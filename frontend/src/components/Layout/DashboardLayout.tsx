@@ -1,10 +1,11 @@
 import { ReactNode, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { getCurrentUser, getUserRole, isAuthenticated, logout, onAuthStateChange } from "@/utils/auth";
+import ApiService from "@/services/api";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { LayoutDashboard, FileText, Users, Settings, LogOut, Menu, X } from "lucide-react";
-import { User } from "@supabase/supabase-js";
+// ...existing code...
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -15,39 +16,28 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState(getCurrentUser());
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
+    if (!isAuthenticated()) {
+      navigate("/auth");
+    } else {
+      setUser(getCurrentUser());
+    }
+    // Listen for auth changes (multi-tab)
+    const cleanup = onAuthStateChange((authData) => {
+      if (!authData || !authData.token) {
         navigate("/auth");
       } else {
-        setUser(session.user);
+        setUser(authData.user);
       }
     });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!session) {
-        navigate("/auth");
-      } else {
-        setUser(session.user);
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    return cleanup;
   }, [navigate]);
 
-  const handleSignOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    } else {
-      navigate("/");
-    }
+  const handleSignOut = () => {
+    logout();
+    navigate("/auth");
   };
 
   const menuItems = userRole === "admin" 
@@ -106,7 +96,7 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
           <div className="border-t p-4">
             <div className="mb-4 rounded-lg bg-muted p-3">
               <p className="text-sm font-medium">{user?.email}</p>
-              <p className="text-xs text-muted-foreground capitalize">{userRole} Account</p>
+              <p className="text-xs text-muted-foreground capitalize">{getUserRole()} Account</p>
             </div>
             <Button variant="outline" className="w-full" onClick={handleSignOut}>
               <LogOut className="mr-2 h-4 w-4" />

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import ApiService from "@/services/api";
+import { isAdmin, isAuthenticated } from "@/utils/auth";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -42,41 +43,21 @@ const AdminViewPost = () => {
 
   const checkAdminAndFetchPost = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
+      if (!isAuthenticated()) {
         navigate("/auth");
         return;
       }
-
-      const { data: roleData } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", session.user.id)
-        .single();
-
-      if (roleData?.role !== "admin") {
+      if (!isAdmin()) {
         navigate("/dashboard");
         return;
       }
-
-      const { data, error } = await supabase
-        .from("posts")
-        .select(`
-          *,
-          profiles!posts_user_id_fkey (
-            email,
-            full_name
-          )
-        `)
-        .eq("id", id)
-        .single();
-
-      if (error) throw error;
-      setPost(data as any);
+      const api = new ApiService();
+      const data = await api.getPostById(id);
+      setPost(data);
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Failed to fetch post.",
         variant: "destructive",
       });
       navigate("/admin/posts");
