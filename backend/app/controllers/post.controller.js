@@ -1,0 +1,333 @@
+const { Post, User, Plan, Subscription } = require('../models');
+const { Op } = require('sequelize');
+const { asyncHandler } = require('../middleware/error.middleware');
+const logger = require('../config/logger');
+
+const createPost = asyncHandler(async (req, res) => {
+    const { title, content, platforms, status, scheduled_at, category, tags, media_urls, is_ai_generated, ai_prompt } = req.body;
+    const userId = req.user.id;
+
+    // Check user's subscription limits
+    const subscription = await Subscription.findOne({
+        where: { user_id: userId, status: 'active' },
+        include: [{ model: Plan, as: 'Plan' }]
+    });
+
+    if (subscription) {
+        const plan = subscription.Plan;
+        if (subscription.posts_used >= plan.monthly_posts) {
+            return res.status(400).json({
+                status: false,
+                message: 'Monthly post limit reached'
+            });
+        }
+
+        if (is_ai_generated && subscription.ai_posts_used >= plan.ai_posts) {
+            return res.status(400).json({
+                status: false,
+                message: 'Monthly AI post limit reached'
+            });
+        }
+    }
+
+    const post = await Post.create({
+        title,
+        content,
+        platforms,
+        status: status || 'draft',
+        scheduled_at: scheduled_at || null,
+        category,
+        tags,
+        media_urls,
+        is_ai_generated: is_ai_generated || false,
+        ai_prompt,
+        user_id: userId
+    });
+
+    // Update subscription usage
+    if (subscription) {
+        await Subscription.update(
+            { 
+                posts_used: subscription.posts_used + 1,
+                ai_posts_used: is_ai_generated ? subscription.ai_posts_used + 1 : subscription.ai_posts_used
+            },
+            { where: { id: subscription.id } }
+        );
+    }
+
+    logger.info('Post created', { postId: post.id, userId });
+
+    res.status(201).json({
+        status: true,
+        message: 'Post created successfully',
+        data: { post }
+    });
+});
+
+const getAllPosts = asyncHandler(async (req, res) => {
+    const { page = 1, limit = 10, search, status, user_id } = req.query;
+    const offset = (page - 1) * limit;
+    const userId = req.user.id;
+    const userType = req.user.user_type;
+
+    const whereClause = {};
+    
+    // If not admin, only show user's own posts
+    if (userType !== 'admin') {
+        whereClause.user_id = userId;
+    } else if (user_id) {
+        whereClause.user_id = user_id;
+    }
+
+    if (search) {
+        whereClause[Op.or] = [
+            { title: { [Op.like]: `%${search}%` } },
+            { content: { [Op.like]: `%${search}%` } }
+        ];
+    }
+
+    if (status) {
+        whereClause.status = status;
+    }
+
+    const { count, rows: posts } = await Post.findAndCountAll({
+        where: whereClause,
+        include: [
+            { 
+                model: User, 
+                as: 'User',
+                attributes: ['id', 'user_name', 'email', 'user_fname', 'user_lname']
+            }
+        ],
+        limit: parseInt(limit),
+        offset: parseInt(offset),
+        order: [['created_at', 'DESC']]
+    });
+
+    res.json({
+        status: true,
+        data: {
+            posts,
+            pagination: {
+                total: count,
+                page: parseInt(page),
+                limit: parseInt(limit),
+                totalPages: Math.ceil(count / limit)
+            }
+        }
+    });
+});
+
+const getPostById = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const userId = req.user.id;
+    const userType = req.user.user_type;
+
+    const post = await Post.findByPk(id, {
+        include: [
+            { 
+                model: User, 
+                as: 'User',
+                attributes: ['id', 'user_name', 'email', 'user_fname', 'user_lname']
+            }
+        ]
+    });
+
+    if (!post) {
+        return res.status(404).json({
+            status: false,
+            message: 'Post not found'
+        });
+    }
+
+    // Check if user can access this post
+    if (userType !== 'admin' && post.user_id !== userId) {
+        return res.status(403).json({
+            status: false,
+            message: 'Access denied'
+        });
+    }
+
+    res.json({
+        status: true,
+        data: { post }
+    });
+});
+
+const updatePost = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { title, content, platforms, status, scheduled_at, category, tags, media_urls } = req.body;
+    const userId = req.user.id;
+    const userType = req.user.user_type;
+
+    const post = await Post.findByPk(id);
+    if (!post) {
+        return res.status(404).json({
+            status: false,
+            message: 'Post not found'
+        });
+    }
+
+    // Check if user can update this post
+    if (userType !== 'admin' && post.user_id !== userId) {
+        return res.status(403).json({
+            status: false,
+            message: 'Access denied'
+        });
+    }
+
+    const updateData = {};
+    if (title) updateData.title = title;
+    if (content) updateData.content = content;
+    if (platforms) updateData.platforms = platforms;
+    if (status) updateData.status = status;
+    if (scheduled_at !== undefined) updateData.scheduled_at = scheduled_at;
+    if (category) updateData.category = category;
+    if (tags) updateData.tags = tags;
+    if (media_urls) updateData.media_urls = media_urls;
+
+    await Post.update(updateData, { where: { id } });
+
+    const updatedPost = await Post.findByPk(id, {
+        include: [
+            { 
+                model: User, 
+                as: 'User',
+                attributes: ['id', 'user_name', 'email', 'user_fname', 'user_lname']
+            }
+        ]
+    });
+
+    logger.info('Post updated', { postId: id, userId });
+
+    res.json({
+        status: true,
+        message: 'Post updated successfully',
+        data: { post: updatedPost }
+    });
+});
+
+const deletePost = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const userId = req.user.id;
+    const userType = req.user.user_type;
+
+    const post = await Post.findByPk(id);
+    if (!post) {
+        return res.status(404).json({
+            status: false,
+            message: 'Post not found'
+        });
+    }
+
+    // Check if user can delete this post
+    if (userType !== 'admin' && post.user_id !== userId) {
+        return res.status(403).json({
+            status: false,
+            message: 'Access denied'
+        });
+    }
+
+    await Post.destroy({ where: { id } });
+
+    logger.info('Post deleted', { postId: id, userId });
+
+    res.json({
+        status: true,
+        message: 'Post deleted successfully'
+    });
+});
+
+const generateAIPost = asyncHandler(async (req, res) => {
+    const { topic, wordCount, language, style, tone, audience, purpose } = req.body;
+    const userId = req.user.id;
+
+    // Check AI post limit
+    const subscription = await Subscription.findOne({
+        where: { user_id: userId, status: 'active' },
+        include: [{ model: Plan, as: 'Plan' }]
+    });
+
+    if (subscription && subscription.ai_posts_used >= subscription.Plan.ai_posts) {
+        return res.status(400).json({
+            status: false,
+            message: 'Monthly AI post limit reached'
+        });
+    }
+
+    // Simple AI post generation (replace with actual AI service)
+    const aiPrompt = `Generate a ${style.toLowerCase()} ${tone.toLowerCase()} post about ${topic} for ${audience} audience with ${purpose} purpose in ${language}. Word count: ${wordCount}`;
+    
+    // Mock AI response (replace with actual AI service call)
+    const generatedContent = `🚀 Exciting news about ${topic}!
+
+${topic} is revolutionizing the way we think about ${purpose.toLowerCase()}. Whether you're new to this space or a seasoned professional, there's something for everyone.
+
+Key highlights:
+• Innovation in ${topic}
+• Benefits for ${audience.toLowerCase()}
+• Future opportunities
+
+What are your thoughts on ${topic}? Share your experience in the comments below!
+
+#${topic.replace(/\s+/g, '')} #Innovation #${purpose}`;
+
+    logger.info('AI post generated', { userId, topic });
+
+    res.json({
+        status: true,
+        message: 'AI post generated successfully',
+        data: {
+            content: generatedContent,
+            title: topic,
+            ai_prompt: aiPrompt
+        }
+    });
+});
+
+const publishPost = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const userId = req.user.id;
+    const userType = req.user.user_type;
+
+    const post = await Post.findByPk(id);
+    if (!post) {
+        return res.status(404).json({
+            status: false,
+            message: 'Post not found'
+        });
+    }
+
+    // Check if user can publish this post
+    if (userType !== 'admin' && post.user_id !== userId) {
+        return res.status(403).json({
+            status: false,
+            message: 'Access denied'
+        });
+    }
+
+    await Post.update(
+        { 
+            status: 'published',
+            published_at: new Date()
+        },
+        { where: { id } }
+    );
+
+    logger.info('Post published', { postId: id, userId });
+
+    res.json({
+        status: true,
+        message: 'Post published successfully'
+    });
+});
+
+module.exports = {
+    createPost,
+    getAllPosts,
+    getPostById,
+    updatePost,
+    deletePost,
+    generateAIPost,
+    publishPost
+};

@@ -1,0 +1,883 @@
+{
+  "info": {
+    "name": "Social Lovable API",
+    "description": "Complete API collection for Social Lovable application",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{auth_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:9999/api",
+      "type": "string"
+    },
+    {
+      "key": "auth_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_name\": \"johndoe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"Password123\",\n  \"user_fname\": \"John\",\n  \"user_lname\": \"Doe\",\n  \"user_phone\": \"+1234567890\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@sociallovable.com\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.status && response.data.token) {",
+                  "        pm.environment.set('auth_token', response.data.token);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/profile",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_fname\": \"John\",\n  \"user_lname\": \"Doe\",\n  \"user_phone\": \"+1234567890\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/profile",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"admin123\",\n  \"newPassword\": \"NewPassword123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/change-password",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "change-password"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get User Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/stats",
+              "host": ["{{base_url}}"],
+              "path": ["users", "stats"]
+            }
+          }
+        },
+        {
+          "name": "Get Admin Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/admin-stats",
+              "host": ["{{base_url}}"],
+              "path": ["users", "admin-stats"]
+            }
+          }
+        },
+        {
+          "name": "Create User (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_name\": \"newuser\",\n  \"email\": \"newuser@example.com\",\n  \"password\": \"Password123\",\n  \"user_fname\": \"New\",\n  \"user_lname\": \"User\",\n  \"user_type\": \"client\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": ["{{base_url}}"],
+              "path": ["users"]
+            }
+          }
+        },
+        {
+          "name": "Get All Users (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users?page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["users"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get User by ID (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/:id",
+              "host": ["{{base_url}}"],
+              "path": ["users", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update User (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_fname\": \"Updated\",\n  \"user_lname\": \"Name\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/:id",
+              "host": ["{{base_url}}"],
+              "path": ["users", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete User (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/:id",
+              "host": ["{{base_url}}"],
+              "path": ["users", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Posts",
+      "item": [
+        {
+          "name": "Create Post",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"My First Post\",\n  \"content\": \"This is the content of my first post. It's really exciting!\",\n  \"platforms\": [\"Facebook\", \"Instagram\"],\n  \"status\": \"draft\",\n  \"category\": \"General\",\n  \"tags\": [\"first\", \"post\", \"excited\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/posts",
+              "host": ["{{base_url}}"],
+              "path": ["posts"]
+            }
+          }
+        },
+        {
+          "name": "Get All Posts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/posts?page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["posts"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Post by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/posts/:id",
+              "host": ["{{base_url}}"],
+              "path": ["posts", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Post",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Post Title\",\n  \"content\": \"Updated content for the post\",\n  \"status\": \"published\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/posts/:id",
+              "host": ["{{base_url}}"],
+              "path": ["posts", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Post",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/posts/:id",
+              "host": ["{{base_url}}"],
+              "path": ["posts", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Generate AI Post",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"topic\": \"Artificial Intelligence in Healthcare\",\n  \"wordCount\": 150,\n  \"language\": \"English\",\n  \"style\": \"Professional\",\n  \"tone\": \"Informational\",\n  \"audience\": \"Adults\",\n  \"purpose\": \"Educational\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/posts/generate-ai",
+              "host": ["{{base_url}}"],
+              "path": ["posts", "generate-ai"]
+            }
+          }
+        },
+        {
+          "name": "Publish Post",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/posts/:id/publish",
+              "host": ["{{base_url}}"],
+              "path": ["posts", ":id", "publish"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Plans",
+      "item": [
+        {
+          "name": "Get Active Plans",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/plans/active",
+              "host": ["{{base_url}}"],
+              "path": ["plans", "active"]
+            }
+          }
+        },
+        {
+          "name": "Get Plan by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/plans/:id",
+              "host": ["{{base_url}}"],
+              "path": ["plans", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Plan (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Premium Plan\",\n  \"price\": 29.99,\n  \"monthly_posts\": 100,\n  \"ai_posts\": 50,\n  \"linked_accounts\": 5,\n  \"description\": \"Premium plan for advanced users\",\n  \"features\": {\n    \"basic_posting\": true,\n    \"ai_generation\": true,\n    \"analytics\": true,\n    \"scheduling\": true,\n    \"support\": \"priority\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/plans",
+              "host": ["{{base_url}}"],
+              "path": ["plans"]
+            }
+          }
+        },
+        {
+          "name": "Get All Plans (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/plans?page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["plans"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Plan (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 39.99,\n  \"monthly_posts\": 150\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/plans/:id",
+              "host": ["{{base_url}}"],
+              "path": ["plans", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Plan (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/plans/:id",
+              "host": ["{{base_url}}"],
+              "path": ["plans", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Toggle Plan Status (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/plans/:id/toggle-status",
+              "host": ["{{base_url}}"],
+              "path": ["plans", ":id", "toggle-status"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Subscriptions",
+      "item": [
+        {
+          "name": "Get My Subscription",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/subscriptions/my-subscription",
+              "host": ["{{base_url}}"],
+              "path": ["subscriptions", "my-subscription"]
+            }
+          }
+        },
+        {
+          "name": "Create Subscription",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"plan_id\": 1,\n  \"start_date\": \"2024-01-01T00:00:00.000Z\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/subscriptions",
+              "host": ["{{base_url}}"],
+              "path": ["subscriptions"]
+            }
+          }
+        },
+        {
+          "name": "Get All Subscriptions (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/subscriptions?page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["subscriptions"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Subscription by ID (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/subscriptions/:id",
+              "host": ["{{base_url}}"],
+              "path": ["subscriptions", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Subscription (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"active\",\n  \"auto_renew\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/subscriptions/:id",
+              "host": ["{{base_url}}"],
+              "path": ["subscriptions", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Cancel Subscription",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/subscriptions/:id/cancel",
+              "host": ["{{base_url}}"],
+              "path": ["subscriptions", ":id", "cancel"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Renew Subscription",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/subscriptions/:id/renew",
+              "host": ["{{base_url}}"],
+              "path": ["subscriptions", ":id", "renew"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Social Accounts",
+      "item": [
+        {
+          "name": "Get My Social Accounts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/social-accounts/my-accounts",
+              "host": ["{{base_url}}"],
+              "path": ["social-accounts", "my-accounts"]
+            }
+          }
+        },
+        {
+          "name": "Create Social Account",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"platform\": \"Facebook\",\n  \"account_id\": \"123456789\",\n  \"account_name\": \"My Facebook Page\",\n  \"access_token\": \"access_token_here\",\n  \"refresh_token\": \"refresh_token_here\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/social-accounts",
+              "host": ["{{base_url}}"],
+              "path": ["social-accounts"]
+            }
+          }
+        },
+        {
+          "name": "Get All Social Accounts (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/social-accounts?page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["social-accounts"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Social Account by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/social-accounts/:id",
+              "host": ["{{base_url}}"],
+              "path": ["social-accounts", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Social Account",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"account_name\": \"Updated Account Name\",\n  \"is_active\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/social-accounts/:id",
+              "host": ["{{base_url}}"],
+              "path": ["social-accounts", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Social Account",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/social-accounts/:id",
+              "host": ["{{base_url}}"],
+              "path": ["social-accounts", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Toggle Social Account Status",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/social-accounts/:id/toggle-status",
+              "host": ["{{base_url}}"],
+              "path": ["social-accounts", ":id", "toggle-status"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Refresh Social Account Token",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"access_token\": \"new_access_token\",\n  \"refresh_token\": \"new_refresh_token\",\n  \"token_expires_at\": \"2024-12-31T23:59:59.000Z\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/social-accounts/:id/refresh-token",
+              "host": ["{{base_url}}"],
+              "path": ["social-accounts", ":id", "refresh-token"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
