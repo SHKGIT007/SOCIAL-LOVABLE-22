@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import ApiService from "@/services/api";
+import { isAdmin, isAuthenticated } from "@/utils/auth";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -39,23 +40,14 @@ const Subscriptions = () => {
 
   const checkAdminAndFetchSubscriptions = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
+      if (!isAuthenticated()) {
         navigate("/auth");
         return;
       }
-
-      const { data: roleData } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", session.user.id)
-        .single();
-
-      if (roleData?.role !== "admin") {
+      if (!isAdmin()) {
         navigate("/dashboard");
         return;
       }
-
       await fetchSubscriptions();
     } catch (error: any) {
       toast({
@@ -69,31 +61,16 @@ const Subscriptions = () => {
   };
 
   const fetchSubscriptions = async () => {
-    const { data, error } = await supabase
-      .from("subscriptions")
-      .select(`
-        *,
-        profiles!subscriptions_user_id_fkey (
-          email,
-          full_name
-        ),
-        plans (
-          name,
-          price,
-          monthly_posts,
-          ai_posts
-        )
-      `)
-      .order("created_at", { ascending: false });
-
-    if (error) {
+    try {
+      const api = new ApiService();
+      const data = await api.getAllSubscriptions();
+      setSubscriptions(data || []);
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Failed to fetch subscriptions.",
         variant: "destructive",
       });
-    } else {
-      setSubscriptions(data as any || []);
     }
   };
 

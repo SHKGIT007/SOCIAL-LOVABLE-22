@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import ApiService from "@/services/api";
+import { isAuthenticated } from "@/utils/auth";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,20 +11,25 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const platforms = ["Facebook", "Instagram", "Twitter", "LinkedIn"];
 const statuses = ["draft", "scheduled", "published"];
 
-interface Post {
-  id: string;
+interface FormData {
   title: string;
   content: string;
   platforms: string[];
   status: string;
-  scheduled_at: string | null;
-  category: string | null;
-  tags: string[] | null;
+  scheduled_at: string;
+  category: string;
+  tags: string;
 }
 
 const EditPost = () => {
@@ -32,10 +38,10 @@ const EditPost = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     title: "",
     content: "",
-    platforms: [] as string[],
+    platforms: [],
     status: "draft",
     scheduled_at: "",
     category: "",
@@ -48,37 +54,29 @@ const EditPost = () => {
 
   const fetchPost = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
+      if (!isAuthenticated()) {
         navigate("/auth");
         return;
       }
-
-      const { data, error } = await supabase
-        .from("posts")
-        .select("*")
-        .eq("id", id)
-        .eq("user_id", session.user.id)
-        .single();
-
-      if (error) throw error;
-
+      const api = new ApiService();
+      const data = await api.getPostById(id);
       setFormData({
         title: data.title,
         content: data.content,
         platforms: data.platforms,
         status: data.status,
-        scheduled_at: data.scheduled_at ? new Date(data.scheduled_at).toISOString().slice(0, 16) : "",
+        scheduled_at: data.scheduled_at
+          ? new Date(data.scheduled_at).toISOString().slice(0, 16)
+          : "",
         category: data.category || "",
         tags: data.tags ? data.tags.join(", ") : "",
       });
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Failed to fetch post.",
         variant: "destructive",
       });
-      navigate("/posts");
     } finally {
       setIsLoading(false);
     }
@@ -98,16 +96,10 @@ const EditPost = () => {
     setIsSaving(true);
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate("/auth");
-        return;
-      }
-
       if (formData.platforms.length === 0) {
         toast({
           title: "Error",
-          description: "Please select at least one platform",
+          description: "Please select at least one platform.",
           variant: "destructive",
         });
         setIsSaving(false);
@@ -129,12 +121,8 @@ const EditPost = () => {
         tags: tagsArray.length > 0 ? tagsArray : null,
       };
 
-      const { error } = await supabase
-        .from("posts")
-        .update(updateData)
-        .eq("id", id);
-
-      if (error) throw error;
+      const api = new ApiService();
+      await api.updatePost(id, updateData);
 
       toast({
         title: "Success",
@@ -145,7 +133,7 @@ const EditPost = () => {
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Failed to update post.",
         variant: "destructive",
       });
     } finally {
@@ -185,7 +173,9 @@ const EditPost = () => {
                 <Input
                   id="title"
                   value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, title: e.target.value })
+                  }
                   placeholder="Enter post title"
                   required
                 />
@@ -196,7 +186,9 @@ const EditPost = () => {
                 <Textarea
                   id="content"
                   value={formData.content}
-                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, content: e.target.value })
+                  }
                   placeholder="Write your post content..."
                   className="min-h-[200px]"
                   required
@@ -208,7 +200,9 @@ const EditPost = () => {
                 <Input
                   id="category"
                   value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, category: e.target.value })
+                  }
                   placeholder="e.g., Marketing, Product Update"
                 />
               </div>
@@ -218,7 +212,9 @@ const EditPost = () => {
                 <Input
                   id="tags"
                   value={formData.tags}
-                  onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, tags: e.target.value })
+                  }
                   placeholder="e.g., social media, announcement, sale"
                 />
               </div>
@@ -231,7 +227,9 @@ const EditPost = () => {
                       <Checkbox
                         id={platform}
                         checked={formData.platforms.includes(platform)}
-                        onCheckedChange={() => handlePlatformToggle(platform)}
+                        onCheckedChange={() =>
+                          handlePlatformToggle(platform)
+                        }
                       />
                       <Label htmlFor={platform} className="cursor-pointer">
                         {platform}
@@ -243,9 +241,14 @@ const EditPost = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="status">Status</Label>
-                <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
+                <Select
+                  value={formData.status}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, status: value })
+                  }
+                >
                   <SelectTrigger>
-                    <SelectValue />
+                    <SelectValue placeholder="Select status" />
                   </SelectTrigger>
                   <SelectContent>
                     {statuses.map((status) => (
@@ -264,8 +267,10 @@ const EditPost = () => {
                     id="scheduled_at"
                     type="datetime-local"
                     value={formData.scheduled_at}
-                    onChange={(e) => setFormData({ ...formData, scheduled_at: e.target.value })}
-                    required={formData.status === "scheduled"}
+                    onChange={(e) =>
+                      setFormData({ ...formData, scheduled_at: e.target.value })
+                    }
+                    required
                   />
                 </div>
               )}
@@ -281,7 +286,11 @@ const EditPost = () => {
                     </>
                   )}
                 </Button>
-                <Button type="button" variant="outline" onClick={() => navigate("/posts")}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => navigate("/posts")}
+                >
                   Cancel
                 </Button>
               </div>

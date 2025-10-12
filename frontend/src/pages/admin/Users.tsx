@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import ApiService from "@/services/api";
+import { isAdmin, isAuthenticated } from "@/utils/auth";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -32,30 +33,15 @@ const Users = () => {
     checkAdminAndFetchUsers();
   }, []);
 
-  const checkAdminAndFetchUsers = async () => {
+  const fetchUsers = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate("/auth");
-        return;
-      }
-
-      const { data: roleData } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", session.user.id)
-        .single();
-
-      if (roleData?.role !== "admin") {
-        navigate("/dashboard");
-        return;
-      }
-
-      await fetchUsers();
+      const api = new ApiService();
+      const data = await api.getAllUsers();
+      setUsers(data || []);
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Failed to fetch users.",
         variant: "destructive",
       });
     } finally {
@@ -63,58 +49,18 @@ const Users = () => {
     }
   };
 
-  const fetchUsers = async () => {
-    const { data: profilesData, error: profilesError } = await supabase
-      .from("profiles")
-      .select(`
-        id,
-        email,
-        full_name,
-        created_at
-      `)
-      .order("created_at", { ascending: false });
-
-    if (profilesError) {
-      toast({
-        title: "Error",
-        description: profilesError.message,
-        variant: "destructive",
-      });
+  const checkAdminAndFetchUsers = () => {
+    if (!isAuthenticated()) {
+      navigate("/login");
       return;
     }
 
-    // Fetch roles for each user
-    const usersWithData = await Promise.all(
-      (profilesData || []).map(async (profile) => {
-        const { data: roleData } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", profile.id)
-          .single();
+    if (!isAdmin()) {
+      navigate("/unauthorized");
+      return;
+    }
 
-        const { data: subData } = await supabase
-          .from("subscriptions")
-          .select(`
-            status,
-            plan_id,
-            plans (name)
-          `)
-          .eq("user_id", profile.id)
-          .eq("status", "active")
-          .single();
-
-        return {
-          ...profile,
-          role: roleData?.role || "client",
-          subscription: subData ? {
-            plan: subData.plans,
-            status: subData.status,
-          } : null,
-        };
-      })
-    );
-
-    setUsers(usersWithData);
+    fetchUsers();
   };
 
   if (isLoading) {
@@ -134,7 +80,6 @@ const Users = () => {
           <h1 className="text-3xl font-bold tracking-tight">Users Management</h1>
           <p className="text-muted-foreground">View and manage all registered users</p>
         </div>
-
         <Card>
           <CardHeader>
             <CardTitle>All Users</CardTitle>
@@ -163,9 +108,7 @@ const Users = () => {
                         {user.role}
                       </Badge>
                     </TableCell>
-                    <TableCell>
-                      {user.subscription?.plan?.name || "No plan"}
-                    </TableCell>
+                    <TableCell>{user.subscription?.plan?.name || "No plan"}</TableCell>
                     <TableCell>
                       <Badge variant={user.subscription?.status === "active" ? "default" : "outline"}>
                         {user.subscription?.status || "inactive"}

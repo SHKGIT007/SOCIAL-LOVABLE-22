@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import ApiService from "@/services/api";
+import { isAdmin, isAuthenticated } from "@/utils/auth";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -45,23 +46,14 @@ const Plans = () => {
 
   const checkAdminAndFetchPlans = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
+      if (!isAuthenticated()) {
         navigate("/auth");
         return;
       }
-
-      const { data: roleData } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", session.user.id)
-        .single();
-
-      if (roleData?.role !== "admin") {
+      if (!isAdmin()) {
         navigate("/dashboard");
         return;
       }
-
       await fetchPlans();
     } catch (error: any) {
       toast({
@@ -75,19 +67,16 @@ const Plans = () => {
   };
 
   const fetchPlans = async () => {
-    const { data, error } = await supabase
-      .from("plans")
-      .select("*")
-      .order("price", { ascending: true });
-
-    if (error) {
+    try {
+      const api = new ApiService();
+      const data = await api.getAllPlans();
+      setPlans(data || []);
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Failed to fetch plans.",
         variant: "destructive",
       });
-    } else {
-      setPlans(data || []);
     }
   };
 
@@ -96,20 +85,14 @@ const Plans = () => {
     setIsLoading(true);
 
     try {
+      const api = new ApiService();
       if (editingPlan) {
-        const { error } = await supabase
-          .from("plans")
-          .update(formData)
-          .eq("id", editingPlan.id);
-
-        if (error) throw error;
+        await api.updatePlan(editingPlan.id, formData);
         toast({ title: "Success", description: "Plan updated successfully!" });
       } else {
-        const { error } = await supabase.from("plans").insert([formData]);
-        if (error) throw error;
+        await api.createPlan(formData);
         toast({ title: "Success", description: "Plan created successfully!" });
       }
-
       setIsDialogOpen(false);
       setEditingPlan(null);
       setFormData({
@@ -124,7 +107,7 @@ const Plans = () => {
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Failed to save plan.",
         variant: "destructive",
       });
     } finally {
@@ -149,14 +132,14 @@ const Plans = () => {
     if (!confirm("Are you sure you want to delete this plan?")) return;
 
     try {
-      const { error } = await supabase.from("plans").delete().eq("id", id);
-      if (error) throw error;
+      const api = new ApiService();
+      await api.deletePlan(id);
       toast({ title: "Success", description: "Plan deleted successfully!" });
       await fetchPlans();
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Failed to delete plan.",
         variant: "destructive",
       });
     }

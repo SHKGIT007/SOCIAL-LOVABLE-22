@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import ApiService from "@/services/api";
+import { isAuthenticated } from "@/utils/auth";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -38,25 +39,17 @@ const ViewPost = () => {
 
   const fetchPost = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
+      if (!isAuthenticated()) {
         navigate("/auth");
         return;
       }
-
-      const { data, error } = await supabase
-        .from("posts")
-        .select("*")
-        .eq("id", id)
-        .eq("user_id", session.user.id)
-        .single();
-
-      if (error) throw error;
+      const api = new ApiService();
+      const data = await api.getPostById(id);
       setPost(data);
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Failed to fetch post.",
         variant: "destructive",
       });
       navigate("/posts");

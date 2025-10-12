@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import ApiService from "@/services/api";
+import { isAdmin, isAuthenticated } from "@/utils/auth";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -63,23 +64,14 @@ const AdminPosts = () => {
 
   const checkAdminAndFetchPosts = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
+      if (!isAuthenticated()) {
         navigate("/auth");
         return;
       }
-
-      const { data: roleData } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", session.user.id)
-        .single();
-
-      if (roleData?.role !== "admin") {
+      if (!isAdmin()) {
         navigate("/dashboard");
         return;
       }
-
       await fetchPosts();
     } catch (error: any) {
       toast({
@@ -93,50 +85,34 @@ const AdminPosts = () => {
   };
 
   const fetchPosts = async () => {
-    const { data, error } = await supabase
-      .from("posts")
-      .select(`
-        *,
-        profiles!posts_user_id_fkey (
-          email,
-          full_name
-        )
-      `)
-      .order("created_at", { ascending: false });
-
-    if (error) {
+    try {
+      const api = new ApiService();
+      const data = await api.getAllPosts();
+      setPosts(data || []);
+      setFilteredPosts(data || []);
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Failed to fetch posts.",
         variant: "destructive",
       });
-    } else {
-      setPosts(data as any || []);
-      setFilteredPosts(data as any || []);
     }
   };
 
   const handleDelete = async () => {
     if (!deletePostId) return;
-
     try {
-      const { error } = await supabase
-        .from("posts")
-        .delete()
-        .eq("id", deletePostId);
-
-      if (error) throw error;
-
+      const api = new ApiService();
+      await api.deletePost(deletePostId);
       toast({
         title: "Success",
         description: "Post deleted successfully",
       });
-
       await fetchPosts();
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Failed to delete post.",
         variant: "destructive",
       });
     } finally {
