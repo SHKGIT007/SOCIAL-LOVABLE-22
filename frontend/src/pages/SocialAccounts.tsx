@@ -40,8 +40,8 @@ const SocialAccounts = () => {
     }
   };
 
-  // Save App ID/Secret to backend and start OAuth
-  const handleConnect = async (platform) => {
+  // Save App ID/Secret to backend only
+  const handleSave = async (platform) => {
     setIsLoading(true);
     let appId = "", appSecret = "";
     if (platform === "Facebook") {
@@ -57,16 +57,38 @@ const SocialAccounts = () => {
       return;
     }
     try {
-      // Save to backend
-      await apiService.createSocialAccount({
-        platform,
-        app_id: appId,
-        app_secret: appSecret
-      });
-      // Start OAuth
-      window.location.href = OAUTH_URLS[platform];
+      // Check if account exists for this platform
+      const existing = accounts.find(acc => acc.platform === platform);
+      if (existing) {
+        // Update credentials
+        await apiService.updateSocialAccountCredentials({
+          platform,
+          app_id: appId,
+          app_secret: appSecret
+        });
+        toast({ title: "Success", description: `${platform} credentials updated.` });
+      } else {
+        // Create new account
+        await apiService.createSocialAccount({
+          platform,
+          app_id: appId,
+          app_secret: appSecret
+        });
+        toast({ title: "Success", description: `${platform} App ID/Secret saved.` });
+      }
+      fetchAccounts();
     } catch (error) {
       toast({ title: "Error", description: error.message || "Failed to save App ID/Secret", variant: "destructive" });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Start OAuth only (credentials must be saved already)
+  const handleConnect = async (platform) => {
+    setIsLoading(true);
+    try {
+      window.location.href = OAUTH_URLS[platform];
     } finally {
       setIsLoading(false);
     }
@@ -98,26 +120,44 @@ const SocialAccounts = () => {
               <Input value={fbAppId} onChange={e => setFbAppId(e.target.value)} placeholder="Facebook App ID" />
               <Label>Facebook App Secret</Label>
               <Input value={fbAppSecret} onChange={e => setFbAppSecret(e.target.value)} placeholder="Facebook App Secret" type="password" />
-              <Button
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white mt-2"
-                onClick={() => handleConnect("Facebook")}
-                disabled={isLoading}
-              >
-                Save & Connect Facebook
-              </Button>
+              <div className="flex gap-2 mt-2">
+                <Button
+                  className="w-1/2 bg-blue-500 hover:bg-blue-600 text-white"
+                  onClick={() => handleSave("Facebook")}
+                  disabled={isLoading}
+                >
+                  Save
+                </Button>
+                <Button
+                  className="w-1/2 bg-blue-600 hover:bg-blue-700 text-white"
+                  onClick={() => handleConnect("Facebook")}
+                  disabled={isLoading}
+                >
+                  Connect
+                </Button>
+              </div>
             </div>
             <div className="space-y-2 mt-6">
               <Label>Instagram App ID</Label>
               <Input value={igAppId} onChange={e => setIgAppId(e.target.value)} placeholder="Instagram App ID" />
               <Label>Instagram App Secret</Label>
               <Input value={igAppSecret} onChange={e => setIgAppSecret(e.target.value)} placeholder="Instagram App Secret" type="password" />
-              <Button
-                className="w-full bg-pink-500 hover:bg-pink-600 text-white mt-2"
-                onClick={() => handleConnect("Instagram")}
-                disabled={isLoading}
-              >
-                Save & Connect Instagram
-              </Button>
+              <div className="flex gap-2 mt-2">
+                <Button
+                  className="w-1/2 bg-pink-400 hover:bg-pink-500 text-white"
+                  onClick={() => handleSave("Instagram")}
+                  disabled={isLoading}
+                >
+                  Save
+                </Button>
+                <Button
+                  className="w-1/2 bg-pink-500 hover:bg-pink-600 text-white"
+                  onClick={() => handleConnect("Instagram")}
+                  disabled={isLoading}
+                >
+                  Connect
+                </Button>
+              </div>
             </div>
           </div>
         </CardContent>

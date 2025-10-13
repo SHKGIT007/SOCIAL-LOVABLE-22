@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import ApiService from "@/services/api";
+import { apiService } from "@/services/api";
 import { isAdmin, isAuthenticated } from "@/utils/auth";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -68,8 +68,7 @@ const Plans = () => {
 
   const fetchPlans = async () => {
     try {
-      const api = new ApiService();
-      const data = await api.getAllPlans();
+      const data = await apiService.getAllPlans();
       setPlans(data || []);
     } catch (error: any) {
       toast({
@@ -85,12 +84,11 @@ const Plans = () => {
     setIsLoading(true);
 
     try {
-      const api = new ApiService();
       if (editingPlan) {
-        await api.updatePlan(editingPlan.id, formData);
+        await apiService.updatePlan(editingPlan.id, formData);
         toast({ title: "Success", description: "Plan updated successfully!" });
       } else {
-        await api.createPlan(formData);
+        await apiService.createPlan(formData);
         toast({ title: "Success", description: "Plan created successfully!" });
       }
       setIsDialogOpen(false);
@@ -132,8 +130,7 @@ const Plans = () => {
     if (!confirm("Are you sure you want to delete this plan?")) return;
 
     try {
-      const api = new ApiService();
-      await api.deletePlan(id);
+      await apiService.deletePlan(id);
       toast({ title: "Success", description: "Plan deleted successfully!" });
       await fetchPlans();
     } catch (error: any) {

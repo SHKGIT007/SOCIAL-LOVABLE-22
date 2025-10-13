@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import ApiService from "@/services/api";
+import { apiService } from "@/services/api";
 import { isAdmin, isAuthenticated } from "@/utils/auth";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -35,8 +35,7 @@ const Users = () => {
 
   const fetchUsers = async () => {
     try {
-      const api = new ApiService();
-      const data = await api.getAllUsers();
+      const data = await apiService.getAllUsers();
       setUsers(data || []);
     } catch (error: any) {
       toast({

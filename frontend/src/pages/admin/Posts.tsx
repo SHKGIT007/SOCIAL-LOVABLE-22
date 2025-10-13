@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import ApiService from "@/services/api";
+import { apiService } from "@/services/api";
 import { isAdmin, isAuthenticated } from "@/utils/auth";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -86,8 +86,7 @@ const AdminPosts = () => {
 
   const fetchPosts = async () => {
     try {
-      const api = new ApiService();
-      const data = await api.getAllPosts();
+      const data = await apiService.getAllPosts();
       setPosts(data || []);
       setFilteredPosts(data || []);
     } catch (error: any) {
@@ -102,8 +101,7 @@ const AdminPosts = () => {
   const handleDelete = async () => {
     if (!deletePostId) return;
     try {
-      const api = new ApiService();
-      await api.deletePost(deletePostId);
+      await apiService.deletePost(deletePostId);
       toast({
         title: "Success",
         description: "Post deleted successfully",

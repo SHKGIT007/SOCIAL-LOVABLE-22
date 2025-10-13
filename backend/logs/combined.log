@@ -25,3 +25,5 @@
 {"accountId":2,"level":"info","message":"Social account connected","platform":"Instagram","service":"social-lovable-api","timestamp":"2025-10-13T06:52:26.729Z","userId":2}
 {"accountId":"1","deletedBy":2,"level":"info","message":"Social account deleted","service":"social-lovable-api","timestamp":"2025-10-13T06:52:29.473Z"}
 {"accountId":"2","deletedBy":2,"level":"info","message":"Social account deleted","service":"social-lovable-api","timestamp":"2025-10-13T06:52:30.583Z"}
+{"accountId":3,"level":"info","message":"Social account connected","platform":"Facebook","service":"social-lovable-api","timestamp":"2025-10-13T08:17:04.795Z","userId":2}
+{"accountId":4,"level":"info","message":"Social account connected","platform":"Facebook","service":"social-lovable-api","timestamp":"2025-10-13T08:34:43.951Z","userId":3}

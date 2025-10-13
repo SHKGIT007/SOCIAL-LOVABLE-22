@@ -15,6 +15,7 @@ router.put('/:id', validateId, socialAccountController.updateSocialAccount);
 router.delete('/:id', validateId, socialAccountController.deleteSocialAccount);
 router.patch('/:id/toggle-status', validateId, socialAccountController.toggleSocialAccountStatus);
 router.put('/:id/refresh-token', validateId, socialAccountController.refreshSocialAccountToken);
+router.post('/credentials', socialAccountController.updateSocialAccountCredentials);
 
 // Admin-only routes
 router.get('/', requireAdmin, validatePagination, socialAccountController.getAllSocialAccounts);

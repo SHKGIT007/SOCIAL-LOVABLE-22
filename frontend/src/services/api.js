@@ -319,8 +319,15 @@ class ApiService {
       body: tokenData,
     });
   }
+
+  // Update app_id/app_secret for logged-in user and platform
+  async updateSocialAccountCredentials(data) {
+    return this.request(API_CONFIG.ENDPOINTS.SOCIAL_ACCOUNTS.UPDATE_CREDENTIALS, {
+      method: 'POST',
+      body: data,
+    });
+  }
 }
 
 // Export singleton instance
 export const apiService = new ApiService();
-export default apiService;

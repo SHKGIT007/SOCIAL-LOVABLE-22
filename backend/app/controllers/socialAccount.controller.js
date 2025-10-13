@@ -1,3 +1,4 @@
+
 const { SocialAccount, User } = require('../models');
 const { Op } = require('sequelize');
 const { asyncHandler } = require('../middleware/error.middleware');
@@ -5,7 +6,7 @@ const logger = require('../config/logger');
 const axios = require('axios');
 
 const createSocialAccount = asyncHandler(async (req, res) => {
-    const { platform, app_id, app_secret, account_id, account_name, access_token, refresh_token, token_expires_at, metadata } = req.body;
+    const { platform, app_id, app_secret } = req.body;
     const userId = req.user.id;
 
     // Check if user already has this platform connected
@@ -25,12 +26,6 @@ const createSocialAccount = asyncHandler(async (req, res) => {
         platform,
         app_id,
         app_secret,
-        account_id,
-        account_name,
-        access_token,
-        refresh_token,
-        token_expires_at,
-        metadata,
         is_active: true
     });
 
@@ -38,7 +33,7 @@ const createSocialAccount = asyncHandler(async (req, res) => {
 
     res.status(201).json({
         status: true,
-        message: `${platform} account connected successfully`,
+        message: `${platform} app credentials saved successfully`,
         data: { socialAccount }
     });
 });
@@ -102,7 +97,7 @@ const getUserSocialAccounts = asyncHandler(async (req, res) => {
         order: [['platform', 'ASC']]
     });
 
-    res.json({
+     res.json({
         status: true,
         data: { socialAccounts }
     });
@@ -193,6 +188,19 @@ const updateSocialAccount = asyncHandler(async (req, res) => {
         message: 'Social account updated successfully',
         data: { socialAccount: updatedSocialAccount }
     });
+});
+
+// Update SocialAccount app_id/app_secret for logged-in user and platform
+const updateSocialAccountCredentials = asyncHandler(async (req, res) => {
+    const { platform, app_id, app_secret } = req.body;
+    const userId = req.user.id;
+    const socialAccount = await SocialAccount.findOne({ where: { user_id: userId, platform } });
+    if (!socialAccount) {
+        return res.status(404).json({ status: false, message: 'Social account not found' });
+    }
+    await SocialAccount.update({ app_id, app_secret }, { where: { id: socialAccount.id } });
+    const updated = await SocialAccount.findByPk(socialAccount.id);
+    res.json({ status: true, message: 'Credentials updated', data: { socialAccount: updated } });
 });
 
 const deleteSocialAccount = asyncHandler(async (req, res) => {
@@ -383,5 +391,6 @@ module.exports = {
     updateSocialAccount,
     deleteSocialAccount,
     toggleSocialAccountStatus,
-    refreshSocialAccountToken
+    refreshSocialAccountToken,
+    updateSocialAccountCredentials,
 };

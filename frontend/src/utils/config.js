@@ -59,7 +59,8 @@ export const API_CONFIG = {
       UPDATE: '/social-accounts',
       DELETE: '/social-accounts',
       TOGGLE_STATUS: '/social-accounts',
-      REFRESH_TOKEN: '/social-accounts'
+      REFRESH_TOKEN: '/social-accounts',
+      UPDATE_CREDENTIALS: '/social-accounts/credentials',
     }
   }
 };
