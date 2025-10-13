@@ -31,3 +31,4 @@
 {"accountId":"5","deletedBy":2,"level":"info","message":"Social account deleted","service":"social-lovable-api","timestamp":"2025-10-13T09:25:10.826Z"}
 {"accountId":"3","deletedBy":2,"level":"info","message":"Social account deleted","service":"social-lovable-api","timestamp":"2025-10-13T09:25:11.756Z"}
 {"accountId":6,"level":"info","message":"Social account connected","platform":"Facebook","service":"social-lovable-api","timestamp":"2025-10-13T09:25:22.783Z","userId":2}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-13T10:07:18.703Z","userId":2}

@@ -102,7 +102,18 @@ const SocialAccounts = () => {
   const handleConnect = async (platform) => {
     setIsLoading(true);
     try {
-      window.location.href = OAUTH_URLS[platform];
+        console.log('Initiating OAuth for', platform);
+        if(platform === "Facebook") {
+
+        }
+      
+//      const redirectUri = `${process.env.BACKEND_URL}/social-accounts/oauth/facebook/callback`;
+//   const scope = 'pages_manage_posts,pages_read_engagement,pages_show_list,public_profile,email';
+//   const state = req.user.id;
+//   const url = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${scope}&state=${state}&response_type=code`;
+     
+    
+    //   window.location.href = oauthUrl;
     } finally {
       setIsLoading(false);
     }

@@ -36,6 +36,25 @@ app.get("/",(req,res)=>{
     res.send("Welcome to Social Lovable API")
 });
 
+
+app.get("/facebook/callback",(req,res)=>{
+    res.send({status:true,msg:"facebook/callback"})
+});
+
+
+
+
+// appid = 1579224306600577
+// secretkey = a61184184766a15c03154b899db189c7
+// callbackUrl = https://hometalent4u.in/backend/facebook/callback
+
+//  VERIFY_TOKEN = "nilesh";
+
+
+
+
+
+
 app.use('/api', routes);
 
 // Error handling middleware

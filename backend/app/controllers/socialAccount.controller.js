@@ -302,9 +302,12 @@ const refreshSocialAccountToken = asyncHandler(async (req, res) => {
     });
 });
 
-// Facebook OAuth2 init
-exports.facebookOAuthInit = (req, res) => {
+const facebookOAuthInit = (req, res) => {
+
+
   const clientId = process.env.FACEBOOK_CLIENT_ID;
+ console.log('Facebook Client ID:', clientId);
+  return
   const redirectUri = `${process.env.BACKEND_URL}/social-accounts/oauth/facebook/callback`;
   const scope = 'pages_manage_posts,pages_read_engagement,pages_show_list,public_profile,email';
   const state = req.user.id;
@@ -312,8 +315,20 @@ exports.facebookOAuthInit = (req, res) => {
   res.redirect(url);
 };
 
-// Facebook OAuth2 callback
-exports.facebookOAuthCallback = async (req, res) => {
+// Facebook OAuth2 init
+// exports.facebookOAuthInit = (req, res) => {
+
+//     return res.send('Not implemented yet');
+//   const clientId = process.env.FACEBOOK_CLIENT_ID;
+//   const redirectUri = `${process.env.BACKEND_URL}/social-accounts/oauth/facebook/callback`;
+//   const scope = 'pages_manage_posts,pages_read_engagement,pages_show_list,public_profile,email';
+//   const state = req.user.id;
+//   const url = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${scope}&state=${state}&response_type=code`;
+//   res.redirect(url);
+// };
+
+// // Facebook OAuth2 callback
+const facebookOAuthCallback = async (req, res) => {
     const code = req.query.code;
     const userId = req.query.state;
     // Get app_id and app_secret from SocialAccount
@@ -338,8 +353,8 @@ exports.facebookOAuthCallback = async (req, res) => {
     }
 };
 
-// Instagram OAuth2 init
-exports.instagramOAuthInit = (req, res) => {
+// // Instagram OAuth2 init
+const instagramOAuthInit = (req, res) => {
   const clientId = process.env.INSTAGRAM_CLIENT_ID;
   const redirectUri = `${process.env.BACKEND_URL}/social-accounts/oauth/instagram/callback`;
   const scope = 'user_profile,user_media';
@@ -348,8 +363,8 @@ exports.instagramOAuthInit = (req, res) => {
   res.redirect(url);
 };
 
-// Instagram OAuth2 callback
-exports.instagramOAuthCallback = async (req, res) => {
+// // Instagram OAuth2 callback
+const instagramOAuthCallback = async (req, res) => {
     const code = req.query.code;
     const userId = req.query.state;
     // Get app_id and app_secret from SocialAccount
@@ -393,4 +408,8 @@ module.exports = {
     toggleSocialAccountStatus,
     refreshSocialAccountToken,
     updateSocialAccountCredentials,
+    facebookOAuthInit,
+    facebookOAuthCallback,
+    instagramOAuthInit,
+    instagramOAuthCallback
 };
