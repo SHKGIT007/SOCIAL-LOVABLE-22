@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiService } from "@/services/api";
 import { API_CONFIG } from "@/utils/config";
+import { redirect } from "react-router-dom";
 
 const platforms = ["Facebook", "Instagram"];
 
@@ -105,12 +106,57 @@ const SocialAccounts = () => {
         console.log('Initiating OAuth for', platform);
         if(platform === "Facebook") {
 
+          let  appid= '2934798226703542'
+          let secret='acb8d713392b5fb7e59e0022b63d4056'
+          let uri = 'https://hometalent4u.in/backend/facebook/callback'
+          
+
+            // redirect
+            const oauthUrl = `https://www.facebook.com/v16.0/dialog/oauth?client_id=${appid}&redirect_uri=${encodeURIComponent(uri)}&state={st=state123abc,ds=123456789}`;
+
+
+             const url = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${appid}&redirect_uri=${encodeURIComponent(`https://hometalent4u.in/backend/facebook/callback`)}&scope=user_profile,user_media&state=123&response_type=code`;
+
+            window.location.href = url;
+
+
+
+        }else if(platform === "Instagram") {
+
+        //     dgg {
+        // 'hub.mode': 'subscribe',
+        // 'hub.challenge': '793876193',
+        // 'hub.verify_token': 'nilesh'
+        // }
+        // ✅ Webhook verified successfully
+
+           
+           // for instgram
+
+             let appid = '1579224306600577' 
+            
+            // secretkey = a61184184766a15c03154b899db189c7
+            // callbackUrl = https://hometalent4u.in/backend/facebook/callback
+            //  VERIFY_TOKEN = "nilesh"; 
+
+            // https://api.instagram.com/oauth/authorize
+            // ?client_id={app-id}
+            // &redirect_uri={redirect-uri}
+            // &scope=user_profile,user_media
+            // &response_type=code
+
+
+            const oauthUrl = `https://api.instagram.com/oauth/authorize?client_id=${appid}&redirect_uri=${encodeURIComponent(`https://hometalent4u.in/backend/facebook/callback`)}&scope=user_profile,user_media&response_type=code`;
+            window.location.href = oauthUrl;
+
+
+
+
+
+
         }
       
-//      const redirectUri = `${process.env.BACKEND_URL}/social-accounts/oauth/facebook/callback`;
-//   const scope = 'pages_manage_posts,pages_read_engagement,pages_show_list,public_profile,email';
-//   const state = req.user.id;
-//   const url = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${scope}&state=${state}&response_type=code`;
+
      
     
     //   window.location.href = oauthUrl;
