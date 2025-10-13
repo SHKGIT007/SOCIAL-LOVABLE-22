@@ -20,7 +20,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const platforms = ["Facebook", "Instagram", "Twitter", "LinkedIn"];
 const statuses = ["draft", "scheduled", "published"];
 
 interface FormData {
@@ -48,10 +47,23 @@ const EditPost = () => {
     category: "",
     tags: "",
   });
+  const [connectedAccounts, setConnectedAccounts] = useState([]);
 
   useEffect(() => {
     fetchPost();
   }, [id]);
+
+  useEffect(() => {
+    const fetchAccounts = async () => {
+      try {
+        const res = await apiService.getMySocialAccounts();
+        setConnectedAccounts(res.data.socialAccounts || []);
+      } catch (error) {
+        // Optionally show error
+      }
+    };
+    fetchAccounts();
+  }, []);
 
   const fetchPost = async () => {
     try {
@@ -249,20 +261,22 @@ const EditPost = () => {
               <div className="space-y-2">
                 <Label>Select Platforms</Label>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {platforms.map((platform) => (
-                    <div key={platform} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={platform}
-                        checked={formData.platforms.includes(platform)}
-                        onCheckedChange={() =>
-                          handlePlatformToggle(platform)
-                        }
-                      />
-                      <Label htmlFor={platform} className="cursor-pointer">
-                        {platform}
-                      </Label>
-                    </div>
-                  ))}
+                  {connectedAccounts.length === 0 ? (
+                    <p className="text-muted-foreground">No social accounts connected. Connect from dashboard.</p>
+                  ) : (
+                    connectedAccounts.map((acc) => (
+                      <div key={acc.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={acc.platform}
+                          checked={formData.platforms.includes(acc.platform)}
+                          onCheckedChange={() => handlePlatformToggle(acc.platform)}
+                        />
+                        <Label htmlFor={acc.platform} className="cursor-pointer">
+                          {acc.platform} {acc.account_name ? `(${acc.account_name})` : ""}
+                        </Label>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
 

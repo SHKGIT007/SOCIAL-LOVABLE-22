@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -35,6 +35,19 @@ const NewPost = () => {
   const [tone, setTone] = useState("Professional");
   const [audience, setAudience] = useState("Adults");
   const [purpose, setPurpose] = useState("Marketing");
+  const [connectedAccounts, setConnectedAccounts] = useState([]);
+
+  useEffect(() => {
+    const fetchAccounts = async () => {
+      try {
+        const res = await apiService.getMySocialAccounts();
+        setConnectedAccounts(res.data.socialAccounts || []);
+      } catch (error) {
+        // Optionally show error
+      }
+    };
+    fetchAccounts();
+  }, []);
 
   const handlePlatformToggle = (platform: string) => {
     setPlatforms((prev) =>
@@ -329,21 +342,25 @@ const NewPost = () => {
             <div className="space-y-2">
               <Label>Platforms *</Label>
               <div className="flex flex-wrap gap-4">
-                {["Facebook", "Instagram", "Twitter", "LinkedIn"].map((platform) => (
-                  <div key={platform} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={platform}
-                      checked={platforms.includes(platform)}
-                      onCheckedChange={() => handlePlatformToggle(platform)}
-                    />
-                    <label
-                      htmlFor={platform}
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      {platform}
-                    </label>
-                  </div>
-                ))}
+                {connectedAccounts.length === 0 ? (
+                  <p className="text-muted-foreground">No social accounts connected. Connect from dashboard.</p>
+                ) : (
+                  connectedAccounts.map((acc) => (
+                    <div key={acc.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={acc.platform}
+                        checked={platforms.includes(acc.platform)}
+                        onCheckedChange={() => handlePlatformToggle(acc.platform)}
+                      />
+                      <label
+                        htmlFor={acc.platform}
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        {acc.platform} {acc.account_name ? `(${acc.account_name})` : ""}
+                      </label>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
 

@@ -18,6 +18,7 @@ import AdminSubscriptions from "./pages/admin/Subscriptions";
 import AdminPosts from "./pages/admin/Posts";
 import AdminViewPost from "./pages/admin/ViewPost";
 import NotFound from "./pages/NotFound";
+import SocialAccounts from "./pages/SocialAccounts";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +32,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/social-accounts" element={<SocialAccounts />} />
           <Route path="/posts" element={<Posts />} />
           <Route path="/posts/new" element={<NewPost />} />
           <Route path="/posts/:id" element={<ViewPost />} />

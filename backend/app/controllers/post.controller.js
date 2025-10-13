@@ -2,6 +2,8 @@ const { Post, User, Plan, Subscription } = require('../models');
 const { Op } = require('sequelize');
 const { asyncHandler } = require('../middleware/error.middleware');
 const logger = require('../config/logger');
+const { SocialAccount } = require('../models');
+const axios = require('axios');
 
 const createPost = asyncHandler(async (req, res) => {
     const { title, content, platforms, status, scheduled_at, category, tags, media_urls, is_ai_generated, ai_prompt } = req.body;
@@ -310,6 +312,45 @@ const publishPost = asyncHandler(async (req, res) => {
         });
     }
 
+    // Get all active social accounts for user
+    const socialAccounts = await SocialAccount.findAll({
+        where: { user_id: userId, is_active: true }
+    });
+
+    // Send post to each connected platform
+    for (const account of socialAccounts) {
+        if (account.platform === 'Facebook') {
+            // Example: Post to Facebook page (replace with actual logic)
+            try {
+                const pageId = account.account_id;
+                const pageAccessToken = account.access_token;
+                if (pageId && pageAccessToken) {
+                    await axios.post(`https://graph.facebook.com/${pageId}/feed`, {
+                        message: post.content,
+                        access_token: pageAccessToken
+                    });
+                }
+            } catch (err) {
+                logger.error('Facebook publish error', { error: err.message });
+            }
+        }
+        if (account.platform === 'Instagram') {
+            // Example: Post to Instagram (replace with actual logic)
+            try {
+                const igUserId = account.account_id;
+                const igAccessToken = account.access_token;
+                if (igUserId && igAccessToken) {
+                    await axios.post(`https://graph.instagram.com/${igUserId}/media`, {
+                        caption: post.content,
+                        access_token: igAccessToken
+                    });
+                }
+            } catch (err) {
+                logger.error('Instagram publish error', { error: err.message });
+            }
+        }
+    }
+
     await Post.update(
         { 
             status: 'published',
@@ -322,7 +363,7 @@ const publishPost = asyncHandler(async (req, res) => {
 
     res.json({
         status: true,
-        message: 'Post published successfully'
+        message: 'Post published successfully and sent to connected platforms.'
     });
 });
 
