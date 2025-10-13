@@ -7,3 +7,10 @@
 {"level":"info","message":"Post deleted","postId":"1","service":"social-lovable-api","timestamp":"2025-10-13T05:34:38.760Z","userId":2}
 {"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-13T05:35:07.916Z","topic":"shoes","userId":2}
 {"level":"info","message":"Post created","postId":2,"service":"social-lovable-api","timestamp":"2025-10-13T05:35:43.314Z","userId":2}
+{"level":"info","message":"Post created","postId":3,"service":"social-lovable-api","timestamp":"2025-10-13T05:52:38.022Z","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-13T05:54:02.248Z","topic":"cooked","userId":2}
+{"level":"info","message":"Post created","postId":4,"service":"social-lovable-api","timestamp":"2025-10-13T05:54:05.139Z","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-13T05:55:02.312Z","topic":"fight","userId":2}
+{"level":"info","message":"Post created","postId":5,"service":"social-lovable-api","timestamp":"2025-10-13T05:55:14.067Z","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-13T05:55:47.583Z","topic":"sales tv","userId":2}
+{"level":"info","message":"Post created","postId":6,"service":"social-lovable-api","timestamp":"2025-10-13T05:55:53.654Z","userId":2}
