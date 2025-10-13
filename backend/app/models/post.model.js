@@ -12,8 +12,13 @@ const Post = sequelize.define('Post', {
         allowNull: false,
     },
     content: {
-        type: DataTypes.TEXT,
+        type: DataTypes.TEXT('long'),
         allowNull: false,
+        // Ensure support for emojis/unicode
+        get() {
+            const rawValue = this.getDataValue('content');
+            return rawValue;
+        }
     },
     platforms: {
         type: DataTypes.JSON,
@@ -69,7 +74,9 @@ const Post = sequelize.define('Post', {
     tableName: 'posts',
     timestamps: true,
     createdAt: 'created_at',
-    updatedAt: 'updated_at'
+    updatedAt: 'updated_at',
+    charset: 'utf8mb4',
+    collate: 'utf8mb4_unicode_ci'
 });
 
 Post.associate = (models) => {

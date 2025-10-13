@@ -1,0 +1,9 @@
+{"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-13T05:08:18.027Z","userId":1}
+{"email":"test@gmail.com","level":"info","message":"User registered successfully","service":"social-lovable-api","timestamp":"2025-10-13T05:12:10.154Z","userId":2}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-13T05:13:22.162Z","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-13T05:13:55.353Z","topic":"shoes","userId":2}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-13T05:17:46.837Z","userId":2}
+{"level":"info","message":"Post created","postId":1,"service":"social-lovable-api","timestamp":"2025-10-13T05:18:16.192Z","userId":2}
+{"level":"info","message":"Post deleted","postId":"1","service":"social-lovable-api","timestamp":"2025-10-13T05:34:38.760Z","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-13T05:35:07.916Z","topic":"shoes","userId":2}
+{"level":"info","message":"Post created","postId":2,"service":"social-lovable-api","timestamp":"2025-10-13T05:35:43.314Z","userId":2}

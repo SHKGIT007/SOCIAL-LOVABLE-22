@@ -64,6 +64,7 @@ const register = asyncHandler(async (req, res) => {
 const login = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
 
+
     // Find user
     const user = await User.findOne({
         where: { email },

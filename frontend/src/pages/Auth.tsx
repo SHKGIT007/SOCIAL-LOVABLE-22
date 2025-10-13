@@ -39,6 +39,7 @@ const Auth = () => {
   }, [navigate]);
 
   const handleSignIn = async (e: React.FormEvent) => {
+   
     e.preventDefault();
     setIsLoading(true);
 
@@ -48,6 +49,7 @@ const Auth = () => {
         password,
       });
 
+      
       if (response.status) {
         // Store auth data in localStorage
         setAuthData(response.data);

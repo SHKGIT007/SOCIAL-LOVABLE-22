@@ -98,10 +98,10 @@ const validatePostCreation = [
         .optional()
         .isIn(['draft', 'scheduled', 'published'])
         .withMessage('Status must be draft, scheduled, or published'),
-    body('scheduled_at')
-        .optional()
-        .isISO8601()
-        .withMessage('Scheduled date must be a valid date'),
+        body('scheduled_at')
+            .optional({ nullable: true })
+            .custom((value) => value === null || value === '' || !value || (typeof value === 'string' && !isNaN(Date.parse(value))))
+            .withMessage('Scheduled date must be a valid date or null'),
     body('category')
         .optional()
         .isLength({ max: 100 })
@@ -130,10 +130,10 @@ const validatePostUpdate = [
         .optional()
         .isIn(['draft', 'scheduled', 'published'])
         .withMessage('Status must be draft, scheduled, or published'),
-    body('scheduled_at')
-        .optional()
-        .isISO8601()
-        .withMessage('Scheduled date must be a valid date'),
+        body('scheduled_at')
+            .optional({ nullable: true })
+            .custom((value) => value === null || value === '' || !value || (typeof value === 'string' && !isNaN(Date.parse(value))))
+            .withMessage('Scheduled date must be a valid date or null'),
     handleValidationErrors
 ];
 

@@ -23,7 +23,7 @@ app.use(limiter);
 
 // Allow frontend origin
 var corsOptions = {
-    origin: process.env.FRONTEND_URL || "*"
+    origin: "*"
 };
 app.use(cors(corsOptions));
 

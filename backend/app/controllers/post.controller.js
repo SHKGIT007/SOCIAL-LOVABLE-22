@@ -7,6 +7,10 @@ const createPost = asyncHandler(async (req, res) => {
     const { title, content, platforms, status, scheduled_at, category, tags, media_urls, is_ai_generated, ai_prompt } = req.body;
     const userId = req.user.id;
 
+  
+    console.log("post 1 - ",req.user.id);
+
+
     // Check user's subscription limits
     const subscription = await Subscription.findOne({
         where: { user_id: userId, status: 'active' },

@@ -27,7 +27,7 @@ const seedAdminUser = async () => {
         
         const adminUser = await User.create({
             user_name: 'admin',
-            email: 'admin@sociallovable.com',
+            email: 'admin@gmail.com',
             password: hashedPassword,
             user_fname: 'Admin',
             user_lname: 'User',
