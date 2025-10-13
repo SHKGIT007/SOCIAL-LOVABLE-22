@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import ApiService from "@/services/api";
+import { apiService } from "@/services/api";
 import { isAuthenticated } from "@/utils/auth";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Edit, Calendar, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { AlertTitle } from "@/components/ui/alert";
 
 interface Post {
   id: string;
@@ -33,6 +35,8 @@ const ViewPost = () => {
   const [post, setPost] = useState<Post | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  console.log("Post ID from ppostarams: ", post);
+
   useEffect(() => {
     fetchPost();
   }, [id]);
@@ -43,9 +47,20 @@ const ViewPost = () => {
         navigate("/auth");
         return;
       }
-      const api = new ApiService();
-      const data = await api.getPostById(id);
-      setPost(data);
+
+      // const api = new ApiService();
+      const data = await apiService.getPostById(id);
+      // const data = await api.getPostById(id);
+      if(data.status === true) {
+         setPost(data.data.post);
+      }else {
+        toast({
+          title: "Error",
+          description: data.message || "Failed to fetch post.",
+          variant: "destructive",
+        });
+        navigate("/posts");
+      }
     } catch (error: any) {
       toast({
         title: "Error",
@@ -140,11 +155,13 @@ const ViewPost = () => {
             <div>
               <h3 className="font-semibold mb-2">Platforms</h3>
               <div className="flex flex-wrap gap-2">
-                {post.platforms.map((platform) => (
+                {
+                post?.platforms?.map((platform) => (
                   <Badge key={platform} variant="secondary">
                     {platform}
                   </Badge>
-                ))}
+                ))
+                }
               </div>
             </div>
 
@@ -152,7 +169,7 @@ const ViewPost = () => {
               <div>
                 <h3 className="font-semibold mb-2">Tags</h3>
                 <div className="flex flex-wrap gap-2">
-                  {post.tags.map((tag) => (
+                  {post?.tags?.map((tag) => (
                     <Badge key={tag} variant="outline">
                       #{tag}
                     </Badge>

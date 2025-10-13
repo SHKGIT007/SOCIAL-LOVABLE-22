@@ -129,6 +129,7 @@ class ApiService {
   }
 
   async getUserById(id) {
+    alert(id);
     return this.request(`${API_CONFIG.ENDPOINTS.USERS.GET_BY_ID}/${id}`);
   }
 

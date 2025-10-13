@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import ApiService from "@/services/api";
+import { apiService } from "@/services/api";
 import { isAuthenticated } from "@/utils/auth";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -58,19 +59,43 @@ const EditPost = () => {
         navigate("/auth");
         return;
       }
-      const api = new ApiService();
-      const data = await api.getPostById(id);
+      // const api = new ApiService();
+      // const data = await api.getPostById(id);
+      const data = await apiService.getPostById(id);
+      console.log("Fetched post data: ", data);
+    
+      if(data.status === false) {
+        toast({
+          title: "Error",
+          description: data.message || "Failed to fetch post.",
+          variant: "destructive",
+        });
+        navigate("/posts");
+        return;
+      }else if (!data.data || !data.data.post) {
+        toast({
+          title: "Error",
+          description: "Post not found.",
+          variant: "destructive",
+        });
+        navigate("/posts");
+        return;
+      }
+      const dataPost = data.data.post;
       setFormData({
-        title: data.title,
-        content: data.content,
-        platforms: data.platforms,
-        status: data.status,
-        scheduled_at: data.scheduled_at
-          ? new Date(data.scheduled_at).toISOString().slice(0, 16)
+        title: dataPost.title,
+        content: dataPost.content,
+        platforms: dataPost.platforms,
+        status: dataPost.status,
+        scheduled_at: dataPost.scheduled_at
+          ? new Date(dataPost.scheduled_at).toISOString().slice(0, 16)
           : "",
-        category: data.category || "",
-        tags: data.tags ? data.tags.join(", ") : "",
+        category: dataPost.category || "",
+        tags: dataPost.tags ? dataPost.tags.join(", ") : "",
       });
+
+
+
     } catch (error: any) {
       toast({
         title: "Error",
@@ -121,8 +146,10 @@ const EditPost = () => {
         tags: tagsArray.length > 0 ? tagsArray : null,
       };
 
-      const api = new ApiService();
-      await api.updatePost(id, updateData);
+      // const api = new ApiService();
+      // await api.updatePost(id, updateData);
+
+       await apiService.updatePost(id, updateData);
 
       toast({
         title: "Success",
