@@ -4,14 +4,18 @@ const { asyncHandler } = require('../middleware/error.middleware');
 const logger = require('../config/logger');
 const { SocialAccount } = require('../models');
 const axios = require('axios');
+const {facebookPost} = require('../../redirectAuth/facebook/facebookPost');
 
 const createPost = asyncHandler(async (req, res) => {
     const { title, content, platforms, status, scheduled_at, category, tags, media_urls, is_ai_generated, ai_prompt } = req.body;
     const userId = req.user.id;
 
-  
-    console.log("post 1 - ",req.user.id);
+   
+   const ss= await facebookPost('sssssssssdwqdwd-----');
+   console.log("ss",ss);
 
+   return res.json({ success: true, message: 'Post created via facebookPost function' });
+    
 
     // Check user's subscription limits
     const subscription = await Subscription.findOne({
@@ -49,6 +53,8 @@ const createPost = asyncHandler(async (req, res) => {
         ai_prompt,
         user_id: userId
     });
+
+
 
     // Update subscription usage
     if (subscription) {

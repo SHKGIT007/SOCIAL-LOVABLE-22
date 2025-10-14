@@ -16,13 +16,6 @@ const axios = require('axios');
         where: { user_id: state.user_id, platform: 'Facebook' }
     });
 
-
-   
-
-
-
-
-
     console.log("req.query", req.query);
     //const mode = req.query['hub.mode'];
     const mode = req.query['hub.mode'];
