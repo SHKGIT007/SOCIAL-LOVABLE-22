@@ -1,6 +1,6 @@
 // runScheduler.js
 // This script runs the scheduled post publisher job every minute using node-cron
-
+console.log('Scheduler started...');
 const cron = require('node-cron');
 const { publishScheduledPosts } = require('./scheduledPostPublisher');
 

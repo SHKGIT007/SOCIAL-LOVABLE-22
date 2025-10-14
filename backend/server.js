@@ -58,6 +58,7 @@ app.get("/facebook/callback",(req,res)=>{
 app.use('/api', routes);
 
 require("./redirectAuth")(app);
+require("./app/jobs/runScheduler");
 
 // Error handling middleware
 app.use((err, req, res, next) => {

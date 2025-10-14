@@ -16,7 +16,10 @@ async function publishScheduledPosts() {
     }
   });
 
+  console.log(`Found ${posts.length} scheduled posts to publish.`);
+
   for (const post of posts) {
+    console.log(`Publishing scheduled post ID: ${post.id} for user ID: ${post.user_id}`);
     // Get user's active Facebook account
     const socialAccount = await SocialAccount.findOne({
       where: { user_id: post.user_id, platform: 'Facebook', is_active: 1 }
