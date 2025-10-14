@@ -183,12 +183,7 @@ const SocialAccounts = () => {
     const handleDisconnect = async (id) => {
         setIsLoading(true);
         try {
-          //  await apiService.deleteSocialAccount(id);
-
-            await apiService.updateSocialAccountCredentials({
-                    is_active:0
-                });
-
+            await apiService.deleteSocialAccount(id);
             toast({ title: "Success", description: "Account disconnected." });
             fetchAccounts();
         } catch (error) {
