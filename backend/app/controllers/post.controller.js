@@ -6,6 +6,7 @@ const { SocialAccount } = require('../models');
 const axios = require('axios');
 const {facebookPost} = require('../../redirectAuth/facebook/facebookPost');
 const OpenAI = require("openai");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 const createPost = asyncHandler(async (req, res) => {
     const { title, content, platforms, status, scheduled_at, category, tags, media_urls, is_ai_generated, ai_prompt } = req.body;
@@ -280,7 +281,10 @@ const generateAIPost = asyncHandler(async (req, res) => {
     const userId = req.user.id;
 
   console.log(process.env.OPENAI_API_KEY);
-  return
+ await callOpenAI(process.env.OPENAI_API_KEY);
+
+ return
+ 
 
     // Check AI post limit
     const subscription = await Subscription.findOne({
@@ -338,6 +342,40 @@ const generateAIPost = asyncHandler(async (req, res) => {
         }
     });
 });
+
+async function callOpenAI(OPENAI_API_KEY) {
+
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+(async () => {
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const result = await model.generateContent("Write a short motivational quote");
+  console.log(result.response.text());
+})();
+
+return
+
+    console.log("dgsdhdshsdgdg--------------------",OPENAI_API_KEY);
+  try {
+    const response = await axios.post(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: "Hello GPT!" }],
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+        },
+      }
+    );
+
+    console.log(response.data.choices[0].message.content);
+  } catch (error) {
+    console.error("AI post generation error", error.response?.data || error);
+  }
+}
 
 const publishPost = asyncHandler(async (req, res) => {
     const { id } = req.params;
