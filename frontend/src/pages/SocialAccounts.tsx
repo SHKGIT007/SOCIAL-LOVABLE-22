@@ -111,7 +111,7 @@ const SocialAccounts = () => {
           let user_id = fbAcc ? fbAcc.user_id : null;
           let app_id= fbAppId
           let app_secret = fbAppSecret
-          let redirect_uri = `https://hometalent4u.in/backend/facebook/callback`
+          let redirect_uri = `https://socialvibe.tradestreet.in/backend/facebook/callback`
 
             //    const url = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${appid}&redirect_uri=${encodeURIComponent(`https://hometalent4u.in/backend/facebook/callback`)}&state=123&response_type=code&scope=public_profile,email,pages_show_list,pages_read_engagement,pages_manage_posts`;
             if(!app_id || !app_secret || !redirect_uri || !user_id) {

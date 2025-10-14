@@ -1,3 +1,8 @@
+
+
+const { Plan, Subscription } = require('../../app/models');
+
+
 module.exports = function (app) {
 
  app.get('/facebook/callback', async (req, res) => {
