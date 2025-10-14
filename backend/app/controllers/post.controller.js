@@ -8,6 +8,10 @@ const {facebookPost} = require('../../redirectAuth/facebook/facebookPost');
 const OpenAI = require("openai");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY // .env file mein apni API key dalein
+});
+
 const createPost = asyncHandler(async (req, res) => {
     const { title, content, platforms, status, scheduled_at, category, tags, media_urls, is_ai_generated, ai_prompt } = req.body;
     const userId = req.user.id;
@@ -279,13 +283,10 @@ const deletePost = asyncHandler(async (req, res) => {
 const generateAIPost = asyncHandler(async (req, res) => {
     const { topic, wordCount, language, style, tone, audience, purpose } = req.body;
     const userId = req.user.id;
-
-  console.log(process.env.OPENAI_API_KEY);
- await callOpenAI(process.env.OPENAI_API_KEY);
-
- return
  
-
+     main();
+     return
+    //  await generateContent(aiPrompt);
     // Check AI post limit
     const subscription = await Subscription.findOne({
         where: { user_id: userId, status: 'active' },
@@ -343,39 +344,46 @@ const generateAIPost = asyncHandler(async (req, res) => {
     });
 });
 
-async function callOpenAI(OPENAI_API_KEY) {
-
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
-(async () => {
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-  const result = await model.generateContent("Write a short motivational quote");
-  console.log(result.response.text());
-})();
-
-return
-
-    console.log("dgsdhdshsdgdg--------------------",OPENAI_API_KEY);
+async function generateContent(prompt) {
   try {
-    const response = await axios.post(
-      "https://api.openai.com/v1/chat/completions",
-      {
-        model: "gpt-3.5-turbo",
-        messages: [{ role: "user", content: "Hello GPT!" }],
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
-        },
-      }
-    );
+    console.log('Request bhej rahe hain...');
+    
+    const response = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo", // Ya "gpt-4" use kar sakte hain
+      messages: [
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      temperature: 0.7, // Creativity level (0-1)
+      max_tokens: 1000 // Maximum response length
+    });
 
-    console.log(response.data.choices[0].message.content);
+    // AI ka response return karein
+    const content = response.choices[0].message.content;
+    console.log('\nAI Response:');
+    console.log(content);
+    
+    return content;
+
   } catch (error) {
-    console.error("AI post generation error", error.response?.data || error);
+    console.error('Error aaya:', error.message);
+    throw error;
   }
 }
+
+// Example usage
+async function main() {
+  const prompt = "JavaScript ke baare mein 3 interesting facts batao";
+  
+  const result = await generateContent(prompt);
+  
+  // Aap result ko kahi bhi use kar sakte hain
+  console.log('\n--- Response complete ---');
+}
+
+
 
 const publishPost = asyncHandler(async (req, res) => {
     const { id } = req.params;
