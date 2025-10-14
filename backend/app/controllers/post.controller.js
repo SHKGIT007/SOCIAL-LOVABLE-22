@@ -291,22 +291,36 @@ const generateAIPost = asyncHandler(async (req, res) => {
         });
     }
 
-    // Simple AI post generation (replace with actual AI service)
+    // AI post generation using OpenAI ChatGPT
     const aiPrompt = `Generate a ${style.toLowerCase()} ${tone.toLowerCase()} post about ${topic} for ${audience} audience with ${purpose} purpose in ${language}. Word count: ${wordCount}`;
-    
-    // Mock AI response (replace with actual AI service call)
-    const generatedContent = `🚀 Exciting news about ${topic}!
 
-${topic} is revolutionizing the way we think about ${purpose.toLowerCase()}. Whether you're new to this space or a seasoned professional, there's something for everyone.
-
-Key highlights:
-• Innovation in ${topic}
-• Benefits for ${audience.toLowerCase()}
-• Future opportunities
-
-What are your thoughts on ${topic}? Share your experience in the comments below!
-
-#${topic.replace(/\s+/g, '')} #Innovation #${purpose}`;
+    let generatedContent = '';
+    try {
+        const openaiApiKey = process.env.OPENAI_API_KEY;
+        if (!openaiApiKey) throw new Error('OpenAI API key not configured');
+        const response = await axios.post(
+            'https://api.openai.com/v1/chat/completions',
+            {
+                model: 'gpt-3.5-turbo',
+                messages: [
+                    { role: 'system', content: 'You are a helpful social media post generator.' },
+                    { role: 'user', content: aiPrompt }
+                ],
+                max_tokens: 512,
+                temperature: 0.7
+            },
+            {
+                headers: {
+                    'Authorization': `Bearer ${openaiApiKey}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+        generatedContent = response.data.choices[0].message.content;
+    } catch (err) {
+        logger.error('AI post generation error', { error: err.message });
+        return res.status(500).json({ status: false, message: 'AI post generation failed', error: err.message });
+    }
 
     logger.info('AI post generated', { userId, topic });
 

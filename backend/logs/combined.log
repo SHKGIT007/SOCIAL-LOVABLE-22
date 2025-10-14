@@ -41,3 +41,12 @@
 {"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-14T12:06:14.930Z","topic":"Shoes","userId":2}
 {"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-14T12:07:33.362Z","topic":"Shoes","userId":2}
 {"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-14T12:08:04.207Z","topic":"Shoes","userId":2}
+{"level":"info","message":"Scheduled post published to Facebook","postId":5,"service":"social-lovable-api","timestamp":"2025-10-14T12:28:03.857Z","userId":2}
+{"level":"info","message":"Post deleted","postId":"3","service":"social-lovable-api","timestamp":"2025-10-14T12:29:14.461Z","userId":2}
+{"level":"info","message":"Post deleted","postId":"4","service":"social-lovable-api","timestamp":"2025-10-14T12:29:16.955Z","userId":2}
+{"level":"info","message":"Post deleted","postId":"5","service":"social-lovable-api","timestamp":"2025-10-14T12:29:18.914Z","userId":2}
+{"level":"info","message":"Post deleted","postId":"6","service":"social-lovable-api","timestamp":"2025-10-14T12:29:20.548Z","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-14T12:29:41.392Z","topic":"cooking and fish fry","userId":2}
+{"level":"info","message":"Post created","postId":8,"service":"social-lovable-api","timestamp":"2025-10-14T12:30:02.761Z","userId":2}
+{"level":"info","message":"Scheduled post published to Facebook","postId":8,"service":"social-lovable-api","timestamp":"2025-10-14T12:31:03.032Z","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-14T12:35:47.275Z","topic":"ss","userId":2}
