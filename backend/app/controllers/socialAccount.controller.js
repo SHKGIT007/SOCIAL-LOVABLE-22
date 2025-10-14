@@ -194,6 +194,10 @@ const updateSocialAccount = asyncHandler(async (req, res) => {
 
 // Update SocialAccount app_id/app_secret for logged-in user and platform
 const updateSocialAccountCredentials = asyncHandler(async (req, res) => {
+   
+
+
+
     const { platform, app_id, app_secret } = req.body;
     const userId = req.user.id;
     const socialAccount = await SocialAccount.findOne({ where: { user_id: userId, platform } });

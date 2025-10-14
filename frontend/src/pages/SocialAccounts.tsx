@@ -122,8 +122,8 @@ const SocialAccounts = () => {
 
                 let stateData = {
                     user_id: user_id,
-                    app_id:app_id,
-                    app_secret:app_secret,
+                    app_id: app_id,
+                    app_secret: app_secret,
                     redirect_uri: redirect_uri,
                     redirect_dashboard: "http://localhost:8080/dashboard"
                 };
@@ -183,7 +183,12 @@ const SocialAccounts = () => {
     const handleDisconnect = async (id) => {
         setIsLoading(true);
         try {
-            await apiService.deleteSocialAccount(id);
+          //  await apiService.deleteSocialAccount(id);
+
+            await apiService.updateSocialAccountCredentials({
+                    is_active:0
+                });
+
             toast({ title: "Success", description: "Account disconnected." });
             fetchAccounts();
         } catch (error) {
@@ -258,12 +263,21 @@ const SocialAccounts = () => {
                             <p className="text-muted-foreground">No accounts connected.</p>
                         ) : (
                             <div className="space-y-4">
-                                {accounts.map((acc) => (
+                                {accounts && accounts?.map((acc) => (
                                     <div key={acc.id} className="flex items-center justify-between border-b pb-2">
-                                        <div>
-                                            <Badge>{acc.platform}</Badge> {acc.account_name || acc.account_id}
-                                        </div>
-                                        <Button variant="destructive" size="sm" onClick={() => handleDisconnect(acc.id)} disabled={isLoading}>Disconnect</Button>
+                                        {
+                                            Number(acc.is_active) == 1 ?
+                                                <>
+                                                    <div>
+                                                        <Badge>{acc.platform}</Badge> {acc.account_name || acc.account_id}
+                                                    </div>
+                                                    <Button variant="destructive" size="sm" onClick={() => handleDisconnect(acc.id)} disabled={isLoading}>Disconnect</Button>
+                                                </>
+
+                                                : ""
+                                        }
+
+
                                     </div>
                                 ))}
                             </div>
