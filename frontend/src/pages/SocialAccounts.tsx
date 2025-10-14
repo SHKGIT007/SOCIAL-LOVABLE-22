@@ -26,6 +26,8 @@ const SocialAccounts = () => {
   };
   const [isLoading, setIsLoading] = useState(false);
 
+  console.log("accounts:", accounts);
+
   useEffect(() => {
     fetchAccounts();
   }, []);
@@ -105,20 +107,20 @@ const SocialAccounts = () => {
     try {
         console.log('Initiating OAuth for', platform);
         if(platform === "Facebook") {
+          const fbAcc = accounts.find(acc => acc.platform === "Facebook");
+          let user_id = fbAcc ? fbAcc.user_id : null;
+          let app_id= fbAppId
+          let app_secret = fbAppSecret
+          let redirect_uri = `https://hometalent4u.in/backend/facebook/callback`
 
-          let  appid= '2934798226703542'
-          let secret='acb8d713392b5fb7e59e0022b63d4056'
-          let uri = 'https://hometalent4u.in/backend/facebook/callback'
-          
-
-            // redirect
-             
-        
             //    const url = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${appid}&redirect_uri=${encodeURIComponent(`https://hometalent4u.in/backend/facebook/callback`)}&state=123&response_type=code&scope=public_profile,email,pages_show_list,pages_read_engagement,pages_manage_posts`;
+            if(!app_id || !app_secret || !redirect_uri || !user_id) {
+                toast({ title: "Error", description: "Please save Facebook App ID/Secret first.", variant: "destructive" });
+                setIsLoading(false);
+                return;
+            }
 
-               const url = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${appid}&redirect_uri=${encodeURIComponent(`https://hometalent4u.in/backend/facebook/callback`)}&state=123&response_type=code&scope=public_profile,email,pages_show_list,pages_read_engagement,pages_manage_posts`;
-
-
+            const url = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${app_id}&redirect_uri=${encodeURIComponent(redirect_uri)}&state=${user_id}&response_type=code&scope=public_profile,email,pages_show_list,pages_read_engagement,pages_manage_posts`;
 
             window.location.href = url;
 
