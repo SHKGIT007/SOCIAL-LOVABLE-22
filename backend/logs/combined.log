@@ -37,3 +37,7 @@
 {"accountId":"7","deletedBy":2,"level":"info","message":"Social account deleted","service":"social-lovable-api","timestamp":"2025-10-14T10:35:33.147Z"}
 {"accountId":"6","deletedBy":2,"level":"info","message":"Social account deleted","service":"social-lovable-api","timestamp":"2025-10-14T11:04:11.343Z"}
 {"accountId":8,"level":"info","message":"Social account connected","platform":"Facebook","service":"social-lovable-api","timestamp":"2025-10-14T11:05:47.430Z","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-14T11:49:14.970Z","topic":"scsc","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-14T12:06:14.930Z","topic":"Shoes","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-14T12:07:33.362Z","topic":"Shoes","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-14T12:08:04.207Z","topic":"Shoes","userId":2}

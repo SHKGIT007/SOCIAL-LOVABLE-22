@@ -10,6 +10,20 @@ const createPost = asyncHandler(async (req, res) => {
     const { title, content, platforms, status, scheduled_at, category, tags, media_urls, is_ai_generated, ai_prompt } = req.body;
     const userId = req.user.id;
 
+   const socialAccount = await SocialAccount.findOne({
+        where: { user_id: userId, platform: 'Facebook', is_active: 1 }
+    });
+
+ 
+
+   const postData= await facebookPost(socialAccount.access_token, content);
+  
+
+    
+
+    return res.json({ success: true, message: postData });
+    
+
     // Check user's subscription limits
     const subscription = await Subscription.findOne({
         where: { user_id: userId, status: 'active' },
@@ -33,7 +47,6 @@ const createPost = asyncHandler(async (req, res) => {
         }
     }
 
-    // Save post in DB
     const post = await Post.create({
         title,
         content,
@@ -48,6 +61,8 @@ const createPost = asyncHandler(async (req, res) => {
         user_id: userId
     });
 
+
+
     // Update subscription usage
     if (subscription) {
         await Subscription.update(
@@ -59,24 +74,8 @@ const createPost = asyncHandler(async (req, res) => {
         );
     }
 
-    // Facebook publish logic
-    if (status === 'published') {
-        const socialAccount = await SocialAccount.findOne({
-            where: { user_id: userId, platform: 'Facebook', is_active: 1 }
-        });
-        if (socialAccount && socialAccount.access_token) {
-            try {
-                const postData = await facebookPost(socialAccount.access_token, content);
-                logger.info('Facebook post published', { userId, postId: post.id });
-                return res.json({ success: true, message: 'Post published to Facebook', fb: postData });
-            } catch (err) {
-                logger.error('Facebook publish error', { error: err.message });
-                return res.status(500).json({ success: false, message: 'Facebook publish failed', error: err.message });
-            }
-        }
-    }
-    // For scheduled and draft, just save post, do not publish
     logger.info('Post created', { postId: post.id, userId });
+
     res.status(201).json({
         status: true,
         message: 'Post created successfully',
@@ -218,24 +217,8 @@ const updatePost = asyncHandler(async (req, res) => {
         ]
     });
 
-    // Facebook publish logic if status changed to published
-    if (status === 'published') {
-        const socialAccount = await SocialAccount.findOne({
-            where: { user_id: userId, platform: 'Facebook', is_active: 1 }
-        });
-        if (socialAccount && socialAccount.access_token) {
-            try {
-                const postData = await facebookPost(socialAccount.access_token, content || updatedPost.content);
-                logger.info('Facebook post published (update)', { userId, postId: id });
-                return res.json({ status: true, message: 'Post updated and published to Facebook', fb: postData, data: { post: updatedPost } });
-            } catch (err) {
-                logger.error('Facebook publish error (update)', { error: err.message });
-                return res.status(500).json({ status: false, message: 'Facebook publish failed', error: err.message });
-            }
-        }
-    }
-
     logger.info('Post updated', { postId: id, userId });
+
     res.json({
         status: true,
         message: 'Post updated successfully',
