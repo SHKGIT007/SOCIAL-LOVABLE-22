@@ -5,6 +5,7 @@ const logger = require('../config/logger');
 const { SocialAccount } = require('../models');
 const axios = require('axios');
 const {facebookPost} = require('../../redirectAuth/facebook/facebookPost');
+const OpenAI = require("openai");
 
 const createPost = asyncHandler(async (req, res) => {
     const { title, content, platforms, status, scheduled_at, category, tags, media_urls, is_ai_generated, ai_prompt } = req.body;
@@ -277,6 +278,9 @@ const deletePost = asyncHandler(async (req, res) => {
 const generateAIPost = asyncHandler(async (req, res) => {
     const { topic, wordCount, language, style, tone, audience, purpose } = req.body;
     const userId = req.user.id;
+
+  console.log(process.env.OPENAI_API_KEY);
+  return
 
     // Check AI post limit
     const subscription = await Subscription.findOne({
