@@ -9,6 +9,8 @@ const createSocialAccount = asyncHandler(async (req, res) => {
     const { platform, app_id, app_secret } = req.body;
     const userId = req.user.id;
 
+    
+
     // Check if user already has this platform connected
     const existingAccount = await SocialAccount.findOne({
         where: { user_id: userId, platform }

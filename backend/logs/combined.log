@@ -34,3 +34,4 @@
 {"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-13T10:07:18.703Z","userId":2}
 {"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-14T06:43:04.946Z","topic":"shoes","userId":2}
 {"accountId":7,"level":"info","message":"Social account connected","platform":"Instagram","service":"social-lovable-api","timestamp":"2025-10-14T10:06:25.048Z","userId":2}
+{"accountId":"7","deletedBy":2,"level":"info","message":"Social account deleted","service":"social-lovable-api","timestamp":"2025-10-14T10:35:33.147Z"}
