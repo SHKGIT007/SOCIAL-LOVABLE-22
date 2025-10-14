@@ -9,8 +9,6 @@ const createSocialAccount = asyncHandler(async (req, res) => {
     const { platform, app_id, app_secret } = req.body;
     const userId = req.user.id;
 
-    
-
     // Check if user already has this platform connected
     const existingAccount = await SocialAccount.findOne({
         where: { user_id: userId, platform }
@@ -194,13 +192,20 @@ const updateSocialAccount = asyncHandler(async (req, res) => {
 
 // Update SocialAccount app_id/app_secret for logged-in user and platform
 const updateSocialAccountCredentials = asyncHandler(async (req, res) => {
-   
+    const { platform, app_id, app_secret ,is_active ,id } = req.body;
 
-
-
-    const { platform, app_id, app_secret } = req.body;
     const userId = req.user.id;
+    
+    if(is_active !== undefined && is_active == 0){
+        await SocialAccount.update({ is_active }, { where: { id: id } });
+        const updated = await SocialAccount.findByPk(id);
+       return res.json({ status: true, message: 'Disconnected', data: { socialAccount: updated } });
+    }
+    
+    
+    
     const socialAccount = await SocialAccount.findOne({ where: { user_id: userId, platform } });
+    
     if (!socialAccount) {
         return res.status(404).json({ status: false, message: 'Social account not found' });
     }

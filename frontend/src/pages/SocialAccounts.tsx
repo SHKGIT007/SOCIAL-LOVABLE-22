@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiService } from "@/services/api";
 import { API_CONFIG } from "@/utils/config";
 import { redirect } from "react-router-dom";
+import { platform } from "os";
 
 const platforms = ["Facebook", "Instagram"];
 
@@ -187,6 +188,7 @@ const SocialAccounts = () => {
 
            await apiService.updateSocialAccountCredentials({
                    is_active: 0,
+                   id: id,
                 });
             toast({ title: "Success", description: "Account disconnected." });
             fetchAccounts();
