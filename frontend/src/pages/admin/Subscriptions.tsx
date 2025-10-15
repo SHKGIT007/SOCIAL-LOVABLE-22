@@ -16,9 +16,9 @@ interface SubscriptionData {
   end_date: string | null;
   posts_used: number;
   ai_posts_used: number;
-  profile: {
+  User?: {
     email: string;
-    full_name: string | null;
+    user_name: string | null;
   };
   plan: {
     name: string;
@@ -63,7 +63,17 @@ const Subscriptions = () => {
   const fetchSubscriptions = async () => {
     try {
       const data = await apiService.getAllSubscriptions();
-      setSubscriptions(data || []);
+      if(data.status === true){
+        setSubscriptions(data?.data?.subscriptions || []);
+      }else{
+        setSubscriptions([]);
+        toast({
+          title: "Error",
+          description: data.message || "Failed to fetch subscriptions.",
+          variant: "destructive",
+        });
+        return;
+      }
     } catch (error: any) {
       toast({
         title: "Error",
@@ -82,7 +92,7 @@ const Subscriptions = () => {
       </DashboardLayout>
     );
   }
-
+ 
   return (
     <DashboardLayout userRole="admin">
       <div className="space-y-6">
@@ -110,12 +120,12 @@ const Subscriptions = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {subscriptions.map((sub) => (
+                {subscriptions?.map((sub) => (
                   <TableRow key={sub.id}>
                     <TableCell>
                       <div>
-                        <div className="font-medium">{sub.profile?.full_name || "N/A"}</div>
-                        <div className="text-sm text-muted-foreground">{sub.profile?.email}</div>
+                        <div className="font-medium">{sub?.User?.user_name || "N/A"}</div>
+                        <div className="text-sm text-muted-foreground">{sub?.User?.email}</div>
                       </div>
                     </TableCell>
                     <TableCell>

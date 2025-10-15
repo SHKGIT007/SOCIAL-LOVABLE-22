@@ -69,7 +69,17 @@ const Plans = () => {
   const fetchPlans = async () => {
     try {
       const data = await apiService.getAllPlans();
-      setPlans(data || []);
+      if(data.status === true){
+      setPlans(data?.data?.plans || []);
+      }else{
+        setPlans([]);
+        toast({
+          title: "Error",
+          description: data.message || "Failed to fetch plans.",
+          variant: "destructive",
+        });
+        return;
+      }
     } catch (error: any) {
       toast({
         title: "Error",
@@ -151,6 +161,8 @@ const Plans = () => {
       </DashboardLayout>
     );
   }
+
+  // console.log("Plans data: ", plans);
 
   return (
     <DashboardLayout userRole="admin">
@@ -270,7 +282,7 @@ const Plans = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {plans.map((plan) => (
+                {plans?.map((plan) => (
                   <TableRow key={plan.id}>
                     <TableCell className="font-medium">{plan.name}</TableCell>
                     <TableCell>${plan.price}</TableCell>

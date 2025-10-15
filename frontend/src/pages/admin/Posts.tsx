@@ -29,9 +29,9 @@ interface Post {
   status: string;
   is_ai_generated: boolean;
   created_at: string;
-  profiles: {
+  User?: {
     email: string;
-    full_name: string | null;
+    user_name: string | null;
   };
 }
 
@@ -54,7 +54,7 @@ const AdminPosts = () => {
         (post) =>
           post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
           post.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          post.profiles.email.toLowerCase().includes(searchTerm.toLowerCase())
+          post.User?.email?.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setFilteredPosts(filtered);
     } else {
@@ -84,11 +84,25 @@ const AdminPosts = () => {
     }
   };
 
+  //  console.log("Posts data: ", posts);
+  //  console.log("Posts filteredPosts: ", filteredPosts);
+
   const fetchPosts = async () => {
     try {
       const data = await apiService.getAllPosts();
-      setPosts(data || []);
-      setFilteredPosts(data || []);
+      if(data.status === true){
+      setPosts(data?.data?.posts || []);
+      setFilteredPosts(data?.data?.posts || []);
+      }else{
+        setPosts([]);
+        setFilteredPosts([]);
+        toast({
+          title: "Error",
+          description: data.message || "Failed to fetch posts.",
+          variant: "destructive",
+        });
+        return;
+      }
     } catch (error: any) {
       toast({
         title: "Error",
@@ -128,6 +142,8 @@ const AdminPosts = () => {
     );
   }
 
+ 
+
   return (
     <DashboardLayout userRole="admin">
       <div className="space-y-6">
@@ -165,15 +181,15 @@ const AdminPosts = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredPosts.map((post) => (
+                {filteredPosts && filteredPosts?.map((post) => (
                   <TableRow key={post.id}>
                     <TableCell className="font-medium max-w-xs truncate">
                       {post.title}
                     </TableCell>
                     <TableCell>
                       <div>
-                        <div className="font-medium">{post.profiles?.full_name || "N/A"}</div>
-                        <div className="text-sm text-muted-foreground">{post.profiles?.email}</div>
+                        <div className="font-medium">{post?.User?.user_name || "N/A"}</div>
+                        <div className="text-sm text-muted-foreground">{post?.User?.email}</div>
                       </div>
                     </TableCell>
                     <TableCell>

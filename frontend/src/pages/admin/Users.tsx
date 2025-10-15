@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 interface UserData {
   id: string;
   email: string;
-  full_name: string | null;
+  user_name: string | null;
   created_at: string;
   role: string;
   subscription: {
@@ -36,7 +36,19 @@ const Users = () => {
   const fetchUsers = async () => {
     try {
       const data = await apiService.getAllUsers();
-      setUsers(data || []);
+
+      if(data.status === true){
+       setUsers(data?.data?.users || []);
+      }else{
+        setUsers([]);
+        toast({
+          title: "Error",
+          description: data.message || "Failed to fetch users.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
     } catch (error: any) {
       toast({
         title: "Error",
@@ -72,6 +84,8 @@ const Users = () => {
     );
   }
 
+  // console.log("Users data: ", users);
+
   return (
     <DashboardLayout userRole="admin">
       <div className="space-y-6">
@@ -98,9 +112,9 @@ const Users = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {users.map((user) => (
+                {users && users?.map((user) => (
                   <TableRow key={user.id}>
-                    <TableCell className="font-medium">{user.full_name || "N/A"}</TableCell>
+                    <TableCell className="font-medium">{user?.user_name || "N/A"}</TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>
                       <Badge variant={user.role === "admin" ? "default" : "secondary"}>
