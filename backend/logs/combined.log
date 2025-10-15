@@ -109,3 +109,15 @@
 {"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-15T12:22:03.503Z","topic":"clothes","userId":2}
 {"level":"info","message":"Post created","postId":12,"service":"social-lovable-api","timestamp":"2025-10-15T12:22:20.662Z","userId":2}
 {"level":"info","message":"Scheduled post published to Facebook","postId":12,"service":"social-lovable-api","timestamp":"2025-10-15T12:24:04.876Z","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-15T12:35:04.783Z","topic":"fef","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-15T12:52:47.902Z","topic":"x","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-15T12:52:58.630Z","topic":"x","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-15T12:53:26.504Z","topic":"dsac","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-15T12:54:06.326Z","topic":"dcs","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-15T12:54:28.398Z","topic":"dcs","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-15T12:54:37.889Z","topic":"dcs","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-15T12:55:22.641Z","topic":"x","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-15T12:55:23.810Z","topic":"sc","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-15T12:55:33.654Z","topic":"sc","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-15T12:55:52.745Z","topic":"sc","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-15T12:56:38.856Z","topic":"dcs","userId":2}

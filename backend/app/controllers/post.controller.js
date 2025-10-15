@@ -448,24 +448,117 @@ async function example1() {
   console.log('\n' + '='.repeat(50) + '\n');
 }
 
-async function generateImagePollinations(prompt) {
+// async function generateImagePollinations(prompt) {
+//   try {
+//     const encodedPrompt = encodeURIComponent(prompt);
+//     const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true`;
+    
+//     console.log('🎨 Image generating...');
+//     console.log('Image URL:', imageUrl);
+    
+//     // Download image
+//     const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+//     const filename = `generated_${Date.now()}.png`;
+//     fs.writeFileSync(filename, response.data);
+    
+//     console.log(`✅ Image saved: ${filename}`);
+//     return { url: imageUrl, filename };
+//   } catch (error) {
+//     console.error('Pollinations Error:', error.message);
+//     throw error;
+//   }
+// }
+
+
+async function generateImagePollinations(prompt, retries = 3) {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      console.log(`🎨 Image generating... (Attempt ${attempt}/${retries})`);
+      console.log('Prompt:', prompt);
+      
+    // Replace spaces with underscores for better Pollinations API compatibility
+    const cleanPrompt = prompt.trim().replace(/\s+/g, '_');
+    const encodedPrompt = encodeURIComponent(cleanPrompt);
+      
+      const urls = [
+        `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true`,
+        `https://image.pollinations.ai/prompt/${encodedPrompt}?model=flux&width=1024&height=1024&nologo=true`,
+        `https://pollinations.ai/p/${encodedPrompt}`
+      ];
+      
+      const imageUrl = urls[attempt - 1] || urls[0];
+      console.log('Requesting URL:', imageUrl);
+      
+      const response = await axios.get(imageUrl, { 
+        responseType: 'arraybuffer',
+        timeout: 45000,
+        maxRedirects: 10,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+      });
+      
+      if (!response.data || response.data.length < 1000) {
+        throw new Error('Invalid or empty image received');
+      }
+      
+      const filename = `generated_${Date.now()}.png`;
+      fs.writeFileSync(filename, response.data);
+      
+      const sizeKB = (response.data.length / 1024).toFixed(2);
+      console.log(`✅ Image saved: ${filename} (${sizeKB} KB)`);
+      
+      return { 
+        url: imageUrl, 
+        filename,
+        size: response.data.length,
+        prompt: cleanPrompt
+      };
+      
+    } catch (error) {
+      console.error(`❌ Attempt ${attempt} failed:`, error.message);
+      
+      if (attempt === retries) {
+        console.error('All attempts failed. Using fallback...');
+        return await generateImageFallback(prompt);
+      }
+      
+      const waitTime = attempt * 2000;
+      console.log(`⏳ Waiting ${waitTime/1000}s before retry...`);
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+    }
+  }
+}
+
+// ⚠️ YE FUNCTION ADD KARNA PADEGA (missing hai)
+async function generateImageFallback(prompt) {
   try {
-    const encodedPrompt = encodeURIComponent(prompt);
-    const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true`;
+    console.log('🔄 Using fallback API...');
     
-    console.log('🎨 Image generating...');
-    console.log('Image URL:', imageUrl);
+    // Option 1: Picsum (random image based on seed)
+    const seed = prompt.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+    const imageUrl = `https://picsum.photos/seed/${seed}/1024/1024`;
     
-    // Download image
-    const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
-    const filename = `generated_${Date.now()}.png`;
+    const response = await axios.get(imageUrl, {
+      responseType: 'arraybuffer',
+      timeout: 30000
+    });
+    
+    const filename = `fallback_${Date.now()}.jpg`;
     fs.writeFileSync(filename, response.data);
     
-    console.log(`✅ Image saved: ${filename}`);
-    return { url: imageUrl, filename };
+    console.log(`✅ Fallback image saved: ${filename}`);
+    console.log('⚠️ Note: Stock photo (not AI-generated)');
+    
+    return {
+      url: imageUrl,
+      filename,
+      size: response.data.length,
+      isFallback: true
+    };
   } catch (error) {
-    console.error('Pollinations Error:', error.message);
-    throw error;
+    console.error('❌ Fallback failed:', error.message);
+    throw new Error('All image generation methods failed');
   }
 }
 
