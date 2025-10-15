@@ -22,3 +22,5 @@
 {"level":"info","message":"Post updated","postId":"6","service":"social-lovable-api","timestamp":"2025-10-13T06:33:57.801Z","userId":2}
 {"level":"info","message":"Post updated","postId":"6","service":"social-lovable-api","timestamp":"2025-10-13T06:34:05.993Z","userId":2}
 {"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-15T07:10:57.099Z","userId":2}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-15T09:23:32.892Z","userId":2}
+{"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-15T09:29:12.631Z","userId":1}
