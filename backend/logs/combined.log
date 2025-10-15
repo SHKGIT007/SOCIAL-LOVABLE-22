@@ -79,5 +79,11 @@
 {"level":"info","message":"Subscription created","planId":2,"service":"social-lovable-api","subscriptionId":2,"timestamp":"2025-10-15T07:19:00.506Z","userId":2}
 {"level":"info","message":"Subscription cancelled","service":"social-lovable-api","subscriptionId":"2","timestamp":"2025-10-15T07:19:26.352Z","userId":2}
 {"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-15T09:27:15.016Z","topic":"sneaker shoes","userId":2}
-{"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-15T09:42:36.750Z","userId":1}
-{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-15T09:44:08.669Z","userId":2}
+{"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-15T09:55:21.799Z","userId":1}
+{"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-15T09:58:22.202Z","userId":1}
+{"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-15T09:58:35.176Z","userId":1}
+{"level":"info","message":"Plan updated","planId":"1","service":"social-lovable-api","timestamp":"2025-10-15T09:58:50.316Z","updatedBy":1}
+{"level":"info","message":"Plan updated","planId":"1","service":"social-lovable-api","timestamp":"2025-10-15T09:59:04.229Z","updatedBy":1}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-15T09:59:34.993Z","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-15T10:00:47.035Z","topic":"clothes","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-15T10:01:01.446Z","topic":"clothes","userId":2}
