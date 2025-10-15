@@ -188,10 +188,12 @@ const getPostById = asyncHandler(async (req, res) => {
 
 const updatePost = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const { title, content, platforms, status, scheduled_at, category, tags, media_urls } = req.body;
+    const { title, content, platforms, status, scheduled_at, category, tags, media_urls ,image_url} = req.body;
     const userId = req.user.id;
     const userType = req.user.user_type;
 
+
+   
     const post = await Post.findByPk(id);
     if (!post) {
         return res.status(404).json({
@@ -237,7 +239,7 @@ const updatePost = asyncHandler(async (req, res) => {
         });
         if (socialAccount && socialAccount.access_token) {
             try {
-                const postData = await facebookPost(socialAccount.access_token, content || updatedPost.content);
+                const postData = await facebookPost(socialAccount.access_token, content ,image_url);
                 logger.info('Facebook post published (update)', { userId, postId: id });
                 return res.json({ status: true, message: 'Post updated and published to Facebook', fb: postData, data: { post: updatedPost } });
             } catch (err) {

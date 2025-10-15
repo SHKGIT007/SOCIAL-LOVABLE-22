@@ -30,6 +30,8 @@ interface FormData {
   scheduled_at: string;
   category: string;
   tags: string;
+  image_prompt: string | null;
+  image_url: string | null; 
 }
 
 const EditPost = () => {
@@ -46,6 +48,8 @@ const EditPost = () => {
     scheduled_at: "",
     category: "",
     tags: "",
+    image_prompt: "",
+    image_url: "",
   });
   const [connectedAccounts, setConnectedAccounts] = useState([]);
 
@@ -104,6 +108,8 @@ const EditPost = () => {
           : "",
         category: dataPost.category || "",
         tags: dataPost.tags ? dataPost.tags.join(", ") : "",
+        image_prompt: dataPost.image_prompt || null,
+        image_url: dataPost.image_url || null
       });
 
 
@@ -156,6 +162,8 @@ const EditPost = () => {
         scheduled_at: formData.scheduled_at || null,
         category: formData.category || null,
         tags: tagsArray.length > 0 ? tagsArray : null,
+        image_prompt: formData.image_prompt || null,
+        image_url : formData.image_url
       };
 
       // const api = new ApiService();

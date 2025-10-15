@@ -26,7 +26,7 @@ async function publishScheduledPosts() {
     });
     if (socialAccount && socialAccount.access_token) {
       try {
-        await facebookPost(socialAccount.access_token, post.content);
+        await facebookPost(socialAccount.access_token, post.content , post.image_url);
         // Mark post as published
         await Post.update(
           { status: 'published', published_at: new Date() },
