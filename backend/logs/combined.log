@@ -21,3 +21,4 @@
 {"level":"info","message":"Post deleted","postId":"2","service":"social-lovable-api","timestamp":"2025-10-13T06:18:20.635Z","userId":2}
 {"level":"info","message":"Post updated","postId":"6","service":"social-lovable-api","timestamp":"2025-10-13T06:33:57.801Z","userId":2}
 {"level":"info","message":"Post updated","postId":"6","service":"social-lovable-api","timestamp":"2025-10-13T06:34:05.993Z","userId":2}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-15T07:10:57.099Z","userId":2}
