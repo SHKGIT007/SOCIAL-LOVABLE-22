@@ -135,6 +135,7 @@ const NewPost = () => {
         scheduled_at: scheduledAt || null,
         is_ai_generated: isGenerating || topic !== "",
         ai_prompt: topic || null,
+        image_prompt: imagePrompt || null,
         image_url: imageContent || null,
       });
 

@@ -102,3 +102,6 @@
 {"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-15T11:55:01.889Z","topic":"sfvdv","userId":2}
 {"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-15T11:55:18.183Z","topic":"shoes","userId":2}
 {"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-15T11:56:44.222Z","topic":"chetan ","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-15T12:07:21.816Z","topic":"dinner","userId":2}
+{"level":"info","message":"Facebook post published","postId":11,"service":"social-lovable-api","timestamp":"2025-10-15T12:07:36.367Z","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-15T12:08:00.449Z","topic":"dinner","userId":2}

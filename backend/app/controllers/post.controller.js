@@ -15,7 +15,7 @@ const openai = new OpenAI({
 });
 
 const createPost = asyncHandler(async (req, res) => {
-    const { title, content, platforms, status, scheduled_at, category, tags, media_urls, is_ai_generated, ai_prompt ,image_url } = req.body;
+    const { title, content, platforms, status, scheduled_at, category, tags, media_urls, is_ai_generated, ai_prompt ,image_prompt,image_url } = req.body;
     const userId = req.user.id;
 
     // Check user's subscription limits
@@ -53,7 +53,9 @@ const createPost = asyncHandler(async (req, res) => {
         media_urls,
         is_ai_generated: is_ai_generated || false,
         ai_prompt,
-        user_id: userId
+        user_id: userId,
+        image_prompt: image_prompt || null,
+        image_url: image_url || null
     });
 
     // Update subscription usage
