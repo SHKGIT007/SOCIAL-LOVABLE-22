@@ -16,7 +16,7 @@ router.use(authenticateToken);
 // Post CRUD operations
 router.post('/', validatePostCreation, postController.createPost);
 router.get('/', validatePagination, postController.getAllPosts);
-router.get('/:id', validateId, postController.getPostById);
+ router.get('/:id', validateId, postController.getPostById);
 router.put('/:id', validateId, validatePostUpdate, postController.updatePost);
 router.delete('/:id', validateId, postController.deletePost);
 

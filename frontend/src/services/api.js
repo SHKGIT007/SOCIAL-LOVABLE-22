@@ -1,5 +1,3 @@
-
-
 import { API_CONFIG, buildApiUrl, addQueryParams } from '../utils/config';
 import { getAuthToken, logout } from '../utils/auth';
 

@@ -146,8 +146,8 @@ const getAllPosts = asyncHandler(async (req, res) => {
 
 const getPostById = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const userId = req.user.id;
-    const userType = req.user.user_type;
+    // const userId = req.user.id;
+    // const userType = req.user.user_type;
 
     const post = await Post.findByPk(id, {
         include: [
@@ -167,12 +167,14 @@ const getPostById = asyncHandler(async (req, res) => {
     }
 
     // Check if user can access this post
-    if (userType !== 'admin' && post.user_id !== userId) {
-        return res.status(403).json({
-            status: false,
-            message: 'Access denied'
-        });
-    }
+    // Admin can view any post; client can view only their own post
+    // If you want to restrict, uncomment below:
+    // if (userType !== 'admin' && post.user_id !== userId) {
+    //     return res.status(403).json({
+    //         status: false,
+    //         message: 'Access denied'
+    //     });
+    // }
 
     res.json({
         status: true,

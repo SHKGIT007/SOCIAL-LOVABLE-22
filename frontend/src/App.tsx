@@ -45,7 +45,7 @@ const App = () => (
           <Route path="/admin/users/:id" element={<UserDetails />} />
           <Route path="/admin/subscriptions" element={<AdminSubscriptions />} />
           <Route path="/admin/posts" element={<AdminPosts />} />
-          <Route path="/admin/posts/:id" element={<AdminViewPost />} />
+           <Route path="/admin/posts/:id" element={<AdminViewPost />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
