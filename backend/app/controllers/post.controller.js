@@ -15,7 +15,7 @@ const openai = new OpenAI({
 });
 
 const createPost = asyncHandler(async (req, res) => {
-    const { title, content, platforms, status, scheduled_at, category, tags, media_urls, is_ai_generated, ai_prompt } = req.body;
+    const { title, content, platforms, status, scheduled_at, category, tags, media_urls, is_ai_generated, ai_prompt ,image_url } = req.body;
     const userId = req.user.id;
 
     // Check user's subscription limits
@@ -74,7 +74,7 @@ const createPost = asyncHandler(async (req, res) => {
         });
         if (socialAccount && socialAccount.access_token) {
             try {
-                const postData = await facebookPost(socialAccount.access_token, content);
+                const postData = await facebookPost(socialAccount.access_token, content,image_url);
                 logger.info('Facebook post published', { userId, postId: post.id });
                 return res.json({ success: true, message: 'Post published to Facebook', fb: postData });
             } catch (err) {
@@ -287,8 +287,7 @@ const deletePost = asyncHandler(async (req, res) => {
 const generateAIPost = asyncHandler(async (req, res) => {
     const { topic, wordCount, language, style, tone, audience, purpose ,imagePrompt } = req.body;
     const userId = req.user.id;
-     console.log(" req.body",req.body)
-    return
+    
     //let ss = await example1()
     const subscription = await Subscription.findOne({
         where: { user_id: userId, status: 'active' },
@@ -306,48 +305,28 @@ const generateAIPost = asyncHandler(async (req, res) => {
     const aiPrompt = `Generate a ${style.toLowerCase()} ${tone.toLowerCase()} post about ${topic} for ${audience} audience with ${purpose} purpose in ${language}. Word count: ${wordCount}`;
 
     let generatedContent = '';
+    let imageUrl = '';
 
-   // generatedContent =  await generateImagePollinations(imagePrompt);
-   generatedContent = await generateImagePollinations("Dog");
+    if (imagePrompt !== '') {
+        const imageObj = await generateImagePollinations(imagePrompt);
+        imageUrl = imageObj.url || '';
+    }
+    generatedContent = await generateAIContent(aiPrompt);
 
-  //  generatedContent = await  generateAIContent(aiPrompt)
-    
-  // try {
-    //     const openaiApiKey = process.env.OPENAI_API_KEY;
-    //     if (!openaiApiKey) throw new Error('OpenAI API key not configured');
-    //     const response = await axios.post(
-    //         'https://api.openai.com/v1/chat/completions',
-    //         {
-    //             model: 'gpt-3.5-turbo',
-    //             messages: [
-    //                 { role: 'system', content: 'You are a helpful social media post generator.' },
-    //                 { role: 'user', content: aiPrompt }
-    //             ],
-    //             max_tokens: 512,
-    //             temperature: 0.7
-    //         },
-    //         {
-    //             headers: {
-    //                 'Authorization': `Bearer ${openaiApiKey}`,
-    //                 'Content-Type': 'application/json'
-    //             }
-    //         }
-    //     );
-    //     generatedContent = response.data.choices[0].message.content;
-    // } catch (err) {
-    //     logger.error('AI post generation error', { error: err.message });
-    //     return res.status(500).json({ status: false, message: 'AI post generation failed', error: err.message });
+    // If imageUrl exists, prepend <img> tag to generatedContent
+    // if (imageUrl) {
+    //     generatedContent = `<img src="${imageUrl}" alt="AI generated image" style="max-width:100%;height:auto;display:block;margin-bottom:1rem;" />\n` + generatedContent;
     // }
 
     logger.info('AI post generated', { userId, topic });
-
     res.json({
         status: true,
         message: 'AI post generated successfully',
         data: {
             content: generatedContent,
             title: topic,
-            ai_prompt: aiPrompt
+            ai_prompt: aiPrompt,
+            imageUrl: imageUrl
         }
     });
 });

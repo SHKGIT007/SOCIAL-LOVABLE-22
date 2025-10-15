@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Sparkles } from "lucide-react";
 import { apiService } from "@/services/api";
 import { isAuthenticated, logout } from "@/utils/auth";
+import { marked } from "marked";
 
 const NewPost = () => {
   const navigate = useNavigate();
@@ -23,6 +24,8 @@ const NewPost = () => {
   // Manual post fields
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [htmlContent, setHtmlContent] = useState("");
+  const [imageContent, setImageContent] = useState("");
   const [platforms, setPlatforms] = useState<string[]>([]);
   const [status, setStatus] = useState("draft");
   const [scheduledAt, setScheduledAt] = useState("");
@@ -36,6 +39,7 @@ const NewPost = () => {
   const [audience, setAudience] = useState("Adults");
   const [purpose, setPurpose] = useState("Marketing");
   const [connectedAccounts, setConnectedAccounts] = useState([]);
+  const [imagePrompt, setImagePrompt] = useState("");
 
   useEffect(() => {
     const fetchAccounts = async () => {
@@ -77,10 +81,12 @@ const NewPost = () => {
         tone,
         audience,
         purpose,
+        imagePrompt
       });
 
       if (response.status) {
         setContent(response.data.content);
+        setImageContent(response.data.imageUrl);
         setTitle(response.data.title);
         toast({
           title: "Success",
@@ -129,6 +135,7 @@ const NewPost = () => {
         scheduled_at: scheduledAt || null,
         is_ai_generated: isGenerating || topic !== "",
         ai_prompt: topic || null,
+        image_url: imageContent || null,
       });
 
       if (response.status) {
@@ -269,6 +276,16 @@ const NewPost = () => {
                   </div>
                 </div>
 
+                <div className="space-y-2">
+                  <Label htmlFor="imagePrompt">Image Prompt (Optional)</Label>
+                  <Input
+                    id="imagePrompt"
+                    value={imagePrompt}
+                    onChange={(e) => setImagePrompt(e.target.value)}
+                    placeholder="Enter image prompt"
+                  />
+                </div>
+
                 <Button
                   type="button"
                   onClick={handleGenerateAI}
@@ -283,12 +300,21 @@ const NewPost = () => {
                 {content && (
                   <div className="space-y-4 border-t pt-4">
                     <div className="space-y-2">
-                      <Label htmlFor="generated-content">Generated Content</Label>
+                      <Label htmlFor="generated-content">Generated Content Preview</Label>
+                      {/* HTML Preview */}
+                      <div
+                        id="generated-content-preview"
+                        style={{ background: '#f9f9f9', padding: '1rem', borderRadius: '8px', border: '1px solid #eee', marginBottom: '1rem' }}
+                        dangerouslySetInnerHTML={{ __html: imageContent ? `<img src="${imageContent}" alt="Generated" style="max-width: 100%; height: auto; margin-bottom: 1rem;" />` : '' }}
+                      />
+                      {/* Editable textarea if user wants to change */}
+                      <Label htmlFor="generated-content-edit">Edit Content</Label>
                       <Textarea
-                        id="generated-content"
+                        id="generated-content-edit"
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
                         rows={8}
+                        style={{ marginTop: '1rem' }}
                       />
                     </div>
                   </div>
