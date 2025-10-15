@@ -7,6 +7,7 @@ const axios = require('axios');
 const {facebookPost} = require('../../redirectAuth/facebook/facebookPost');
 const OpenAI = require("openai");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+require('dotenv').config();
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY // .env file mein apni API key dalein
@@ -286,10 +287,9 @@ const generateAIPost = asyncHandler(async (req, res) => {
     const { topic, wordCount, language, style, tone, audience, purpose } = req.body;
     const userId = req.user.id;
  
-     main();
-     return
-    //  await generateContent(aiPrompt);
-    // Check AI post limit
+    //let ss = await example1()
+    
+   
     const subscription = await Subscription.findOne({
         where: { user_id: userId, status: 'active' },
         include: [{ model: Plan, as: 'Plan' }]
@@ -306,32 +306,33 @@ const generateAIPost = asyncHandler(async (req, res) => {
     const aiPrompt = `Generate a ${style.toLowerCase()} ${tone.toLowerCase()} post about ${topic} for ${audience} audience with ${purpose} purpose in ${language}. Word count: ${wordCount}`;
 
     let generatedContent = '';
-    try {
-        const openaiApiKey = process.env.OPENAI_API_KEY;
-        if (!openaiApiKey) throw new Error('OpenAI API key not configured');
-        const response = await axios.post(
-            'https://api.openai.com/v1/chat/completions',
-            {
-                model: 'gpt-3.5-turbo',
-                messages: [
-                    { role: 'system', content: 'You are a helpful social media post generator.' },
-                    { role: 'user', content: aiPrompt }
-                ],
-                max_tokens: 512,
-                temperature: 0.7
-            },
-            {
-                headers: {
-                    'Authorization': `Bearer ${openaiApiKey}`,
-                    'Content-Type': 'application/json'
-                }
-            }
-        );
-        generatedContent = response.data.choices[0].message.content;
-    } catch (err) {
-        logger.error('AI post generation error', { error: err.message });
-        return res.status(500).json({ status: false, message: 'AI post generation failed', error: err.message });
-    }
+    generatedContent = await  generateAIContent(aiPrompt)
+    // try {
+    //     const openaiApiKey = process.env.OPENAI_API_KEY;
+    //     if (!openaiApiKey) throw new Error('OpenAI API key not configured');
+    //     const response = await axios.post(
+    //         'https://api.openai.com/v1/chat/completions',
+    //         {
+    //             model: 'gpt-3.5-turbo',
+    //             messages: [
+    //                 { role: 'system', content: 'You are a helpful social media post generator.' },
+    //                 { role: 'user', content: aiPrompt }
+    //             ],
+    //             max_tokens: 512,
+    //             temperature: 0.7
+    //         },
+    //         {
+    //             headers: {
+    //                 'Authorization': `Bearer ${openaiApiKey}`,
+    //                 'Content-Type': 'application/json'
+    //             }
+    //         }
+    //     );
+    //     generatedContent = response.data.choices[0].message.content;
+    // } catch (err) {
+    //     logger.error('AI post generation error', { error: err.message });
+    //     return res.status(500).json({ status: false, message: 'AI post generation failed', error: err.message });
+    // }
 
     logger.info('AI post generated', { userId, topic });
 
@@ -346,44 +347,125 @@ const generateAIPost = asyncHandler(async (req, res) => {
     });
 });
 
-async function generateContent(prompt) {
+
+
+
+
+
+////////////////-------genrrate Ai code  Start------///////////
+
+// Groq API Configuration
+const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
+
+// Main function - AI se content generate karne ke liye
+async function generateAIContent(prompt, options = {}) {
   try {
-    console.log('Request bhej rahe hain...');
-    
-    const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo", // Ya "gpt-4" use kar sakte hain
-      messages: [
-        {
-          role: "user",
-          content: prompt
+    const {
+      model = 'llama-3.3-70b-versatile', // Updated default model (currently supported)
+      temperature = 0.7,
+      maxTokens = 1024
+    } = options;
+
+    console.log('🚀 Groq AI se request bhej rahe hain...\n');
+
+    const response = await axios.post(
+      GROQ_API_URL,
+      {
+        model: model,
+        messages: [
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: temperature,
+        max_tokens: maxTokens,
+        top_p: 1,
+        stream: false
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${GROQ_API_KEY}`,
+          'Content-Type': 'application/json'
         }
-      ],
-      temperature: 0.7, // Creativity level (0-1)
-      max_tokens: 1000 // Maximum response length
+      }
+    );
+
+    const content = response.data.choices[0].message.content;
+    const usage = response.data.usage;
+
+    console.log('✅ Response mil gaya!\n');
+    console.log('📊 Token Usage:', {
+      prompt: usage.prompt_tokens,
+      completion: usage.completion_tokens,
+      total: usage.total_tokens
     });
 
-    // AI ka response return karein
-    const content = response.choices[0].message.content;
-    console.log('\nAI Response:');
-    console.log(content);
-    
     return content;
 
   } catch (error) {
-    console.error('Error aaya:', error.message);
+    if (error.response) {
+      console.error('❌ API Error:', error.response.data);
+    } else {
+      console.error('❌ Error:', error.message);
+    }
+    throw error;
+  }
+}
+// Available Models (update to latest Groq supported models)
+const GROQ_MODELS = {
+    MIXTRAL: 'mixtral-8x7b-32768',             // Large context, supported
+    GEMMA_7B: 'gemma-7b-it',                   // Google's model (update name)
+    LLAMA_8B: 'llama-3-8b-8192',               // Fastest (if available)
+    LLAMA_70B: 'llama-3-70b-8192'              // If available for your account
+};
+// Chat history ke saath conversation
+async function chatWithAI(messages) {
+  try {
+    const response = await axios.post(
+      GROQ_API_URL,
+      {
+        model: GROQ_MODELS.LLAMA_70B,
+        messages: messages, // Array of {role, content}
+        temperature: 0.7,
+        max_tokens: 1024
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${GROQ_API_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    console.log('✅ Chat response mil gaya!\n');
+    console.log('Response:', response.data);
+
+    return response.data.choices[0].message.content;
+  } catch (error) {
+    console.error('Chat Error:', error.response?.data || error.message);
     throw error;
   }
 }
 
-// Example usage
-async function main() {
-  const prompt = "JavaScript ke baare mein 3 interesting facts batao";
+// Example 1: Simple prompt
+async function example1() {
+  console.log('=== Example 1: Simple Prompt ===\n');
   
-  const result = await generateContent(prompt);
+  const prompt = "JavaScript ke baare mein 5 interesting facts batao";
+  const response = await generateAIContent(prompt);
   
-  // Aap result ko kahi bhi use kar sakte hain
-  console.log('\n--- Response complete ---');
+  console.log('Response:\n', response);
+  console.log('\n' + '='.repeat(50) + '\n');
 }
+
+
+
+////////////////-------genrrate Ai code End------///////////
+
+
+
 
 
 
