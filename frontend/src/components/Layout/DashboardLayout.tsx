@@ -1,11 +1,11 @@
 import { ReactNode, useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom"; // Added useLocation
 import { getCurrentUser, getUserRole, isAuthenticated, logout, onAuthStateChange } from "@/utils/auth";
-import ApiService from "@/services/api";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { LayoutDashboard, FileText, Users, Settings, LogOut, Menu, X } from "lucide-react";
-// ...existing code...
+import { LayoutDashboard, FileText, Users, Settings, LogOut, Menu, X, Zap } from "lucide-react"; // Added Zap
+
+// --- No data or logic removed ---
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -14,9 +14,14 @@ interface DashboardLayoutProps {
 
 const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
   const navigate = useNavigate();
+  const location = useLocation(); // Used to determine active link
   const { toast } = useToast();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [user, setUser] = useState(getCurrentUser());
+  
+  // Define the primary gradient class for theme consistency
+  const primaryGradient = "from-indigo-600 to-cyan-500";
+  const primaryGradientClass = `bg-gradient-to-r ${primaryGradient}`;
 
   useEffect(() => {
     if (!isAuthenticated()) {
@@ -56,50 +61,74 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
       ];
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Mobile menu button */}
+    // Base background is light gray for contrast with the white cards/layout
+    <div className="min-h-screen bg-gray-50">
+      
+      {/* Mobile menu button (Themed) */}
       <div className="lg:hidden fixed top-4 left-4 z-50">
         <Button
-          variant="outline"
+          // Use a strong color for visibility
+          className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/50"
           size="icon"
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
         >
-          {isSidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+          {isSidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </Button>
       </div>
 
-      {/* Sidebar */}
+      {/* Sidebar (Themed) */}
       <aside
-        className={`fixed left-0 top-0 z-40 h-screen w-64 transform bg-card border-r transition-transform duration-200 ease-in-out ${
+        className={`fixed left-0 top-0 z-40 h-screen w-64 transform bg-white border-r border-gray-200 transition-transform duration-200 ease-in-out shadow-xl ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         } lg:translate-x-0`}
       >
         <div className="flex h-full flex-col">
-          <div className="flex h-16 items-center border-b px-6">
-            <h1 className="text-xl font-bold">SocialPost AI</h1>
+          {/* Sidebar Header (Branding) */}
+          <div className="flex h-16 items-center border-b border-gray-100 px-6">
+            <Zap className="h-6 w-6 mr-2 text-indigo-600" />
+            <h1 className="text-xl font-extrabold">
+              {/* Apply gradient to the brand text */}
+              <span className={`text-transparent bg-clip-text ${primaryGradientClass}`}>SocialPost AI</span>
+            </h1>
           </div>
+          
+          {/* Navigation Menu */}
           <nav className="flex-1 space-y-1 px-3 py-4">
-            {menuItems.map((item) => (
-              <Button
-                key={item.path}
-                variant="ghost"
-                className="w-full justify-start"
-                onClick={() => {
-                  navigate(item.path);
-                  setIsSidebarOpen(false);
-                }}
-              >
-                <item.icon className="mr-2 h-4 w-4" />
-                {item.label}
-              </Button>
-            ))}
+            {menuItems.map((item) => {
+              const isActive = location.pathname === item.path;
+              return (
+                <Button
+                  key={item.path}
+                  // Active state uses solid color, hover uses light background
+                  variant={isActive ? "default" : "ghost"}
+                  className={`w-full justify-start font-semibold transition-all duration-200 ${
+                    isActive
+                      ? "bg-indigo-600 text-white hover:bg-indigo-700 shadow-md" // Active style
+                      : "text-gray-700 hover:bg-indigo-50 hover:text-indigo-600" // Inactive style
+                  }`}
+                  onClick={() => {
+                    navigate(item.path);
+                    setIsSidebarOpen(false);
+                  }}
+                >
+                  <item.icon className="mr-3 h-5 w-5" />
+                  {item.label}
+                </Button>
+              );
+            })}
           </nav>
-          <div className="border-t p-4">
-            <div className="mb-4 rounded-lg bg-muted p-3">
-              <p className="text-sm font-medium">{user?.email}</p>
-              <p className="text-xs text-muted-foreground capitalize">{getUserRole()} Account</p>
+          
+          {/* User Info and Sign Out */}
+          <div className="border-t border-gray-100 p-4">
+            <div className="mb-4 rounded-lg bg-indigo-50 p-3 shadow-sm">
+              <p className="text-sm font-semibold text-gray-800">{user?.email}</p>
+              <p className="text-xs text-indigo-600 capitalize">{getUserRole()} Account</p>
             </div>
-            <Button variant="outline" className="w-full" onClick={handleSignOut}>
+            <Button 
+              variant="outline" 
+              className="w-full border-2 border-indigo-300 text-indigo-600 hover:bg-indigo-50 transition-colors" 
+              onClick={handleSignOut}
+            >
               <LogOut className="mr-2 h-4 w-4" />
               Sign Out
             </Button>
@@ -109,13 +138,14 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
 
       {/* Main content */}
       <main className="lg:pl-64">
+        {/* The content area will naturally pick up the dashboard's light/white theme */}
         <div className="p-4 lg:p-8 pt-16 lg:pt-8">{children}</div>
       </main>
 
       {/* Overlay for mobile */}
       {isSidebarOpen && (
         <div
-          className="fixed inset-0 z-30 bg-background/80 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-30 bg-background/60 backdrop-blur-sm lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
