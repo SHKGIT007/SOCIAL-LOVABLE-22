@@ -52,3 +52,5 @@
 {"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-14T12:35:47.275Z","topic":"ss","userId":2}
 {"error":"Request failed with status code 401","level":"error","message":"AI post generation error","service":"social-lovable-api","timestamp":"2025-10-14T12:55:41.828Z"}
 {"error":"Request failed with status code 401","level":"error","message":"AI post generation error","service":"social-lovable-api","timestamp":"2025-10-14T12:59:03.268Z"}
+{"level":"info","message":"Plan updated","planId":"1","service":"social-lovable-api","timestamp":"2025-10-15T05:45:46.788Z","updatedBy":1}
+{"level":"info","message":"Plan updated","planId":"1","service":"social-lovable-api","timestamp":"2025-10-15T05:45:53.643Z","updatedBy":1}

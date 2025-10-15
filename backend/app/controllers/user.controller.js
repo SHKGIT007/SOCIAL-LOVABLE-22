@@ -119,23 +119,22 @@ const getAllUsers = asyncHandler(async (req, res) => {
 
 const getUserById = asyncHandler(async (req, res) => {
     const { id } = req.params;
-
     const user = await User.findByPk(id, {
+        attributes: ['id', 'user_name', 'email', 'user_type', 'created_at'],
         include: [
-            { model: Role, as: 'Role' },
-            { 
-                model: Subscription, 
+            {
+                model: Subscription,
                 as: 'Subscriptions',
-                include: [{ model: Plan, as: 'Plan' }]
-            },
-            { 
-                model: Post, 
-                as: 'Posts',
-                limit: 10,
-                order: [['created_at', 'DESC']]
+                attributes: ['status'],
+                include: [
+                    {
+                        model: Plan,
+                        as: 'Plan',
+                        attributes: ['name']
+                    }
+                ]
             }
-        ],
-        attributes: { exclude: ['password'] }
+        ]
     });
 
     if (!user) {

@@ -14,6 +14,7 @@ import ClientPlans from "./pages/ClientPlans";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminPlans from "./pages/admin/Plans";
 import AdminUsers from "./pages/admin/Users";
+import UserDetails from "@/pages/admin/UserDetails";
 import AdminSubscriptions from "./pages/admin/Subscriptions";
 import AdminPosts from "./pages/admin/Posts";
 import AdminViewPost from "./pages/admin/ViewPost";
@@ -41,6 +42,7 @@ const App = () => (
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/plans" element={<AdminPlans />} />
           <Route path="/admin/users" element={<AdminUsers />} />
+          <Route path="/admin/users/:id" element={<UserDetails />} />
           <Route path="/admin/subscriptions" element={<AdminSubscriptions />} />
           <Route path="/admin/posts" element={<AdminPosts />} />
           <Route path="/admin/posts/:id" element={<AdminViewPost />} />
