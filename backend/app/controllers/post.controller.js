@@ -8,6 +8,7 @@ const {facebookPost} = require('../../redirectAuth/facebook/facebookPost');
 const OpenAI = require("openai");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 require('dotenv').config();
+const fs = require('fs');
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY // .env file mein apni API key dalein
@@ -303,8 +304,13 @@ const generateAIPost = asyncHandler(async (req, res) => {
     const aiPrompt = `Generate a ${style.toLowerCase()} ${tone.toLowerCase()} post about ${topic} for ${audience} audience with ${purpose} purpose in ${language}. Word count: ${wordCount}`;
 
     let generatedContent = '';
-    generatedContent = await  generateAIContent(aiPrompt)
-    // try {
+
+   // generatedContent =  await generateImagePollinations(aiPrompt);
+   generatedContent = await generateImagePollinations("Dog");
+
+  //  generatedContent = await  generateAIContent(aiPrompt)
+    
+  // try {
     //     const openaiApiKey = process.env.OPENAI_API_KEY;
     //     if (!openaiApiKey) throw new Error('OpenAI API key not configured');
     //     const response = await axios.post(
@@ -455,6 +461,27 @@ async function example1() {
   
   console.log('Response:\n', response);
   console.log('\n' + '='.repeat(50) + '\n');
+}
+
+async function generateImagePollinations(prompt) {
+  try {
+    const encodedPrompt = encodeURIComponent(prompt);
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true`;
+    
+    console.log('🎨 Image generating...');
+    console.log('Image URL:', imageUrl);
+    
+    // Download image
+    const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+    const filename = `generated_${Date.now()}.png`;
+    fs.writeFileSync(filename, response.data);
+    
+    console.log(`✅ Image saved: ${filename}`);
+    return { url: imageUrl, filename };
+  } catch (error) {
+    console.error('Pollinations Error:', error.message);
+    throw error;
+  }
 }
 
 
