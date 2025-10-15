@@ -121,3 +121,14 @@
 {"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-15T12:55:33.654Z","topic":"sc","userId":2}
 {"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-15T12:55:52.745Z","topic":"sc","userId":2}
 {"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-15T12:56:38.856Z","topic":"dcs","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-15T13:00:59.331Z","topic":"dgdg","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-15T13:01:49.199Z","topic":"scs","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-15T13:02:09.961Z","topic":"scs","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-15T13:02:51.434Z","topic":"dgdg","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-15T13:02:58.167Z","topic":"scs","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-15T13:03:47.061Z","topic":"scs","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-15T13:04:44.487Z","topic":"scs","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-15T13:05:02.182Z","topic":"scs","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-15T13:05:40.702Z","topic":"shoes","userId":2}
+{"level":"info","message":"Post created","postId":13,"service":"social-lovable-api","timestamp":"2025-10-15T13:05:56.414Z","userId":2}
+{"level":"info","message":"Scheduled post published to Facebook","postId":13,"service":"social-lovable-api","timestamp":"2025-10-15T13:06:03.615Z","userId":2}
