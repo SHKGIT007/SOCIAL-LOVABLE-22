@@ -69,7 +69,16 @@ const Post = sequelize.define('Post', {
     analytics: {
         type: DataTypes.JSON,
         allowNull: true,
-    }
+    },
+    image_prompt: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+    },
+    image_url: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+    },
+
 }, {
     tableName: 'posts',
     timestamps: true,
