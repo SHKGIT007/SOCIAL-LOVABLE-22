@@ -503,7 +503,7 @@ async function generateImagePollinations(prompt, retries = 3) {
       }
       
       const filename = `generated_${Date.now()}.png`;
-      fs.writeFileSync(filename, response.data);
+     // fs.writeFileSync(filename, response.data);
       
       const sizeKB = (response.data.length / 1024).toFixed(2);
       console.log(`✅ Image saved: ${filename} (${sizeKB} KB)`);
