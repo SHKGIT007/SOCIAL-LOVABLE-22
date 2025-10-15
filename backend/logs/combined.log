@@ -58,3 +58,4 @@
 {"level":"info","message":"Plan updated","planId":"1","service":"social-lovable-api","timestamp":"2025-10-15T06:26:46.616Z","updatedBy":1}
 {"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-15T06:29:48.206Z","userId":1}
 {"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-15T06:34:40.149Z","userId":2}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-15T06:45:09.990Z","userId":2}
