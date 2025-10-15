@@ -79,3 +79,5 @@
 {"level":"info","message":"Subscription created","planId":2,"service":"social-lovable-api","subscriptionId":2,"timestamp":"2025-10-15T07:19:00.506Z","userId":2}
 {"level":"info","message":"Subscription cancelled","service":"social-lovable-api","subscriptionId":"2","timestamp":"2025-10-15T07:19:26.352Z","userId":2}
 {"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-15T09:27:15.016Z","topic":"sneaker shoes","userId":2}
+{"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-15T09:42:36.750Z","userId":1}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-15T09:44:08.669Z","userId":2}
