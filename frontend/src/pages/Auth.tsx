@@ -20,23 +20,34 @@ const Auth = () => {
   const [userFname, setUserFname] = useState("");
   const [userLname, setUserLname] = useState("");
   const [userPhone, setUserPhone] = useState("");
+ 
 
   useEffect(() => {
     // Check if user is already authenticated
     if (isAuthenticated()) {
-      navigate("/dashboard");
+      const authData = JSON.parse(localStorage.getItem("authData") || "null");
+      if (authData?.user?.role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/dashboard");
+      }
       return;
     }
 
     // Listen for auth state changes
     const unsubscribe = onAuthStateChange((authData) => {
       if (authData) {
-        navigate("/dashboard");
+        if (authData.user?.role === "admin") {
+          navigate("/admin");
+        } else {
+          navigate("/dashboard");
+        }
       }
     });
 
     return unsubscribe;
   }, [navigate]);
+ 
 
   const handleSignIn = async (e: React.FormEvent) => {
    
@@ -57,10 +68,12 @@ const Auth = () => {
           title: "Success",
           description: "Signed in successfully!",
         });
-        // Role-based redirect
-        if (response.data.user && response.data.user.role === "admin") {
+        // Fallback navigation if onAuthStateChange does not trigger
+        if (response.data.user?.role === "admin") {
+          window.location.reload();
           navigate("/admin");
         } else {
+          window.location.reload();
           navigate("/dashboard");
         }
       }
@@ -96,8 +109,8 @@ const Auth = () => {
           title: "Success",
           description: "Account created successfully!",
         });
-        // Role-based redirect
-        if (response.data.user && response.data.user.role === "admin") {
+        // Fallback navigation if onAuthStateChange does not trigger
+        if (response.data.user?.role === "admin") {
           navigate("/admin");
         } else {
           navigate("/dashboard");
@@ -113,6 +126,8 @@ const Auth = () => {
       setIsLoading(false);
     }
   };
+
+  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-secondary/10 p-4">

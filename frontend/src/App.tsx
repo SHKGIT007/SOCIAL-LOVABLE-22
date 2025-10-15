@@ -29,34 +29,38 @@ function getUserRole() {
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/dashboard" element={getUserRole() === "client" ? <Dashboard /> : <Navigate to="/admin" />} />
-          <Route path="/social-accounts" element={getUserRole() === "client" ? <SocialAccounts /> : <Navigate to="/admin" />} />
-          <Route path="/posts" element={getUserRole() === "client" ? <Posts /> : <Navigate to="/admin" />} />
-          <Route path="/posts/new" element={getUserRole() === "client" ? <NewPost /> : <Navigate to="/admin" />} />
-          <Route path="/posts/:id" element={getUserRole() === "client" ? <ViewPost /> : <Navigate to="/admin" />} />
-          <Route path="/posts/edit/:id" element={getUserRole() === "client" ? <EditPost /> : <Navigate to="/admin" />} />
-          <Route path="/plans" element={getUserRole() === "client" ? <ClientPlans /> : <Navigate to="/admin" />} />
-          <Route path="/admin" element={getUserRole() === "admin" ? <AdminDashboard /> : <Navigate to="/dashboard" />} />
-          <Route path="/admin/plans" element={getUserRole() === "admin" ? <AdminPlans /> : <Navigate to="/dashboard" />} />
-          <Route path="/admin/users" element={getUserRole() === "admin" ? <AdminUsers /> : <Navigate to="/dashboard" />} />
-          <Route path="/admin/users/:id" element={getUserRole() === "admin" ? <UserDetails /> : <Navigate to="/dashboard" />} />
-          <Route path="/admin/subscriptions" element={getUserRole() === "admin" ? <AdminSubscriptions /> : <Navigate to="/dashboard" />} />
-          <Route path="/admin/posts" element={getUserRole() === "admin" ? <AdminPosts /> : <Navigate to="/dashboard" />} />
-          <Route path="/admin/posts/:id" element={getUserRole() === "admin" ? <AdminViewPost /> : <Navigate to="/dashboard" />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+
+function App() {
+  const userRole = getUserRole();
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/dashboard" element={userRole === "client" ? <Dashboard /> : <Navigate to="/admin" />} />
+            <Route path="/social-accounts" element={userRole === "client" ? <SocialAccounts /> : <Navigate to="/admin" />} />
+            <Route path="/posts" element={userRole === "client" ? <Posts /> : <Navigate to="/admin" />} />
+            <Route path="/posts/new" element={userRole === "client" ? <NewPost /> : <Navigate to="/admin" />} />
+            <Route path="/posts/:id" element={userRole === "client" ? <ViewPost /> : <Navigate to="/admin" />} />
+            <Route path="/posts/edit/:id" element={userRole === "client" ? <EditPost /> : <Navigate to="/admin" />} />
+            <Route path="/plans" element={userRole === "client" ? <ClientPlans /> : <Navigate to="/admin" />} />
+            <Route path="/admin" element={userRole === "admin" ? <AdminDashboard /> : <Navigate to="/dashboard" />} />
+            <Route path="/admin/plans" element={userRole === "admin" ? <AdminPlans /> : <Navigate to="/dashboard" />} />
+            <Route path="/admin/users" element={userRole === "admin" ? <AdminUsers /> : <Navigate to="/dashboard" />} />
+            <Route path="/admin/users/:id" element={userRole === "admin" ? <UserDetails /> : <Navigate to="/dashboard" />} />
+            <Route path="/admin/subscriptions" element={userRole === "admin" ? <AdminSubscriptions /> : <Navigate to="/dashboard" />} />
+            <Route path="/admin/posts" element={userRole === "admin" ? <AdminPosts /> : <Navigate to="/dashboard" />} />
+            <Route path="/admin/posts/:id" element={userRole === "admin" ? <AdminViewPost /> : <Navigate to="/dashboard" />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+}
 
 export default App;
