@@ -54,3 +54,7 @@
 {"error":"Request failed with status code 401","level":"error","message":"AI post generation error","service":"social-lovable-api","timestamp":"2025-10-14T12:59:03.268Z"}
 {"level":"info","message":"Plan updated","planId":"1","service":"social-lovable-api","timestamp":"2025-10-15T05:45:46.788Z","updatedBy":1}
 {"level":"info","message":"Plan updated","planId":"1","service":"social-lovable-api","timestamp":"2025-10-15T05:45:53.643Z","updatedBy":1}
+{"level":"info","message":"Plan updated","planId":"1","service":"social-lovable-api","timestamp":"2025-10-15T06:26:37.207Z","updatedBy":1}
+{"level":"info","message":"Plan updated","planId":"1","service":"social-lovable-api","timestamp":"2025-10-15T06:26:46.616Z","updatedBy":1}
+{"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-15T06:29:48.206Z","userId":1}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-15T06:34:40.149Z","userId":2}

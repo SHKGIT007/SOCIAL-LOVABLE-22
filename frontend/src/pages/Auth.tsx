@@ -53,13 +53,16 @@ const Auth = () => {
       if (response.status) {
         // Store auth data in localStorage
         setAuthData(response.data);
-        
         toast({
           title: "Success",
           description: "Signed in successfully!",
         });
-        
-        navigate("/dashboard");
+        // Role-based redirect
+        if (response.data.user && response.data.user.role === "admin") {
+          navigate("/admin");
+        } else {
+          navigate("/dashboard");
+        }
       }
     } catch (error: any) {
       toast({
@@ -89,13 +92,16 @@ const Auth = () => {
       if (response.status) {
         // Store auth data in localStorage
         setAuthData(response.data);
-        
         toast({
           title: "Success",
           description: "Account created successfully!",
         });
-        
-        navigate("/dashboard");
+        // Role-based redirect
+        if (response.data.user && response.data.user.role === "admin") {
+          navigate("/admin");
+        } else {
+          navigate("/dashboard");
+        }
       }
     } catch (error: any) {
       toast({
