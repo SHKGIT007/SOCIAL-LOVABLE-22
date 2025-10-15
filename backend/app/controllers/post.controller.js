@@ -285,8 +285,10 @@ const deletePost = asyncHandler(async (req, res) => {
 });
 
 const generateAIPost = asyncHandler(async (req, res) => {
-    const { topic, wordCount, language, style, tone, audience, purpose } = req.body;
+    const { topic, wordCount, language, style, tone, audience, purpose ,imagePrompt } = req.body;
     const userId = req.user.id;
+     console.log(" req.body",req.body)
+    return
     //let ss = await example1()
     const subscription = await Subscription.findOne({
         where: { user_id: userId, status: 'active' },
@@ -305,7 +307,7 @@ const generateAIPost = asyncHandler(async (req, res) => {
 
     let generatedContent = '';
 
-   // generatedContent =  await generateImagePollinations(aiPrompt);
+   // generatedContent =  await generateImagePollinations(imagePrompt);
    generatedContent = await generateImagePollinations("Dog");
 
   //  generatedContent = await  generateAIContent(aiPrompt)
