@@ -57,6 +57,7 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
         { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
         { icon: FileText, label: "Posts", path: "/posts" },
         { icon: Settings, label: "Plans", path: "/plans" },
+        { icon: Settings, label: "Social Accounts", path: "/social-accounts" },
       ];
 
   return (

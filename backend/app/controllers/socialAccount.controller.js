@@ -1,10 +1,12 @@
+
 const { SocialAccount, User } = require('../models');
 const { Op } = require('sequelize');
 const { asyncHandler } = require('../middleware/error.middleware');
 const logger = require('../config/logger');
+const axios = require('axios');
 
 const createSocialAccount = asyncHandler(async (req, res) => {
-    const { platform, account_id, account_name, access_token, refresh_token, token_expires_at, metadata } = req.body;
+    const { platform, app_id, app_secret } = req.body;
     const userId = req.user.id;
 
     // Check if user already has this platform connected
@@ -22,12 +24,8 @@ const createSocialAccount = asyncHandler(async (req, res) => {
     const socialAccount = await SocialAccount.create({
         user_id: userId,
         platform,
-        account_id,
-        account_name,
-        access_token,
-        refresh_token,
-        token_expires_at,
-        metadata,
+        app_id,
+        app_secret,
         is_active: true
     });
 
@@ -35,7 +33,7 @@ const createSocialAccount = asyncHandler(async (req, res) => {
 
     res.status(201).json({
         status: true,
-        message: `${platform} account connected successfully`,
+        message: `${platform} app credentials saved successfully`,
         data: { socialAccount }
     });
 });
@@ -99,7 +97,7 @@ const getUserSocialAccounts = asyncHandler(async (req, res) => {
         order: [['platform', 'ASC']]
     });
 
-    res.json({
+     res.json({
         status: true,
         data: { socialAccounts }
     });
@@ -190,6 +188,30 @@ const updateSocialAccount = asyncHandler(async (req, res) => {
         message: 'Social account updated successfully',
         data: { socialAccount: updatedSocialAccount }
     });
+});
+
+// Update SocialAccount app_id/app_secret for logged-in user and platform
+const updateSocialAccountCredentials = asyncHandler(async (req, res) => {
+    const { platform, app_id, app_secret ,is_active ,id } = req.body;
+
+    const userId = req.user.id;
+    
+    if(is_active !== undefined && is_active == 0){
+        await SocialAccount.update({ is_active }, { where: { id: id } });
+        const updated = await SocialAccount.findByPk(id);
+       return res.json({ status: true, message: 'Disconnected', data: { socialAccount: updated } });
+    }
+    
+    
+    
+    const socialAccount = await SocialAccount.findOne({ where: { user_id: userId, platform } });
+    
+    if (!socialAccount) {
+        return res.status(404).json({ status: false, message: 'Social account not found' });
+    }
+    await SocialAccount.update({ app_id, app_secret }, { where: { id: socialAccount.id } });
+    const updated = await SocialAccount.findByPk(socialAccount.id);
+    res.json({ status: true, message: 'Credentials updated', data: { socialAccount: updated } });
 });
 
 const deleteSocialAccount = asyncHandler(async (req, res) => {
@@ -291,6 +313,102 @@ const refreshSocialAccountToken = asyncHandler(async (req, res) => {
     });
 });
 
+const facebookOAuthInit = (req, res) => {
+
+
+  const clientId = process.env.FACEBOOK_CLIENT_ID;
+ console.log('Facebook Client ID:', clientId);
+  return
+  const redirectUri = `${process.env.BACKEND_URL}/social-accounts/oauth/facebook/callback`;
+  const scope = 'pages_manage_posts,pages_read_engagement,pages_show_list,public_profile,email';
+  const state = req.user.id;
+  const url = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${scope}&state=${state}&response_type=code`;
+  res.redirect(url);
+};
+
+// Facebook OAuth2 init
+// exports.facebookOAuthInit = (req, res) => {
+
+//     return res.send('Not implemented yet');
+//   const clientId = process.env.FACEBOOK_CLIENT_ID;
+//   const redirectUri = `${process.env.BACKEND_URL}/social-accounts/oauth/facebook/callback`;
+//   const scope = 'pages_manage_posts,pages_read_engagement,pages_show_list,public_profile,email';
+//   const state = req.user.id;
+//   const url = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${scope}&state=${state}&response_type=code`;
+//   res.redirect(url);
+// };
+
+// // Facebook OAuth2 callback
+const facebookOAuthCallback = async (req, res) => {
+    const code = req.query.code;
+    const userId = req.query.state;
+    // Get app_id and app_secret from SocialAccount
+    const socialAccount = await SocialAccount.findOne({ where: { user_id: userId, platform: 'Facebook' } });
+    if (!socialAccount) {
+        return res.status(400).send('Facebook app credentials not found.');
+    }
+    const clientId = socialAccount.app_id;
+    const clientSecret = socialAccount.app_secret;
+    const redirectUri = `${process.env.BACKEND_URL}/social-accounts/oauth/facebook/callback`;
+    // Exchange code for access token
+    const tokenUrl = `https://graph.facebook.com/v18.0/oauth/access_token?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&client_secret=${clientSecret}&code=${code}`;
+    try {
+        const response = await axios.get(tokenUrl);
+        const data = response.data;
+        if (!data.access_token) throw new Error('No access token');
+        // Update SocialAccount with access_token
+        await SocialAccount.update({ access_token: data.access_token }, { where: { id: socialAccount.id } });
+        res.send('Facebook account connected! You can close this window.');
+    } catch (err) {
+        res.status(500).send('Facebook OAuth failed: ' + err.message);
+    }
+};
+
+// // Instagram OAuth2 init
+const instagramOAuthInit = (req, res) => {
+  const clientId = process.env.INSTAGRAM_CLIENT_ID;
+  const redirectUri = `${process.env.BACKEND_URL}/social-accounts/oauth/instagram/callback`;
+  const scope = 'user_profile,user_media';
+  const state = req.user.id;
+  const url = `https://api.instagram.com/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${scope}&state=${state}&response_type=code`;
+  res.redirect(url);
+};
+
+// // Instagram OAuth2 callback
+const instagramOAuthCallback = async (req, res) => {
+    const code = req.query.code;
+    const userId = req.query.state;
+    // Get app_id and app_secret from SocialAccount
+    const socialAccount = await SocialAccount.findOne({ where: { user_id: userId, platform: 'Instagram' } });
+    if (!socialAccount) {
+        return res.status(400).send('Instagram app credentials not found.');
+    }
+    const clientId = socialAccount.app_id;
+    const clientSecret = socialAccount.app_secret;
+    const redirectUri = `${process.env.BACKEND_URL}/social-accounts/oauth/instagram/callback`;
+    // Exchange code for access token
+    const tokenUrl = `https://api.instagram.com/oauth/access_token`;
+    try {
+        const params = new URLSearchParams({
+            client_id: clientId,
+            client_secret: clientSecret,
+            grant_type: 'authorization_code',
+            redirect_uri: redirectUri,
+            code
+        });
+        const response = await axios.post(tokenUrl, params, {
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+        });
+        const data = response.data;
+        if (!data.access_token) throw new Error('No access token');
+        // Update SocialAccount with access_token
+        await SocialAccount.update({ access_token: data.access_token }, { where: { id: socialAccount.id } });
+        res.send('Instagram account connected! You can close this window.');
+    } catch (err) {
+        res.status(500).send('Instagram OAuth failed: ' + err.message);
+    }
+};
+
 module.exports = {
     createSocialAccount,
     getAllSocialAccounts,
@@ -299,5 +417,10 @@ module.exports = {
     updateSocialAccount,
     deleteSocialAccount,
     toggleSocialAccountStatus,
-    refreshSocialAccountToken
+    refreshSocialAccountToken,
+    updateSocialAccountCredentials,
+    facebookOAuthInit,
+    facebookOAuthCallback,
+    instagramOAuthInit,
+    instagramOAuthCallback
 };

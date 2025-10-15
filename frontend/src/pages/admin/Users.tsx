@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import ApiService from "@/services/api";
+import { apiService } from "@/services/api";
 import { isAdmin, isAuthenticated } from "@/utils/auth";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,7 +13,7 @@ import { User, CreditCard } from "lucide-react"; // Added Icons
 interface UserData {
   id: string;
   email: string;
-  full_name: string | null;
+  user_name: string | null;
   created_at: string;
   role: string;
   subscription: {
@@ -41,12 +41,20 @@ const Users = () => {
 
   const fetchUsers = async () => {
     try {
-      // NOTE: Assuming ApiService is correctly configured to use token for auth
-      const api = new ApiService();
-      // Ensure the API call is type-checked if needed, but the original logic is kept
-      // For this example, I'll keep the original call method, ensuring logic is preserved.
-      const data = await api.getAllUsers();
-      setUsers(data || []);
+      const data = await apiService.getAllUsers();
+
+      if(data.status === true){
+       setUsers(data?.data?.users || []);
+      }else{
+        setUsers([]);
+        toast({
+          title: "Error",
+          description: data.message || "Failed to fetch users.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
     } catch (error: any) {
       // Improved error handling to redirect on failed auth check
       if (error.message === 'Authentication failed' || error.status === 401) {
@@ -89,20 +97,7 @@ const Users = () => {
     );
   }
 
-  // Helper function to determine badge variant based on status
-  const getSubscriptionBadge = (status: string | undefined) => {
-    const s = status?.toLowerCase();
-    switch (s) {
-      case 'active':
-        return <Badge className="bg-cyan-500 hover:bg-cyan-600">Active</Badge>;
-      case 'trialing':
-        return <Badge className="bg-amber-500 hover:bg-amber-600">Trial</Badge>;
-      case 'canceled':
-        return <Badge variant="destructive">Canceled</Badge>;
-      default:
-        return <Badge variant="outline">Inactive</Badge>;
-    }
-  };
+  // console.log("Users data: ", users);
 
   return (
     <DashboardLayout userRole="admin">
@@ -129,62 +124,48 @@ const Users = () => {
             </Button>
           </CardHeader>
           <CardContent>
-            {users.length === 0 ? (
-                <div className="text-center py-10 text-gray-500">No users found.</div>
-            ) : (
-                <Table>
-                    <TableHeader className="bg-gray-50">
-                        <TableRow>
-                            <TableHead className="w-[180px]">Name</TableHead>
-                            <TableHead>Email</TableHead>
-                            <TableHead>Role</TableHead>
-                            <TableHead>Plan</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Joined</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {users.map((user) => (
-                            <TableRow key={user.id} className="hover:bg-indigo-50/20 transition-colors">
-                                <TableCell className="font-semibold text-gray-800">
-                                    {user.full_name || user.email.split('@')[0] || "N/A"}
-                                </TableCell>
-                                <TableCell className="text-sm text-gray-600">{user.email}</TableCell>
-                                <TableCell>
-                                    {/* Thematic Role Badge */}
-                                    <Badge 
-                                        className={user.role === "admin" 
-                                            ? "bg-indigo-600 hover:bg-indigo-700" 
-                                            : "bg-gray-200 text-gray-700 hover:bg-gray-300"}
-                                    >
-                                        {user.role}
-                                    </Badge>
-                                </TableCell>
-                                <TableCell className="font-medium text-teal-700">{user.subscription?.plan?.name || "Free"}</TableCell>
-                                <TableCell>
-                                    {/* Thematic Subscription Status Badge */}
-                                    {getSubscriptionBadge(user.subscription?.status)}
-                                </TableCell>
-                                <TableCell className="text-sm text-gray-500">
-                                    {new Date(user.created_at).toLocaleDateString()}
-                                </TableCell>
-                                <TableCell className="text-right">
-                                    {/* Thematic Action Button */}
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="border-indigo-400 text-indigo-600 hover:bg-indigo-50"
-                                        onClick={() => navigate(`/admin/users/${user.id}`)}
-                                    >
-                                        View Details
-                                    </Button>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            )}
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Plan</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Joined</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {users && users?.map((user) => (
+                  <TableRow key={user.id}>
+                    <TableCell className="font-medium">{user?.user_name || "N/A"}</TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>
+                      <Badge variant={user.role === "admin" ? "default" : "secondary"}>
+                        {user.role}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{user.subscription?.plan?.name || "No plan"}</TableCell>
+                    <TableCell>
+                      <Badge variant={user.subscription?.status === "active" ? "default" : "outline"}>
+                        {user.subscription?.status || "inactive"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
+                    <TableCell>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate(`/admin/users/${user.id}`)}
+                      >
+                        View Details
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </CardContent>
         </Card>
       </div>

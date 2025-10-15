@@ -2,9 +2,28 @@ import { API_CONFIG, buildApiUrl, addQueryParams } from '../utils/config';
 import { getAuthToken, logout } from '../utils/auth';
 
 // API service class
+
 class ApiService {
   constructor() {
     this.baseURL = API_CONFIG.BASE_URL;
+  }
+
+  // Get OAuth URL for a platform, including user token
+  async getOAuthUrl(platform) {
+    const token = getAuthToken();
+    let url = '';
+    if (platform === 'Facebook') {
+      url = `${API_CONFIG.BASE_URL}/social-accounts/oauth/facebook`;
+    } else if (platform === 'Instagram') {
+      url = `${API_CONFIG.BASE_URL}/social-accounts/oauth/instagram`;
+    } else {
+      throw new Error('Unsupported platform');
+    }
+    if (token) {
+      url += `?token=${encodeURIComponent(token)}`;
+    }
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    return { url, headers };
   }
 
   // Get headers for API requests
@@ -129,8 +148,7 @@ class ApiService {
   }
 
   async getUserById(id) {
-    alert(id);
-    return this.request(`${API_CONFIG.ENDPOINTS.USERS.GET_BY_ID}/${id}`);
+  return this.request(`${API_CONFIG.ENDPOINTS.USERS.GET_BY_ID}/${id}`);
   }
 
   async updateUser(id, userData) {
@@ -319,8 +337,15 @@ class ApiService {
       body: tokenData,
     });
   }
+
+  // Update app_id/app_secret for logged-in user and platform
+  async updateSocialAccountCredentials(data) {
+    return this.request(API_CONFIG.ENDPOINTS.SOCIAL_ACCOUNTS.UPDATE_CREDENTIALS, {
+      method: 'POST',
+      body: data,
+    });
+  }
 }
 
 // Export singleton instance
 export const apiService = new ApiService();
-export default apiService;

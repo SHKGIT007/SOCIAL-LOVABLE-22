@@ -15,11 +15,11 @@ const rateLimit = require('express-rate-limit');
 app.use(helmet());
 
 // Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limit each IP to 100 requests per windowMs
-});
-app.use(limiter);
+// const limiter = rateLimit({
+//   windowMs: 15 * 60 * 1000, // 15 minutes
+//   max: 100 // limit each IP to 100 requests per windowMs
+// });
+// app.use(limiter);
 
 // Allow frontend origin
 var corsOptions = {
@@ -36,7 +36,29 @@ app.get("/",(req,res)=>{
     res.send("Welcome to Social Lovable API")
 });
 
+
+app.get("/facebook/callback",(req,res)=>{
+    res.send({status:true,msg:"facebook/callback"})
+});
+
+
+
+
+// appid = 1579224306600577
+// secretkey = a61184184766a15c03154b899db189c7
+// callbackUrl = https://hometalent4u.in/backend/facebook/callback
+
+//  VERIFY_TOKEN = "nilesh";
+
+
+
+// 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
+
+
 app.use('/api', routes);
+
+require("./redirectAuth")(app);
+require("./app/jobs/runScheduler");
 
 // Error handling middleware
 app.use((err, req, res, next) => {

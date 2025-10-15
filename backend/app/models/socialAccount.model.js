@@ -27,6 +27,14 @@ const SocialAccount = sequelize.define('SocialAccount', {
         type: DataTypes.STRING,
         allowNull: true,
     },
+    app_id: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+    },
+    app_secret: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+    },
     access_token: {
         type: DataTypes.TEXT,
         allowNull: true,

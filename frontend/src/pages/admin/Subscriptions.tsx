@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import ApiService from "@/services/api";
+import { apiService } from "@/services/api";
 import { isAdmin, isAuthenticated } from "@/utils/auth";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,9 +16,9 @@ interface SubscriptionData {
   end_date: string | null;
   posts_used: number;
   ai_posts_used: number;
-  profile: {
+  User?: {
     email: string;
-    full_name: string | null;
+    user_name: string | null;
   };
   plan: {
     name: string;
@@ -62,9 +62,18 @@ const Subscriptions = () => {
 
   const fetchSubscriptions = async () => {
     try {
-      const api = new ApiService();
-      const data = await api.getAllSubscriptions();
-      setSubscriptions(data || []);
+      const data = await apiService.getAllSubscriptions();
+      if(data.status === true){
+        setSubscriptions(data?.data?.subscriptions || []);
+      }else{
+        setSubscriptions([]);
+        toast({
+          title: "Error",
+          description: data.message || "Failed to fetch subscriptions.",
+          variant: "destructive",
+        });
+        return;
+      }
     } catch (error: any) {
       toast({
         title: "Error",
@@ -83,7 +92,7 @@ const Subscriptions = () => {
       </DashboardLayout>
     );
   }
-
+ 
   return (
     <DashboardLayout userRole="admin">
       <div className="space-y-6">
@@ -111,12 +120,12 @@ const Subscriptions = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {subscriptions.map((sub) => (
+                {subscriptions?.map((sub) => (
                   <TableRow key={sub.id}>
                     <TableCell>
                       <div>
-                        <div className="font-medium">{sub.profile?.full_name || "N/A"}</div>
-                        <div className="text-sm text-muted-foreground">{sub.profile?.email}</div>
+                        <div className="font-medium">{sub?.User?.user_name || "N/A"}</div>
+                        <div className="text-sm text-muted-foreground">{sub?.User?.email}</div>
                       </div>
                     </TableCell>
                     <TableCell>

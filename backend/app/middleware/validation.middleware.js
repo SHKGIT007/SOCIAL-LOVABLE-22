@@ -1,3 +1,5 @@
+
+
 const { body, param, query, validationResult } = require('express-validator');
 
 const handleValidationErrors = (req, res, next) => {
@@ -11,6 +13,19 @@ const handleValidationErrors = (req, res, next) => {
     }
     next();
 };
+// Social Account credentials update validation
+const validateSocialAccountCredentialsUpdate = [
+    body('platform')
+        .notEmpty()
+        .withMessage('Platform is required'),
+    body('app_id')
+        .notEmpty()
+        .withMessage('App ID is required'),
+    body('app_secret')
+        .notEmpty()
+        .withMessage('App Secret is required'),
+    handleValidationErrors
+];
 
 // User validation rules
 const validateUserRegistration = [
@@ -261,6 +276,7 @@ module.exports = {
     validatePlanCreation,
     validateSubscriptionCreation,
     validateSocialAccountCreation,
+     validateSocialAccountCredentialsUpdate,
     validateAIPostGeneration,
     validateId,
     validatePagination,

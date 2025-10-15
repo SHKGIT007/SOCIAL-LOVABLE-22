@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import ApiService from "@/services/api";
+import { apiService } from "@/services/api";
 import { isAdmin, isAuthenticated } from "@/utils/auth";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,9 +29,9 @@ interface Post {
   status: string;
   is_ai_generated: boolean;
   created_at: string;
-  profiles: {
+  User?: {
     email: string;
-    full_name: string | null;
+    user_name: string | null;
   };
 }
 
@@ -54,7 +54,7 @@ const AdminPosts = () => {
         (post) =>
           post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
           post.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          post.profiles.email.toLowerCase().includes(searchTerm.toLowerCase())
+          post.User?.email?.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setFilteredPosts(filtered);
     } else {
@@ -84,12 +84,25 @@ const AdminPosts = () => {
     }
   };
 
+  //  console.log("Posts data: ", posts);
+  //  console.log("Posts filteredPosts: ", filteredPosts);
+
   const fetchPosts = async () => {
     try {
-      const api = new ApiService();
-      const data = await api.getAllPosts();
-      setPosts(data || []);
-      setFilteredPosts(data || []);
+      const data = await apiService.getAllPosts();
+      if(data.status === true){
+      setPosts(data?.data?.posts || []);
+      setFilteredPosts(data?.data?.posts || []);
+      }else{
+        setPosts([]);
+        setFilteredPosts([]);
+        toast({
+          title: "Error",
+          description: data.message || "Failed to fetch posts.",
+          variant: "destructive",
+        });
+        return;
+      }
     } catch (error: any) {
       toast({
         title: "Error",
@@ -102,8 +115,7 @@ const AdminPosts = () => {
   const handleDelete = async () => {
     if (!deletePostId) return;
     try {
-      const api = new ApiService();
-      await api.deletePost(deletePostId);
+      await apiService.deletePost(deletePostId);
       toast({
         title: "Success",
         description: "Post deleted successfully",
@@ -129,6 +141,8 @@ const AdminPosts = () => {
       </DashboardLayout>
     );
   }
+
+ 
 
   return (
     <DashboardLayout userRole="admin">
@@ -167,15 +181,15 @@ const AdminPosts = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredPosts.map((post) => (
+                {filteredPosts && filteredPosts?.map((post) => (
                   <TableRow key={post.id}>
                     <TableCell className="font-medium max-w-xs truncate">
                       {post.title}
                     </TableCell>
                     <TableCell>
                       <div>
-                        <div className="font-medium">{post.profiles?.full_name || "N/A"}</div>
-                        <div className="text-sm text-muted-foreground">{post.profiles?.email}</div>
+                        <div className="font-medium">{post?.User?.user_name || "N/A"}</div>
+                        <div className="text-sm text-muted-foreground">{post?.User?.email}</div>
                       </div>
                     </TableCell>
                     <TableCell>

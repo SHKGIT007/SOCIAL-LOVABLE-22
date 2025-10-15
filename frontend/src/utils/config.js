@@ -1,6 +1,7 @@
 // Backend API Configuration
 export const API_CONFIG = {
   BASE_URL: import.meta.env.VITE_API_URL || 'http://localhost:9999/api',
+ // BASE_URL: import.meta.env.VITE_API_URL || 'https://socialvibe.tradestreet.in/backend/api',
   ENDPOINTS: {
     // Auth endpoints
     AUTH: {
@@ -59,7 +60,8 @@ export const API_CONFIG = {
       UPDATE: '/social-accounts',
       DELETE: '/social-accounts',
       TOGGLE_STATUS: '/social-accounts',
-      REFRESH_TOKEN: '/social-accounts'
+      REFRESH_TOKEN: '/social-accounts',
+      UPDATE_CREDENTIALS: '/social-accounts/credentials',
     }
   }
 };

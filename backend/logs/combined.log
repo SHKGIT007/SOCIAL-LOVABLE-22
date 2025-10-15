@@ -21,6 +21,61 @@
 {"level":"info","message":"Post deleted","postId":"2","service":"social-lovable-api","timestamp":"2025-10-13T06:18:20.635Z","userId":2}
 {"level":"info","message":"Post updated","postId":"6","service":"social-lovable-api","timestamp":"2025-10-13T06:33:57.801Z","userId":2}
 {"level":"info","message":"Post updated","postId":"6","service":"social-lovable-api","timestamp":"2025-10-13T06:34:05.993Z","userId":2}
-{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-15T07:10:57.099Z","userId":2}
-{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-15T09:23:32.892Z","userId":2}
-{"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-15T09:29:12.631Z","userId":1}
+{"accountId":1,"level":"info","message":"Social account connected","platform":"Facebook","service":"social-lovable-api","timestamp":"2025-10-13T06:52:14.250Z","userId":2}
+{"accountId":2,"level":"info","message":"Social account connected","platform":"Instagram","service":"social-lovable-api","timestamp":"2025-10-13T06:52:26.729Z","userId":2}
+{"accountId":"1","deletedBy":2,"level":"info","message":"Social account deleted","service":"social-lovable-api","timestamp":"2025-10-13T06:52:29.473Z"}
+{"accountId":"2","deletedBy":2,"level":"info","message":"Social account deleted","service":"social-lovable-api","timestamp":"2025-10-13T06:52:30.583Z"}
+{"accountId":3,"level":"info","message":"Social account connected","platform":"Facebook","service":"social-lovable-api","timestamp":"2025-10-13T08:17:04.795Z","userId":2}
+{"accountId":4,"level":"info","message":"Social account connected","platform":"Facebook","service":"social-lovable-api","timestamp":"2025-10-13T08:34:43.951Z","userId":3}
+{"accountId":5,"level":"info","message":"Social account connected","platform":"Instagram","service":"social-lovable-api","timestamp":"2025-10-13T09:18:35.968Z","userId":2}
+{"accountId":"5","deletedBy":2,"level":"info","message":"Social account deleted","service":"social-lovable-api","timestamp":"2025-10-13T09:25:10.826Z"}
+{"accountId":"3","deletedBy":2,"level":"info","message":"Social account deleted","service":"social-lovable-api","timestamp":"2025-10-13T09:25:11.756Z"}
+{"accountId":6,"level":"info","message":"Social account connected","platform":"Facebook","service":"social-lovable-api","timestamp":"2025-10-13T09:25:22.783Z","userId":2}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-13T10:07:18.703Z","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-14T06:43:04.946Z","topic":"shoes","userId":2}
+{"accountId":7,"level":"info","message":"Social account connected","platform":"Instagram","service":"social-lovable-api","timestamp":"2025-10-14T10:06:25.048Z","userId":2}
+{"accountId":"7","deletedBy":2,"level":"info","message":"Social account deleted","service":"social-lovable-api","timestamp":"2025-10-14T10:35:33.147Z"}
+{"accountId":"6","deletedBy":2,"level":"info","message":"Social account deleted","service":"social-lovable-api","timestamp":"2025-10-14T11:04:11.343Z"}
+{"accountId":8,"level":"info","message":"Social account connected","platform":"Facebook","service":"social-lovable-api","timestamp":"2025-10-14T11:05:47.430Z","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-14T11:49:14.970Z","topic":"scsc","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-14T12:06:14.930Z","topic":"Shoes","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-14T12:07:33.362Z","topic":"Shoes","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-14T12:08:04.207Z","topic":"Shoes","userId":2}
+{"level":"info","message":"Scheduled post published to Facebook","postId":5,"service":"social-lovable-api","timestamp":"2025-10-14T12:28:03.857Z","userId":2}
+{"level":"info","message":"Post deleted","postId":"3","service":"social-lovable-api","timestamp":"2025-10-14T12:29:14.461Z","userId":2}
+{"level":"info","message":"Post deleted","postId":"4","service":"social-lovable-api","timestamp":"2025-10-14T12:29:16.955Z","userId":2}
+{"level":"info","message":"Post deleted","postId":"5","service":"social-lovable-api","timestamp":"2025-10-14T12:29:18.914Z","userId":2}
+{"level":"info","message":"Post deleted","postId":"6","service":"social-lovable-api","timestamp":"2025-10-14T12:29:20.548Z","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-14T12:29:41.392Z","topic":"cooking and fish fry","userId":2}
+{"level":"info","message":"Post created","postId":8,"service":"social-lovable-api","timestamp":"2025-10-14T12:30:02.761Z","userId":2}
+{"level":"info","message":"Scheduled post published to Facebook","postId":8,"service":"social-lovable-api","timestamp":"2025-10-14T12:31:03.032Z","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-14T12:35:47.275Z","topic":"ss","userId":2}
+{"error":"Request failed with status code 401","level":"error","message":"AI post generation error","service":"social-lovable-api","timestamp":"2025-10-14T12:55:41.828Z"}
+{"error":"Request failed with status code 401","level":"error","message":"AI post generation error","service":"social-lovable-api","timestamp":"2025-10-14T12:59:03.268Z"}
+{"level":"info","message":"Plan updated","planId":"1","service":"social-lovable-api","timestamp":"2025-10-15T05:45:46.788Z","updatedBy":1}
+{"level":"info","message":"Plan updated","planId":"1","service":"social-lovable-api","timestamp":"2025-10-15T05:45:53.643Z","updatedBy":1}
+{"level":"info","message":"Plan updated","planId":"1","service":"social-lovable-api","timestamp":"2025-10-15T06:26:37.207Z","updatedBy":1}
+{"level":"info","message":"Plan updated","planId":"1","service":"social-lovable-api","timestamp":"2025-10-15T06:26:46.616Z","updatedBy":1}
+{"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-15T06:29:48.206Z","userId":1}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-15T06:34:40.149Z","userId":2}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-15T06:45:09.990Z","userId":2}
+{"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-15T06:46:40.966Z","userId":1}
+{"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-15T06:47:47.632Z","userId":1}
+{"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-15T06:48:38.124Z","userId":1}
+{"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-15T06:50:27.959Z","userId":1}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-15T06:51:23.420Z","userId":2}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-15T06:52:42.716Z","userId":2}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-15T06:53:15.096Z","userId":2}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-15T06:59:55.565Z","userId":2}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-15T07:02:25.653Z","userId":2}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-15T07:04:39.340Z","userId":2}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-15T07:05:56.835Z","userId":2}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-15T07:06:56.081Z","userId":2}
+{"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-15T07:12:00.888Z","userId":1}
+{"level":"info","message":"Plan updated","planId":"1","service":"social-lovable-api","timestamp":"2025-10-15T07:12:23.074Z","updatedBy":1}
+{"level":"info","message":"Plan updated","planId":"1","service":"social-lovable-api","timestamp":"2025-10-15T07:12:28.162Z","updatedBy":1}
+{"level":"info","message":"Subscription created","planId":1,"service":"social-lovable-api","subscriptionId":1,"timestamp":"2025-10-15T07:18:06.164Z","userId":2}
+{"level":"info","message":"Subscription cancelled","service":"social-lovable-api","subscriptionId":"1","timestamp":"2025-10-15T07:18:57.667Z","userId":2}
+{"level":"info","message":"Subscription created","planId":2,"service":"social-lovable-api","subscriptionId":2,"timestamp":"2025-10-15T07:19:00.506Z","userId":2}
+{"level":"info","message":"Subscription cancelled","service":"social-lovable-api","subscriptionId":"2","timestamp":"2025-10-15T07:19:26.352Z","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-15T09:27:15.016Z","topic":"sneaker shoes","userId":2}

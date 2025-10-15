@@ -5,17 +5,24 @@ const logger = require('../config/logger');
 const { SocialAccount } = require('../models');
 const axios = require('axios');
 const {facebookPost} = require('../../redirectAuth/facebook/facebookPost');
-const OpenAI = require("openai");
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-require('dotenv').config();
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY // .env file mein apni API key dalein
-});
 
 const createPost = asyncHandler(async (req, res) => {
     const { title, content, platforms, status, scheduled_at, category, tags, media_urls, is_ai_generated, ai_prompt } = req.body;
     const userId = req.user.id;
+
+   const socialAccount = await SocialAccount.findOne({
+        where: { user_id: userId, platform: 'Facebook', is_active: 1 }
+    });
+
+ 
+
+   const postData= await facebookPost(socialAccount.access_token, content);
+  
+
+    
+
+    return res.json({ success: true, message: postData });
+    
 
     // Check user's subscription limits
     const subscription = await Subscription.findOne({
@@ -40,7 +47,6 @@ const createPost = asyncHandler(async (req, res) => {
         }
     }
 
-    // Save post in DB
     const post = await Post.create({
         title,
         content,
@@ -55,6 +61,8 @@ const createPost = asyncHandler(async (req, res) => {
         user_id: userId
     });
 
+
+
     // Update subscription usage
     if (subscription) {
         await Subscription.update(
@@ -66,24 +74,8 @@ const createPost = asyncHandler(async (req, res) => {
         );
     }
 
-    // Facebook publish logic
-    if (status === 'published') {
-        const socialAccount = await SocialAccount.findOne({
-            where: { user_id: userId, platform: 'Facebook', is_active: 1 }
-        });
-        if (socialAccount && socialAccount.access_token) {
-            try {
-                const postData = await facebookPost(socialAccount.access_token, content);
-                logger.info('Facebook post published', { userId, postId: post.id });
-                return res.json({ success: true, message: 'Post published to Facebook', fb: postData });
-            } catch (err) {
-                logger.error('Facebook publish error', { error: err.message });
-                return res.status(500).json({ success: false, message: 'Facebook publish failed', error: err.message });
-            }
-        }
-    }
-    // For scheduled and draft, just save post, do not publish
     logger.info('Post created', { postId: post.id, userId });
+
     res.status(201).json({
         status: true,
         message: 'Post created successfully',
@@ -147,8 +139,8 @@ const getAllPosts = asyncHandler(async (req, res) => {
 
 const getPostById = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    // const userId = req.user.id;
-    // const userType = req.user.user_type;
+    const userId = req.user.id;
+    const userType = req.user.user_type;
 
     const post = await Post.findByPk(id, {
         include: [
@@ -168,14 +160,12 @@ const getPostById = asyncHandler(async (req, res) => {
     }
 
     // Check if user can access this post
-    // Admin can view any post; client can view only their own post
-    // If you want to restrict, uncomment below:
-    // if (userType !== 'admin' && post.user_id !== userId) {
-    //     return res.status(403).json({
-    //         status: false,
-    //         message: 'Access denied'
-    //     });
-    // }
+    if (userType !== 'admin' && post.user_id !== userId) {
+        return res.status(403).json({
+            status: false,
+            message: 'Access denied'
+        });
+    }
 
     res.json({
         status: true,
@@ -227,24 +217,8 @@ const updatePost = asyncHandler(async (req, res) => {
         ]
     });
 
-    // Facebook publish logic if status changed to published
-    if (status === 'published') {
-        const socialAccount = await SocialAccount.findOne({
-            where: { user_id: userId, platform: 'Facebook', is_active: 1 }
-        });
-        if (socialAccount && socialAccount.access_token) {
-            try {
-                const postData = await facebookPost(socialAccount.access_token, content || updatedPost.content);
-                logger.info('Facebook post published (update)', { userId, postId: id });
-                return res.json({ status: true, message: 'Post updated and published to Facebook', fb: postData, data: { post: updatedPost } });
-            } catch (err) {
-                logger.error('Facebook publish error (update)', { error: err.message });
-                return res.status(500).json({ status: false, message: 'Facebook publish failed', error: err.message });
-            }
-        }
-    }
-
     logger.info('Post updated', { postId: id, userId });
+
     res.json({
         status: true,
         message: 'Post updated successfully',
@@ -286,10 +260,8 @@ const deletePost = asyncHandler(async (req, res) => {
 const generateAIPost = asyncHandler(async (req, res) => {
     const { topic, wordCount, language, style, tone, audience, purpose } = req.body;
     const userId = req.user.id;
- 
-    //let ss = await example1()
-    
-   
+
+    // Check AI post limit
     const subscription = await Subscription.findOne({
         where: { user_id: userId, status: 'active' },
         include: [{ model: Plan, as: 'Plan' }]
@@ -302,37 +274,22 @@ const generateAIPost = asyncHandler(async (req, res) => {
         });
     }
 
-    // AI post generation using OpenAI ChatGPT
+    // Simple AI post generation (replace with actual AI service)
     const aiPrompt = `Generate a ${style.toLowerCase()} ${tone.toLowerCase()} post about ${topic} for ${audience} audience with ${purpose} purpose in ${language}. Word count: ${wordCount}`;
+    
+    // Mock AI response (replace with actual AI service call)
+    const generatedContent = `🚀 Exciting news about ${topic}!
 
-    let generatedContent = '';
-    generatedContent = await  generateAIContent(aiPrompt)
-    // try {
-    //     const openaiApiKey = process.env.OPENAI_API_KEY;
-    //     if (!openaiApiKey) throw new Error('OpenAI API key not configured');
-    //     const response = await axios.post(
-    //         'https://api.openai.com/v1/chat/completions',
-    //         {
-    //             model: 'gpt-3.5-turbo',
-    //             messages: [
-    //                 { role: 'system', content: 'You are a helpful social media post generator.' },
-    //                 { role: 'user', content: aiPrompt }
-    //             ],
-    //             max_tokens: 512,
-    //             temperature: 0.7
-    //         },
-    //         {
-    //             headers: {
-    //                 'Authorization': `Bearer ${openaiApiKey}`,
-    //                 'Content-Type': 'application/json'
-    //             }
-    //         }
-    //     );
-    //     generatedContent = response.data.choices[0].message.content;
-    // } catch (err) {
-    //     logger.error('AI post generation error', { error: err.message });
-    //     return res.status(500).json({ status: false, message: 'AI post generation failed', error: err.message });
-    // }
+${topic} is revolutionizing the way we think about ${purpose.toLowerCase()}. Whether you're new to this space or a seasoned professional, there's something for everyone.
+
+Key highlights:
+• Innovation in ${topic}
+• Benefits for ${audience.toLowerCase()}
+• Future opportunities
+
+What are your thoughts on ${topic}? Share your experience in the comments below!
+
+#${topic.replace(/\s+/g, '')} #Innovation #${purpose}`;
 
     logger.info('AI post generated', { userId, topic });
 
@@ -346,128 +303,6 @@ const generateAIPost = asyncHandler(async (req, res) => {
         }
     });
 });
-
-
-
-
-
-
-////////////////-------genrrate Ai code  Start------///////////
-
-// Groq API Configuration
-const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
-const GROQ_API_KEY = process.env.GROQ_API_KEY;
-
-// Main function - AI se content generate karne ke liye
-async function generateAIContent(prompt, options = {}) {
-  try {
-    const {
-      model = 'llama-3.3-70b-versatile', // Updated default model (currently supported)
-      temperature = 0.7,
-      maxTokens = 1024
-    } = options;
-
-    console.log('🚀 Groq AI se request bhej rahe hain...\n');
-
-    const response = await axios.post(
-      GROQ_API_URL,
-      {
-        model: model,
-        messages: [
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        temperature: temperature,
-        max_tokens: maxTokens,
-        top_p: 1,
-        stream: false
-      },
-      {
-        headers: {
-          'Authorization': `Bearer ${GROQ_API_KEY}`,
-          'Content-Type': 'application/json'
-        }
-      }
-    );
-
-    const content = response.data.choices[0].message.content;
-    const usage = response.data.usage;
-
-    console.log('✅ Response mil gaya!\n');
-    console.log('📊 Token Usage:', {
-      prompt: usage.prompt_tokens,
-      completion: usage.completion_tokens,
-      total: usage.total_tokens
-    });
-
-    return content;
-
-  } catch (error) {
-    if (error.response) {
-      console.error('❌ API Error:', error.response.data);
-    } else {
-      console.error('❌ Error:', error.message);
-    }
-    throw error;
-  }
-}
-// Available Models (update to latest Groq supported models)
-const GROQ_MODELS = {
-    MIXTRAL: 'mixtral-8x7b-32768',             // Large context, supported
-    GEMMA_7B: 'gemma-7b-it',                   // Google's model (update name)
-    LLAMA_8B: 'llama-3-8b-8192',               // Fastest (if available)
-    LLAMA_70B: 'llama-3-70b-8192'              // If available for your account
-};
-// Chat history ke saath conversation
-async function chatWithAI(messages) {
-  try {
-    const response = await axios.post(
-      GROQ_API_URL,
-      {
-        model: GROQ_MODELS.LLAMA_70B,
-        messages: messages, // Array of {role, content}
-        temperature: 0.7,
-        max_tokens: 1024
-      },
-      {
-        headers: {
-          'Authorization': `Bearer ${GROQ_API_KEY}`,
-          'Content-Type': 'application/json'
-        }
-      }
-    );
-
-    console.log('✅ Chat response mil gaya!\n');
-    console.log('Response:', response.data);
-
-    return response.data.choices[0].message.content;
-  } catch (error) {
-    console.error('Chat Error:', error.response?.data || error.message);
-    throw error;
-  }
-}
-
-// Example 1: Simple prompt
-async function example1() {
-  console.log('=== Example 1: Simple Prompt ===\n');
-  
-  const prompt = "JavaScript ke baare mein 5 interesting facts batao";
-  const response = await generateAIContent(prompt);
-  
-  console.log('Response:\n', response);
-  console.log('\n' + '='.repeat(50) + '\n');
-}
-
-
-
-////////////////-------genrrate Ai code End------///////////
-
-
-
-
-
 
 const publishPost = asyncHandler(async (req, res) => {
     const { id } = req.params;

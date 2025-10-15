@@ -14,7 +14,8 @@ router.get('/stats', userController.getUserStats);
 router.post('/', requireAdmin, validateUserRegistration, userController.createUser);
 router.get('/', requireAdmin, validatePagination, userController.getAllUsers);
 router.get('/admin-stats', requireAdmin, userController.getAdminStats);
-router.get('/:id', requireAdmin, validateId, userController.getUserById);
+// Get user by ID (admin only)
+router.get('/:id', requireAdmin, userController.getUserById);
 router.put('/:id', requireAdmin, validateId, userController.updateUser);
 router.delete('/:id', requireAdmin, validateId, userController.deleteUser);
 
