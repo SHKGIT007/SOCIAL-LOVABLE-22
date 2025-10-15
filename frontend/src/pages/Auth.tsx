@@ -21,7 +21,6 @@ const Auth = () => {
   const [userFname, setUserFname] = useState("");
   const [userLname, setUserLname] = useState("");
   const [userPhone, setUserPhone] = useState("");
- 
 
   // Define the primary gradient class for theme consistency
   const primaryGradient = "from-indigo-600 to-cyan-500";
@@ -31,29 +30,19 @@ const Auth = () => {
   useEffect(() => {
     // Check if user is already authenticated
     if (isAuthenticated()) {
-      const authData = JSON.parse(localStorage.getItem("authData") || "null");
-      if (authData?.user?.role === "admin") {
-        navigate("/admin");
-      } else {
-        navigate("/dashboard");
-      }
+      navigate("/dashboard");
       return;
     }
 
     // Listen for auth state changes
     const unsubscribe = onAuthStateChange((authData) => {
       if (authData) {
-        if (authData.user?.role === "admin") {
-          navigate("/admin");
-        } else {
-          navigate("/dashboard");
-        }
+        navigate("/dashboard");
       }
     });
 
     return unsubscribe;
   }, [navigate]);
- 
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,18 +57,13 @@ const Auth = () => {
       if (response.status) {
         // Store auth data in localStorage (Preserved)
         setAuthData(response.data);
+        
         toast({
           title: "Success",
           description: "Signed in successfully!",
         });
-        // Fallback navigation if onAuthStateChange does not trigger
-        if (response.data.user?.role === "admin") {
-          window.location.reload();
-          navigate("/admin");
-        } else {
-          window.location.reload();
-          navigate("/dashboard");
-        }
+        
+        navigate("/dashboard");
       }
     } catch (error: any) {
       toast({
@@ -109,16 +93,13 @@ const Auth = () => {
       if (response.status) {
         // Store auth data in localStorage (Preserved)
         setAuthData(response.data);
+        
         toast({
           title: "Success",
           description: "Account created successfully!",
         });
-        // Fallback navigation if onAuthStateChange does not trigger
-        if (response.data.user?.role === "admin") {
-          navigate("/admin");
-        } else {
-          navigate("/dashboard");
-        }
+        
+        navigate("/dashboard");
       }
     } catch (error: any) {
       toast({
@@ -130,8 +111,6 @@ const Auth = () => {
       setIsLoading(false);
     }
   };
-
-  
 
   return (
     // Updated Background: Clean light background with subtle, vibrant gradient border/focus
