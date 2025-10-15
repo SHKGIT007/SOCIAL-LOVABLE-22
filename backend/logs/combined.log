@@ -106,3 +106,6 @@
 {"level":"info","message":"Facebook post published","postId":11,"service":"social-lovable-api","timestamp":"2025-10-15T12:07:36.367Z","userId":2}
 {"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-15T12:08:00.449Z","topic":"dinner","userId":2}
 {"level":"info","message":"Facebook post published (update)","postId":"11","service":"social-lovable-api","timestamp":"2025-10-15T12:20:42.798Z","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-15T12:22:03.503Z","topic":"clothes","userId":2}
+{"level":"info","message":"Post created","postId":12,"service":"social-lovable-api","timestamp":"2025-10-15T12:22:20.662Z","userId":2}
+{"level":"info","message":"Scheduled post published to Facebook","postId":12,"service":"social-lovable-api","timestamp":"2025-10-15T12:24:04.876Z","userId":2}
