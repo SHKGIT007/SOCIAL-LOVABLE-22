@@ -132,3 +132,12 @@
 {"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-15T13:05:40.702Z","topic":"shoes","userId":2}
 {"level":"info","message":"Post created","postId":13,"service":"social-lovable-api","timestamp":"2025-10-15T13:05:56.414Z","userId":2}
 {"level":"info","message":"Scheduled post published to Facebook","postId":13,"service":"social-lovable-api","timestamp":"2025-10-15T13:06:03.615Z","userId":2}
+{"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-15T13:17:05.706Z","topic":"fef","userId":2}
+{"level":"info","message":"Facebook post published","postId":14,"service":"social-lovable-api","timestamp":"2025-10-15T13:17:16.852Z","userId":2}
+{"level":"info","message":"Post deleted","postId":"8","service":"social-lovable-api","timestamp":"2025-10-15T13:34:14.024Z","userId":2}
+{"level":"info","message":"Post deleted","postId":"10","service":"social-lovable-api","timestamp":"2025-10-15T13:34:16.239Z","userId":2}
+{"level":"info","message":"Post deleted","postId":"9","service":"social-lovable-api","timestamp":"2025-10-15T13:34:18.245Z","userId":2}
+{"level":"info","message":"Post deleted","postId":"11","service":"social-lovable-api","timestamp":"2025-10-15T13:34:19.915Z","userId":2}
+{"level":"info","message":"Post deleted","postId":"14","service":"social-lovable-api","timestamp":"2025-10-15T13:34:21.968Z","userId":2}
+{"level":"info","message":"Post deleted","postId":"12","service":"social-lovable-api","timestamp":"2025-10-15T13:34:23.908Z","userId":2}
+{"level":"info","message":"Post deleted","postId":"13","service":"social-lovable-api","timestamp":"2025-10-15T13:34:25.465Z","userId":2}

@@ -1,7 +1,7 @@
 // Backend API Configuration
 export const API_CONFIG = {
-  BASE_URL: import.meta.env.VITE_API_URL || 'http://localhost:9999/api',
- // BASE_URL: import.meta.env.VITE_API_URL || 'https://socialvibe.tradestreet.in/backend/api',
+   BASE_URL: import.meta.env.VITE_API_URL || 'http://localhost:9999/api',
+  //BASE_URL: import.meta.env.VITE_API_URL || `${window.location.origin}/backend/api/`,
   ENDPOINTS: {
     // Auth endpoints
     AUTH: {
