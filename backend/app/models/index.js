@@ -4,6 +4,7 @@ const Post = require('./post.model');
 const Plan = require('./plan.model');
 const Subscription = require('./subscription.model');
 const SocialAccount = require('./socialAccount.model');
+const Profile = require('./profile.model');
 
 const models = {
     User,
@@ -12,14 +13,17 @@ const models = {
     Plan,
     Subscription,
     SocialAccount,
+    Profile,
 };
 
 // Define associations in correct order
-Role.associate(models);
-User.associate(models);
-Post.associate(models);
-Plan.associate(models);
-Subscription.associate(models);
-SocialAccount.associate(models);
+
+if (Role.associate) Role.associate(models);
+if (User.associate) User.associate(models);
+if (Post.associate) Post.associate(models);
+if (Plan.associate) Plan.associate(models);
+if (Subscription.associate) Subscription.associate(models);
+if (SocialAccount.associate) SocialAccount.associate(models);
+if (Profile.associate) Profile.associate(models);
 
 module.exports = models;

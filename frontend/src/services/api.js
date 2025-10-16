@@ -8,6 +8,14 @@ class ApiService {
     this.baseURL = API_CONFIG.BASE_URL;
   }
 
+  // Profile API methods
+  async saveProfile(profileData) {
+    return this.request('/profile', {
+      method: 'POST',
+      body: profileData,
+    });
+  }
+
   // Get OAuth URL for a platform, including user token
   async getOAuthUrl(platform) {
     const token = getAuthToken();
