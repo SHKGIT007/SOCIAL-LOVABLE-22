@@ -134,6 +134,8 @@ const getAllPosts = asyncHandler(async (req, res) => {
         order: [['created_at', 'DESC']]
     });
 
+    console.log("post",posts)
+
     res.json({
         status: true,
         data: {

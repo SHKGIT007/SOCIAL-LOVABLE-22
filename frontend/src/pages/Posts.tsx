@@ -120,6 +120,8 @@ const Posts = () => {
     );
   }
 
+  console.log("post",posts)
+
   return (
     <DashboardLayout userRole="client">
       <div className="space-y-6">
@@ -169,7 +171,12 @@ const Posts = () => {
                 <CardContent>
                   <div className="space-y-4">
                     <div className="flex flex-wrap gap-1">
-                      {post.platforms.map((platform) => (
+                      {(Array.isArray(post.platforms)
+                        ? post.platforms
+                        : typeof post.platforms === 'string' && post.platforms
+                          ? post.platforms?.split(',').map(p => p.trim()).filter(Boolean)
+                          : []
+                      ).map((platform) => (
                         <Badge key={platform} variant="secondary">
                           {platform}
                         </Badge>
