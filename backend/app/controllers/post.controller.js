@@ -13,8 +13,11 @@ const fs = require('fs');
 
 
 const createPost = asyncHandler(async (req, res) => {
-    const { title, content, platforms, status, scheduled_at, category, tags, media_urls, is_ai_generated, ai_prompt ,image_prompt,image_url } = req.body;
+    const { title, content, platforms, status, scheduled_at, media_urls, is_ai_generated, ai_prompt ,image_prompt,image_url } = req.body;
     const userId = req.user.id;
+
+
+    
 
     // Check user's subscription limits
     const subscription = await Subscription.findOne({
@@ -46,8 +49,6 @@ const createPost = asyncHandler(async (req, res) => {
         platforms,
         status: status || 'draft',
         scheduled_at: scheduled_at || null,
-        category,
-        tags,
         media_urls,
         is_ai_generated: is_ai_generated || false,
         ai_prompt,
@@ -289,8 +290,10 @@ const deletePost = asyncHandler(async (req, res) => {
 });
 
 const generateAIPost = asyncHandler(async (req, res) => {
-    const { topic, wordCount, language, style, tone, audience, purpose ,imagePrompt } = req.body;
+
+    let {title, ai_prompt ,image_prompt } = req.body;
     const userId = req.user.id;
+    ai_prompt = title?`Title: ${title}\nDetails: ${ai_prompt}`:ai_prompt;
     
     //let ss = await example1()
     const subscription = await Subscription.findOne({
@@ -304,32 +307,22 @@ const generateAIPost = asyncHandler(async (req, res) => {
             message: 'Monthly AI post limit reached'
         });
     }
-
-    // AI post generation using OpenAI ChatGPT
-    const aiPrompt = `Generate a ${style.toLowerCase()} ${tone.toLowerCase()} post about ${topic} for ${audience} audience with ${purpose} purpose in ${language}. Word count: ${wordCount}`;
-
     let generatedContent = '';
     let imageUrl = '';
 
-    if (imagePrompt !== '') {
-        const imageObj = await generateImagePollinations(imagePrompt);
+    if (image_prompt !== '') {
+        const imageObj = await generateImagePollinations(image_prompt);
         imageUrl = imageObj.url || '';
     }
-    generatedContent = await generateAIContent(aiPrompt);
+    generatedContent = await generateAIContent(ai_prompt);
 
-    // If imageUrl exists, prepend <img> tag to generatedContent
-    // if (imageUrl) {
-    //     generatedContent = `<img src="${imageUrl}" alt="AI generated image" style="max-width:100%;height:auto;display:block;margin-bottom:1rem;" />\n` + generatedContent;
-    // }
-
-    logger.info('AI post generated', { userId, topic });
-    res.json({
+    logger.info('AI post generated', { userId, ai_prompt });
+   return res.json({
         status: true,
         message: 'AI post generated successfully',
         data: {
             content: generatedContent,
-            title: topic,
-            ai_prompt: aiPrompt,
+            ai_prompt: ai_prompt,
             imageUrl: imageUrl
         }
     });

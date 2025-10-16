@@ -31,26 +31,29 @@ const NewPost = () => {
   const [scheduledAt, setScheduledAt] = useState("");
 
   // AI generation fields
-  const [topic, setTopic] = useState("");
-  const [wordCount, setWordCount] = useState(150);
-  const [language, setLanguage] = useState("English");
-  const [style, setStyle] = useState("Formal");
-  const [tone, setTone] = useState("Professional");
-  const [audience, setAudience] = useState("Adults");
-  const [purpose, setPurpose] = useState("Marketing");
+  const [aiPrompt, setAiPrompt] = useState("");
   const [connectedAccounts, setConnectedAccounts] = useState([]);
   const [imagePrompt, setImagePrompt] = useState("");
 
   useEffect(() => {
-    const fetchAccounts = async () => {
+    const fetchAccountsAndProfile = async () => {
       try {
-        const res = await apiService.getMySocialAccounts();
-        setConnectedAccounts(res.data.socialAccounts || []);
+        const accRes = await apiService.getMySocialAccounts();
+        setConnectedAccounts(accRes.data.socialAccounts || []);
+        // Fetch profile details and set aiPrompt
+        const profileRes = await apiService.request("/profile");
+        if (profileRes.status && profileRes.data?.profile) {
+          const p = profileRes.data.profile;
+          setTitle(p.business_name || "");
+          // Build prompt from profile fields
+          const prompt = `Business/Creator: ${p.business_name}\nDescription: ${p.description}\nPlatforms: ${p.platforms}\nBrand Voice: ${p.brand_voice}\nHashtags: ${p.hashtags}\nImage Style: ${p.image_style}`;
+          setAiPrompt(prompt);
+        }
       } catch (error) {
         // Optionally show error
       }
     };
-    fetchAccounts();
+    fetchAccountsAndProfile();
   }, []);
 
   const handlePlatformToggle = (platform: string) => {
@@ -62,10 +65,10 @@ const NewPost = () => {
   };
 
   const handleGenerateAI = async () => {
-    if (!topic) {
+    if (!aiPrompt) {
       toast({
         title: "Error",
-        description: "Please enter a topic",
+        description: "Please enter your post prompt",
         variant: "destructive",
       });
       return;
@@ -74,20 +77,14 @@ const NewPost = () => {
     setIsGenerating(true);
     try {
       const response = await apiService.generateAIPost({
-        topic,
-        wordCount,
-        language,
-        style,
-        tone,
-        audience,
-        purpose,
-        imagePrompt
+        title: title || "AI Generated Post",
+        ai_prompt: aiPrompt,
+        image_prompt: imagePrompt
       });
 
       if (response.status) {
         setContent(response.data.content);
         setImageContent(response.data.imageUrl);
-        setTitle(response.data.title);
         toast({
           title: "Success",
           description: "AI post generated successfully!",
@@ -111,14 +108,33 @@ const NewPost = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!title || !content || platforms.length === 0) {
+    if (!title) {
       toast({
         title: "Error",
-        description: "Please fill in all required fields",
+        description: "Please fill title",
         variant: "destructive",
       });
       return;
     }
+   if (!content) {
+      toast({
+        title: "Error",
+        description: "Please generate post content",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if(platforms.length === 0){
+      toast({
+        title: "Error",
+        description: "Please connect and select at least one social platform",
+        variant: "destructive",
+      });
+      return;
+    }
+
+
 
     setIsLoading(true);
     try {
@@ -133,8 +149,8 @@ const NewPost = () => {
         platforms,
         status,
         scheduled_at: scheduledAt || null,
-        is_ai_generated: isGenerating || topic !== "",
-        ai_prompt: topic || null,
+        is_ai_generated: isGenerating || aiPrompt !== "",
+        ai_prompt: aiPrompt || null,
         image_prompt: imagePrompt || null,
         image_url: imageContent || null,
       });
@@ -184,99 +200,9 @@ const NewPost = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="topic">Topic *</Label>
-                    <Input
-                      id="topic"
-                      value={topic}
-                      onChange={(e) => setTopic(e.target.value)}
-                      placeholder="Enter post topic"
-                    />
-                  </div>
+                {/* Removed unused AI input fields. Only prompt and imagePrompt remain. */}
 
-                  <div className="space-y-2">
-                    <Label htmlFor="wordCount">Word Count</Label>
-                    <Input
-                      id="wordCount"
-                      type="number"
-                      value={wordCount}
-                      onChange={(e) => setWordCount(Number(e.target.value))}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="language">Language</Label>
-                    <Select value={language} onValueChange={setLanguage}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="English">English</SelectItem>
-                        <SelectItem value="Spanish">Spanish</SelectItem>
-                        <SelectItem value="French">French</SelectItem>
-                        <SelectItem value="German">German</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="style">Writing Style</Label>
-                    <Select value={style} onValueChange={setStyle}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Formal">Formal</SelectItem>
-                        <SelectItem value="Informal">Informal</SelectItem>
-                        <SelectItem value="Casual">Casual</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="tone">Tone</Label>
-                    <Select value={tone} onValueChange={setTone}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Professional">Professional</SelectItem>
-                        <SelectItem value="Friendly">Friendly</SelectItem>
-                        <SelectItem value="Humorous">Humorous</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="audience">Target Audience</Label>
-                    <Select value={audience} onValueChange={setAudience}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Kids">Kids</SelectItem>
-                        <SelectItem value="Teens">Teens</SelectItem>
-                        <SelectItem value="Adults">Adults</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="purpose">Purpose</Label>
-                    <Select value={purpose} onValueChange={setPurpose}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Marketing">Marketing</SelectItem>
-                        <SelectItem value="Informational">Informational</SelectItem>
-                        <SelectItem value="Educational">Educational</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
+                
                 <div className="space-y-2">
                   <Label htmlFor="imagePrompt">Image Prompt (Optional)</Label>
                   <Input
@@ -290,7 +216,7 @@ const NewPost = () => {
                 <Button
                   type="button"
                   onClick={handleGenerateAI}
-                  disabled={isGenerating || !topic}
+                  disabled={isGenerating || !aiPrompt}
                   className="w-full"
                 >
                   {isGenerating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -301,7 +227,7 @@ const NewPost = () => {
                 {content && (
                   <div className="space-y-4 border-t pt-4">
                     <div className="space-y-2">
-                      <Label htmlFor="generated-content">Generated Content Preview</Label>
+                      
                       {/* HTML Preview */}
                       <div
                         id="generated-content-preview"

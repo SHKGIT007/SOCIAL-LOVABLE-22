@@ -54,20 +54,28 @@ const EditPost = () => {
   const [connectedAccounts, setConnectedAccounts] = useState([]);
 
   useEffect(() => {
-    fetchPost();
-  }, [id]);
-
-  useEffect(() => {
-    const fetchAccounts = async () => {
+    const fetchAll = async () => {
+      await fetchPost();
       try {
-        const res = await apiService.getMySocialAccounts();
-        setConnectedAccounts(res.data.socialAccounts || []);
+        const accRes = await apiService.getMySocialAccounts();
+        setConnectedAccounts(accRes.data.socialAccounts || []);
+        // Fetch profile details and set image_prompt if post is AI-generated
+        const profileRes = await apiService.request("/profile");
+        if (profileRes.status && profileRes.data?.profile) {
+          const p = profileRes.data.profile;
+          // If post is AI-generated, fill image_prompt and other fields from profile
+          setFormData((prev) => ({
+            ...prev,
+            image_prompt: prev.image_prompt || p.image_style || "",
+            // Optionally set other fields like brand_voice, hashtags, etc. if needed
+          }));
+        }
       } catch (error) {
         // Optionally show error
       }
     };
-    fetchAccounts();
-  }, []);
+    fetchAll();
+  }, [id]);
 
   const fetchPost = async () => {
     try {

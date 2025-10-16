@@ -96,19 +96,12 @@ const validateUserUpdate = [
 
 // Post validation rules
 const validatePostCreation = [
-    body('title')
-        .notEmpty()
-        .withMessage('Title is required')
-        .isLength({ min: 1, max: 200 })
-        .withMessage('Title must be between 1 and 200 characters'),
+   
     body('content')
         .notEmpty()
         .withMessage('Content is required')
         .isLength({ min: 10 })
         .withMessage('Content must be at least 10 characters long'),
-    body('platforms')
-        .isArray({ min: 1 })
-        .withMessage('At least one platform must be selected'),
     body('status')
         .optional()
         .isIn(['draft', 'scheduled', 'published'])
@@ -117,14 +110,6 @@ const validatePostCreation = [
             .optional({ nullable: true })
             .custom((value) => value === null || value === '' || !value || (typeof value === 'string' && !isNaN(Date.parse(value))))
             .withMessage('Scheduled date must be a valid date or null'),
-    body('category')
-        .optional()
-        .isLength({ max: 100 })
-        .withMessage('Category must be less than 100 characters'),
-    body('tags')
-        .optional()
-        .isArray()
-        .withMessage('Tags must be an array'),
     handleValidationErrors
 ];
 
@@ -214,35 +199,35 @@ const validateSocialAccountCreation = [
 
 // AI Post generation validation
 const validateAIPostGeneration = [
-    body('topic')
-        .notEmpty()
-        .withMessage('Topic is required')
-        .isLength({ min: 1, max: 200 })
-        .withMessage('Topic must be between 1 and 200 characters'),
-    body('wordCount')
-        .optional()
-        .isInt({ min: 50, max: 1000 })
-        .withMessage('Word count must be between 50 and 1000'),
-    body('language')
-        .optional()
-        .isIn(['English', 'Spanish', 'French', 'German'])
-        .withMessage('Language must be English, Spanish, French, or German'),
-    body('style')
-        .optional()
-        .isIn(['Formal', 'Informal', 'Casual'])
-        .withMessage('Style must be Formal, Informal, or Casual'),
-    body('tone')
-        .optional()
-        .isIn(['Professional', 'Friendly', 'Humorous'])
-        .withMessage('Tone must be Professional, Friendly, or Humorous'),
-    body('audience')
-        .optional()
-        .isIn(['Kids', 'Teens', 'Adults'])
-        .withMessage('Audience must be Kids, Teens, or Adults'),
-    body('purpose')
-        .optional()
-        .isIn(['Marketing', 'Informational', 'Educational'])
-        .withMessage('Purpose must be Marketing, Informational, or Educational'),
+    // body('topic')
+    //     .notEmpty()
+    //     .withMessage('Topic is required')
+    //     .isLength({ min: 1, max: 200 })
+    //     .withMessage('Topic must be between 1 and 200 characters'),
+    // body('wordCount')
+    //     .optional()
+    //     .isInt({ min: 50, max: 1000 })
+    //     .withMessage('Word count must be between 50 and 1000'),
+    // body('language')
+    //     .optional()
+    //     .isIn(['English', 'Spanish', 'French', 'German'])
+    //     .withMessage('Language must be English, Spanish, French, or German'),
+    // body('style')
+    //     .optional()
+    //     .isIn(['Formal', 'Informal', 'Casual'])
+    //     .withMessage('Style must be Formal, Informal, or Casual'),
+    // body('tone')
+    //     .optional()
+    //     .isIn(['Professional', 'Friendly', 'Humorous'])
+    //     .withMessage('Tone must be Professional, Friendly, or Humorous'),
+    // body('audience')
+    //     .optional()
+    //     .isIn(['Kids', 'Teens', 'Adults'])
+    //     .withMessage('Audience must be Kids, Teens, or Adults'),
+    // body('purpose')
+    //     .optional()
+    //     .isIn(['Marketing', 'Informational', 'Educational'])
+    //     .withMessage('Purpose must be Marketing, Informational, or Educational'),
     handleValidationErrors
 ];
 
