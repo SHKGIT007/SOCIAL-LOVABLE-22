@@ -142,7 +142,12 @@ const AdminPosts = () => {
     );
   }
 
- 
+ const getPlatformsArray = (platforms: string[] | string | undefined): string[] => {
+    if (Array.isArray(platforms)) return platforms;
+    if (typeof platforms === 'string' && platforms) return platforms.split(',').map(p => p.trim()).filter(Boolean);
+    return [];
+  };
+
 
   return (
     <DashboardLayout userRole="admin">
@@ -194,16 +199,11 @@ const AdminPosts = () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
-                        {post.platforms.slice(0, 2).map((platform) => (
-                          <Badge key={platform} variant="secondary" className="text-xs">
-                            {platform}
-                          </Badge>
-                        ))}
-                        {post.platforms.length > 2 && (
-                          <Badge variant="secondary" className="text-xs">
-                            +{post.platforms.length - 2}
-                          </Badge>
-                        )}
+                        {getPlatformsArray(post.platforms).map((platform) => (
+                        <Badge key={platform} variant="secondary">
+                          {platform}
+                        </Badge>
+                      ))}
                       </div>
                     </TableCell>
                     <TableCell>

@@ -70,6 +70,13 @@ const AdminViewPost = () => {
     );
   }
 
+  // Helper to always return array for platforms
+  const getPlatformsArray = (platforms: string[] | string | undefined): string[] => {
+    if (Array.isArray(platforms)) return platforms;
+    if (typeof platforms === 'string' && platforms) return platforms.split(',').map(p => p.trim()).filter(Boolean);
+    return [];
+  };
+
   return (
     <DashboardLayout userRole="admin">
       <div className="max-w-2xl mx-auto py-8">
@@ -93,7 +100,13 @@ const AdminViewPost = () => {
               </div>
               <div>
                 <span className="font-semibold">Platforms:</span>{" "}
-                {post.platforms?.join(", ")}
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {getPlatformsArray(post.platforms).map((platform) => (
+                    <Badge key={platform} variant="secondary" className="text-xs">
+                      {platform}
+                    </Badge>
+                  ))}
+                </div>
               </div>
               <div>
                 <span className="font-semibold">Status:</span>{" "}
