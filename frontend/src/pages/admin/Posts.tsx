@@ -200,10 +200,20 @@ const AdminPosts = () => {
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
                         {getPlatformsArray(post.platforms).map((platform) => (
-                        <Badge key={platform} variant="secondary">
-                          {platform}
-                        </Badge>
-                      ))}
+                          <Badge
+                            key={platform}
+                            variant={
+                              platform.toLowerCase() === "facebook"
+                                ? "default"
+                                : platform.toLowerCase() === "instagram"
+                                ? "secondary"
+                                : "outline"
+                            }
+                            className="text-xs"
+                          >
+                            {platform}
+                          </Badge>
+                        ))}
                       </div>
                     </TableCell>
                     <TableCell>
