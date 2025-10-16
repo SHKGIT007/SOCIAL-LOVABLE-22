@@ -10,9 +10,7 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 require('dotenv').config();
 const fs = require('fs');
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY // .env file mein apni API key dalein
-});
+
 
 const createPost = asyncHandler(async (req, res) => {
     const { title, content, platforms, status, scheduled_at, category, tags, media_urls, is_ai_generated, ai_prompt ,image_prompt,image_url } = req.body;
@@ -547,7 +545,7 @@ async function generateImageFallback(prompt) {
     });
     
     const filename = `fallback_${Date.now()}.jpg`;
-    fs.writeFileSync(filename, response.data);
+   // fs.writeFileSync(filename, response.data);
     
     console.log(`✅ Fallback image saved: ${filename}`);
     console.log('⚠️ Note: Stock photo (not AI-generated)');
