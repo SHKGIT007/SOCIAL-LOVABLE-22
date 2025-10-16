@@ -208,50 +208,56 @@ const SocialAccounts = () => {
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-4">
-                            <div className="space-y-2">
-                                <Label>Facebook App ID</Label>
-                                <Input value={fbAppId} onChange={e => setFbAppId(e.target.value)} placeholder="Facebook App ID" />
-                                <Label>Facebook App Secret</Label>
-                                <Input value={fbAppSecret} onChange={e => setFbAppSecret(e.target.value)} placeholder="Facebook App Secret" type="password" />
-                                <div className="flex gap-2 mt-2">
-                                    <Button
-                                        className="w-1/2 bg-blue-500 hover:bg-blue-600 text-white"
-                                        onClick={() => handleSave("Facebook")}
-                                        disabled={isLoading}
-                                    >
-                                        Save
-                                    </Button>
-                                    <Button
-                                        className="w-1/2 bg-blue-600 hover:bg-blue-700 text-white"
-                                        onClick={() => handleConnect("Facebook")}
-                                        disabled={isLoading}
-                                    >
-                                        Connect
-                                    </Button>
+                            {/* Facebook fields: show only if not connected */}
+                            {!(accounts.find(acc => acc.platform === "Facebook" && Number(acc.is_active) === 1)) && (
+                                <div className="space-y-2">
+                                    <Label>Facebook App ID</Label>
+                                    <Input value={fbAppId} onChange={e => setFbAppId(e.target.value)} placeholder="Facebook App ID" />
+                                    <Label>Facebook App Secret</Label>
+                                    <Input value={fbAppSecret} onChange={e => setFbAppSecret(e.target.value)} placeholder="Facebook App Secret" type="password" />
+                                    <div className="flex gap-2 mt-2">
+                                        <Button
+                                            className="w-1/2 bg-blue-500 hover:bg-blue-600 text-white"
+                                            onClick={() => handleSave("Facebook")}
+                                            disabled={isLoading}
+                                        >
+                                            Save
+                                        </Button>
+                                        <Button
+                                            className="w-1/2 bg-blue-600 hover:bg-blue-700 text-white"
+                                            onClick={() => handleConnect("Facebook")}
+                                            disabled={isLoading}
+                                        >
+                                            Connect
+                                        </Button>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="space-y-2 mt-6">
-                                <Label>Instagram App ID</Label>
-                                <Input value={igAppId} onChange={e => setIgAppId(e.target.value)} placeholder="Instagram App ID" />
-                                <Label>Instagram App Secret</Label>
-                                <Input value={igAppSecret} onChange={e => setIgAppSecret(e.target.value)} placeholder="Instagram App Secret" type="password" />
-                                <div className="flex gap-2 mt-2">
-                                    <Button
-                                        className="w-1/2 bg-pink-400 hover:bg-pink-500 text-white"
-                                        onClick={() => handleSave("Instagram")}
-                                        disabled={isLoading}
-                                    >
-                                        Save
-                                    </Button>
-                                    <Button
-                                        className="w-1/2 bg-pink-500 hover:bg-pink-600 text-white"
-                                        onClick={() => handleConnect("Instagram")}
-                                        disabled={isLoading}
-                                    >
-                                        Connect
-                                    </Button>
+                            )}
+                            {/* Instagram fields: show only if not connected */}
+                            {!(accounts.find(acc => acc.platform === "Instagram" && Number(acc.is_active) === 1)) && (
+                                <div className="space-y-2 mt-6">
+                                    <Label>Instagram App ID</Label>
+                                    <Input value={igAppId} onChange={e => setIgAppId(e.target.value)} placeholder="Instagram App ID" />
+                                    <Label>Instagram App Secret</Label>
+                                    <Input value={igAppSecret} onChange={e => setIgAppSecret(e.target.value)} placeholder="Instagram App Secret" type="password" />
+                                    <div className="flex gap-2 mt-2">
+                                        <Button
+                                            className="w-1/2 bg-pink-400 hover:bg-pink-500 text-white"
+                                            onClick={() => handleSave("Instagram")}
+                                            disabled={isLoading}
+                                        >
+                                            Save
+                                        </Button>
+                                        <Button
+                                            className="w-1/2 bg-pink-500 hover:bg-pink-600 text-white"
+                                            onClick={() => handleConnect("Instagram")}
+                                            disabled={isLoading}
+                                        >
+                                            Connect
+                                        </Button>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
                         </div>
                     </CardContent>
                 </Card>
