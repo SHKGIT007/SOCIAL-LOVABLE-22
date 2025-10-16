@@ -111,7 +111,7 @@ const NewPost = () => {
     if (!title) {
       toast({
         title: "Error",
-        description: "Please fill title",
+        description: "Please update your profile first before creating a post.",
         variant: "destructive",
       });
       return;
