@@ -168,8 +168,6 @@ const EditPost = () => {
         platforms: formData.platforms,
         status: formData.status,
         scheduled_at: formData.scheduled_at || null,
-        category: formData.category || null,
-        tags: tagsArray.length > 0 ? tagsArray : null,
         image_prompt: formData.image_prompt || null,
         image_url : formData.image_url
       };
@@ -250,29 +248,7 @@ const EditPost = () => {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="category">Category (Optional)</Label>
-                <Input
-                  id="category"
-                  value={formData.category}
-                  onChange={(e) =>
-                    setFormData({ ...formData, category: e.target.value })
-                  }
-                  placeholder="e.g., Marketing, Product Update"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="tags">Tags (Optional, comma-separated)</Label>
-                <Input
-                  id="tags"
-                  value={formData.tags}
-                  onChange={(e) =>
-                    setFormData({ ...formData, tags: e.target.value })
-                  }
-                  placeholder="e.g., social media, announcement, sale"
-                />
-              </div>
+          
 
               <div className="space-y-2">
                 <Label>Select Platforms</Label>
