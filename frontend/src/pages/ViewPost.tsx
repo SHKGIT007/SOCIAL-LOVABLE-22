@@ -109,11 +109,18 @@ const ViewPost = () => {
     );
   }
 
+  // Helper to always return array for platforms
+  const getPlatformsArray = (platforms: string[] | string | undefined): string[] => {
+    if (Array.isArray(platforms)) return platforms;
+    if (typeof platforms === 'string' && platforms) return platforms.split(',').map(p => p.trim()).filter(Boolean);
+    return [];
+  };
+
   return (
     <DashboardLayout userRole="client">
       <div className="space-y-6 max-w-4xl mx-auto">
         <div className="flex items-center justify-between">
-          <Button variant="ghost" onClick={() => navigate("/posts")}>
+          <Button variant="ghost" onClick={() => navigate("/posts")}> 
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Posts
           </Button>
@@ -154,13 +161,11 @@ const ViewPost = () => {
             <div>
               <h3 className="font-semibold mb-2">Platforms</h3>
               <div className="flex flex-wrap gap-2">
-                {
-                post?.platforms?.map((platform) => (
+                {getPlatformsArray(post.platforms).map((platform) => (
                   <Badge key={platform} variant="secondary">
                     {platform}
                   </Badge>
-                ))
-                }
+                ))}
               </div>
             </div>
 

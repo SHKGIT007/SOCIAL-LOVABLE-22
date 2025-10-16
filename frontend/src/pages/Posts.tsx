@@ -122,6 +122,13 @@ const Posts = () => {
 
   console.log("post",posts)
 
+  // Helper to always return array for platforms
+  const getPlatformsArray = (platforms: string[] | string | undefined): string[] => {
+    if (Array.isArray(platforms)) return platforms;
+    if (typeof platforms === 'string' && platforms) return platforms.split(',').map(p => p.trim()).filter(Boolean);
+    return [];
+  };
+
   return (
     <DashboardLayout userRole="client">
       <div className="space-y-6">
@@ -130,7 +137,7 @@ const Posts = () => {
             <h1 className="text-3xl font-bold tracking-tight">Posts</h1>
             <p className="text-muted-foreground">Manage your social media posts</p>
           </div>
-          <Button onClick={() => navigate("/posts/new")}>
+          <Button onClick={() => navigate("/posts/new")}> 
             <Plus className="mr-2 h-4 w-4" />
             Create Post
           </Button>
@@ -140,7 +147,7 @@ const Posts = () => {
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12">
               <p className="text-muted-foreground mb-4">No posts yet</p>
-              <Button onClick={() => navigate("/posts/new")}>
+              <Button onClick={() => navigate("/posts/new")}> 
                 <Plus className="mr-2 h-4 w-4" />
                 Create Your First Post
               </Button>
@@ -171,12 +178,7 @@ const Posts = () => {
                 <CardContent>
                   <div className="space-y-4">
                     <div className="flex flex-wrap gap-1">
-                      {(Array.isArray(post.platforms)
-                        ? post.platforms
-                        : typeof post.platforms === 'string' && post.platforms
-                          ? post.platforms?.split(',').map(p => p.trim()).filter(Boolean)
-                          : []
-                      ).map((platform) => (
+                      {getPlatformsArray(post.platforms).map((platform) => (
                         <Badge key={platform} variant="secondary">
                           {platform}
                         </Badge>
