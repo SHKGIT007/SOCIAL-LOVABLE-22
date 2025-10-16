@@ -45,8 +45,11 @@ const NewPost = () => {
         if (profileRes.status && profileRes.data?.profile) {
           const p = profileRes.data.profile;
           setTitle(p.business_name || "");
-          // Build prompt from profile fields
-          const prompt = `Business/Creator: ${p.business_name}\nDescription: ${p.description}\nPlatforms: ${p.platforms}\nBrand Voice: ${p.brand_voice}\nHashtags: ${p.hashtags}\nImage Style: ${p.image_style}`;
+          // Build prompt from profile fields, include festival if present
+          let prompt = `Business/Creator: ${p.business_name}\nDescription: ${p.description}\nPlatforms: ${p.platforms}\nBrand Voice: ${p.brand_voice}\nHashtags: ${p.hashtags}\nImage Style: ${p.image_style}`;
+          if (p.festival && p.festival.trim()) {
+            prompt += `\nFestival/Event: ${p.festival}`;
+          }
           setAiPrompt(prompt);
         }
       } catch (error) {

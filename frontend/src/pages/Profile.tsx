@@ -13,6 +13,7 @@ const initialProfile = {
   brand_voice: "",
   hashtags: "",
   image_style: "",
+  festival: "",
 };
 
 import { useEffect } from "react";
@@ -35,6 +36,7 @@ const Profile = () => {
             brand_voice: res.data.profile.brand_voice || "",
             hashtags: res.data.profile.hashtags || "",
             image_style: res.data.profile.image_style || "",
+            festival: res.data.profile.festival || "",
           });
         }
       } catch (error) {
@@ -108,9 +110,13 @@ const Profile = () => {
                   <Input id="hashtags" name="hashtags" placeholder="Default Hashtags (comma separated)" value={profile.hashtags} onChange={handleChange} className="w-full md:w-2/3 border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md" />
                 </div>
                 <div className="flex flex-col md:flex-row items-center gap-4">
-                  <label htmlFor="image_style" className="w-full md:w-1/3 text-base font-semibold text-gray-700 md:text-right">Image Style</label>
-                  <Input id="image_style" name="image_style" placeholder="Image Style (e.g. minimal, vibrant)" value={profile.image_style} onChange={handleChange} className="w-full md:w-2/3 border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md" />
-                </div>
+                    <label htmlFor="image_style" className="w-full md:w-1/3 text-base font-semibold text-gray-700 md:text-right">Image Style</label>
+                    <Input id="image_style" name="image_style" placeholder="Image Style (e.g. minimal, vibrant)" value={profile.image_style} onChange={handleChange} className="w-full md:w-2/3 border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md" />
+                  </div>
+                  <div className="flex flex-col md:flex-row items-center gap-4">
+                    <label htmlFor="festival" className="w-full md:w-1/3 text-base font-semibold text-gray-700 md:text-right">Current Festival/Event</label>
+                    <Input id="festival" name="festival" placeholder="e.g. Diwali, Christmas, Eid" value={profile.festival} onChange={handleChange} className="w-full md:w-2/3 border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md" />
+                  </div>
               </div>
               <Button type="submit" disabled={isLoading} className="w-full mt-6 text-lg font-bold py-3 rounded-md bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-200">
                 {isLoading ? "Saving..." : "Save Profile"}
