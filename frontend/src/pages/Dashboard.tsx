@@ -168,7 +168,7 @@ const Dashboard = () => {
                 onClick={() => navigate("/posts/new")}
               >
                 <Sparkles className="mr-3 h-5 w-5 animate-pulse" />
-                Generate AI Post
+                Create New Post (AI or Manual)
               </Button>
               {/* Secondary Action Button: Clean outline with indigo accent */}
               <Button 
