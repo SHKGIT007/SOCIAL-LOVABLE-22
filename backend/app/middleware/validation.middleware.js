@@ -122,10 +122,10 @@ const validatePostUpdate = [
         .optional()
         .isLength({ min: 10 })
         .withMessage('Content must be at least 10 characters long'),
-    body('platforms')
-        .optional()
-        .isArray({ min: 1 })
-        .withMessage('At least one platform must be selected'),
+    // body('platforms')
+    //     .optional()
+    //     .isArray({ min: 1 })
+    //     .withMessage('At least one platform must be selected'),
     body('status')
         .optional()
         .isIn(['draft', 'scheduled', 'published'])

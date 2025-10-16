@@ -163,3 +163,17 @@
 {"level":"info","message":"Post created","postId":17,"service":"social-lovable-api","timestamp":"2025-10-16T11:51:09.884Z","userId":2}
 {"level":"info","message":"Post updated","postId":"17","service":"social-lovable-api","timestamp":"2025-10-16T11:51:23.365Z","userId":2}
 {"ai_prompt":"Title: shoes collection 1\nDetails: Business/Creator: shoes collection 1\nDescription: cacs\nPlatforms: scs\nBrand Voice: scsc\nHashtags: scsc\nImage Style: minimal","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-16T11:54:30.719Z","userId":2}
+{"level":"info","message":"Facebook post published (update)","postId":"17","service":"social-lovable-api","timestamp":"2025-10-16T11:56:34.442Z","userId":2}
+{"level":"info","message":"Post updated","postId":"17","service":"social-lovable-api","timestamp":"2025-10-16T11:58:05.121Z","userId":2}
+{"level":"info","message":"Scheduled post published to Facebook","postId":17,"service":"social-lovable-api","timestamp":"2025-10-16T11:59:06.220Z","userId":2}
+{"ai_prompt":"Title: 2e2\nDetails: Business/Creator: 2e2\nDescription: qsqs\nPlatforms: scs\nBrand Voice: scsc\nHashtags: scsc\nImage Style: minimal","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-16T12:26:17.153Z","userId":2}
+{"ai_prompt":"Title: 2e2\nDetails: Business/Creator: 2e2\nDescription: qsqs\nPlatforms: scs\nBrand Voice: scsc\nHashtags: scsc\nImage Style: minimal","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-16T12:26:38.289Z","userId":2}
+{"ai_prompt":"Title: 2e2\nDetails: Business/Creator: 2e2\nDescription: qsqs\nPlatforms: scs\nBrand Voice: scsc\nHashtags: scsc\nImage Style: minimal","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-16T12:37:57.503Z","userId":2}
+{"level":"info","message":"Post created","postId":18,"service":"social-lovable-api","timestamp":"2025-10-16T12:38:34.148Z","userId":2}
+{"level":"info","message":"Scheduled post published to Facebook","postId":18,"service":"social-lovable-api","timestamp":"2025-10-16T12:39:04.295Z","userId":2}
+{"ai_prompt":"Title: 2e2\nDetails: Business/Creator: 2e2\nDescription: qsqs\nPlatforms: scs\nBrand Voice: scsc\nHashtags: scsc\nImage Style: minimal","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-16T12:40:44.975Z","userId":2}
+{"level":"info","message":"Post created","postId":19,"service":"social-lovable-api","timestamp":"2025-10-16T12:40:56.152Z","userId":2}
+{"level":"info","message":"Post updated","postId":"19","service":"social-lovable-api","timestamp":"2025-10-16T12:41:02.793Z","userId":2}
+{"level":"info","message":"Post updated","postId":"19","service":"social-lovable-api","timestamp":"2025-10-16T12:41:09.284Z","userId":2}
+{"level":"info","message":"Scheduled post published to Facebook","postId":19,"service":"social-lovable-api","timestamp":"2025-10-16T12:42:03.803Z","userId":2}
+{"level":"info","message":"Facebook post published (update)","postId":"19","service":"social-lovable-api","timestamp":"2025-10-16T12:44:59.060Z","userId":2}
