@@ -177,3 +177,18 @@
 {"level":"info","message":"Post updated","postId":"19","service":"social-lovable-api","timestamp":"2025-10-16T12:41:09.284Z","userId":2}
 {"level":"info","message":"Scheduled post published to Facebook","postId":19,"service":"social-lovable-api","timestamp":"2025-10-16T12:42:03.803Z","userId":2}
 {"level":"info","message":"Facebook post published (update)","postId":"19","service":"social-lovable-api","timestamp":"2025-10-16T12:44:59.060Z","userId":2}
+{"ai_prompt":"Title: shoes\nDetails: Business/Creator: shoes\nDescription: branded shoes\nPlatforms: scs\nBrand Voice: scsc\nHashtags: scsc\nImage Style: minimal","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-16T12:58:12.920Z","userId":2}
+{"ai_prompt":"Title: shoes\nDetails: Business/Creator: shoes\nDescription: branded shoes\nPlatforms: scs\nBrand Voice: scsc\nHashtags: scsc\nImage Style: minimal","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-16T12:58:14.749Z","userId":2}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-17T06:44:40.655Z","userId":2}
+{"level":"info","message":"Subscription created","planId":1,"service":"social-lovable-api","subscriptionId":3,"timestamp":"2025-10-17T06:45:01.991Z","userId":2}
+{"level":"info","message":"Subscription cancelled","service":"social-lovable-api","subscriptionId":"3","timestamp":"2025-10-17T06:45:11.279Z","userId":2}
+{"level":"info","message":"Subscription created","planId":4,"service":"social-lovable-api","subscriptionId":4,"timestamp":"2025-10-17T06:45:55.993Z","userId":2}
+{"level":"info","message":"Subscription cancelled","service":"social-lovable-api","subscriptionId":"4","timestamp":"2025-10-17T06:46:03.066Z","userId":2}
+{"level":"info","message":"Subscription created","planId":3,"service":"social-lovable-api","subscriptionId":5,"timestamp":"2025-10-17T06:46:05.434Z","userId":2}
+{"level":"info","message":"Subscription cancelled","service":"social-lovable-api","subscriptionId":"5","timestamp":"2025-10-17T06:46:10.251Z","userId":2}
+{"level":"info","message":"Subscription created","planId":3,"service":"social-lovable-api","subscriptionId":6,"timestamp":"2025-10-17T06:46:23.109Z","userId":2}
+{"level":"info","message":"Subscription cancelled","service":"social-lovable-api","subscriptionId":"6","timestamp":"2025-10-17T06:46:40.076Z","userId":2}
+{"level":"info","message":"Subscription created","planId":3,"service":"social-lovable-api","subscriptionId":7,"timestamp":"2025-10-17T06:46:43.894Z","userId":2}
+{"level":"info","message":"Subscription cancelled","service":"social-lovable-api","subscriptionId":"7","timestamp":"2025-10-17T06:48:07.343Z","userId":2}
+{"ai_prompt":"Title: shoes\nDetails: Business/Creator: shoes\nDescription: branded shoes\nPlatforms: scs\nBrand Voice: scsc\nHashtags: scsc\nImage Style: minimal","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-17T06:48:31.145Z","userId":2}
+{"level":"info","message":"Facebook post published","postId":20,"service":"social-lovable-api","timestamp":"2025-10-17T06:48:42.863Z","userId":2}
