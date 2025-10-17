@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Oct 16, 2025 at 10:21 AM
+-- Generation Time: Oct 17, 2025 at 06:55 AM
 -- Server version: 5.7.36
 -- PHP Version: 7.4.26
 
@@ -81,7 +81,7 @@ CREATE TABLE IF NOT EXISTS `posts` (
   `updated_at` datetime NOT NULL,
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `posts`
@@ -90,7 +90,41 @@ CREATE TABLE IF NOT EXISTS `posts` (
 INSERT INTO `posts` (`id`, `title`, `content`, `platforms`, `status`, `is_ai_generated`, `ai_prompt`, `scheduled_at`, `published_at`, `user_id`, `category`, `tags`, `media_urls`, `analytics`, `image_prompt`, `image_url`, `created_at`, `updated_at`) VALUES
 (7, 'clothes', '🚀 Exciting news about clothes!\n\nclothes is revolutionizing the way we think about marketing. Whether you\'re new to this space or a seasoned professional, there\'s something for everyone.\n\nKey highlights:\n• Innovation in clothes\n• Benefits for adults\n• Future opportunities\n\nWhat are your thoughts on clothes? Share your experience in the comments below!\n\n#clothes #Innovation #Marketing', '[\"Facebook\"]', 'draft', 1, 'clothes', NULL, NULL, 3, NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-13 05:59:02', '2025-10-13 05:59:02'),
 (15, 'sfs', '**Unlock Your Potential with SFS**\n\nDiscover the power of SFS, a revolutionary platform designed to empower adults in their personal and professional lives. Our cutting-edge solutions cater to the diverse needs of modern adults, providing unparalleled support and guidance.\n\nWith SFS, you can:\n\n* Enhance your skills and knowledge\n* Boost your confidence and self-esteem\n* Achieve your goals and aspirations\n* Connect with like-minded individuals\n\nJoin our community today and experience the transformative impact of SFS. Stay ahead of the curve and unlock your full potential. Learn more about our innovative services and take the first step towards a brighter future.', '[\"Facebook\"]', 'published', 1, 'sfs', '2025-10-16 05:38:00', '2025-10-16 05:38:03', 2, NULL, NULL, NULL, NULL, 'fish', 'https://image.pollinations.ai/prompt/fish?width=1024&height=1024&nologo=true', '2025-10-16 05:37:05', '2025-10-16 05:38:03'),
-(16, 'shoes', '\"Elevate Your Style with Our Premium Footwear Collection\n\nDiscover the perfect blend of comfort and sophistication with our latest range of shoes, designed specifically for adults. From sleek and modern designs to timeless classics, our collection has something for everyone.\n\nWith a focus on quality and craftsmanship, our shoes are built to last, ensuring you can enjoy your favorite styles for years to come. Whether you\'re dressing up for a special occasion or dressing down for a casual day out, our shoes are the perfect choice.\n\nVisit us today and experience the comfort, style, and versatility of our premium footwear collection. Treat your feet to the best and take your shoe game to the next level. Explore now and elevate your style!\"', '[\"Facebook\"]', 'published', 1, 'shoes', '2025-10-16 05:52:00', '2025-10-16 05:52:03', 2, NULL, NULL, NULL, NULL, 'shoes', 'https://image.pollinations.ai/prompt/shoes?width=1024&height=1024&nologo=true', '2025-10-16 05:51:44', '2025-10-16 05:52:03');
+(16, 'shoes', '\"Elevate Your Style with Our Premium Footwear Collection\n\nDiscover the perfect blend of comfort and sophistication with our latest range of shoes, designed specifically for adults. From sleek and modern designs to timeless classics, our collection has something for everyone.\n\nWith a focus on quality and craftsmanship, our shoes are built to last, ensuring you can enjoy your favorite styles for years to come. Whether you\'re dressing up for a special occasion or dressing down for a casual day out, our shoes are the perfect choice.\n\nVisit us today and experience the comfort, style, and versatility of our premium footwear collection. Treat your feet to the best and take your shoe game to the next level. Explore now and elevate your style!\"', '[\"Facebook\"]', 'published', 1, 'shoes', '2025-10-16 05:52:00', '2025-10-16 05:52:03', 2, NULL, NULL, NULL, NULL, 'shoes', 'https://image.pollinations.ai/prompt/shoes?width=1024&height=1024&nologo=true', '2025-10-16 05:51:44', '2025-10-16 05:52:03'),
+(17, 'shoes collection 1', 'FFFFFFFFFFFFFF', '[\"Facebook\"]', 'published', 1, 'Business/Creator: shoes collection 1\nDescription: cacs\nPlatforms: scs\nBrand Voice: scsc\nHashtags: scsc\nImage Style: minimal', '2025-10-16 11:59:00', '2025-10-16 11:59:06', 2, NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-16 11:51:09', '2025-10-16 11:59:06'),
+(18, '2e2', 'Based on the provided details, I will create a comprehensive outline for the 2e2 brand.\n\n**Business/Creator:** 2e2\n**Description:** qsqs (assuming this is a placeholder, I\'ll create a generic description) - 2e2 is a innovative company that specializes in providing cutting-edge solutions to simplify and streamline business processes.\n\n**Platforms:** scs (assuming this refers to social media platforms, I\'ll list a few) - Twitter, Instagram, Facebook, LinkedIn\n\n**Brand Voice:** scsc (assuming this refers to a tone of voice, I\'ll describe a generic tone) - 2e2\'s brand voice is professional, approachable, and informative. We aim to educate and engage our audience with clear and concise language.\n\n**Hashtags:** scsc (assuming this refers to a set of hashtags, I\'ll create a few) - #2e2Innovates #SimplifyYourBusiness #StreamlineYourProcess\n\n**Image Style:** minimal - 2e2\'s visual identity features a clean and minimalist aesthetic, with a focus on simple shapes, bold typography, and a limited color palette. This style is reflected in our logo, website, and social media graphics.\n\nHere\'s an example of what a social media post from 2e2 might look like:\n\n**Twitter Post:**\n\"Simplify your business processes with 2e2\'s innovative solutions! Our expert team is dedicated to helping you streamline your operations and increase productivity. #2e2Innovates #SimplifyYourBusiness\"\n\n**Instagram Post:**\n\"Minimalism is key to our design philosophy at 2e2. We believe that simplicity is the foundation of innovation. Check out our latest blog post to learn more about how our minimalist approach can benefit your business. #2e2Innovates #MinimalistDesign\"\n\n**Facebook Post:**\n\"Are you tired of complicated business processes holding you back? At 2e2, we\'re dedicated to providing cutting-edge solutions to simplify and streamline your operations. Our team of experts is here to help you every step of the way. #2e2Innovates #StreamlineYourProcess\"\n\n**LinkedIn Post:**\n\"As a business leader, you understand the importance of efficiency and productivity. At 2e2, we\'re committed to helping you achieve your goals with our innovative solutions and expert guidance. Let\'s work together to simplify your business processes and take your company to the next level. #2e2Innovates #SimplifyYourBusiness\"', '[\"Facebook\"]', 'published', 1, 'Business/Creator: 2e2\nDescription: qsqs\nPlatforms: scs\nBrand Voice: scsc\nHashtags: scsc\nImage Style: minimal', '2025-10-16 12:39:00', '2025-10-16 12:39:04', 2, NULL, NULL, NULL, NULL, 'clothes', NULL, '2025-10-16 12:38:34', '2025-10-16 12:39:04'),
+(19, '2e2', 'It seems like you\'ve provided a template with placeholders, but without actual content. To create a cohesive brand identity for \"2e2\", I\'ll fill in the details with hypothetical information. Feel free to replace these with your actual preferences.\n\n**Title:** 2e2\n**Details:** Business/Creator: 2e2 is a cutting-edge tech firm specializing in innovative software solutions.\n**Description:** At 2e2, we\'re passionate about crafting intuitive and user-friendly products that simplify complex tasks, making life easier for our customers.\n**Platforms:** Our products and services are available on Web, Mobile (iOS and Android), and Desktop (Windows and macOS) platforms.\n**Brand Voice:** Our tone is approachable, informative, and slightly humorous, aiming to educate and engage our audience without being overly technical.\n**Hashtags:** #InnovateWith2e2 #TechForAll #SimplifyYourLife #SoftwareSolutions\n**Image Style:** We prefer a minimalistic aesthetic, focusing on clean lines, ample whitespace, and a limited color palette that reflects our brand\'s personality: calming blues (#4567b7) and energetic oranges (#ff9900).\n\nThis setup provides a clear and modern brand identity for 2e2, emphasizing innovation, user experience, and approachability.', '[\"Facebook\"]', 'published', 1, 'Business/Creator: 2e2\nDescription: qsqs\nPlatforms: scs\nBrand Voice: scsc\nHashtags: scsc\nImage Style: minimal', '2025-10-15 23:14:00', '2025-10-16 12:42:03', 2, NULL, NULL, NULL, NULL, 'sparrow', 'https://image.pollinations.ai/prompt/sparrow?width=1024&height=1024&nologo=true', '2025-10-16 12:40:56', '2025-10-16 12:44:53'),
+(20, 'shoes', 'Here\'s a potential social media post based on the provided details:\n\n**Post:**\nElevate your style with our branded shoes\nFrom sleek and modern to bold and statement-making, our collection has something for everyone.\nShop now and experience the comfort and quality of our shoes\n#scsc #shoes #minimalstyle\n\n**Image:**\nA minimalist photo of a pair of shoes against a plain background, with a focus on the shoe\'s design and details.\n\n**Platform:**\nThe post will be published on the SCS platform.\n\n**Brand Voice:**\nThe tone of the post is consistent with the SCSC brand voice, which is modern, sleek, and sophisticated.\n\n**Hashtags:**\nThe post includes the #scsc hashtag, which is the primary hashtag for the brand, as well as #shoes and #minimalstyle to reach a wider audience interested in fashion and minimalist design.\n\nLet me know if you want to make any changes or if you have any other requests!', '[\"Facebook\"]', 'published', 1, 'Business/Creator: shoes\nDescription: branded shoes\nPlatforms: scs\nBrand Voice: scsc\nHashtags: scsc\nImage Style: minimal', NULL, NULL, 2, NULL, NULL, NULL, NULL, 'ss', 'https://image.pollinations.ai/prompt/ss?width=1024&height=1024&nologo=true', '2025-10-17 06:48:39', '2025-10-17 06:48:39');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `profiles`
+--
+
+DROP TABLE IF EXISTS `profiles`;
+CREATE TABLE IF NOT EXISTS `profiles` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `business_name` varchar(255) NOT NULL,
+  `description` text NOT NULL,
+  `platforms` varchar(255) DEFAULT NULL,
+  `brand_voice` varchar(255) DEFAULT NULL,
+  `hashtags` varchar(255) DEFAULT NULL,
+  `image_style` varchar(255) DEFAULT NULL,
+  `festival` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_id` (`user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `profiles`
+--
+
+INSERT INTO `profiles` (`id`, `user_id`, `business_name`, `description`, `platforms`, `brand_voice`, `hashtags`, `image_style`, `festival`, `created_at`, `updated_at`) VALUES
+(1, 2, 'shoes', 'branded shoes', 'scs', 'scsc', 'scsc', 'minimal', 'Diwali', '2025-10-16 10:40:01', '2025-10-17 06:54:21');
 
 -- --------------------------------------------------------
 
@@ -174,7 +208,7 @@ CREATE TABLE IF NOT EXISTS `subscriptions` (
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   KEY `plan_id` (`plan_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `subscriptions`
@@ -182,7 +216,12 @@ CREATE TABLE IF NOT EXISTS `subscriptions` (
 
 INSERT INTO `subscriptions` (`id`, `user_id`, `plan_id`, `status`, `start_date`, `end_date`, `posts_used`, `ai_posts_used`, `auto_renew`, `created_at`, `updated_at`) VALUES
 (1, 2, 1, 'cancelled', '2025-10-15 07:18:06', NULL, 0, 0, 0, '2025-10-15 07:18:06', '2025-10-15 07:18:57'),
-(2, 2, 2, 'cancelled', '2025-10-15 07:19:00', NULL, 0, 0, 0, '2025-10-15 07:19:00', '2025-10-15 07:19:26');
+(2, 2, 2, 'cancelled', '2025-10-15 07:19:00', NULL, 0, 0, 0, '2025-10-15 07:19:00', '2025-10-15 07:19:26'),
+(3, 2, 1, 'cancelled', '2025-10-17 06:45:01', NULL, 0, 0, 0, '2025-10-17 06:45:01', '2025-10-17 06:45:11'),
+(4, 2, 4, 'cancelled', '2025-10-17 06:45:55', NULL, 0, 0, 0, '2025-10-17 06:45:55', '2025-10-17 06:46:03'),
+(5, 2, 3, 'cancelled', '2025-10-17 06:46:05', NULL, 0, 0, 0, '2025-10-17 06:46:05', '2025-10-17 06:46:10'),
+(6, 2, 3, 'cancelled', '2025-10-17 06:46:23', NULL, 0, 0, 0, '2025-10-17 06:46:23', '2025-10-17 06:46:40'),
+(7, 2, 3, 'cancelled', '2025-10-17 06:46:43', NULL, 0, 0, 0, '2025-10-17 06:46:43', '2025-10-17 06:48:07');
 
 -- --------------------------------------------------------
 
@@ -229,6 +268,12 @@ INSERT INTO `users` (`id`, `user_name`, `user_fname`, `user_lname`, `email`, `us
 --
 ALTER TABLE `posts`
   ADD CONSTRAINT `posts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `profiles`
+--
+ALTER TABLE `profiles`
+  ADD CONSTRAINT `profiles_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE;
 
 --
 -- Constraints for table `social_accounts`
