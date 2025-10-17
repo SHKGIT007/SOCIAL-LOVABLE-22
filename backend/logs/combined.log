@@ -147,3 +147,4 @@
 {"level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-16T05:51:07.259Z","topic":"shoes","userId":2}
 {"level":"info","message":"Post created","postId":16,"service":"social-lovable-api","timestamp":"2025-10-16T05:51:44.627Z","userId":2}
 {"level":"info","message":"Scheduled post published to Facebook","postId":16,"service":"social-lovable-api","timestamp":"2025-10-16T05:52:03.855Z","userId":2}
+{"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-16T08:41:08.367Z","userId":1}
