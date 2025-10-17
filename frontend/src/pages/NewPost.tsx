@@ -158,7 +158,7 @@ const NewPost = () => {
         image_url: imageContent || null,
       });
 
-      if (response.status) {
+     if (response.status) {
         toast({
           title: "Success",
           description: "Post created successfully!",
