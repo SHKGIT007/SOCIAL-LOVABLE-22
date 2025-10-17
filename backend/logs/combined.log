@@ -192,3 +192,4 @@
 {"level":"info","message":"Subscription cancelled","service":"social-lovable-api","subscriptionId":"7","timestamp":"2025-10-17T06:48:07.343Z","userId":2}
 {"ai_prompt":"Title: shoes\nDetails: Business/Creator: shoes\nDescription: branded shoes\nPlatforms: scs\nBrand Voice: scsc\nHashtags: scsc\nImage Style: minimal","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-17T06:48:31.145Z","userId":2}
 {"level":"info","message":"Facebook post published","postId":20,"service":"social-lovable-api","timestamp":"2025-10-17T06:48:42.863Z","userId":2}
+{"ai_prompt":"Title: shoes\nDetails: Business/Creator: shoes\nDescription: branded shoes\nPlatforms: scs\nBrand Voice: scsc\nHashtags: scsc\nImage Style: minimal\nFestival/Event: Diwali","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-10-17T06:54:49.200Z","userId":2}
