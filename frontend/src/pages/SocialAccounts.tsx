@@ -138,38 +138,21 @@ const SocialAccounts = () => {
 
 
             } else if (platform === "Instagram") {
+                // Use dynamic App ID and callback URL
+                const igAcc = accounts.find(acc => acc.platform === "Instagram");
+                let app_id = igAppId;
+                let app_secret = igAppSecret;
+                let redirect_uri = `https://socialvibe.tradestreet.in/backend/instagram/callback`;
 
-                //     dgg {
-                // 'hub.mode': 'subscribe',
-                // 'hub.challenge': '793876193',
-                // 'hub.verify_token': 'nilesh'
-                // }
-                // ✅ Webhook verified successfully
+                if (!app_id || !app_secret || !redirect_uri || !igAcc) {
+                    toast({ title: "Error", description: "Please save Instagram App ID/Secret first.", variant: "destructive" });
+                    setIsLoading(false);
+                    return;
+                }
 
-
-                // for instgram
-
-                let appid = '1579224306600577'
-
-                // secretkey = a61184184766a15c03154b899db189c7
-                // callbackUrl = https://hometalent4u.in/backend/facebook/callback
-                //  VERIFY_TOKEN = "nilesh"; 
-
-                // https://api.instagram.com/oauth/authorize
-                // ?client_id={app-id}
-                // &redirect_uri={redirect-uri}
-                // &scope=user_profile,user_media
-                // &response_type=code
-
-
-                const oauthUrl = `https://api.instagram.com/oauth/authorize?client_id=${appid}&redirect_uri=${encodeURIComponent(`https://hometalent4u.in/backend/facebook/callback`)}&scope=user_profile,user_media&response_type=code`;
+                // Instagram OAuth URL
+                const oauthUrl = `https://api.instagram.com/oauth/authorize?client_id=${app_id}&redirect_uri=${encodeURIComponent(redirect_uri)}&scope=user_profile,user_media&response_type=code`;
                 window.location.href = oauthUrl;
-
-
-
-
-
-
             }
 
 
