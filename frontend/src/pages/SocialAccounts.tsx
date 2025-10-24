@@ -149,10 +149,20 @@ const SocialAccounts = () => {
                     setIsLoading(false);
                     return;
                 }
+                let user_id = igAcc ? igAcc.user_id : null;
 
-                // Instagram OAuth URL
-                const oauthUrl = `https://api.instagram.com/oauth/authorize?client_id=${app_id}&redirect_uri=${encodeURIComponent(redirect_uri)}&scope=user_profile,user_media&response_type=code`;
-                window.location.href = oauthUrl;
+                let stateData = {
+                    user_id: user_id,
+                    app_id: app_id,
+                    app_secret: app_secret,
+                    redirect_uri: redirect_uri,
+                    redirect_dashboard: "http://localhost:8080/dashboard"
+                };
+
+                const state = encodeURIComponent(JSON.stringify(stateData));
+
+     const oauthUrl = `https://www.instagram.com/oauth/authorize?client_id=${app_id}&redirect_uri=${encodeURIComponent(redirect_uri)}&state=${state}&response_type=code&scope=instagram_business_basic,instagram_business_manage_messages,instagram_business_manage_comments,instagram_business_content_publish`
+     window.location.href = oauthUrl;
             }
 
 
