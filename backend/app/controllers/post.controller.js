@@ -5,6 +5,7 @@ const logger = require('../config/logger');
 const { SocialAccount } = require('../models');
 const axios = require('axios');
 const {facebookPost} = require('../../redirectAuth/facebook/facebookPost');
+const {instagramPost} = require('../../redirectAuth/instagram/instagramPost');
 const OpenAI = require("openai");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 require('dotenv').config();
@@ -16,8 +17,11 @@ const createPost = asyncHandler(async (req, res) => {
     const { title, content, platforms, status, scheduled_at, media_urls, is_ai_generated, ai_prompt ,image_prompt,image_url } = req.body;
     const userId = req.user.id;
 
+   
+    // console.log("platforms",platforms)
+    // console.log("platforms" ,typeof platforms)
+    // return res.json({status:false});
 
-    
 
     // Check user's subscription limits
     const subscription = await Subscription.findOne({
@@ -68,24 +72,48 @@ const createPost = asyncHandler(async (req, res) => {
         );
     }
 
-    // Facebook publish logic
-    if (status === 'published') {
-        const socialAccount = await SocialAccount.findOne({
-            where: { user_id: userId, platform: 'Facebook', is_active: 1 }
-        });
-        if (socialAccount && socialAccount.access_token) {
-            try {
-                const postData = await facebookPost(socialAccount.access_token, content,image_url);
-                logger.info('Facebook post published', { userId, postId: post.id });
-                return res.json({ success: true, message: 'Post published to Facebook', fb: postData });
-            } catch (err) {
-                logger.error('Facebook publish error', { error: err.message });
-                return res.status(500).json({ success: false, message: 'Facebook publish failed', error: err.message });
+    // Publish logic for Facebook and Instagram
+    if (status === 'published' && Array.isArray(platforms)) {
+        let publishResults = {};
+        // Facebook
+        if (platforms.includes('Facebook')) {
+            const fbAccount = await SocialAccount.findOne({
+                where: { user_id: userId, platform: 'Facebook', is_active: 1 }
+            });
+            if (fbAccount && fbAccount.access_token) {
+                try {
+                    const fbPostData = await facebookPost(fbAccount.access_token, content, image_url);
+                 //   logger.info('Facebook post published', { userId, postId: post.id });
+                    publishResults.facebook = { success: true, data: fbPostData };
+                } catch (err) {
+                    logger.error('Facebook publish error', { error: err.message });
+                    publishResults.facebook = { success: false, error: err.message };
+                }
             }
+        }
+        // Instagram
+        if (platforms.includes('Instagram')) {
+            const igAccount = await SocialAccount.findOne({
+                where: { user_id: userId, platform: 'Instagram', is_active: 1 }
+            });
+            if (igAccount && igAccount.access_token) {
+                try {
+                    const igPostData = await instagramPost(igAccount.access_token, content, image_url);
+                   // logger.info('Instagram post published', { userId, postId: post.id });
+                    publishResults.instagram = { success: true, data: igPostData };
+                } catch (err) {
+                    logger.error('Instagram publish error', { error: err.message });
+                    publishResults.instagram = { success: false, error: err.message };
+                }
+            }
+        }
+        // If any platform was published, return result
+        if (Object.keys(publishResults).length > 0) {
+            return res.json({ success: true, message: 'Post published', results: publishResults });
         }
     }
     // For scheduled and draft, just save post, do not publish
-    logger.info('Post created', { postId: post.id, userId });
+  //  logger.info('Post created', { postId: post.id, userId });
     res.status(201).json({
         status: true,
         message: 'Post created successfully',
