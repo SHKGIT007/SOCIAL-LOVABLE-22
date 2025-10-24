@@ -1,12 +1,8 @@
 
 const { User, SocialAccount } = require('../../app/models');
 
-
 module.exports = function (app) {
-
 const axios = require('axios');
-
-
  app.get('/facebook/callback', async (req, res) => {
 
      const state = JSON.parse(decodeURIComponent(req.query.state)); // 👈 decode & parse
@@ -122,7 +118,7 @@ const axios = require('axios');
 
     }
 
-});
+ });
   
 
 
