@@ -8,3 +8,19 @@
 {"error":"The parameter image_url is required","level":"error","message":"Instagram publish error","service":"social-lovable-api","timestamp":"2025-10-24T12:59:54.341Z"}
 {"error":"The parameter image_url is required","level":"error","message":"Instagram publish error","service":"social-lovable-api","timestamp":"2025-10-24T13:00:38.127Z"}
 {"error":"Media ID is not available","level":"error","message":"Instagram publish error","service":"social-lovable-api","timestamp":"2025-10-24T13:06:11.928Z"}
+{"error":"Error validating access token: Session has expired on Friday, 24-Oct-25 07:00:00 PDT. The current time is Monday, 27-Oct-25 22:11:37 PDT.","level":"error","message":"Instagram publish error","service":"social-lovable-api","timestamp":"2025-10-28T05:11:37.467Z"}
+{"error":"The caption was too long.","level":"error","message":"Scheduled Instagram publish error","postId":40,"service":"social-lovable-api","timestamp":"2025-10-28T06:27:00.619Z"}
+{"error":"The caption was too long.","level":"error","message":"Scheduled Instagram publish error","postId":40,"service":"social-lovable-api","timestamp":"2025-10-28T06:28:00.562Z"}
+{"error":"The caption was too long.","level":"error","message":"Scheduled Instagram publish error","postId":40,"service":"social-lovable-api","timestamp":"2025-10-28T06:29:00.539Z"}
+{"error":"The caption was too long.","level":"error","message":"Scheduled Instagram publish error","postId":40,"service":"social-lovable-api","timestamp":"2025-10-28T06:30:00.679Z"}
+{"error":"The caption was too long.","level":"error","message":"Scheduled Instagram publish error","postId":40,"service":"social-lovable-api","timestamp":"2025-10-28T06:31:00.572Z"}
+{"error":"The caption was too long.","level":"error","message":"Scheduled Instagram publish error","postId":40,"service":"social-lovable-api","timestamp":"2025-10-28T06:32:00.811Z"}
+{"error":"The caption was too long.","level":"error","message":"Scheduled Instagram publish error","postId":40,"service":"social-lovable-api","timestamp":"2025-10-28T06:33:00.598Z"}
+{"error":"The caption was too long.","level":"error","message":"Scheduled Instagram publish error","postId":40,"service":"social-lovable-api","timestamp":"2025-10-28T06:34:01.091Z"}
+{"error":"The caption was too long.","level":"error","message":"Scheduled Instagram publish error","postId":40,"service":"social-lovable-api","timestamp":"2025-10-28T06:35:00.718Z"}
+{"error":"The caption was too long.","level":"error","message":"Scheduled Instagram publish error","postId":40,"service":"social-lovable-api","timestamp":"2025-10-28T06:36:00.558Z"}
+{"error":"The caption was too long.","level":"error","message":"Scheduled Instagram publish error","postId":40,"service":"social-lovable-api","timestamp":"2025-10-28T06:37:00.488Z"}
+{"error":"The caption was too long.","level":"error","message":"Scheduled Instagram publish error","postId":40,"service":"social-lovable-api","timestamp":"2025-10-28T06:38:00.517Z"}
+{"error":"The caption was too long.","level":"error","message":"Scheduled Instagram publish error","postId":40,"service":"social-lovable-api","timestamp":"2025-10-28T06:39:00.646Z"}
+{"error":"The caption was too long.","level":"error","message":"Scheduled Instagram publish error","postId":40,"service":"social-lovable-api","timestamp":"2025-10-28T06:40:00.639Z"}
+{"error":"The parameter image_url is required","level":"error","message":"Instagram publish error","service":"social-lovable-api","timestamp":"2025-10-28T06:42:27.693Z"}
