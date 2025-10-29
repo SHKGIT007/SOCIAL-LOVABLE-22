@@ -10,6 +10,7 @@ const OpenAI = require("openai");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 require('dotenv').config();
 const fs = require('fs');
+const { type } = require('os');
 
 
 
@@ -18,18 +19,35 @@ const createPost = asyncHandler(async (req, res) => {
     // Debug: Log incoming form data and files
     console.log("req.body:", req.body);
     console.log("req.files:", req.files);
+    console.log("platforms:", req.body.platforms);
+    console.log("platforms:",typeof req.body.platforms);
+
+    
 
     // Support for file uploads (image/video)
     const userId = req.user.id;
     let image_url = req.body.image_url || null;
     let video_url = null;
 
-    const { title, content, platforms, status, is_ai_generated } = req.body;
+    let { title, content, platforms, status, is_ai_generated } = req.body;
+    // Convert platforms to array if string
+    if (typeof platforms === 'string') {
+        try {
+            platforms = JSON.parse(platforms);
+        } catch {
+            platforms = [platforms];
+        }
+    }
 
-    // Ensure uploads/posts directory exists
-    const uploadDir = 'uploads/posts';
-    if (!fs.existsSync(uploadDir)) {
-        fs.mkdirSync(uploadDir, { recursive: true });
+
+
+    // Use environment variables for upload directory and public URL
+    const UPLOAD_DIR = process.env.UPLOAD_DIR || '/var/www/socialvibe/uploads';
+    const PUBLIC_UPLOAD_URL = process.env.PUBLIC_UPLOAD_URL || 'https://socialvibe.tradestreet.in/uploads';
+
+    // Ensure uploads directory exists
+    if (!fs.existsSync(UPLOAD_DIR)) {
+        fs.mkdirSync(UPLOAD_DIR, { recursive: true });
     }
 
     // If multipart, handle file uploads
@@ -37,16 +55,18 @@ const createPost = asyncHandler(async (req, res) => {
         if (req.files.image_file) {
             // Save image file and set image_url
             const img = req.files.image_file;
-            const imgPath = `${uploadDir}/${Date.now()}_${img.name}`;
+            const fileName = `${Date.now()}_${img.name}`;
+            const imgPath = `${UPLOAD_DIR}/${fileName}`;
             await img.mv(imgPath);
-            image_url = `/${imgPath}`;
+            image_url = `${PUBLIC_UPLOAD_URL}/${fileName}`;
         }
         if (req.files.video_file) {
             // Save video file and set video_url
             const vid = req.files.video_file;
-            const vidPath = `${uploadDir}/${Date.now()}_${vid.name}`;
+            const fileName = `${Date.now()}_${vid.name}`;
+            const vidPath = `${UPLOAD_DIR}/${fileName}`;
             await vid.mv(vidPath);
-            video_url = `/${vidPath}`;
+            video_url = `${PUBLIC_UPLOAD_URL}/${fileName}`;
         }
     }
 
@@ -100,8 +120,13 @@ const createPost = asyncHandler(async (req, res) => {
         );
     }
 
+    
+
     // Publish logic for Facebook and Instagram
     if (status === 'published' && Array.isArray(platforms)) {
+
+
+        console.log("Publishing to platformsLLLLLLLLLLLLLLLLLLL:", platforms);
         let publishResults = {};
         // Facebook
         if (platforms.includes('Facebook')) {
@@ -125,6 +150,8 @@ const createPost = asyncHandler(async (req, res) => {
         }
         // Instagram
         if (platforms.includes('Instagram')) {
+
+            console.log("Publishing to Instagram INSIDEEEEE");
             const igAccount = await SocialAccount.findOne({
                 where: { user_id: userId, platform: 'Instagram', is_active: 1 }
             });
