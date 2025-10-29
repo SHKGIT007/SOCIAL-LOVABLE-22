@@ -12,11 +12,9 @@ const {
 router.post('/register', validateUserRegistration, authController.register);
 router.post('/login', validateUserLogin, authController.login);
 // Social login routes
-router.post('/google', authController.googleOAuth);
-router.post('/facebook', authController.facebookOAuth);
 
 // OTP/email verification route
-router.post('/verify-otp', authController.verifyOtp);
+// router.post('/verify-otp', authController.verifyOtp);
 
 // Protected routes
 router.get('/profile', authenticateToken, authController.getProfile);

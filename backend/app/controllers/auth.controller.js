@@ -1,64 +1,4 @@
 // Social Login: Google OAuth
-const googleOAuth = asyncHandler(async (req, res) => {
-    const { token } = req.body;
-    if (!token) return res.status(400).json({ status: false, message: 'Google token required' });
-    // Verify token with Google
-    const googleApiUrl = `https://oauth2.googleapis.com/tokeninfo?id_token=${token}`;
-    const response = await require('axios').get(googleApiUrl);
-    const profile = response.data;
-    if (!profile.email) return res.status(400).json({ status: false, message: 'Invalid Google token' });
-    // Find or create user
-    let user = await User.findOne({ where: { email: profile.email } });
-    if (!user) {
-        user = await User.create({
-            user_name: profile.name,
-            email: profile.email,
-            provider: 'google',
-            provider_id: profile.sub,
-            email_verified: profile.email_verified === 'true',
-            avatar_url: profile.picture,
-            password: '',
-            user_type: 'client',
-            role_id: 2
-        });
-    } else {
-        await user.update({ provider: 'google', provider_id: profile.sub, email_verified: true, avatar_url: profile.picture });
-    }
-    // Generate token
-    const tokenJwt = generateToken(user.id);
-    res.json({ status: true, message: 'Google login successful', data: { user, token: tokenJwt } });
-});
-
-// Social Login: Facebook OAuth
-const facebookOAuth = asyncHandler(async (req, res) => {
-    const { token } = req.body;
-    if (!token) return res.status(400).json({ status: false, message: 'Facebook token required' });
-    // Verify token with Facebook
-    const fbApiUrl = `https://graph.facebook.com/me?fields=id,name,email,picture&access_token=${token}`;
-    const response = await require('axios').get(fbApiUrl);
-    const profile = response.data;
-    if (!profile.email) return res.status(400).json({ status: false, message: 'Invalid Facebook token' });
-    // Find or create user
-    let user = await User.findOne({ where: { email: profile.email } });
-    if (!user) {
-        user = await User.create({
-            user_name: profile.name,
-            email: profile.email,
-            provider: 'facebook',
-            provider_id: profile.id,
-            email_verified: true,
-            avatar_url: profile.picture?.data?.url || '',
-            password: '',
-            user_type: 'client',
-            role_id: 2
-        });
-    } else {
-        await user.update({ provider: 'facebook', provider_id: profile.id, email_verified: true, avatar_url: profile.picture?.data?.url || '' });
-    }
-    // Generate token
-    const tokenJwt = generateToken(user.id);
-    res.json({ status: true, message: 'Facebook login successful', data: { user, token: tokenJwt } });
-});
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
@@ -319,7 +259,5 @@ module.exports = {
     getProfile,
     updateProfile,
     changePassword,
-    verifyOtp,
-    googleOAuth,
-    facebookOAuth
+    //verifyOtp
 };
