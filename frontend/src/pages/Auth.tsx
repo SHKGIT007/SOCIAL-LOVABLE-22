@@ -88,15 +88,10 @@ const Auth = () => {
     }
   };
 
-  const [showOtp, setShowOtp] = useState(false);
-  const [otp, setOtp] = useState("");
-  const [otpStatus, setOtpStatus] = useState("");
-
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setShowOtp(false);
-    setOtpStatus("");
+
     try {
       const response = await apiService.register({
         user_name: userName,
@@ -106,12 +101,20 @@ const Auth = () => {
         user_lname: userLname,
         user_phone: userPhone,
       });
+
       if (response.status) {
+        // Store auth data in localStorage
+        setAuthData(response.data);
         toast({
           title: "Success",
-          description: "Account created! OTP sent to email.",
+          description: "Account created successfully!",
         });
-        setShowOtp(true);
+        // Fallback navigation if onAuthStateChange does not trigger
+        if (response.data.user?.role === "admin") {
+          navigate("/admin");
+        } else {
+          navigate("/dashboard");
+        }
       }
     } catch (error: any) {
       toast({
@@ -119,32 +122,6 @@ const Auth = () => {
         description: error.message || "Registration failed",
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleVerifyOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setOtpStatus("");
-    try {
-      const response = await apiService.verifyOtp({ email, otp });
-      if (response.status) {
-        setOtpStatus("Email verified successfully!");
-  toast({ title: "Verified", description: "Email verified!", variant: "default" });
-        setShowOtp(false);
-        // Redirect to login page after verification
-        setTimeout(() => {
-          navigate("/", { replace: true });
-        }, 1000);
-      } else {
-        setOtpStatus(response.message || "Verification failed");
-        toast({ title: "Error", description: response.message, variant: "destructive" });
-      }
-    } catch (error: any) {
-      setOtpStatus(error.message || "Verification failed");
-      toast({ title: "Error", description: error.message, variant: "destructive" });
     } finally {
       setIsLoading(false);
     }
@@ -195,102 +172,79 @@ const Auth = () => {
                   Sign In
                 </Button>
               </form>
-              <div className="mt-6 flex flex-col gap-2">
-              </div>
             </TabsContent>
             <TabsContent value="signup">
-              {!showOtp ? (
-                <form onSubmit={handleSignUp} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-username">Username</Label>
-                    <Input
-                      id="signup-username"
-                      type="text"
-                      placeholder="johndoe"
-                      value={userName}
-                      onChange={(e) => setUserName(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-fname">First Name</Label>
-                    <Input
-                      id="signup-fname"
-                      type="text"
-                      placeholder="John"
-                      value={userFname}
-                      onChange={(e) => setUserFname(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-lname">Last Name</Label>
-                    <Input
-                      id="signup-lname"
-                      type="text"
-                      placeholder="Doe"
-                      value={userLname}
-                      onChange={(e) => setUserLname(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-phone">Phone Number</Label>
-                    <Input
-                      id="signup-phone"
-                      type="tel"
-                      placeholder="+1234567890"
-                      value={userPhone}
-                      onChange={(e) => setUserPhone(e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
-                    <Input
-                      id="signup-email"
-                      type="email"
-                      placeholder="you@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password">Password</Label>
-                    <Input
-                      id="signup-password"
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      minLength={6}
-                    />
-                  </div>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Sign Up
-                  </Button>
-                </form>
-              ) : (
-                <form onSubmit={handleVerifyOtp} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="otp">Enter OTP (sent to email)</Label>
-                    <Input
-                      id="otp"
-                      type="text"
-                      value={otp}
-                      onChange={e => setOtp(e.target.value)}
-                      required
-                      maxLength={6}
-                    />
-                  </div>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Verify OTP
-                  </Button>
-                  {otpStatus && <div className="text-center text-sm mt-2">{otpStatus}</div>}
-                </form>
-              )}
+              <form onSubmit={handleSignUp} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="signup-username">Username</Label>
+                  <Input
+                    id="signup-username"
+                    type="text"
+                    placeholder="johndoe"
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-fname">First Name</Label>
+                  <Input
+                    id="signup-fname"
+                    type="text"
+                    placeholder="John"
+                    value={userFname}
+                    onChange={(e) => setUserFname(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-lname">Last Name</Label>
+                  <Input
+                    id="signup-lname"
+                    type="text"
+                    placeholder="Doe"
+                    value={userLname}
+                    onChange={(e) => setUserLname(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-phone">Phone Number</Label>
+                  <Input
+                    id="signup-phone"
+                    type="tel"
+                    placeholder="+1234567890"
+                    value={userPhone}
+                    onChange={(e) => setUserPhone(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-email">Email</Label>
+                  <Input
+                    id="signup-email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-password">Password</Label>
+                  <Input
+                    id="signup-password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    minLength={6}
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Sign Up
+                </Button>
+              </form>
             </TabsContent>
           </Tabs>
         </CardContent>

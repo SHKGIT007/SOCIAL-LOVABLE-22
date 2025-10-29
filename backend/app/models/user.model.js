@@ -60,29 +60,7 @@ const User = sequelize.define('User', {
     full_name: {
         type: DataTypes.STRING,
         allowNull: true,
-    },
-    provider: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        defaultValue: 'local',
-    },
-    provider_id: {
-        type: DataTypes.STRING,
-        allowNull: true,
-    },
-    email_verified: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
-        defaultValue: false,
-    },
-    otp_code: {
-        type: DataTypes.STRING,
-        allowNull: true,
-    },
-    otp_expires: {
-        type: DataTypes.DATE,
-        allowNull: true,
-    },
+    }
 }, {
     tableName: 'users',
     timestamps: true,

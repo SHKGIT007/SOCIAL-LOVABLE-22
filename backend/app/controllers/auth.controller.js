@@ -1,7 +1,4 @@
-// Social Login: Google OAuth
 const bcrypt = require('bcryptjs');
-const crypto = require('crypto');
-const nodemailer = require('nodemailer');
 const jwt = require('jsonwebtoken');
 const { User, Role } = require('../models');
 const { asyncHandler } = require('../middleware/error.middleware');
@@ -42,26 +39,6 @@ const register = asyncHandler(async (req, res) => {
         role_id: 2 // Default client role
     });
 
-    // Generate OTP
-    const otp = ('' + Math.floor(100000 + Math.random() * 900000));
-    const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 min
-    await user.update({ otp_code: otp, otp_expires: otpExpires });
-
-    // Send OTP email
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-      }
-    });
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: user.email,
-      subject: 'Verify your email',
-      text: `Your OTP code is: ${otp}`
-    });
-
     // Generate token
     const token = generateToken(user.id);
 
@@ -69,7 +46,7 @@ const register = asyncHandler(async (req, res) => {
 
     res.status(201).json({
         status: true,
-        message: 'User registered successfully. OTP sent to email.',
+        message: 'User registered successfully',
         data: {
             user: {
                 id: user.id,
@@ -82,18 +59,6 @@ const register = asyncHandler(async (req, res) => {
             token
         }
     });
-// Verify OTP endpoint
-const verifyOtp = asyncHandler(async (req, res) => {
-    const { email, otp } = req.body;
-    const user = await User.findOne({ where: { email } });
-    if (!user) return res.status(404).json({ status: false, message: 'User not found' });
-    if (user.email_verified) return res.json({ status: true, message: 'Email already verified' });
-    if (!user.otp_code || !user.otp_expires) return res.status(400).json({ status: false, message: 'OTP not sent' });
-    if (user.otp_expires < new Date()) return res.status(400).json({ status: false, message: 'OTP expired' });
-    if (user.otp_code !== otp) return res.status(400).json({ status: false, message: 'Invalid OTP' });
-    await user.update({ email_verified: true, otp_code: null, otp_expires: null });
-    res.json({ status: true, message: 'Email verified successfully' });
-});
 });
 
 const login = asyncHandler(async (req, res) => {
@@ -258,6 +223,5 @@ module.exports = {
     login,
     getProfile,
     updateProfile,
-    changePassword,
-    //verifyOtp
+    changePassword
 };

@@ -9,10 +9,7 @@ export const API_CONFIG = {
       LOGIN: '/auth/login',
       PROFILE: '/auth/profile',
       UPDATE_PROFILE: '/auth/profile',
-  CHANGE_PASSWORD: '/auth/change-password',
-  GOOGLE: '/auth/google',
-  FACEBOOK: '/auth/facebook',
-  VERIFY_OTP: '/auth/verify-otp'
+      CHANGE_PASSWORD: '/auth/change-password'
     },
     // User endpoints
     USERS: {
