@@ -78,6 +78,10 @@ const Post = sequelize.define('Post', {
         type: DataTypes.TEXT,
         allowNull: true,
     },
+    video_url: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+    }
 
 }, {
     tableName: 'posts',

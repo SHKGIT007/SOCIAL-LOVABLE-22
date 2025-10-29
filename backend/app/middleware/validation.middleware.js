@@ -96,7 +96,6 @@ const validateUserUpdate = [
 
 // Post validation rules
 const validatePostCreation = [
-   
     body('content')
         .notEmpty()
         .withMessage('Content is required')
@@ -106,18 +105,44 @@ const validatePostCreation = [
         .optional()
         .isIn(['draft', 'scheduled', 'published'])
         .withMessage('Status must be draft, scheduled, or published'),
-        body('scheduled_at')
-            .optional({ nullable: true })
-            .custom((value) => value === null || value === '' || !value || (typeof value === 'string' && !isNaN(Date.parse(value))))
-            .withMessage('Scheduled date must be a valid date or null'),
+    body('scheduled_at')
+        .optional({ nullable: true })
+        .custom((value) => value === null || value === '' || !value || (typeof value === 'string' && !isNaN(Date.parse(value))))
+        .withMessage('Scheduled date must be a valid date or null'),
+    // Custom validation for image upload
+    body('image')
+        .custom((value, { req }) => {
+            if (req.files && req.files.image) {
+                // Optionally check file type
+                const allowedImageTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
+                if (!allowedImageTypes.includes(req.files.image.mimetype)) {
+                    throw new Error('Image must be a valid image file (jpeg, png, jpg, gif)');
+                }
+            }
+            return true;
+        })
+        .optional(),
+    // Custom validation for video upload
+    body('video')
+        .custom((value, { req }) => {
+            if (req.files && req.files.video) {
+                // Optionally check file type
+                const allowedVideoTypes = ['video/mp4', 'video/avi', 'video/mov', 'video/mpeg'];
+                if (!allowedVideoTypes.includes(req.files.video.mimetype)) {
+                    throw new Error('Video must be a valid video file (mp4, avi, mov, mpeg)');
+                }
+            }
+            return true;
+        })
+        .optional(),
     handleValidationErrors
 ];
 
 const validatePostUpdate = [
-    body('title')
-        .optional()
-        .isLength({ min: 1, max: 200 })
-        .withMessage('Title must be between 1 and 200 characters'),
+    // body('title')
+    //     .optional()
+    //     .isLength({ min: 1, max: 200 })
+    //     .withMessage('Title must be between 1 and 200 characters'),
     body('content')
         .optional()
         .isLength({ min: 10 })

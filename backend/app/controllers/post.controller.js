@@ -14,14 +14,41 @@ const fs = require('fs');
 
 
 const createPost = asyncHandler(async (req, res) => {
-    const { title, content, platforms, status, scheduled_at, media_urls, is_ai_generated, ai_prompt ,image_prompt,image_url } = req.body;
+
+    // Debug: Log incoming form data and files
+    console.log("req.body:", req.body);
+    console.log("req.files:", req.files);
+
+    // Support for file uploads (image/video)
     const userId = req.user.id;
+    let image_url = req.body.image_url || null;
+    let video_url = null;
 
-   
-    // console.log("platforms",platforms)
-    // console.log("platforms" ,typeof platforms)
-    // return res.json({status:false});
+    const { title, content, platforms, status, is_ai_generated } = req.body;
 
+    // Ensure uploads/posts directory exists
+    const uploadDir = 'uploads/posts';
+    if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+    }
+
+    // If multipart, handle file uploads
+    if (req.files) {
+        if (req.files.image_file) {
+            // Save image file and set image_url
+            const img = req.files.image_file;
+            const imgPath = `${uploadDir}/${Date.now()}_${img.name}`;
+            await img.mv(imgPath);
+            image_url = `/${imgPath}`;
+        }
+        if (req.files.video_file) {
+            // Save video file and set video_url
+            const vid = req.files.video_file;
+            const vidPath = `${uploadDir}/${Date.now()}_${vid.name}`;
+            await vid.mv(vidPath);
+            video_url = `/${vidPath}`;
+        }
+    }
 
     // Check user's subscription limits
     const subscription = await Subscription.findOne({
@@ -38,7 +65,7 @@ const createPost = asyncHandler(async (req, res) => {
             });
         }
 
-        if (is_ai_generated && subscription.ai_posts_used >= plan.ai_posts) {
+        if (req.body.is_ai_generated && subscription.ai_posts_used >= plan.ai_posts) {
             return res.status(400).json({
                 status: false,
                 message: 'Monthly AI post limit reached'
@@ -48,17 +75,18 @@ const createPost = asyncHandler(async (req, res) => {
 
     // Save post in DB
     const post = await Post.create({
-        title,
-        content,
-        platforms,
-        status: status || 'draft',
-        scheduled_at: scheduled_at || null,
-        media_urls,
-        is_ai_generated: is_ai_generated || false,
-        ai_prompt,
+        title: req.body.title,
+        content: req.body.content,
+        platforms: req.body.platforms,
+        status: req.body.status || 'draft',
+        scheduled_at: req.body.scheduled_at || null,
+        media_urls: req.body.media_urls,
+        is_ai_generated: req.body.is_ai_generated || false,
+        ai_prompt: req.body.ai_prompt,
         user_id: userId,
-        image_prompt: image_prompt || null,
-        image_url: image_url || null
+        image_prompt: req.body.image_prompt || null,
+        image_url,
+        video_url
     });
 
     // Update subscription usage
@@ -82,8 +110,12 @@ const createPost = asyncHandler(async (req, res) => {
             });
             if (fbAccount && fbAccount.access_token) {
                 try {
-                    const fbPostData = await facebookPost(fbAccount.access_token, content, image_url);
-                 //   logger.info('Facebook post published', { userId, postId: post.id });
+                    const fbPostData = await facebookPost(
+                        fbAccount.access_token,
+                        content,
+                        image_url,
+                        video_url && video_url !== null ? video_url : undefined
+                    );
                     publishResults.facebook = { success: true, data: fbPostData };
                 } catch (err) {
                     logger.error('Facebook publish error', { error: err.message });
@@ -98,8 +130,12 @@ const createPost = asyncHandler(async (req, res) => {
             });
             if (igAccount && igAccount.access_token) {
                 try {
-                    const igPostData = await instagramPost(igAccount.access_token, content, image_url);
-                   // logger.info('Instagram post published', { userId, postId: post.id });
+                    const igPostData = await instagramPost(
+                        igAccount.access_token,
+                        content,
+                        image_url,
+                        video_url && video_url !== null ? video_url : undefined
+                    );
                     publishResults.instagram = { success: true, data: igPostData };
                 } catch (err) {
                     logger.error('Instagram publish error', { error: err.message });

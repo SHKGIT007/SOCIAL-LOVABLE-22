@@ -8,11 +8,18 @@ const app = express();
 const PORT = process.env.PORT || 9999;
 const path = require('path');
 const bodyParser = require('body-parser');
+const fileUpload = require('express-fileupload');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 
 // Security middleware
 app.use(helmet());
+// Enable file upload middleware
+app.use(fileUpload({
+    useTempFiles: true,
+    tempFileDir: '/tmp/',
+    limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit
+}));
 
 // Rate limiting
 // const limiter = rateLimit({

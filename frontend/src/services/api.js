@@ -173,11 +173,36 @@ class ApiService {
   }
 
   // Post API methods
-  async createPost(postData) {
-    return this.request(API_CONFIG.ENDPOINTS.POSTS.CREATE, {
-      method: 'POST',
-      body: postData,
-    });
+  async createPost(postData, isMultipart = false) {
+    if (isMultipart) {
+      // For file uploads, use multipart/form-data
+      const token = getAuthToken();
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      // Build full URL for endpoint
+      let url = API_CONFIG.ENDPOINTS.POSTS.CREATE;
+      if (!/^https?:\/\//.test(url)) {
+        url = API_CONFIG.BASE_URL + url;
+      }
+      const response = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: postData,
+      });
+      const data = await response.json();
+      if (response.status === 401) {
+        logout();
+        throw new Error('Authentication failed');
+      }
+      if (!response.ok) {
+        throw new Error(data.message || 'API request failed');
+      }
+      return data;
+    } else {
+      return this.request(API_CONFIG.ENDPOINTS.POSTS.CREATE, {
+        method: 'POST',
+        body: postData,
+      });
+    }
   }
 
   async getAllPosts(queryParams = {}) {

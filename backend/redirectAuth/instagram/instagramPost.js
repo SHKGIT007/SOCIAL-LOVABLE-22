@@ -1,22 +1,24 @@
 const axios = require('axios');
 
 // Publish a post to Instagram using Graph API
-async function instagramPost(accessToken, content, imageUrl) {
+async function instagramPost(accessToken, content, imageUrl, videoUrl) {
 
     console.log("instagramPost accessToken:", accessToken);
     console.log("instagramPost content:", content);
     console.log("instagramPost imageUrl:", imageUrl);
+    console.log("instagramPost videoUrl:", videoUrl);
   // You may need to create a media object first, then publish it
   // This is a simplified example for text/caption only
   try {
     // Step 1: Create media object (image or video)
     let mediaPayload = {
       caption: content,
-      access_token: accessToken,
-     // image_url: 'https://dummyimage.com/300x200/cccccc/000000.png'
-      image_url: imageUrl
+      access_token: accessToken
     };
-    if (imageUrl && typeof imageUrl === 'string' && imageUrl.trim() !== '') {
+    if (videoUrl && typeof videoUrl === 'string' && videoUrl.trim() !== '') {
+      console.log("Adding videoUrl to mediaPayload:", videoUrl);
+      mediaPayload.video_url = videoUrl;
+    } else if (imageUrl && typeof imageUrl === 'string' && imageUrl.trim() !== '') {
       console.log("Adding imageUrl to mediaPayload:", imageUrl);
       mediaPayload.image_url = imageUrl;
     }

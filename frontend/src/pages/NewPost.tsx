@@ -16,6 +16,11 @@ import { isAuthenticated, logout } from "@/utils/auth";
 import { marked } from "marked";
 
 const NewPost = () => {
+  // Manual post file states
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>("");
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [videoPreview, setVideoPreview] = useState<string>("");
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -137,7 +142,7 @@ const NewPost = () => {
       return;
     }
 
-
+ 
 
     setIsLoading(true);
     try {
@@ -146,19 +151,29 @@ const NewPost = () => {
         return;
       }
 
-      const response = await apiService.createPost({
-        title,
-        content,
-        platforms,
-        status,
-        scheduled_at: scheduledAt || null,
-        is_ai_generated: isGenerating || aiPrompt !== "",
-        ai_prompt: aiPrompt || null,
-        image_prompt: imagePrompt || null,
-        image_url: imageContent || null,
-      });
+      // Prepare form data for file upload
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("content", content);
+      formData.append("platforms", JSON.stringify(platforms));
+      formData.append("status", status);
+      if (scheduledAt) formData.append("scheduled_at", scheduledAt);
+      formData.append("is_ai_generated", String(isGenerating || aiPrompt !== ""));
+      if (aiPrompt) formData.append("ai_prompt", aiPrompt);
+      if (imagePrompt) formData.append("image_prompt", imagePrompt);
+      if (imageContent) formData.append("image_url", imageContent);
+      if (imageFile) formData.append("image_file", imageFile);
+      if (videoFile) formData.append("video_file", videoFile);
 
-     if (response.status) {
+
+      // Debug: print all FormData key-value pairs
+      for (let pair of formData.entries()) {
+        console.log(pair[0], pair[1]);
+      }
+
+      const response = await apiService.createPost(formData, true); // true = multipart
+
+      if (response.status) {
         toast({
           title: "Success",
           description: "Post created successfully!",
@@ -282,6 +297,50 @@ const NewPost = () => {
                       rows={8}
                       required
                     />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="manual-image">Image Upload</Label>
+                    <Input
+                      id="manual-image"
+                      type="file"
+                      accept="image/*"
+                      onChange={e => {
+                        const file = e.target.files?.[0];
+                        setImageFile(file || null);
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onload = (ev) => setImagePreview(ev.target?.result as string);
+                          reader.readAsDataURL(file);
+                        } else {
+                          setImagePreview("");
+                        }
+                      }}
+                    />
+                    {imagePreview && (
+                      <img src={imagePreview} alt="Preview" style={{ maxWidth: "200px", marginTop: "8px" }} />
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="manual-video">Video Upload</Label>
+                    <Input
+                      id="manual-video"
+                      type="file"
+                      accept="video/*"
+                      onChange={e => {
+                        const file = e.target.files?.[0];
+                        setVideoFile(file || null);
+                        if (file) {
+                          setVideoPreview(URL.createObjectURL(file));
+                        } else {
+                          setVideoPreview("");
+                        }
+                      }}
+                    />
+                    {videoPreview && (
+                      <video src={videoPreview} controls style={{ maxWidth: "200px", marginTop: "8px" }} />
+                    )}
                   </div>
                 </form>
               </CardContent>

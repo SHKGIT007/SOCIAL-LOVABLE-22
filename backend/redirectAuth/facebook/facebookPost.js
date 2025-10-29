@@ -34,7 +34,7 @@
 
 
 // }
-async function facebookPost(userAccessToken, content, imageUrl = "") {
+async function facebookPost(userAccessToken, content, imageUrl = "", videoUrl = "") {
   try {
     // Step 1: Get Page Access Token
     const responsePageToken = await axios.get(
@@ -47,8 +47,20 @@ async function facebookPost(userAccessToken, content, imageUrl = "") {
 
     let responsePost;
 
-    // Step 2: Decide endpoint based on image presence
-    if (imageUrl && imageUrl.trim() !== "") {
+    // Step 2: Decide endpoint based on video/image presence
+    if (videoUrl && videoUrl.trim() !== "") {
+      // 🎥 If video is present → post video + caption
+      responsePost = await axios.post(
+        `https://graph.facebook.com/${pageId}/videos`,
+        {
+          file_url: videoUrl,
+          description: content,
+        },
+        {
+          headers: { Authorization: `Bearer ${pageAccessToken}` },
+        }
+      );
+    } else if (imageUrl && imageUrl.trim() !== "") {
       // 🖼️ If image is present → post image + caption
       responsePost = await axios.post(
         `https://graph.facebook.com/${pageId}/photos`,
@@ -61,7 +73,7 @@ async function facebookPost(userAccessToken, content, imageUrl = "") {
         }
       );
     } else {
-      // 📝 If no image → post only text
+      // 📝 If no image/video → post only text
       responsePost = await axios.post(
         `https://graph.facebook.com/${pageId}/feed`,
         {
