@@ -113,7 +113,8 @@ module.exports = function (app) {
                     response: response.data,
                     userInfoResponse: userResponse.data,
                     pagesResponse: pagesResponse.data || [],
-                    groupsResponse: groupsResponse.data || []
+                    groupsResponse: groupsResponse.data || [],
+                    instagramResponse: igRes.data || []
                 });
 
 
