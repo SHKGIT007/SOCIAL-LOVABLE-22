@@ -131,11 +131,24 @@ const SocialAccounts = () => {
 
                 const state = encodeURIComponent(JSON.stringify(stateData));
 
-                const url = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${app_id}&redirect_uri=${encodeURIComponent(redirect_uri)}&state=${state}&response_type=code&scope=public_profile,email,pages_show_list,pages_read_engagement,pages_manage_posts`;
+                const scopes = [
+                    "public_profile",
+                    "email",
+                    "pages_show_list",
+                    "pages_read_engagement",
+                    "pages_manage_posts",
+                    "instagram_basic",
+                    "instagram_manage_insights",
+                    "instagram_manage_comments",
+                    "instagram_content_publish",
+                    "instagram_manage_messages"
+                ].join(",");
 
+                // const url = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${app_id}&redirect_uri=${encodeURIComponent(redirect_uri)}&state=${state}&response_type=code&scope=public_profile,email,pages_show_list,pages_read_engagement,pages_manage_posts`;
+
+                const url = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${app_id}&redirect_uri=${encodeURIComponent(redirect_uri)}&state=${state}&response_type=code&scope=${encodeURIComponent(scopes)}
+                `;
                 window.location.href = url;
-
-
 
             } else if (platform === "Instagram") {
                 // Use dynamic App ID and callback URL
@@ -161,8 +174,8 @@ const SocialAccounts = () => {
 
                 const state = encodeURIComponent(JSON.stringify(stateData));
 
-     const oauthUrl = `https://www.instagram.com/oauth/authorize?client_id=${app_id}&redirect_uri=${encodeURIComponent(redirect_uri)}&state=${state}&response_type=code&scope=instagram_business_basic,instagram_business_manage_messages,instagram_business_manage_comments,instagram_business_content_publish`
-     window.location.href = oauthUrl;
+                const oauthUrl = `https://www.instagram.com/oauth/authorize?client_id=${app_id}&redirect_uri=${encodeURIComponent(redirect_uri)}&state=${state}&response_type=code&scope=instagram_business_basic,instagram_business_manage_messages,instagram_business_manage_comments,instagram_business_content_publish`
+                window.location.href = oauthUrl;
             }
 
 
@@ -177,12 +190,12 @@ const SocialAccounts = () => {
     const handleDisconnect = async (id) => {
         setIsLoading(true);
         try {
-           /// await apiService.deleteSocialAccount(id);
+            /// await apiService.deleteSocialAccount(id);
 
-           await apiService.updateSocialAccountCredentials({
-                   is_active: 0,
-                   id: id,
-                });
+            await apiService.updateSocialAccountCredentials({
+                is_active: 0,
+                id: id,
+            });
             toast({ title: "Success", description: "Account disconnected." });
             fetchAccounts();
         } catch (error) {
