@@ -309,3 +309,5 @@
 {"error":"Request failed with status code 400","level":"error","message":"Instagram publish error","service":"social-lovable-api","timestamp":"2025-10-29T13:11:06.144Z"}
 {"error":"Request failed with status code 400","level":"error","message":"Instagram publish error","service":"social-lovable-api","timestamp":"2025-10-29T13:11:55.769Z"}
 {"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-10-30T06:15:13.294Z","userId":2}
+{"error":"Instagram media creation failed: Invalid OAuth access token - Cannot parse access token","level":"error","message":"Instagram publish error","service":"social-lovable-api","timestamp":"2025-10-30T09:23:05.297Z"}
+{"error":"Instagram media creation failed: Invalid OAuth access token - Cannot parse access token","level":"error","message":"Instagram publish error","service":"social-lovable-api","timestamp":"2025-10-30T09:47:31.248Z"}

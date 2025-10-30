@@ -1,4 +1,5 @@
 const { Post, User, Plan, Subscription } = require('../models');
+
 const { Op } = require('sequelize');
 const { asyncHandler } = require('../middleware/error.middleware');
 const logger = require('../config/logger');
@@ -50,23 +51,48 @@ const createPost = asyncHandler(async (req, res) => {
         fs.mkdirSync(UPLOAD_DIR, { recursive: true });
     }
 
-    // If multipart, handle file uploads
+    // If multipart, handle file uploads with Cloudinary
+    const cloudinary = require('cloudinary').v2;
+    // cloudinary.config({
+    //   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    //   api_key: process.env.CLOUDINARY_API_KEY,
+    //   api_secret: process.env.CLOUDINARY_API_SECRET
+    // });
+    cloudinary.config({
+      cloud_name: 'diapmjeoc',
+      api_key: '623293742125568',
+      api_secret: '6mzyLVSYqqjhbUbECHqvGPayE_E'
+    });
+
     if (req.files) {
         if (req.files.image_file) {
-            // Save image file and set image_url
             const img = req.files.image_file;
-            const fileName = `${Date.now()}_${img.name}`;
-            const imgPath = `${UPLOAD_DIR}/${fileName}`;
-            await img.mv(imgPath);
-            image_url = `${PUBLIC_UPLOAD_URL}/${fileName}`;
+            // Use tempFilePath if available, otherwise save to temp and use path
+            let imgPath = img.tempFilePath || undefined;
+            if (!imgPath) {
+                imgPath = `${UPLOAD_DIR}/temp_${Date.now()}_${img.name}`;
+                await img.mv(imgPath);
+            }
+            const uploadRes = await cloudinary.uploader.upload(imgPath, {
+                resource_type: "image",
+                folder: "posts",
+                transformation: [{ quality: "auto" }]
+            });
+            image_url = uploadRes.secure_url;
         }
         if (req.files.video_file) {
-            // Save video file and set video_url
             const vid = req.files.video_file;
-            const fileName = `${Date.now()}_${vid.name}`;
-            const vidPath = `${UPLOAD_DIR}/${fileName}`;
-            await vid.mv(vidPath);
-            video_url = `${PUBLIC_UPLOAD_URL}/${fileName}`;
+            let vidPath = vid.tempFilePath || undefined;
+            if (!vidPath) {
+                vidPath = `${UPLOAD_DIR}/temp_${Date.now()}_${vid.name}`;
+                await vid.mv(vidPath);
+            }
+            const uploadRes = await cloudinary.uploader.upload(vidPath, {
+                resource_type: "video",
+                folder: "posts",
+                transformation: [{ quality: "auto" }]
+            });
+            video_url = uploadRes.secure_url;
         }
     }
 
@@ -92,6 +118,9 @@ const createPost = asyncHandler(async (req, res) => {
             });
         }
     }
+
+  
+  
 
     // Save post in DB
     const post = await Post.create({

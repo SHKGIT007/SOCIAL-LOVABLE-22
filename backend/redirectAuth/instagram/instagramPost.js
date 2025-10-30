@@ -2,11 +2,7 @@ const axios = require('axios');
 
 // Publish a post to Instagram using Graph API
 async function instagramPost(accessToken, content, imageUrl, videoUrl) {
-  console.log("instagramPost accessToken:", accessToken);
-  console.log("instagramPost content:", content);
-  console.log("instagramPost imageUrl:", imageUrl);
-  console.log("instagramPost videoUrl:", videoUrl);
-  videoUrl ='https://socialvibe.tradestreet.in/uploads/1761738800873_SampleVideo_1280x720_5mb.mp4';
+
   try {
     // Step 1: Create media object (image or video)
     let mediaPayload = {
@@ -14,18 +10,7 @@ async function instagramPost(accessToken, content, imageUrl, videoUrl) {
       access_token: accessToken
     };
     // Basic video validation
-    if (videoUrl && typeof videoUrl === 'string' && videoUrl.trim() !== '') {
-      if (!videoUrl.startsWith('http')) {
-        console.error('Video URL is not public:', videoUrl);
-        throw new Error('Video URL must be public HTTP/HTTPS link');
-      }
-      if (!videoUrl.toLowerCase().endsWith('.mp4')) {
-        console.error('Video is not MP4 format:', videoUrl);
-        throw new Error('Video must be in MP4 format');
-      }
-      console.log("Adding videoUrl to mediaPayload:", videoUrl);
-      mediaPayload.video_url = videoUrl;
-    }
+   
     if (videoUrl && typeof videoUrl === 'string' && videoUrl.trim() !== '') {
       console.log("Adding videoUrl to mediaPayload:", videoUrl);
       mediaPayload.video_url = videoUrl;
