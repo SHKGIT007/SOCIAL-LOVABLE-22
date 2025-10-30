@@ -1,8 +1,12 @@
 
 const { User, SocialAccount } = require('../../app/models');
 
+
 module.exports = function (app) {
+
     const axios = require('axios');
+
+
     app.get('/facebook/callback', async (req, res) => {
 
 
@@ -38,9 +42,9 @@ module.exports = function (app) {
             // redirect_dashboard: 'http://localhost:8080/dashboard'
             // }
 
-            const state = JSON.parse(decodeURIComponent(req.query.state)); // 👈 decode & parse
+            const state = JSON.parse(decodeURIComponent(req.query.state));
 
-            console.log("Decoded State:", state);
+            // console.log("Decoded State:", state);
             const existingAccount = await SocialAccount.findOne({
                 where: { user_id: state.user_id, platform: 'Facebook' }
             });
@@ -68,14 +72,6 @@ module.exports = function (app) {
 
                 const access_token = response.data.access_token;
 
-                // Save or update the access token in your database
-                if (existingAccount) {
-                    existingAccount.access_token = access_token;
-                    existingAccount.is_active = 1;
-                    await existingAccount.save();
-                }
-
-
                 // Get user info
                 const userResponse = await axios.get(`https://graph.facebook.com/v20.0/me`, {
                     params: {
@@ -91,11 +87,44 @@ module.exports = function (app) {
                     }
                 });
 
+                const pageId = pagesResponse?.data?.data[0]?.id;
+                let instagram_business_id = null;
+               
+                const igRes = await axios.get(
+                    `https://graph.facebook.com/v20.0/${pageId}?fields=instagram_business_account&access_token=${access_token}`
+                );
+
+                  
+                 if(!['',null,undefined].includes(igRes?.data?.instagram_business_account)){
+                 instagram_business_id = igRes.data.instagram_business_account?.id;
+                  }
+
+
+                 // Save or update the access token in your database
+               
+
                 const groupsResponse = await axios.get(`https://graph.facebook.com/v20.0/me/groups`, {
                     params: {
                         access_token: access_token
                     }
                 });
+
+                let AllResponse = JSON.stringify({
+                    response: response.data,
+                    userInfoResponse: userResponse.data,
+                    pagesResponse: pagesResponse.data || [],
+                    groupsResponse: groupsResponse.data || []
+                });
+
+
+
+                 if (existingAccount) {
+                    existingAccount.access_token = access_token;
+                    existingAccount.is_active = 1;
+                    existingAccount.instagram_business_id = instagram_business_id;
+                    existingAccount.response_type = AllResponse;
+                    await existingAccount.save();
+                }
 
                 console.log("response.data", response.data);
                 console.log("userResponse", userResponse.data);
@@ -125,6 +154,8 @@ module.exports = function (app) {
 
 
 }
+
+
 
 
 
