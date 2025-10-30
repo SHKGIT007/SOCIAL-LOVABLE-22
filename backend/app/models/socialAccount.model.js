@@ -43,6 +43,14 @@ const SocialAccount = sequelize.define('SocialAccount', {
         type: DataTypes.TEXT,
         allowNull: true,
     },
+    instagram_business_id: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+    },
+    response_type: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+    },
     token_expires_at: {
         type: DataTypes.DATE,
         allowNull: true,
