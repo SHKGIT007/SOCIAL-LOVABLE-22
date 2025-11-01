@@ -13,6 +13,17 @@ class ApiService {
       body: { settings },
     });
   }
+  // System Settings API methods
+  async getSystemSettings() {
+    return this.request('/system-settings');
+  }
+
+  async updateSystemSettings(settings) {
+    return this.request('/system-settings/update', {
+      method: 'POST',
+      body: { settings },
+    });
+  }
   constructor() {
     this.baseURL = API_CONFIG.BASE_URL;
   }

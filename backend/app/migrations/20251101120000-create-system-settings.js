@@ -30,6 +30,18 @@ module.exports = {
         type: Sequelize.BOOLEAN,
         defaultValue: false,
       },
+      cloudinary_cloud_name: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+      cloudinary_api_key: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+      cloudinary_api_secret: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
       created_at: {
         type: Sequelize.DATE,
         allowNull: false,

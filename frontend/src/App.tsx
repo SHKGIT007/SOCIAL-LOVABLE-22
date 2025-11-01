@@ -19,6 +19,7 @@ import AdminSubscriptions from "./pages/admin/Subscriptions";
 import AdminPosts from "./pages/admin/Posts";
 import AdminViewPost from "./pages/admin/ViewPost";
 import NotFound from "./pages/NotFound";
+import SystemSettings from "./pages/admin/SystemSettings";
 import SocialAccounts from "./pages/SocialAccounts";
 import Profile from "./pages/Profile";
 import { Navigate } from "react-router-dom";
@@ -57,6 +58,8 @@ function App() {
             <Route path="/admin/subscriptions" element={userRole === "admin" ? <AdminSubscriptions /> : <Navigate to="/dashboard" />} />
             <Route path="/admin/posts" element={userRole === "admin" ? <AdminPosts /> : <Navigate to="/dashboard" />} />
             <Route path="/admin/posts/:id" element={userRole === "admin" ? <AdminViewPost /> : <Navigate to="/dashboard" />} />
+            <Route path="/admin/system-settings" element={userRole === "admin" ? <SystemSettings /> : <Navigate to="/dashboard" />} />
+            
            
             <Route path="*" element={<NotFound />} />
           </Routes>

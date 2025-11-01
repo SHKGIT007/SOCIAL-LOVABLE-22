@@ -1,0 +1,26 @@
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/db.config');
+
+// SystemSetting model for AI provider and Cloudinary settings
+const SystemSetting = sequelize.define('SystemSetting', {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  // Type of setting: 'ai-provider', 'cloudinary', etc.
+  type: { type: DataTypes.STRING },
+  // Unique key for the setting
+  key: { type: DataTypes.STRING },
+  // Value for generic settings (API key, etc.)
+  api_url: { type: DataTypes.STRING },
+  // Is this setting active?
+  is_active: { type: DataTypes.BOOLEAN },
+  // Cloudinary specific fields
+  cloudinary_cloud_name: { type: DataTypes.STRING },
+  cloudinary_api_key: { type: DataTypes.STRING },
+  cloudinary_api_secret: { type: DataTypes.STRING }
+}, {
+  tableName: 'system_settings',
+  timestamps: true,
+  createdAt: 'created_at',
+  updatedAt: 'updated_at'
+});
+
+module.exports = SystemSetting;

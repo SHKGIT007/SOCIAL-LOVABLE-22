@@ -5,6 +5,8 @@ const Plan = require('./plan.model');
 const Subscription = require('./subscription.model');
 const SocialAccount = require('./socialAccount.model');
 const Profile = require('./profile.model');
+const SystemSetting = require('./systemSetting.model');
+
 
 const models = {
     User,
@@ -14,6 +16,7 @@ const models = {
     Subscription,
     SocialAccount,
     Profile,
+    SystemSetting,
 };
 
 // Define associations in correct order
