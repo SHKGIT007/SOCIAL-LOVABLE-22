@@ -7,15 +7,15 @@ const SystemSetting = sequelize.define('SystemSetting', {
   // Type of setting: 'ai-provider', 'cloudinary', etc.
   type: { type: DataTypes.STRING },
   // Unique key for the setting
-  key: { type: DataTypes.STRING },
+  api_key: { type: DataTypes.TEXT },
   // Value for generic settings (API key, etc.)
-  api_url: { type: DataTypes.STRING },
+  api_url: { type: DataTypes.TEXT },
   // Is this setting active?
   is_active: { type: DataTypes.BOOLEAN },
   // Cloudinary specific fields
-  cloudinary_cloud_name: { type: DataTypes.STRING },
-  cloudinary_api_key: { type: DataTypes.STRING },
-  cloudinary_api_secret: { type: DataTypes.STRING }
+  cloudinary_cloud_name: { type: DataTypes.TEXT },
+  cloudinary_api_key: { type: DataTypes.TEXT },
+  cloudinary_api_secret: { type: DataTypes.TEXT }
 }, {
   tableName: 'system_settings',
   timestamps: true,

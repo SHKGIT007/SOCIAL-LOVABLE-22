@@ -26,8 +26,17 @@ const SystemSettings = () => {
   const handleChange = (key, value) => setForm({ ...form, [key]: value });
   const handleUpdate = async () => {
     setLoading(true);
-    const updates = settings.map(item => ({ ...item, value: form[item.key], cloudinary_cloud_name: form['cloudinary_cloud_name'], cloudinary_api_key: form['cloudinary_api_key'], cloudinary_api_secret: form['cloudinary_api_secret'] }));
-    await apiService.updateSystemSettings(updates);
+    // Send all values as a single object
+    const updates = {
+      type: form['type'] || '',
+      is_active: form['is_active'] === true || form['is_active'] === 'true',
+      api_url: form['api_url'] || '',
+      api_key: form['value'] || '',
+      cloudinary_cloud_name: form['cloudinary_cloud_name'] || '',
+      cloudinary_api_key: form['cloudinary_api_key'] || '',
+      cloudinary_api_secret: form['cloudinary_api_secret'] || '',
+    };
+  await apiService.updateSystemSettings({ settings: updates });
     setLoading(false);
     fetchSettings();
   };
