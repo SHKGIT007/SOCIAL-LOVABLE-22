@@ -92,7 +92,11 @@ const SystemSettings = () => {
             onChange={e => handleChange('cloudinary_api_secret', e.target.value)}
           />
         </div>
-        <button className="w-full py-3 bg-indigo-600 text-white font-bold rounded-lg" disabled={loading} onClick={handleUpdate}>
+        <button
+          className={`w-full py-3 bg-indigo-600 text-white font-bold rounded-lg ${(!form['type'] || !form['api_url'] || !form['value']) ? 'opacity-50 cursor-not-allowed' : ''}`}
+          disabled={loading || !form['type'] || !form['api_url'] || !form['value']}
+          onClick={handleUpdate}
+        >
           {loading ? 'Updating...' : 'Update'}
         </button>
       </div>
