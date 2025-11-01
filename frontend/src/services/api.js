@@ -1,9 +1,18 @@
 import { API_CONFIG, buildApiUrl, addQueryParams } from '../utils/config';
 import { getAuthToken, logout } from '../utils/auth';
 
-// API service class
-
 class ApiService {
+  // System Settings API methods
+  async getSystemSettings() {
+    return this.request('/system-settings');
+  }
+
+  async updateSystemSettings(settings) {
+    return this.request('/system-settings/update', {
+      method: 'POST',
+      body: { settings },
+    });
+  }
   constructor() {
     this.baseURL = API_CONFIG.BASE_URL;
   }
@@ -379,6 +388,5 @@ class ApiService {
     });
   }
 }
-
 // Export singleton instance
 export const apiService = new ApiService();

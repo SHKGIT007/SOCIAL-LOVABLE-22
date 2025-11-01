@@ -57,6 +57,7 @@ function App() {
             <Route path="/admin/subscriptions" element={userRole === "admin" ? <AdminSubscriptions /> : <Navigate to="/dashboard" />} />
             <Route path="/admin/posts" element={userRole === "admin" ? <AdminPosts /> : <Navigate to="/dashboard" />} />
             <Route path="/admin/posts/:id" element={userRole === "admin" ? <AdminViewPost /> : <Navigate to="/dashboard" />} />
+           
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

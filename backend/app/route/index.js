@@ -21,5 +21,5 @@ router.use('/subscriptions', subscriptionRoutes);
 router.use('/social-accounts', socialAccountRoutes);
 router.use('/social-accounts/oauth', socialAccounOauthRoutes);
 router.use('/profile', profileRoutes);
-
+router.use('/system-settings', require('./systemSetting.routes'));
 module.exports = router;
