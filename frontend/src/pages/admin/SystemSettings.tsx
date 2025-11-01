@@ -19,12 +19,9 @@ const SystemSettings = () => {
   const fetchSettings = async () => {
     setLoading(true);
     const res = await apiService.getSystemSettings();
-    console.log('API Response:', res.data);
     const settingsArr = Array.isArray(res.data) ? res.data : [];
     setSettings(settingsArr);
     // If only one record exists, use it to set form values
-
-    console.log('Fetched settings array:', settingsArr);
     if (settingsArr.length > 0) {
       const s = settingsArr[0];
       const newForm = {
@@ -37,7 +34,6 @@ const SystemSettings = () => {
         cloudinary_api_secret: s.cloudinary_api_secret || '',
       };
       setForm(newForm);
-      console.log('Form set to:', newForm);
     } else {
       setForm({});
       console.log('No settings found, form set to empty object');
@@ -63,7 +59,6 @@ const SystemSettings = () => {
     fetchSettings();
   };
 
-  console.log("System Settings Form State: ", form);
 
   return (
     <DashboardLayout userRole="admin">

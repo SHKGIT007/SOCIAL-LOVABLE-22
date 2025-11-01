@@ -561,28 +561,6 @@ async function example1() {
   console.log('\n' + '='.repeat(50) + '\n');
 }
 
-// async function generateImagePollinations(prompt) {
-//   try {
-//     const encodedPrompt = encodeURIComponent(prompt);
-//     const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true`;
-    
-//     console.log('🎨 Image generating...');
-//     console.log('Image URL:', imageUrl);
-    
-//     // Download image
-//     const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
-//     const filename = `generated_${Date.now()}.png`;
-//     fs.writeFileSync(filename, response.data);
-    
-//     console.log(`✅ Image saved: ${filename}`);
-//     return { url: imageUrl, filename };
-//   } catch (error) {
-//     console.error('Pollinations Error:', error.message);
-//     throw error;
-//   }
-// }
-
-
 async function generateImagePollinations(prompt, retries = 3) {
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
