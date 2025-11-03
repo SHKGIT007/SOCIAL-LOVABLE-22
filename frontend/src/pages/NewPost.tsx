@@ -56,6 +56,7 @@ const NewPost = () => {
             prompt += `\nFestival/Event: ${p.festival}`;
           }
           setAiPrompt(prompt);
+          setImagePrompt(p.image_style || "");
         }
       } catch (error) {
         // Optionally show error
@@ -221,7 +222,7 @@ const NewPost = () => {
                 {/* Removed unused AI input fields. Only prompt and imagePrompt remain. */}
 
                 
-                <div className="space-y-2">
+                {/* <div className="space-y-2">
                   <Label htmlFor="imagePrompt">Image Prompt (Optional)</Label>
                   <Input
                     id="imagePrompt"
@@ -229,7 +230,7 @@ const NewPost = () => {
                     onChange={(e) => setImagePrompt(e.target.value)}
                     placeholder="Enter image prompt"
                   />
-                </div>
+                </div> */}
 
                 <Button
                   type="button"

@@ -110,8 +110,8 @@ const Profile = () => {
                   <Input id="hashtags" name="hashtags" placeholder="Default Hashtags (comma separated)" value={profile.hashtags} onChange={handleChange} className="w-full md:w-2/3 border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md" />
                 </div>
                 <div className="flex flex-col md:flex-row items-center gap-4">
-                    <label htmlFor="image_style" className="w-full md:w-1/3 text-base font-semibold text-gray-700 md:text-right">Image Style</label>
-                    <Input id="image_style" name="image_style" placeholder="Image Style (e.g. minimal, vibrant)" value={profile.image_style} onChange={handleChange} className="w-full md:w-2/3 border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md" />
+                    <label htmlFor="image_style" className="w-full md:w-1/3 text-base font-semibold text-gray-700 md:text-right">Image Title</label>
+                    <Input id="image_style" name="image_style" placeholder="Image Title" value={profile.image_style} onChange={handleChange} className="w-full md:w-2/3 border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md" />
                   </div>
                   <div className="flex flex-col md:flex-row items-center gap-4">
                     <label htmlFor="festival" className="w-full md:w-1/3 text-base font-semibold text-gray-700 md:text-right">Current Festival/Event</label>
