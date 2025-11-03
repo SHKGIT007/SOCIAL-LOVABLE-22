@@ -12,6 +12,7 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 require('dotenv').config();
 const fs = require('fs');
 const { type } = require('os');
+const cloudinary = require('cloudinary').v2;
 
 
 
@@ -48,19 +49,20 @@ const createPost = asyncHandler(async (req, res) => {
     if (!fs.existsSync(UPLOAD_DIR)) {
         fs.mkdirSync(UPLOAD_DIR, { recursive: true });
     }
-
-    // If multipart, handle file uploads with Cloudinary
-    const cloudinary = require('cloudinary').v2;
-    // cloudinary.config({
-    //   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    //   api_key: process.env.CLOUDINARY_API_KEY,
-    //   api_secret: process.env.CLOUDINARY_API_SECRET
+        
+    //  cloudinary.config({
+    //   cloud_name: 'diapmjeoc',
+    //   api_key: '623293742125568',
+    //   api_secret: '6mzyLVSYqqjhbUbECHqvGPayE_E'
     // });
-    cloudinary.config({
-      cloud_name: 'diapmjeoc',
-      api_key: '623293742125568',
-      api_secret: '6mzyLVSYqqjhbUbECHqvGPayE_E'
-    });
+        
+        // Fetch Cloudinary config from system_settings table
+        const cloudinarySetting = await SystemSetting.findOne({ where: { id: 1 } });
+        cloudinary.config({
+            cloud_name: cloudinarySetting?.cloudinary_cloud_name || '',
+            api_key: cloudinarySetting?.cloudinary_api_key || '',
+            api_secret: cloudinarySetting?.cloudinary_api_secret || ''
+        });
 
     if (req.files) {
         if (req.files.image_file) {
