@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { apiService } from '../../services/api';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
-import { useToast } from "@/hooks/use-toast";
+import Swal from 'sweetalert2';
 
 const SystemSettings = () => {
-  const { toast } = useToast();
   const [settings, setSettings] = useState<any[]>([]);
   const [form, setForm] = useState<{
     type?: string;
@@ -63,18 +62,17 @@ const SystemSettings = () => {
     fetchSettings();
 
     if(updateData.status == true) {
-        
-        toast({
-          title: "Success",
-          description: "Settings updated successfully.",
-        });
-        
+      Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: 'Settings updated successfully.'
+      });
     } else {
-        toast({
-          title: "Error",
-            description: updateData.message || "Failed to update settings.",
-            variant: "destructive",
-        });
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: updateData.message || 'Failed to update settings.'
+      });
     }
     
   };
