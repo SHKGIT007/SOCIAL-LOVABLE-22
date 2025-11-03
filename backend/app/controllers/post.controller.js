@@ -1,4 +1,4 @@
-const { Post, User, Plan, Subscription } = require('../models');
+const { Post, User, Plan, Subscription , SystemSetting } = require('../models');
 
 const { Op } = require('sequelize');
 const { asyncHandler } = require('../middleware/error.middleware');
@@ -16,14 +16,12 @@ const { type } = require('os');
 
 
 const createPost = asyncHandler(async (req, res) => {
-
     // Debug: Log incoming form data and files
     console.log("req.body:", req.body);
     console.log("req.files:", req.files);
     console.log("platforms:", req.body.platforms);
     console.log("platforms:",typeof req.body.platforms);
 
-    
 
     // Support for file uploads (image/video)
     const userId = req.user.id;
@@ -456,63 +454,77 @@ const generateAIPost = asyncHandler(async (req, res) => {
 ////////////////-------genrrate Ai code  Start------///////////
 
 // Groq API Configuration
-const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
-const GROQ_API_KEY = process.env.GROQ_API_KEY;
+// const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
+// const GROQ_API_KEY = process.env.GROQ_API_KEY;
+
+
+async function getGroqConfig() {
+    const setting = await SystemSetting.findOne({ where: { id: 1 } });
+    return {
+        api_key: setting?.api_key || '',
+        api_url: setting?.api_url || 'https://api.groq.com/openai/v1/chat/completions'
+    };
+}
 
 // Main function - AI se content generate karne ke liye
 async function generateAIContent(prompt, options = {}) {
-  try {
-    const {
-      model = 'llama-3.3-70b-versatile', // Updated default model (currently supported)
-      temperature = 0.7,
-      maxTokens = 1024
-    } = options;
+    try {
+        const {
+            model = 'llama-3.3-70b-versatile',
+            temperature = 0.7,
+            maxTokens = 1024
+        } = options;
 
-    console.log('🚀 Groq AI se request bhej rahe hain...\n');
+        console.log('🚀 Groq AI se request bhej rahe hain...\n');
 
-    const response = await axios.post(
-      GROQ_API_URL,
-      {
-        model: model,
-        messages: [
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        temperature: temperature,
-        max_tokens: maxTokens,
-        top_p: 1,
-        stream: false
-      },
-      {
-        headers: {
-          'Authorization': `Bearer ${GROQ_API_KEY}`,
-          'Content-Type': 'application/json'
+        // Fetch Groq API key and URL from DB
+        const groqConfig = await getGroqConfig();
+        const groqApiKey = groqConfig.api_key;
+        const groqApiUrl = groqConfig.api_url;
+
+        const response = await axios.post(
+            groqApiUrl,
+            {
+                model: model,
+                messages: [
+                    {
+                        role: 'user',
+                        content: prompt
+                    }
+                ],
+                temperature: temperature,
+                max_tokens: maxTokens,
+                top_p: 1,
+                stream: false
+            },
+            {
+                headers: {
+                    'Authorization': `Bearer ${groqApiKey}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+
+        const content = response.data.choices[0].message.content;
+        const usage = response.data.usage;
+
+        console.log('✅ Response mil gaya!\n');
+        console.log('📊 Token Usage:', {
+            prompt: usage.prompt_tokens,
+            completion: usage.completion_tokens,
+            total: usage.total_tokens
+        });
+
+        return content;
+
+    } catch (error) {
+        if (error.response) {
+            console.error('❌ API Error:', error.response.data);
+        } else {
+            console.error('❌ Error:', error.message);
         }
-      }
-    );
-
-    const content = response.data.choices[0].message.content;
-    const usage = response.data.usage;
-
-    console.log('✅ Response mil gaya!\n');
-    console.log('📊 Token Usage:', {
-      prompt: usage.prompt_tokens,
-      completion: usage.completion_tokens,
-      total: usage.total_tokens
-    });
-
-    return content;
-
-  } catch (error) {
-    if (error.response) {
-      console.error('❌ API Error:', error.response.data);
-    } else {
-      console.error('❌ Error:', error.message);
+        throw error;
     }
-    throw error;
-  }
 }
 // Available Models (update to latest Groq supported models)
 const GROQ_MODELS = {
@@ -524,20 +536,23 @@ const GROQ_MODELS = {
 // Chat history ke saath conversation
 async function chatWithAI(messages) {
   try {
-    const response = await axios.post(
-      GROQ_API_URL,
+        const groqConfig = await getGroqConfig();
+        const groqApiKey = groqConfig.api_key;
+        const groqApiUrl = groqConfig.api_url;
+        const response = await axios.post(
+            groqApiUrl,
       {
         model: GROQ_MODELS.LLAMA_70B,
         messages: messages, // Array of {role, content}
         temperature: 0.7,
         max_tokens: 1024
       },
-      {
-        headers: {
-          'Authorization': `Bearer ${GROQ_API_KEY}`,
-          'Content-Type': 'application/json'
-        }
-      }
+            {
+                headers: {
+                    'Authorization': `Bearer ${groqApiKey}`,
+                    'Content-Type': 'application/json'
+                }
+            }
     );
 
     console.log('✅ Chat response mil gaya!\n');
