@@ -44,5 +44,5 @@ exports.updateSystemSettings = async (req, res) => {
       cloudinary_api_secret
     });
   }
-  res.json({ status: true, message: 'Settings updated' });
+  res.json({ status: true, message: 'Settings updated successfully' });
 };

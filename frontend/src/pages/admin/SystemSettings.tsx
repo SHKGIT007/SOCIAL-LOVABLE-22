@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { apiService } from '../../services/api';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
+import { useToast } from "@/hooks/use-toast";
 
 const SystemSettings = () => {
+  const { toast } = useToast();
   const [settings, setSettings] = useState<any[]>([]);
   const [form, setForm] = useState<{
     type?: string;
@@ -54,9 +56,27 @@ const SystemSettings = () => {
       cloudinary_api_key: form.cloudinary_api_key || '',
       cloudinary_api_secret: form.cloudinary_api_secret || '',
     };
-  await apiService.updateSystemSettings({ settings: updates });
+    const updateData = await apiService.updateSystemSettings({ settings: updates });
+
+    console.log("Update Response: ", updateData);
     setLoading(false);
     fetchSettings();
+
+    if(updateData.status == true) {
+        
+        toast({
+          title: "Success",
+          description: "Settings updated successfully.",
+        });
+        
+    } else {
+        toast({
+          title: "Error",
+            description: updateData.message || "Failed to update settings.",
+            variant: "destructive",
+        });
+    }
+    
   };
 
 
