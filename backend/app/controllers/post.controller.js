@@ -435,13 +435,19 @@ const generateAIPost = asyncHandler(async (req, res) => {
         imageUrl = imageObj.url || '';
     }
     generatedContent = await generateAIContent(ai_prompt);
-
-    logger.info('AI post generated', { userId, ai_prompt });
+    if(generatedContent.status == false ){
+        return res.status(500).json({
+            status: false,
+            message: JSON.stringify(generatedContent.msg),
+            error: generatedContent.msg
+        });
+    }   
+   logger.info('AI post generated', { userId, ai_prompt });
    return res.json({
         status: true,
         message: 'AI post generated successfully',
         data: {
-            content: generatedContent,
+            content: generatedContent.content,
             ai_prompt: ai_prompt,
             imageUrl: imageUrl
         }
@@ -517,13 +523,15 @@ async function generateAIContent(prompt, options = {}) {
             total: usage.total_tokens
         });
 
-        return content;
+      return {status:true,content: content};
 
     } catch (error) {
         if (error.response) {
-            console.error('❌ API Error:', error.response.data);
+            console.log('❌ API Error:', error.response.data);
+            return {status:false,msg:error.response.data};
         } else {
-            console.error('❌ Error:', error.message);
+            console.log('❌ Error:', error.message);
+            return {status:false,msg:error.message};
         }
         throw error;
     }
@@ -567,16 +575,6 @@ async function chatWithAI(messages) {
   }
 }
 
-// Example 1: Simple prompt
-async function example1() {
-  console.log('=== Example 1: Simple Prompt ===\n');
-  
-  const prompt = "JavaScript ke baare mein 5 interesting facts batao";
-  const response = await generateAIContent(prompt);
-  
-  console.log('Response:\n', response);
-  console.log('\n' + '='.repeat(50) + '\n');
-}
 
 async function generateImagePollinations(prompt, retries = 3) {
   for (let attempt = 1; attempt <= retries; attempt++) {
