@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Edit, Calendar, Sparkles } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import Swal from "sweetalert2";
 import { AlertTitle } from "@/components/ui/alert";
 
 interface Post {
@@ -30,7 +30,6 @@ interface Post {
 const ViewPost = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [post, setPost] = useState<Post | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -53,18 +52,20 @@ const ViewPost = () => {
       if(data.status === true) {
          setPost(data.data.post);
       }else {
-        toast({
+        Swal.fire({
+          icon: "error",
           title: "Error",
-          description: data.message || "Failed to fetch post.",
-          variant: "destructive",
+          text: data.message || "Failed to fetch post.",
+          confirmButtonColor: "#6366f1"
         });
         navigate("/posts");
       }
     } catch (error: any) {
-      toast({
+      Swal.fire({
+        icon: "error",
         title: "Error",
-        description: error.message || "Failed to fetch post.",
-        variant: "destructive",
+        text: error.message || "Failed to fetch post.",
+        confirmButtonColor: "#6366f1"
       });
       navigate("/posts");
     } finally {

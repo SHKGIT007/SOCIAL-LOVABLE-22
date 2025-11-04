@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
+import Swal from "sweetalert2";
 import { apiService } from "@/services/api";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 
@@ -21,7 +21,6 @@ import { useEffect } from "react";
 const Profile = () => {
   const [profile, setProfile] = useState(initialProfile);
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -56,23 +55,48 @@ const Profile = () => {
     e.preventDefault();
     // Frontend validation for required fields
     if (!profile.business_name.trim()) {
-      toast({ title: "Error", description: "Business/Creator Name is required.", variant: "destructive" });
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Business/Creator Name is required.",
+        confirmButtonColor: "#6366f1"
+      });
       return;
     }
     if (!profile.description.trim()) {
-      toast({ title: "Error", description: "Description is required.", variant: "destructive" });
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Description is required.",
+        confirmButtonColor: "#6366f1"
+      });
       return;
     }
     setIsLoading(true);
     try {
       const res = await apiService.saveProfile(profile);
       if (res.status) {
-        toast({ title: "Profile Saved", description: "Your profile details have been updated." });
+        Swal.fire({
+          icon: "success",
+          title: "Profile Saved",
+          text: "Your profile details have been updated.",
+          confirmButtonColor: "#6366f1"
+        });
       } else {
-        toast({ title: "Error", description: res.message || "Failed to save profile.", variant: "destructive" });
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: res.message || "Failed to save profile.",
+          confirmButtonColor: "#6366f1"
+        });
       }
     } catch (error: any) {
-      toast({ title: "Error", description: error.message || "Failed to save profile.", variant: "destructive" });
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error.message || "Failed to save profile.",
+        confirmButtonColor: "#6366f1"
+      });
     } finally {
       setIsLoading(false);
     }

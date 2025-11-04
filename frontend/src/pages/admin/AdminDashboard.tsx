@@ -3,13 +3,12 @@ import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, FileText, CreditCard, TrendingUp, Zap } from "lucide-react"; // Added Zap for flair
-import { useToast } from "@/hooks/use-toast";
+import Swal from "sweetalert2";
 import { apiService } from "@/services/api";
 import { isAuthenticated, getUserRole, logout } from "@/utils/auth";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalPosts: 0,
@@ -48,10 +47,11 @@ const AdminDashboard = () => {
         if (error.message === 'Authentication failed') {
           logout();
         } else {
-          toast({
+          Swal.fire({
+            icon: "error",
             title: "Error",
-            description: error.message || "Failed to load admin stats",
-            variant: "destructive",
+            text: error.message || "Failed to load admin stats",
+            confirmButtonColor: "#6366f1" // Indigo
           });
         }
       } finally {
@@ -60,7 +60,8 @@ const AdminDashboard = () => {
     };
 
     checkAdminAccess();
-  }, [navigate, toast]);
+  }, [navigate]);
+  // ...existing code...
   // -------------------------
 
   if (isLoading) {

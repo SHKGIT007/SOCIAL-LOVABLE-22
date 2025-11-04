@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Edit, Trash2, Calendar, Eye } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import Swal from "sweetalert2";
 import { apiService } from "@/services/api";
 import { isAuthenticated, logout } from "@/utils/auth";
 import {
@@ -32,7 +32,6 @@ interface Post {
 
 const Posts = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [deletePostId, setDeletePostId] = useState<number | null>(null);
@@ -57,10 +56,11 @@ const Posts = () => {
       if (error.message === 'Authentication failed') {
         logout();
       } else {
-        toast({
+        Swal.fire({
+          icon: "error",
           title: "Error",
-          description: error.message || "Failed to fetch posts",
-          variant: "destructive",
+          text: error.message || "Failed to fetch posts",
+          confirmButtonColor: "#6366f1"
         });
       }
     } finally {
@@ -75,21 +75,23 @@ const Posts = () => {
       const response = await apiService.deletePost(deletePostId);
 
       if (response.status) {
-        toast({
+        Swal.fire({
+          icon: "success",
           title: "Success",
-          description: "Post deleted successfully",
+          text: "Post deleted successfully",
+          confirmButtonColor: "#6366f1"
         });
-
         fetchPosts();
       }
     } catch (error: any) {
       if (error.message === 'Authentication failed') {
         logout();
       } else {
-        toast({
+        Swal.fire({
+          icon: "error",
           title: "Error",
-          description: error.message || "Failed to delete post",
-          variant: "destructive",
+          text: error.message || "Failed to delete post",
+          confirmButtonColor: "#6366f1"
         });
       }
     } finally {

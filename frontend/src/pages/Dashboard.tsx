@@ -4,13 +4,12 @@ import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FileText, Sparkles, Calendar, TrendingUp } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import Swal from "sweetalert2";
 import { apiService } from "@/services/api";
 import { isAuthenticated, getUserRole, logout } from "@/utils/auth";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
   // State variables are preserved
   const [userRole, setUserRole] = useState<"admin" | "client">("client");
   const [stats, setStats] = useState({
@@ -55,10 +54,11 @@ const Dashboard = () => {
         if (error.message === 'Authentication failed') {
           logout();
         } else {
-          toast({
+          Swal.fire({
+            icon: "error",
             title: "Error",
-            description: error.message || "Failed to load dashboard data",
-            variant: "destructive",
+            text: error.message || "Failed to load dashboard data",
+            confirmButtonColor: "#6366f1"
           });
         }
       } finally {
@@ -67,7 +67,7 @@ const Dashboard = () => {
     };
 
     checkUserAndFetchStats();
-  }, [navigate, toast]);
+  }, [navigate]);
   // -------------------------
 
   // Loading State (Preserved and styled)

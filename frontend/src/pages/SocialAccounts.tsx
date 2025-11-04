@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
+import Swal from "sweetalert2";
 import { apiService } from "@/services/api";
 import { API_CONFIG } from "@/utils/config";
 import { redirect } from "react-router-dom";
@@ -14,7 +14,6 @@ import { platform } from "os";
 const platforms = ["Facebook", "Instagram"];
 
 const SocialAccounts = () => {
-    const { toast } = useToast();
     const [accounts, setAccounts] = useState([]);
     // App ID/Secret state
     const [fbAppId, setFbAppId] = useState("");
@@ -52,7 +51,12 @@ const SocialAccounts = () => {
             const res = await apiService.getMySocialAccounts();
             setAccounts(res.data.socialAccounts || []);
         } catch (error) {
-            toast({ title: "Error", description: error.message || "Failed to fetch accounts", variant: "destructive" });
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: error.message || "Failed to fetch accounts",
+                confirmButtonColor: "#6366f1"
+            });
         } finally {
             setIsLoading(false);
         }
@@ -70,7 +74,12 @@ const SocialAccounts = () => {
             appSecret = igAppSecret;
         }
         if (!appId || !appSecret) {
-            toast({ title: "Error", description: "App ID and Secret are required.", variant: "destructive" });
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: "App ID and Secret are required.",
+                confirmButtonColor: "#6366f1"
+            });
             setIsLoading(false);
             return;
         }
@@ -84,7 +93,12 @@ const SocialAccounts = () => {
                     app_id: appId,
                     app_secret: appSecret
                 });
-                toast({ title: "Success", description: `${platform} credentials updated.` });
+                Swal.fire({
+                    icon: "success",
+                    title: "Success",
+                    text: `${platform} credentials updated.`,
+                    confirmButtonColor: "#6366f1"
+                });
             } else {
                 // Create new account
                 await apiService.createSocialAccount({
@@ -92,11 +106,21 @@ const SocialAccounts = () => {
                     app_id: appId,
                     app_secret: appSecret
                 });
-                toast({ title: "Success", description: `${platform} App ID/Secret saved.` });
+                Swal.fire({
+                    icon: "success",
+                    title: "Success",
+                    text: `${platform} App ID/Secret saved.`,
+                    confirmButtonColor: "#6366f1"
+                });
             }
             fetchAccounts();
         } catch (error) {
-            toast({ title: "Error", description: error.message || "Failed to save App ID/Secret", variant: "destructive" });
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: error.message || "Failed to save App ID/Secret",
+                confirmButtonColor: "#6366f1"
+            });
         } finally {
             setIsLoading(false);
         }
@@ -116,7 +140,12 @@ const SocialAccounts = () => {
 
                 //    const url = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${appid}&redirect_uri=${encodeURIComponent(`https://hometalent4u.in/backend/facebook/callback`)}&state=123&response_type=code&scope=public_profile,email,pages_show_list,pages_read_engagement,pages_manage_posts`;
                 if (!app_id || !app_secret || !redirect_uri || !user_id) {
-                    toast({ title: "Error", description: "Please save Facebook App ID/Secret first.", variant: "destructive" });
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "Please save Facebook App ID/Secret first.",
+                        confirmButtonColor: "#6366f1"
+                    });
                     setIsLoading(false);
                     return;
                 }
@@ -158,7 +187,12 @@ const SocialAccounts = () => {
                 let redirect_uri = `https://socialvibe.tradestreet.in/backend/instagram/callback`;
 
                 if (!app_id || !app_secret || !redirect_uri || !igAcc) {
-                    toast({ title: "Error", description: "Please save Instagram App ID/Secret first.", variant: "destructive" });
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "Please save Instagram App ID/Secret first.",
+                        confirmButtonColor: "#6366f1"
+                    });
                     setIsLoading(false);
                     return;
                 }
@@ -196,10 +230,20 @@ const SocialAccounts = () => {
                 is_active: 0,
                 id: id,
             });
-            toast({ title: "Success", description: "Account disconnected." });
+            Swal.fire({
+                icon: "success",
+                title: "Success",
+                text: "Account disconnected.",
+                confirmButtonColor: "#6366f1"
+            });
             fetchAccounts();
         } catch (error) {
-            toast({ title: "Error", description: error.message || "Failed to disconnect account", variant: "destructive" });
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: error.message || "Failed to disconnect account",
+                confirmButtonColor: "#6366f1"
+            });
         } finally {
             setIsLoading(false);
         }

@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, Save } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import Swal from "sweetalert2";
 import {
   Select,
   SelectContent,
@@ -37,7 +37,6 @@ interface FormData {
 const EditPost = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState<FormData>({
@@ -89,18 +88,20 @@ const EditPost = () => {
       console.log("Fetched post data: ", data);
     
       if(data.status === false) {
-        toast({
+        Swal.fire({
+          icon: "error",
           title: "Error",
-          description: data.message || "Failed to fetch post.",
-          variant: "destructive",
+          text: data.message || "Failed to fetch post.",
+          confirmButtonColor: "#6366f1"
         });
         navigate("/posts");
         return;
       }else if (!data.data || !data.data.post) {
-        toast({
+        Swal.fire({
+          icon: "error",
           title: "Error",
-          description: "Post not found.",
-          variant: "destructive",
+          text: "Post not found.",
+          confirmButtonColor: "#6366f1"
         });
         navigate("/posts");
         return;
@@ -123,10 +124,11 @@ const EditPost = () => {
 
 
     } catch (error: any) {
-      toast({
+      Swal.fire({
+        icon: "error",
         title: "Error",
-        description: error.message || "Failed to fetch post.",
-        variant: "destructive",
+        text: error.message || "Failed to fetch post.",
+        confirmButtonColor: "#6366f1"
       });
     } finally {
       setIsLoading(false);
@@ -148,10 +150,11 @@ const EditPost = () => {
 
     try {
       if (formData.platforms.length === 0) {
-        toast({
+        Swal.fire({
+          icon: "error",
           title: "Error",
-          description: "Please select at least one platform.",
-          variant: "destructive",
+          text: "Please select at least one platform.",
+          confirmButtonColor: "#6366f1"
         });
         setIsSaving(false);
         return;
@@ -177,17 +180,20 @@ const EditPost = () => {
 
        await apiService.updatePost(id, updateData);
 
-      toast({
+      Swal.fire({
+        icon: "success",
         title: "Success",
-        description: "Post updated successfully!",
+        text: "Post updated successfully!",
+        confirmButtonColor: "#6366f1"
       });
 
       navigate("/posts");
     } catch (error: any) {
-      toast({
+      Swal.fire({
+        icon: "error",
         title: "Error",
-        description: error.message || "Failed to update post.",
-        variant: "destructive",
+        text: error.message || "Failed to update post.",
+        confirmButtonColor: "#6366f1"
       });
     } finally {
       setIsSaving(false);

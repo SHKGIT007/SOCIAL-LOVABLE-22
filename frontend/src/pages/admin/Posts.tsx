@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Eye, Trash2, Search } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import Swal from "sweetalert2";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -37,7 +37,6 @@ interface Post {
 
 const AdminPosts = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [posts, setPosts] = useState<Post[]>([]);
   const [filteredPosts, setFilteredPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -74,10 +73,11 @@ const AdminPosts = () => {
       }
       await fetchPosts();
     } catch (error: any) {
-      toast({
+      Swal.fire({
+        icon: "error",
         title: "Error",
-        description: error.message,
-        variant: "destructive",
+        text: error.message,
+        confirmButtonColor: "#6366f1"
       });
     } finally {
       setIsLoading(false);
@@ -96,18 +96,20 @@ const AdminPosts = () => {
       }else{
         setPosts([]);
         setFilteredPosts([]);
-        toast({
+        Swal.fire({
+          icon: "error",
           title: "Error",
-          description: data.message || "Failed to fetch posts.",
-          variant: "destructive",
+          text: data.message || "Failed to fetch posts.",
+          confirmButtonColor: "#6366f1"
         });
         return;
       }
     } catch (error: any) {
-      toast({
+      Swal.fire({
+        icon: "error",
         title: "Error",
-        description: error.message || "Failed to fetch posts.",
-        variant: "destructive",
+        text: error.message || "Failed to fetch posts.",
+        confirmButtonColor: "#6366f1"
       });
     }
   };
@@ -116,16 +118,19 @@ const AdminPosts = () => {
     if (!deletePostId) return;
     try {
       await apiService.deletePost(deletePostId);
-      toast({
+      Swal.fire({
+        icon: "success",
         title: "Success",
-        description: "Post deleted successfully",
+        text: "Post deleted successfully",
+        confirmButtonColor: "#6366f1"
       });
       await fetchPosts();
     } catch (error: any) {
-      toast({
+      Swal.fire({
+        icon: "error",
         title: "Error",
-        description: error.message || "Failed to delete post.",
-        variant: "destructive",
+        text: error.message || "Failed to delete post.",
+        confirmButtonColor: "#6366f1"
       });
     } finally {
       setDeletePostId(null);

@@ -11,7 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Pencil, Trash2 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import Swal from "sweetalert2";
 
 interface Plan {
   id: string;
@@ -26,7 +26,6 @@ interface Plan {
 
 const Plans = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -56,10 +55,11 @@ const Plans = () => {
       }
       await fetchPlans();
     } catch (error: any) {
-      toast({
+      Swal.fire({
+        icon: "error",
         title: "Error",
-        description: error.message,
-        variant: "destructive",
+        text: error.message,
+        confirmButtonColor: "#6366f1"
       });
     } finally {
       setIsLoading(false);
@@ -73,18 +73,20 @@ const Plans = () => {
       setPlans(data?.data?.plans || []);
       }else{
         setPlans([]);
-        toast({
+        Swal.fire({
+          icon: "error",
           title: "Error",
-          description: data.message || "Failed to fetch plans.",
-          variant: "destructive",
+          text: data.message || "Failed to fetch plans.",
+          confirmButtonColor: "#6366f1"
         });
         return;
       }
     } catch (error: any) {
-      toast({
+      Swal.fire({
+        icon: "error",
         title: "Error",
-        description: error.message || "Failed to fetch plans.",
-        variant: "destructive",
+        text: error.message || "Failed to fetch plans.",
+        confirmButtonColor: "#6366f1"
       });
     }
   };
@@ -96,10 +98,20 @@ const Plans = () => {
     try {
       if (editingPlan) {
         await apiService.updatePlan(editingPlan.id, formData);
-        toast({ title: "Success", description: "Plan updated successfully!" });
+        Swal.fire({
+          icon: "success",
+          title: "Success",
+          text: "Plan updated successfully!",
+          confirmButtonColor: "#6366f1"
+        });
       } else {
         await apiService.createPlan(formData);
-        toast({ title: "Success", description: "Plan created successfully!" });
+        Swal.fire({
+          icon: "success",
+          title: "Success",
+          text: "Plan created successfully!",
+          confirmButtonColor: "#6366f1"
+        });
       }
       setIsDialogOpen(false);
       setEditingPlan(null);
@@ -113,10 +125,11 @@ const Plans = () => {
       });
       await fetchPlans();
     } catch (error: any) {
-      toast({
+      Swal.fire({
+        icon: "error",
         title: "Error",
-        description: error.message || "Failed to save plan.",
-        variant: "destructive",
+        text: error.message || "Failed to save plan.",
+        confirmButtonColor: "#6366f1"
       });
     } finally {
       setIsLoading(false);
@@ -137,17 +150,32 @@ const Plans = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this plan?")) return;
+    const result = await Swal.fire({
+      icon: "warning",
+      title: "Are you sure?",
+      text: "Do you really want to delete this plan?",
+      showCancelButton: true,
+      confirmButtonColor: "#6366f1",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!"
+    });
+    if (!result.isConfirmed) return;
 
     try {
       await apiService.deletePlan(id);
-      toast({ title: "Success", description: "Plan deleted successfully!" });
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "Plan deleted successfully!",
+        confirmButtonColor: "#6366f1"
+      });
       await fetchPlans();
     } catch (error: any) {
-      toast({
+      Swal.fire({
+        icon: "error",
         title: "Error",
-        description: error.message || "Failed to delete plan.",
-        variant: "destructive",
+        text: error.message || "Failed to delete plan.",
+        confirmButtonColor: "#6366f1"
       });
     }
   };

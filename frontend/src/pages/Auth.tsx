@@ -5,14 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/hooks/use-toast";
+import Swal from "sweetalert2";
 import { Loader2 } from "lucide-react";
 import { apiService } from "@/services/api";
 import { setAuthData, isAuthenticated, onAuthStateChange } from "@/utils/auth";
 
 const Auth = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -64,9 +63,11 @@ const Auth = () => {
       if (response.status) {
         // Store auth data in localStorage
         setAuthData(response.data);
-        toast({
+        Swal.fire({
+          icon: "success",
           title: "Success",
-          description: "Signed in successfully!",
+          text: "Signed in successfully!",
+          confirmButtonColor: "#6366f1"
         });
         // Fallback navigation if onAuthStateChange does not trigger
         if (response.data.user?.role === "admin") {
@@ -78,10 +79,11 @@ const Auth = () => {
         }
       }
     } catch (error: any) {
-      toast({
+      Swal.fire({
+        icon: "error",
         title: "Error",
-        description: error.message || "Login failed",
-        variant: "destructive",
+        text: error.message || "Login failed",
+        confirmButtonColor: "#6366f1"
       });
     } finally {
       setIsLoading(false);
@@ -105,9 +107,11 @@ const Auth = () => {
       if (response.status) {
         // Store auth data in localStorage
         setAuthData(response.data);
-        toast({
+        Swal.fire({
+          icon: "success",
           title: "Success",
-          description: "Account created successfully!",
+          text: "Account created successfully!",
+          confirmButtonColor: "#6366f1"
         });
         // Fallback navigation if onAuthStateChange does not trigger
         if (response.data.user?.role === "admin") {
@@ -117,10 +121,11 @@ const Auth = () => {
         }
       }
     } catch (error: any) {
-      toast({
+      Swal.fire({
+        icon: "error",
         title: "Error",
-        description: error.message || "Registration failed",
-        variant: "destructive",
+        text: error.message || "Registration failed",
+        confirmButtonColor: "#6366f1"
       });
     } finally {
       setIsLoading(false);
