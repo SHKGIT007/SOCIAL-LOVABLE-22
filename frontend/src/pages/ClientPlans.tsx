@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Check } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import Swal from "sweetalert2";
 import { apiService } from "@/services/api";
 import { isAuthenticated, logout } from "@/utils/auth";
 
@@ -21,7 +21,6 @@ interface Plan {
 
 const ClientPlans = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [currentSubscription, setCurrentSubscription] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -54,10 +53,11 @@ const ClientPlans = () => {
         logout();
       } else {
         console.error("Error:", error);
-        toast({
+        Swal.fire({
+          icon: "error",
           title: "Error",
-          description: "Failed to load plans data",
-          variant: "destructive",
+          text: "Failed to load plans data",
+          confirmButtonColor: "#6366f1"
         });
       }
     } finally {
@@ -71,10 +71,11 @@ const ClientPlans = () => {
 
       // Check if user already has active subscription
       if (currentSubscription) {
-        toast({
+        Swal.fire({
+          icon: "info",
           title: "Info",
-          description: "You already have an active subscription. Please cancel it first.",
-          variant: "destructive",
+          text: "You already have an active subscription. Please cancel it first.",
+          confirmButtonColor: "#6366f1"
         });
         return;
       }
@@ -86,21 +87,23 @@ const ClientPlans = () => {
       });
 
       if (response.status) {
-        toast({
+        Swal.fire({
+          icon: "success",
           title: "Success",
-          description: "Successfully subscribed to the plan!",
+          text: "Successfully subscribed to the plan!",
+          confirmButtonColor: "#6366f1"
         });
-
         await checkAuthAndFetchData();
       }
     } catch (error: any) {
       if (error.message === 'Authentication failed') {
         logout();
       } else {
-        toast({
+        Swal.fire({
+          icon: "error",
           title: "Error",
-          description: error.message || "Failed to subscribe to plan",
-          variant: "destructive",
+          text: error.message || "Failed to subscribe to plan",
+          confirmButtonColor: "#6366f1"
         });
       }
     } finally {
@@ -109,7 +112,16 @@ const ClientPlans = () => {
   };
 
   const handleCancelSubscription = async () => {
-    if (!confirm("Are you sure you want to cancel your subscription?")) return;
+    const result = await Swal.fire({
+      icon: "warning",
+      title: "Are you sure?",
+      text: "Do you want to cancel your subscription?",
+      showCancelButton: true,
+      confirmButtonColor: "#6366f1",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, cancel it!"
+    });
+    if (!result.isConfirmed) return;
 
     try {
       setIsLoading(true);
@@ -117,21 +129,23 @@ const ClientPlans = () => {
       const response = await apiService.cancelSubscription(currentSubscription.id);
 
       if (response.status) {
-        toast({
+        Swal.fire({
+          icon: "success",
           title: "Success",
-          description: "Subscription cancelled successfully",
+          text: "Subscription cancelled successfully",
+          confirmButtonColor: "#6366f1"
         });
-
         await checkAuthAndFetchData();
       }
     } catch (error: any) {
       if (error.message === 'Authentication failed') {
         logout();
       } else {
-        toast({
+        Swal.fire({
+          icon: "error",
           title: "Error",
-          description: error.message || "Failed to cancel subscription",
-          variant: "destructive",
+          text: error.message || "Failed to cancel subscription",
+          confirmButtonColor: "#6366f1"
         });
       }
     } finally {

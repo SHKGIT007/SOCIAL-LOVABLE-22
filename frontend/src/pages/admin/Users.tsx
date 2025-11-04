@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
+import Swal from "sweetalert2";
 import { User, CreditCard } from "lucide-react"; // Added Icons
 
 interface UserData {
@@ -26,7 +26,6 @@ interface UserData {
 
 const Users = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [users, setUsers] = useState<UserData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -47,10 +46,11 @@ const Users = () => {
        setUsers(data?.data?.users || []);
       }else{
         setUsers([]);
-        toast({
+        Swal.fire({
+          icon: "error",
           title: "Error",
-          description: data.message || "Failed to fetch users.",
-          variant: "destructive",
+          text: data.message || "Failed to fetch users.",
+          confirmButtonColor: "#6366f1"
         });
         return;
       }
@@ -60,10 +60,11 @@ const Users = () => {
       if (error.message === 'Authentication failed' || error.status === 401) {
          navigate("/auth");
       }
-      toast({
+      Swal.fire({
+        icon: "error",
         title: "Error",
-        description: error.message || "Failed to fetch users.",
-        variant: "destructive",
+        text: error.message || "Failed to fetch users.",
+        confirmButtonColor: "#6366f1"
       });
     } finally {
       setIsLoading(false);

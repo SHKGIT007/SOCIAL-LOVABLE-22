@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useToast } from "@/hooks/use-toast";
+import Swal from "sweetalert2";
 import { Loader2, Sparkles } from "lucide-react";
 import { apiService } from "@/services/api";
 import { isAuthenticated, logout } from "@/utils/auth";
@@ -22,7 +22,6 @@ const NewPost = () => {
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoPreview, setVideoPreview] = useState<string>("");
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -75,10 +74,11 @@ const NewPost = () => {
 
   const handleGenerateAI = async () => {
     if (!aiPrompt) {
-      toast({
+      Swal.fire({
+        icon: "error",
         title: "Error",
-        description: "Please enter your post prompt",
-        variant: "destructive",
+        text: "Please enter your post prompt",
+        confirmButtonColor: "#6366f1"
       });
       return;
     }
@@ -94,19 +94,22 @@ const NewPost = () => {
       if (response.status) {
         setContent(response.data.content);
         setImageContent(response.data.imageUrl);
-        toast({
+        Swal.fire({
+          icon: "success",
           title: "Success",
-          description: "AI post generated successfully!",
+          text: "AI post generated successfully!",
+          confirmButtonColor: "#6366f1"
         });
       }
     } catch (error: any) {
       if (error.message === 'Authentication failed') {
         logout();
       } else {
-        toast({
+        Swal.fire({
+          icon: "error",
           title: "Error",
-          description: error.message || "Failed to generate AI post",
-          variant: "destructive",
+          text: error.message || "Failed to generate AI post",
+          confirmButtonColor: "#6366f1"
         });
       }
     } finally {
@@ -118,27 +121,30 @@ const NewPost = () => {
     e.preventDefault();
 
     if (!title) {
-      toast({
+      Swal.fire({
+        icon: "error",
         title: "Error",
-        description: "Please update your profile first before creating a post.",
-        variant: "destructive",
+        text: "Please update your profile first before creating a post.",
+        confirmButtonColor: "#6366f1"
       });
       return;
     }
    if (!content) {
-      toast({
+      Swal.fire({
+        icon: "error",
         title: "Error",
-        description: "Please generate post content",
-        variant: "destructive",
+        text: "Please generate post content",
+        confirmButtonColor: "#6366f1"
       });
       return;
     }
 
     if(platforms.length === 0){
-      toast({
+      Swal.fire({
+        icon: "error",
         title: "Error",
-        description: "Please connect and select at least one social platform",
-        variant: "destructive",
+        text: "Please connect and select at least one social platform",
+        confirmButtonColor: "#6366f1"
       });
       return;
     }
@@ -175,9 +181,11 @@ const NewPost = () => {
       const response = await apiService.createPost(formData, true); // true = multipart
 
       if (response.status) {
-        toast({
+        Swal.fire({
+          icon: "success",
           title: "Success",
-          description: "Post created successfully!",
+          text: "Post created successfully!",
+          confirmButtonColor: "#6366f1"
         });
         navigate("/posts");
       }
@@ -185,10 +193,11 @@ const NewPost = () => {
       if (error.message === 'Authentication failed') {
         logout();
       } else {
-        toast({
+        Swal.fire({
+          icon: "error",
           title: "Error",
-          description: error.message || "Failed to create post",
-          variant: "destructive",
+          text: error.message || "Failed to create post",
+          confirmButtonColor: "#6366f1"
         });
       }
     } finally {
