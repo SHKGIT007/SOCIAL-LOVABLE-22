@@ -2,6 +2,7 @@ const express = require('express');
 require('dotenv').config();
 const sequelize = require('./app/config/db.config');
 const routes = require('./app/route');
+const { startScheduler } = require('./app/services/scheduler.service');
 
 const cors = require('cors');
 const app = express();
@@ -36,8 +37,11 @@ app.use(cors(corsOptions));
 
 app.use(bodyParser.json({ limit: '50mb', extended: true }));
 app.use(bodyParser.urlencoded({
-  limit: '50mb', extended: true
+    limit: '50mb', extended: true
 }));
+
+// Start the scheduler for auto-posting
+startScheduler();
 
 app.get("/",(req,res)=>{
     res.send("Welcome to Social Lovable API")
