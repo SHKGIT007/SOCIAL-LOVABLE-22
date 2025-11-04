@@ -56,9 +56,9 @@ const getAllSchedules = asyncHandler(async (req, res) => {
 });
 
 module.exports = {
-  createSchedule,
-  getUserSchedules,
-  updateSchedule,
-  deleteSchedule,
-  getAllSchedules,
+  createSchedule: createSchedule,
+  getUserSchedules: getUserSchedules,
+  updateSchedule: updateSchedule,
+  deleteSchedule: deleteSchedule,
+  getAllSchedules: getAllSchedules,
 };

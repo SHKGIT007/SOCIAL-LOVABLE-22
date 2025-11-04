@@ -1,15 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const scheduleController = require('../controllers/schedule.controller');
-const { authenticate } = require('../middleware/auth.middleware');
+const { authenticateToken } = require('../middleware/auth.middleware');
 
 // User routes
-router.post('/', authenticate, scheduleController.createSchedule);
-router.get('/', authenticate, scheduleController.getUserSchedules);
-router.put('/:id', authenticate, scheduleController.updateSchedule);
-router.delete('/:id', authenticate, scheduleController.deleteSchedule);
+router.post('/', authenticateToken, scheduleController.createSchedule);
+router.get('/', authenticateToken, scheduleController.getUserSchedules);
+router.put('/:id', authenticateToken, scheduleController.updateSchedule);
+router.delete('/:id', authenticateToken, scheduleController.deleteSchedule);
 
 // Admin route
-router.get('/all', authenticate, scheduleController.getAllSchedules);
+router.get('/all', authenticateToken, scheduleController.getAllSchedules);
 
 module.exports = router;
