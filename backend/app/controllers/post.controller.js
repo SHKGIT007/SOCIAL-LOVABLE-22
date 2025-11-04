@@ -39,8 +39,6 @@ const createPost = asyncHandler(async (req, res) => {
         }
     }
 
-
-
     // Use environment variables for upload directory and public URL
     const UPLOAD_DIR = process.env.UPLOAD_DIR || '/var/www/socialvibe/uploads';
     const PUBLIC_UPLOAD_URL = process.env.PUBLIC_UPLOAD_URL || 'https://socialvibe.tradestreet.in/uploads';
@@ -152,8 +150,7 @@ const createPost = asyncHandler(async (req, res) => {
     
 
     // Publish logic for Facebook and Instagram
-    if (status === 'published' && Array.isArray(platforms)) {
-
+    if (req.body.status === 'published' && Array.isArray(platforms)) {
 
         console.log("Publishing to platformsLLLLLLLLLLLLLLLLLLL:", platforms);
         let publishResults = {};
@@ -206,7 +203,7 @@ const createPost = asyncHandler(async (req, res) => {
     }
     // For scheduled and draft, just save post, do not publish
   //  logger.info('Post created', { postId: post.id, userId });
-    res.status(201).json({
+    return res.status(201).json({
         status: true,
         message: 'Post created successfully',
         data: { post }
@@ -427,6 +424,7 @@ const generateAIPost = asyncHandler(async (req, res) => {
             message: 'Monthly AI post limit reached'
         });
     }
+    
     let generatedContent = '';
     let imageUrl = '';
 

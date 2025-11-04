@@ -217,7 +217,7 @@ const Plans = () => {
                     required
                   />
                 </div>
-                <div className="space-y-2">
+                {/* <div className="space-y-2">
                   <Label htmlFor="monthly_posts">Monthly Posts</Label>
                   <Input
                     id="monthly_posts"
@@ -226,7 +226,7 @@ const Plans = () => {
                     onChange={(e) => setFormData({ ...formData, monthly_posts: parseInt(e.target.value) })}
                     required
                   />
-                </div>
+                </div> */}
                 <div className="space-y-2">
                   <Label htmlFor="ai_posts">AI Posts</Label>
                   <Input

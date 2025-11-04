@@ -4,12 +4,12 @@ const { asyncHandler } = require('../middleware/error.middleware');
 const logger = require('../config/logger');
 
 const createPlan = asyncHandler(async (req, res) => {
-    const { name, price, monthly_posts, ai_posts, linked_accounts, features, description } = req.body;
+    const { name, price, ai_posts, linked_accounts, features, description } = req.body;
 
     const plan = await Plan.create({
         name,
         price,
-        monthly_posts,
+        // monthly_posts,
         ai_posts,
         linked_accounts,
         features,
