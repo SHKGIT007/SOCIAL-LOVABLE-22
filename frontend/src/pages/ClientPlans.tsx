@@ -82,7 +82,7 @@ const ClientPlans = () => {
       // Create new subscription
       const response = await apiService.createSubscription({
         plan_id: planId,
-        start_date: new Date().toISOString(),
+        // start_date: new Date().toISOString(),
       });
 
       if (response.status) {
