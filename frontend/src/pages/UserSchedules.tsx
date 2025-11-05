@@ -4,7 +4,15 @@ import { apiService } from "@/services/api";
 import Swal from 'sweetalert2';
 import DashboardLayout from '../components/Layout/DashboardLayout';
 
-import { Bell, BellOff, Edit2, Trash2 } from 'lucide-react';
+import { Bell, BellOff, Edit2, Trash2, Eye } from 'lucide-react';
+
+// Helper to get day label
+const getDayLabel = (day) => {
+  if (day === 'custom_date') return 'Custom Date Range';
+  if (day === 'single_date') return 'Single Date';
+  const found = DAYS.find(d => d.value === day);
+  return found ? found.label : day;
+};
 
 // Simple Toggle Switch component
 function ToggleSwitch({ checked, onChange }) {
@@ -51,6 +59,8 @@ export default function UserSchedules() {
   const [rows, setRows] = useState([emptyRow()]);
   const [editingId, setEditingId] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [viewSchedule, setViewSchedule] = useState(null);
 
   const fetchSchedules = async () => {
     try {
@@ -166,7 +176,7 @@ export default function UserSchedules() {
   };
 
   const handleSubmit = async (e) => {
-    
+
     e.preventDefault();
     // Validation: at least one platform AND at least one day/custom date/single date must be selected in every row
     for (let i = 0; i < rows.length; i++) {
@@ -241,7 +251,7 @@ export default function UserSchedules() {
   return (
     <DashboardLayout userRole="client">
       <div className="min-h-[90vh] w-full flex flex-col items-center justify-start bg-gradient-to-br from-blue-50 via-white to-indigo-100 py-8 px-2">
-  <div className="w-full">
+        <div className="w-full">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-3xl font-extrabold flex items-center gap-3 text-indigo-700 drop-shadow">
               <Bell className="text-blue-500 h-8 w-8" /> Your Scheduled Posts
@@ -266,11 +276,14 @@ export default function UserSchedules() {
                       </span>
                       <div>
                         <div className="text-base text-gray-700 font-semibold">Platforms: <span className="font-normal">{Array.isArray(sch.platforms) ? sch.platforms.join(', ') : sch.platforms}</span></div>
-                        <div className="text-base text-gray-700">Time: <span className="font-normal">{sch.scheduled_at?.replace('T', ' ').slice(0, 16)}</span></div>
+
                         {sch.recurrence && <div className="text-xs text-indigo-500">Recurs: {sch.recurrence}</div>}
                       </div>
                     </div>
+
+
                     <div className="flex items-center gap-2">
+
                       <ToggleSwitch checked={isActive} onChange={async () => {
                         try {
                           await apiService.toggleScheduleStatus(sch.id, isActive ? '0' : '1');
@@ -279,7 +292,55 @@ export default function UserSchedules() {
                           Swal.fire('Error', 'Failed to update status', 'error');
                         }
                       }} />
-                      
+
+                      {/* Eye icon button to view schedule details */}
+                      <button title="View Details" className="p-2 hover:bg-indigo-100 rounded" onClick={() => { setViewSchedule(sch); setViewModalOpen(true); }}>
+                        <Eye className="h-4 w-4 text-indigo-600" />
+                      </button>
+                      {/* Modal to show schedule details */}
+                      <Dialog open={viewModalOpen} onClose={() => setViewModalOpen(false)} className="fixed inset-0 z-50 overflow-y-auto">
+                        <div className="flex items-center justify-center min-h-screen px-4">
+                          <div className="fixed inset-0 bg-black opacity-30" aria-hidden="true" />
+                          <Dialog.Panel className="relative bg-white rounded-2xl shadow-xl max-w-md w-full mx-auto p-6 z-10 flex flex-col">
+                            <Dialog.Title className="text-xl font-bold mb-2 flex items-center gap-2 text-indigo-700">
+                              <Eye className="text-indigo-500" /> Schedule Details
+                            </Dialog.Title>
+                            {viewSchedule && (
+                              <div className="space-y-2">
+                                <div className="text-base font-semibold text-gray-700">Platforms: <span className="font-normal">{Array.isArray(viewSchedule.platforms) ? viewSchedule.platforms.join(', ') : viewSchedule.platforms}</span></div>
+                                {viewSchedule.days && viewSchedule.days.length > 0 && (
+                                  <div>
+                                    <div className="font-semibold text-indigo-600 mb-1">Days & Times:</div>
+                                    <ul className="list-disc pl-5 space-y-1">
+                                      {viewSchedule.days.map(day => (
+                                        <li key={day}>
+                                          <span className="font-medium">{getDayLabel(day)}:</span>
+                                          {day === 'custom_date' && (
+                                            <span className="ml-2 text-xs text-gray-500">{viewSchedule.customDateFrom} to {viewSchedule.customDateTo}</span>
+                                          )}
+                                          {day === 'single_date' && (
+                                            <span className="ml-2 text-xs text-gray-500">{viewSchedule.singleDate}</span>
+                                          )}
+                                          {viewSchedule.times && viewSchedule.times[day] && viewSchedule.times[day].length > 0 && (
+                                            <span className="ml-2">[
+                                              {viewSchedule.times[day].filter(Boolean).join(', ')}
+                                              ]</span>
+                                          )}
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+                                {viewSchedule.recurrence && <div className="text-xs text-indigo-500">Recurs: {viewSchedule.recurrence}</div>}
+                                <div className="flex justify-end mt-4">
+                                  <button className="px-4 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700" onClick={() => setViewModalOpen(false)}>Close</button>
+                                </div>
+                              </div>
+                            )}
+                          </Dialog.Panel>
+                        </div>
+                      </Dialog>
+
                       <button title="Edit" className="p-2 hover:bg-blue-100 rounded" onClick={() => handleEdit(sch)}><Edit2 className="h-4 w-4 text-blue-600" /></button>
                       <button title="Delete" className="p-2 hover:bg-red-100 rounded" onClick={() => handleDelete(sch.id)}><Trash2 className="h-4 w-4 text-red-600" /></button>
                     </div>
@@ -290,8 +351,11 @@ export default function UserSchedules() {
           </div>
         </div>
 
-        {/* Modal for Create/Edit Schedule */}
-        
+
+
+
+
+        {/* Modal for Create/Edit Schedule  */}
         <Dialog open={modalOpen} onClose={() => setModalOpen(false)} className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen px-4">
             <div className="fixed inset-0 bg-black opacity-30" aria-hidden="true" />
@@ -436,7 +500,7 @@ export default function UserSchedules() {
                           </div>
                         </div>
                       ))}
-                      
+
                     </div>
                     <button
                       type="button"
