@@ -1,5 +1,17 @@
-
 const { Schedule } = require('../models');
+
+// Toggle only the status of a schedule
+exports.toggleScheduleStatus = async (req, res) => {
+  try {
+    const schedule = await Schedule.findOne({ where: { id: req.params.id, userId: req.user.id } });
+    if (!schedule) return res.status(404).json({ success: false, message: 'Schedule not found' });
+    if (typeof req.body.status === 'undefined') return res.status(400).json({ success: false, message: 'Status is required' });
+    await schedule.update({ status: req.body.status });
+    res.json({ success: true, data: schedule });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+};
 
 // Create a new schedule
 exports.createSchedule = async (req, res) => {
@@ -33,9 +45,13 @@ exports.updateSchedule = async (req, res) => {
   try {
     const schedule = await Schedule.findOne({ where: { id: req.params.id, userId: req.user.id } });
     if (!schedule) return res.status(404).json({ success: false, message: 'Schedule not found' });
-    console.log("Updating schedule with data:-->>>", req.body);
+    // If only status is being updated (toggle), just update status
+    if (Object.keys(req.body).length === 1 && req.body.status !== undefined) {
+      await schedule.update({ status: req.body.status });
+      return res.json({ success: true, data: schedule });
+    }
 
-     let {
+    let {
       platforms,
       days,
       times,
@@ -60,8 +76,6 @@ exports.updateSchedule = async (req, res) => {
         customDateTo, 
         singleDate 
       }
-      , { where: { id: req.params.id } }
-
     );
     res.json({ success: true, data: schedule });
   } catch (err) {

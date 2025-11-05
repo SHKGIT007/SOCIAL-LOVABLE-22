@@ -44,10 +44,10 @@ const Schedule = sequelize.define('Schedule', {
     allowNull: true,
   },
   status: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    defaultValue: 'pending',
-  },
+        type: DataTypes.ENUM('0', '1'),
+        allowNull: false,
+        defaultValue: '1',
+   },
 }, {
   tableName: 'schedules',
   timestamps: true,

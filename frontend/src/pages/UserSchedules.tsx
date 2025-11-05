@@ -6,6 +6,19 @@ import DashboardLayout from '../components/Layout/DashboardLayout';
 
 import { Bell, BellOff, Edit2, Trash2 } from 'lucide-react';
 
+// Simple Toggle Switch component
+function ToggleSwitch({ checked, onChange }) {
+  return (
+    <label className="inline-flex items-center cursor-pointer">
+      <span className="relative">
+        <input type="checkbox" checked={checked} onChange={onChange} className="sr-only peer" />
+        <div className={`w-10 h-6 rounded-full transition-colors duration-200 ${checked ? 'bg-green-400' : 'bg-gray-300'}`}></div>
+        <div className={`absolute left-0 top-0 w-6 h-6 bg-white border rounded-full shadow transform transition-transform duration-200 ${checked ? 'translate-x-4' : ''}`}></div>
+      </span>
+    </label>
+  );
+}
+
 
 
 const DAYS = [
@@ -155,6 +168,17 @@ export default function UserSchedules() {
   const handleSubmit = async (e) => {
     
     e.preventDefault();
+    // Validation: at least one platform AND at least one day/custom date/single date must be selected in every row
+    for (let i = 0; i < rows.length; i++) {
+      if (!rows[i].platforms || rows[i].platforms.length === 0) {
+        Swal.fire('Validation Error', 'Please select at least one platform for every schedule.', 'warning');
+        return;
+      }
+      if (!rows[i].days || rows[i].days.length === 0) {
+        Swal.fire('Validation Error', 'Please select at least one day, custom date, or single date for every schedule.', 'warning');
+        return;
+      }
+    }
     try {
       if (editingId !== null) {
         // Only update the selected row
@@ -205,7 +229,7 @@ export default function UserSchedules() {
   const handleDelete = async (id) => {
     if (await Swal.fire({ title: 'Delete?', text: 'Are you sure?', icon: 'warning', showCancelButton: true })) {
       try {
-        await apiService.delete(`/schedules/${id}`);
+        await apiService.deleteSchedule(id);
         Swal.fire('Deleted!', 'Schedule deleted', 'success');
         fetchSchedules();
       } catch (err) {
@@ -233,7 +257,7 @@ export default function UserSchedules() {
             <div className="space-y-4">
               {schedules.length === 0 && <div className="text-gray-400 text-center py-8">No schedules set.</div>}
               {schedules.map(sch => {
-                const isActive = sch.status === 'pending';
+                const isActive = sch.status === '1' || sch.status === 1;
                 return (
                   <div key={sch.id} className={`flex items-center justify-between p-4 rounded-xl shadow border transition-all ${isActive ? 'bg-blue-50 border-blue-200' : 'bg-gray-100 border-gray-200'}`}>
                     <div className="flex items-center gap-4">
@@ -247,7 +271,15 @@ export default function UserSchedules() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className={`text-xs px-2 py-1 rounded ${isActive ? 'bg-blue-100 text-blue-700' : 'bg-gray-200 text-gray-500'}`}>{sch.status}</span>
+                      <ToggleSwitch checked={isActive} onChange={async () => {
+                        try {
+                          await apiService.toggleScheduleStatus(sch.id, isActive ? '0' : '1');
+                          fetchSchedules();
+                        } catch (err) {
+                          Swal.fire('Error', 'Failed to update status', 'error');
+                        }
+                      }} />
+                      
                       <button title="Edit" className="p-2 hover:bg-blue-100 rounded" onClick={() => handleEdit(sch)}><Edit2 className="h-4 w-4 text-blue-600" /></button>
                       <button title="Delete" className="p-2 hover:bg-red-100 rounded" onClick={() => handleDelete(sch.id)}><Trash2 className="h-4 w-4 text-red-600" /></button>
                     </div>

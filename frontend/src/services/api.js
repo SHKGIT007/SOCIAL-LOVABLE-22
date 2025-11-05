@@ -1,9 +1,24 @@
 
-
 import { API_CONFIG, buildApiUrl, addQueryParams } from '../utils/config';
 import { getAuthToken, logout } from '../utils/auth';
 
 class ApiService {
+
+  // Toggle schedule status (active/inactive) via PATCH /schedules/:id/status
+  async toggleScheduleStatus(id, status) {
+    return this.request(`/schedules/${id}/status`, {
+      method: 'PATCH',
+      body: { status },
+    });
+  }
+
+
+  // Delete a schedule
+  async deleteSchedule(id) {
+    return this.request(`/schedules/${id}`, {
+      method: 'DELETE',
+    });
+  }
   // Create a new schedule
   async postSchedule(scheduleData) {
     return this.request('/schedules', {
