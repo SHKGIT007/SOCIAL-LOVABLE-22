@@ -354,3 +354,8 @@
 {"level":"info","message":"Scheduler started (checks every minute)","service":"social-lovable-api","timestamp":"2025-11-05T09:28:58.701Z"}
 {"level":"info","message":"Scheduler started (checks every minute)","service":"social-lovable-api","timestamp":"2025-11-05T09:29:09.327Z"}
 {"level":"info","message":"Scheduler started (checks every minute)","service":"social-lovable-api","timestamp":"2025-11-05T09:29:20.588Z"}
+{"level":"info","message":"Scheduler started (checks every minute)","service":"social-lovable-api","timestamp":"2025-11-05T09:42:33.845Z"}
+{"level":"info","message":"Scheduler started (checks every minute)","service":"social-lovable-api","timestamp":"2025-11-05T09:42:39.676Z"}
+{"level":"info","message":"Scheduler started (checks every minute)","service":"social-lovable-api","timestamp":"2025-11-05T09:43:49.519Z"}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-05T10:01:27.897Z","userId":2}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-05T10:11:05.409Z","userId":2}

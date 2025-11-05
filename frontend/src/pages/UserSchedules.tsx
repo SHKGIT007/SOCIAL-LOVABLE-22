@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Dialog } from '@headlessui/react';
-import { apiService } from '../services/api';
+import { apiService } from "@/services/api";
 import Swal from 'sweetalert2';
 import DashboardLayout from '../components/Layout/DashboardLayout';
 
@@ -41,8 +41,8 @@ export default function UserSchedules() {
 
   const fetchSchedules = async () => {
     try {
-      const res = await apiService.get('/schedules');
-      setSchedules(res.data.schedules || res.data.data?.schedules || []);
+      const res = await apiService.getSchedules();
+      setSchedules(res.schedules || res.data?.schedules || []);
     } catch (err) {
       Swal.fire('Error', 'Failed to fetch schedules', 'error');
     }

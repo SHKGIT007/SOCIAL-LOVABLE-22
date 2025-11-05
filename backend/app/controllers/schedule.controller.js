@@ -16,6 +16,10 @@ exports.createSchedule = async (req, res) => {
 
 // Get all schedules for the logged-in user
 exports.getSchedules = async (req, res) => {
+
+ console.log("Fetching schedules for user ->>>>>>>>>>>:", req.user.id);
+
+
   try {
     const schedules = await Schedule.findAll({
       where: { userId: req.user.id },
