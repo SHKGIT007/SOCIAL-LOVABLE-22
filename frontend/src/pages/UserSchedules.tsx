@@ -237,7 +237,8 @@ export default function UserSchedules() {
   };
 
   const handleDelete = async (id) => {
-    if (await Swal.fire({ title: 'Delete?', text: 'Are you sure?', icon: 'warning', showCancelButton: true })) {
+    const result = await Swal.fire({ title: 'Delete?', text: 'Are you sure?', icon: 'warning', showCancelButton: true });
+    if (result.isConfirmed) {
       try {
         await apiService.deleteSchedule(id);
         Swal.fire('Deleted!', 'Schedule deleted', 'success');
