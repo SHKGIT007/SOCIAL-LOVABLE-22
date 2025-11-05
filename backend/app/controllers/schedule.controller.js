@@ -17,15 +17,12 @@ exports.createSchedule = async (req, res) => {
 // Get all schedules for the logged-in user
 exports.getSchedules = async (req, res) => {
 
- console.log("Fetching schedules for user ->>>>>>>>>>>:", req.user.id);
-
-
   try {
     const schedules = await Schedule.findAll({
       where: { userId: req.user.id },
       order: [['createdAt', 'DESC']],
     });
-    res.json({ success: true, data: { schedules } });
+    res.json({ success: true, schedules });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -36,7 +33,36 @@ exports.updateSchedule = async (req, res) => {
   try {
     const schedule = await Schedule.findOne({ where: { id: req.params.id, userId: req.user.id } });
     if (!schedule) return res.status(404).json({ success: false, message: 'Schedule not found' });
-    await schedule.update(req.body);
+    console.log("Updating schedule with data:-->>>", req.body);
+
+     let {
+      platforms,
+      days,
+      times,
+      recurrence,
+      customDateFrom,
+      customDateTo,
+      singleDate
+    } = req.body;
+
+    recurrence = recurrence == '' ? null : recurrence;
+    customDateFrom = customDateFrom == '' ? null : customDateFrom;
+    customDateTo = customDateTo == '' ? null : customDateTo;
+    singleDate = singleDate == '' ? null : singleDate;
+
+    await schedule.update(
+      { 
+        platforms, 
+        days, 
+        times, 
+        recurrence, 
+        customDateFrom, 
+        customDateTo, 
+        singleDate 
+      }
+      , { where: { id: req.params.id } }
+
+    );
     res.json({ success: true, data: schedule });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });

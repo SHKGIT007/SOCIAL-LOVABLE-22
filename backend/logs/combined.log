@@ -359,3 +359,4 @@
 {"level":"info","message":"Scheduler started (checks every minute)","service":"social-lovable-api","timestamp":"2025-11-05T09:43:49.519Z"}
 {"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-05T10:01:27.897Z","userId":2}
 {"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-05T10:11:05.409Z","userId":2}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-05T11:08:40.565Z","userId":2}

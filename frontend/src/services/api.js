@@ -1,7 +1,28 @@
+
+
 import { API_CONFIG, buildApiUrl, addQueryParams } from '../utils/config';
 import { getAuthToken, logout } from '../utils/auth';
 
 class ApiService {
+  // Create a new schedule
+  async postSchedule(scheduleData) {
+    return this.request('/schedules', {
+      method: 'POST',
+      body: scheduleData,
+    });
+  }
+
+  // Update an existing schedule
+  async updateSchedule(id, scheduleData) {
+    return this.request(`/schedules/${id}`, {
+      method: 'PUT',
+      body: scheduleData,
+    });
+  }
+  // Schedule API methods
+  async getSchedules() {
+    return this.request('/schedules');
+  }
   // System Settings API methods
   async getSystemSettings() {
     return this.request('/system-settings');

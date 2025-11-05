@@ -23,13 +23,13 @@ const CUSTOM_DATE_KEY = 'custom_date';
 const SINGLE_DATE_KEY = 'single_date';
 
 const defaultSchedule = {
-  singleDate: '',
   platforms: [],
   days: [], // array of selected days
   times: {}, // { [day]: [time, ...] }
-  recurrence: '',
-  customDateFrom: '',
-  customDateTo: '',
+  recurrence: null,
+  customDateFrom: null,
+  customDateTo: null,
+  singleDate: null,
 };
 const emptyRow = () => ({ ...defaultSchedule });
 
@@ -153,14 +153,25 @@ export default function UserSchedules() {
   };
 
   const handleSubmit = async (e) => {
+    
     e.preventDefault();
     try {
       if (editingId !== null) {
-        await apiService.put(`/schedules/${editingId}`, rows[0]);
+        // Only update the selected row
+        await apiService.updateSchedule(editingId, rows[0]);
         Swal.fire('Updated!', 'Schedule updated successfully', 'success');
       } else {
-        for (const row of rows) {
-          await apiService.post('/schedules', row);
+        // Store all rows as separate schedules, each with only its own times
+        for (let i = 0; i < rows.length; i++) {
+          // Deep clone the row to avoid mutation
+          const row = JSON.parse(JSON.stringify(rows[i]));
+          // Remove times for days not selected in this row
+          Object.keys(row.times).forEach(day => {
+            if (!row.days.includes(day)) {
+              delete row.times[day];
+            }
+          });
+          await apiService.postSchedule(row);
         }
         Swal.fire('Created!', 'Schedules created successfully', 'success');
       }

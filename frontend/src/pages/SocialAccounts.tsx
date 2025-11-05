@@ -128,6 +128,14 @@ const SocialAccounts = () => {
 
     // Start OAuth only (credentials must be saved already)
     const handleConnect = async (platform) => {
+   ///
+    
+
+
+
+
+///
+
         setIsLoading(true);
         try {
             console.log('Initiating OAuth for', platform);
@@ -211,10 +219,6 @@ const SocialAccounts = () => {
                 const oauthUrl = `https://www.instagram.com/oauth/authorize?client_id=${app_id}&redirect_uri=${encodeURIComponent(redirect_uri)}&state=${state}&response_type=code&scope=instagram_business_basic,instagram_business_manage_messages,instagram_business_manage_comments,instagram_business_content_publish`
                 window.location.href = oauthUrl;
             }
-
-
-
-
             //   window.location.href = oauthUrl;
         } finally {
             setIsLoading(false);
