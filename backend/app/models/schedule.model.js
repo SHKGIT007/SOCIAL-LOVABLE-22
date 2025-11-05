@@ -1,0 +1,60 @@
+const { DataTypes } = require('sequelize');
+
+const sequelize = require('../config/db.config');
+
+const Schedule = sequelize.define('Schedule', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
+  },
+  userId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  platforms: {
+    type: DataTypes.JSON,
+    allowNull: false,
+    defaultValue: [],
+  },
+  days: {
+    type: DataTypes.JSON,
+    allowNull: false,
+    defaultValue: [],
+  },
+  times: {
+    type: DataTypes.JSON,
+    allowNull: false,
+    defaultValue: {},
+  },
+  recurrence: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  customDateFrom: {
+    type: DataTypes.DATEONLY,
+    allowNull: true,
+  },
+  customDateTo: {
+    type: DataTypes.DATEONLY,
+    allowNull: true,
+  },
+  singleDate: {
+    type: DataTypes.DATEONLY,
+    allowNull: true,
+  },
+  status: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: 'pending',
+  },
+}, {
+  tableName: 'schedules',
+  timestamps: true,
+});
+
+Schedule.associate = (models) => {
+  Schedule.belongsTo(models.User, { foreignKey: 'userId', as: 'user' });
+};
+
+module.exports = Schedule;
