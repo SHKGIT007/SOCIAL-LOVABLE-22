@@ -128,13 +128,7 @@ const SocialAccounts = () => {
 
     // Start OAuth only (credentials must be saved already)
     const handleConnect = async (platform) => {
-   ///
-    
 
-
-
-
-///
 
         setIsLoading(true);
         try {
