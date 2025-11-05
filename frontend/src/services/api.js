@@ -398,6 +398,11 @@ class ApiService {
       body: data,
     });
   }
+
+  async getconnnectedAccounts() {
+    return this.request(API_CONFIG.ENDPOINTS.SOCIAL_ACCOUNTS.GET_CONNECTED_ACCOUNTS);
+  }
+  
 }
 // Export singleton instance
 export const apiService = new ApiService();

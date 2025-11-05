@@ -183,23 +183,23 @@ const ClientPlans = () => {
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span className="font-medium">Plan:</span>
-                  <Badge>{currentSubscription.plans?.name}</Badge>
+                  <Badge>{currentSubscription.Plan?.name}</Badge>
                 </div>
-                <div className="flex justify-between">
+                {/* <div className="flex justify-between">
                   <span className="font-medium">Posts Used:</span>
                   <span>{currentSubscription.posts_used} / {currentSubscription.plans?.monthly_posts}</span>
-                </div>
+                </div> */}
                 <div className="flex justify-between">
                   <span className="font-medium">AI Posts Used:</span>
-                  <span>{currentSubscription.ai_posts_used} / {currentSubscription.plans?.ai_posts}</span>
+                  <span>{currentSubscription.ai_posts_used} / {currentSubscription.Plan?.ai_posts}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="font-medium">Status:</span>
-                  <Badge variant="default">{currentSubscription.status}</Badge>
+                  <Badge style={{ backgroundColor: "green" }}>{currentSubscription.status}</Badge>
                 </div>
               </div>
             </CardContent>
-            <CardFooter>
+            {/* <CardFooter>
               <Button
                 variant="destructive"
                 onClick={handleCancelSubscription}
@@ -207,7 +207,7 @@ const ClientPlans = () => {
               >
                 Cancel Subscription
               </Button>
-            </CardFooter>
+            </CardFooter> */}
           </Card>
         )}
 

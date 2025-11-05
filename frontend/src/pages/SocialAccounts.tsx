@@ -106,6 +106,7 @@ const SocialAccounts = () => {
                     app_id: appId,
                     app_secret: appSecret
                 });
+
                 Swal.fire({
                     icon: "success",
                     title: "Success",
@@ -128,6 +129,20 @@ const SocialAccounts = () => {
 
     // Start OAuth only (credentials must be saved already)
     const handleConnect = async (platform) => {
+
+        const connectedAccounts = await apiService.getConnectedAccounts();
+
+        if (!connectedAccounts || connectedAccounts.length === 0) {
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: "No connected accounts found.",
+                confirmButtonColor: "#6366f1"
+            });
+            setIsLoading(false);
+            return;
+        }
+        
         setIsLoading(true);
         try {
             console.log('Initiating OAuth for', platform);
@@ -137,6 +152,7 @@ const SocialAccounts = () => {
                 let app_id = fbAppId
                 let app_secret = fbAppSecret
                 let redirect_uri = `https://socialvibe.tradestreet.in/backend/facebook/callback`
+                
 
                 //    const url = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${appid}&redirect_uri=${encodeURIComponent(`https://hometalent4u.in/backend/facebook/callback`)}&state=123&response_type=code&scope=public_profile,email,pages_show_list,pages_read_engagement,pages_manage_posts`;
                 if (!app_id || !app_secret || !redirect_uri || !user_id) {
