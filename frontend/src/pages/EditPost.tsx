@@ -252,6 +252,17 @@ const EditPost = () => {
                   className="min-h-[200px]"
                   required
                 />
+                      {/* Show image from image_url if present */}
+                      {formData.image_url && (
+                        <div className="mb-4">
+                          <img
+                            src={formData.image_url}
+                            alt="Post Image"
+                            className="rounded-lg w-full max-h-64 object-cover"
+                            onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/no-image.png'; }}
+                          />
+                        </div>
+                      )}
               </div>
 
           

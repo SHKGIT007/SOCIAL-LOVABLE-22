@@ -23,6 +23,7 @@ interface Post {
   category: string | null;
   tags: string[] | null;
   media_urls: string[] | null;
+  image_url?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -159,6 +160,18 @@ const ViewPost = () => {
               <p className="whitespace-pre-wrap text-muted-foreground">{post.content}</p>
             </div>
 
+            {/* Show single image_url if present, below content */}
+            {post.image_url && (
+              <div className="mb-4">
+                <img
+                  src={post.image_url}
+                  alt="Post Image"
+                  className="rounded-lg w-full max-h-64 object-cover"
+                  onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/no-image.png'; }}
+                />
+              </div>
+            )}
+
             <div>
               <h3 className="font-semibold mb-2">Platforms</h3>
               <div className="flex flex-wrap gap-2">
@@ -183,16 +196,17 @@ const ViewPost = () => {
               </div>
             )}
 
-            {post.media_urls && post.media_urls.length > 0 && (
+            {Array.isArray(post.media_urls) && post.media_urls.filter(Boolean).length > 0 && (
               <div>
                 <h3 className="font-semibold mb-2">Media</h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {post.media_urls.map((url, index) => (
+                  {post.media_urls.filter(Boolean).map((url, index) => (
                     <img
                       key={index}
                       src={url}
                       alt={`Media ${index + 1}`}
                       className="rounded-lg w-full h-32 object-cover"
+                      onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/no-image.png'; }}
                     />
                   ))}
                 </div>
