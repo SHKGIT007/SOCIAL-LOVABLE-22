@@ -1,5 +1,5 @@
 
-const { SocialAccount, User, Subscription } = require('../models');
+const { SocialAccount, User, Subscription, Plan } = require('../models');
 const { Op } = require('sequelize');
 const { asyncHandler } = require('../middleware/error.middleware');
 const logger = require('../config/logger');
@@ -418,20 +418,55 @@ const instagramOAuthCallback = async (req, res) => {
 };
 
 const getconnnectedAccounts = asyncHandler(async (req, res) => {
-    const userId = req.user.id;
-    const socialAccounts = await SocialAccount.findAll({
-        where: { user_id: userId, is_active: true },
-        order: [['platform', 'ASC']]
+    const userId = req.body.user_id;
+    const currentDate = moment().tz("Asia/Kolkata").startOf("day").toDate();
+    const current_subscription = await Subscription.findOne({
+        include: [
+            { model: Plan, as: 'Plan',
+              attributes: ['id', 'name', 'linked_accounts']
+            },  
+        ],
+        where: {
+            user_id: userId,
+            status: "active",
+            start_date: { [Op.lte]: currentDate },
+            end_date: { [Op.gte]: currentDate },
+        },
+        order: [["end_date", "DESC"]],
+        attributes: [
+            "id",
+        ],
     });
     
+    if(!current_subscription){
+        return  res.json({
+            status: false,
+            message: "No active subscription found",
+            limitcount: 0,
+            activecount: 0
+        });
+    }
 
-    res.json(socialAccounts);
+    console.log("Current Subscription:", current_subscription);
+    const activeLinkedCount = await SocialAccount.count({
+        where: {
+            user_id: userId,
+            is_active: true
+        }
+    });
+
+    return res.json({
+        status: true,
+        limitcount: current_subscription.Plan ? current_subscription.Plan.linked_accounts : 0,
+        activecount: activeLinkedCount
+    });
 });
+
 
 module.exports = {
     createSocialAccount,
     getAllSocialAccounts,
-    getUserSocialAccounts,
+    getUserSocialAccounts, 
     getSocialAccountById,
     updateSocialAccount,
     deleteSocialAccount,

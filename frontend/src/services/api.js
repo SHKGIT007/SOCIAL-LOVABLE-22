@@ -100,7 +100,8 @@ class ApiService {
     try {
       const response = await fetch(url, config);
       const data = await response.json();
-
+      console.log("API Response:", data);
+      
       // Handle authentication errors
       if (response.status === 401) {
         logout();
@@ -399,8 +400,11 @@ class ApiService {
     });
   }
 
-  async getconnnectedAccounts() {
-    return this.request(API_CONFIG.ENDPOINTS.SOCIAL_ACCOUNTS.GET_CONNECTED_ACCOUNTS);
+  async getconnnectedAccounts(data) {
+    return this.request(API_CONFIG.ENDPOINTS.SOCIAL_ACCOUNTS.GET_CONNECTED_ACCOUNTS, {
+    method: 'POST',
+      body: data
+    });
   }
   
 }

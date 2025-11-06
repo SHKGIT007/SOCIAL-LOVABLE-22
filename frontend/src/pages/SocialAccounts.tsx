@@ -129,18 +129,27 @@ const SocialAccounts = () => {
 
     // Start OAuth only (credentials must be saved already)
     const handleConnect = async (platform) => {
-
-        const connectedAccounts = await apiService.getConnectedAccounts();
-
-        if (!connectedAccounts || connectedAccounts.length === 0) {
+        const user_id = localStorage.getItem("user_id");
+        const connectedAccounts = await apiService.getconnnectedAccounts({ user_id:user_id });
+        console.log("Connected Accounts:", connectedAccounts);
+        if (connectedAccounts.status == false){
             Swal.fire({
                 icon: "error",
-                title: "Error",
-                text: "No connected accounts found.",
+                title: "No active subscription",
+                text: connectedAccounts.message,
                 confirmButtonColor: "#6366f1"
             });
-            setIsLoading(false);
             return;
+        }else{
+            if(connectedAccounts.connected_accounts_count >= connectedAccounts.limitcount){
+                Swal.fire({
+                    icon: "error",
+                    title: "Limit Reached",
+                    text: `You have reached your limit of ${connectedAccounts.limitcount} connected accounts.`,
+                    confirmButtonColor: "#6366f1"
+                });
+                return;
+            }
         }
         
         setIsLoading(true);
