@@ -145,6 +145,7 @@ const AdminPosts = () => {
         </div>
       </DashboardLayout>
     );
+    
   }
 
  const getPlatformsArray = (platforms: string[] | string | undefined): string[] => {

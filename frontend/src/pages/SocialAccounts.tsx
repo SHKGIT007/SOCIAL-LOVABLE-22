@@ -14,334 +14,403 @@ import { platform } from "os";
 const platforms = ["Facebook", "Instagram"];
 
 const SocialAccounts = () => {
-    const [accounts, setAccounts] = useState([]);
-    // App ID/Secret state
-    const [fbAppId, setFbAppId] = useState("");
-    const [fbAppSecret, setFbAppSecret] = useState("");
-    const [igAppId, setIgAppId] = useState("");
-    const [igAppSecret, setIgAppSecret] = useState("");
-    const OAUTH_URLS = {
-        Facebook: `${API_CONFIG.BASE_URL}/social-accounts/oauth/facebook`,
-        Instagram: `${API_CONFIG.BASE_URL}/social-accounts/oauth/instagram`,
-    };
-    const [isLoading, setIsLoading] = useState(false);
+  const [accounts, setAccounts] = useState<any[]>([]);
+  const [fbAppId, setFbAppId] = useState("");
+  const [fbAppSecret, setFbAppSecret] = useState("");
+  const [igAppId, setIgAppId] = useState("");
+  const [igAppSecret, setIgAppSecret] = useState("");
+  const OAUTH_URLS = {
+    Facebook: `${API_CONFIG.BASE_URL}/social-accounts/oauth/facebook`,
+    Instagram: `${API_CONFIG.BASE_URL}/social-accounts/oauth/instagram`,
+  };
+  const [isLoading, setIsLoading] = useState(false);
 
-    console.log("accounts:", accounts);
+  useEffect(() => {
+    fetchAccounts();
+  }, []);
 
-    useEffect(() => {
-        fetchAccounts();
-    }, []);
+  useEffect(() => {
+    const fbAcc = accounts.find((acc) => acc.platform === "Facebook");
+    if (fbAcc) {
+      setFbAppId(fbAcc.app_id || "");
+      setFbAppSecret(fbAcc.app_secret || "");
+    }
+    const igAcc = accounts.find((acc) => acc.platform === "Instagram");
+    if (igAcc) {
+      setIgAppId(igAcc.app_id || "");
+      setIgAppSecret(igAcc.app_secret || "");
+    }
+  }, [accounts]);
 
-    useEffect(() => {
-        const fbAcc = accounts.find(acc => acc.platform === "Facebook");
-        if (fbAcc) {
-            setFbAppId(fbAcc.app_id || "");
-            setFbAppSecret(fbAcc.app_secret || "");
+  const fetchAccounts = async () => {
+    setIsLoading(true);
+    try {
+      const res = await apiService.getMySocialAccounts();
+      setAccounts(res.data.socialAccounts || []);
+    } catch (error: any) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error.message || "Failed to fetch accounts",
+        confirmButtonColor: "#6366f1",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSave = async (platform: "Facebook" | "Instagram") => {
+    setIsLoading(true);
+    let appId = "",
+      appSecret = "";
+    if (platform === "Facebook") {
+      appId = fbAppId;
+      appSecret = fbAppSecret;
+    } else if (platform === "Instagram") {
+      appId = igAppId;
+      appSecret = igAppSecret;
+    }
+    if (!appId || !appSecret) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "App ID and Secret are required.",
+        confirmButtonColor: "#6366f1",
+      });
+      setIsLoading(false);
+      return;
+    }
+    try {
+      const existing = accounts.find((acc) => acc.platform === platform);
+      if (existing) {
+        await apiService.updateSocialAccountCredentials({
+          platform,
+          app_id: appId,
+          app_secret: appSecret,
+        });
+        Swal.fire({
+          icon: "success",
+          title: "Success",
+          text: `${platform} credentials updated.`,
+          confirmButtonColor: "#6366f1",
+        });
+      } else {
+        await apiService.createSocialAccount({
+          platform,
+          app_id: appId,
+          app_secret: appSecret,
+        });
+        Swal.fire({
+          icon: "success",
+          title: "Success",
+          text: `${platform} App ID/Secret saved.`,
+          confirmButtonColor: "#6366f1",
+        });
+      }
+      fetchAccounts();
+    } catch (error: any) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error.message || "Failed to save App ID/Secret",
+        confirmButtonColor: "#6366f1",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleConnect = async (platform: "Facebook" | "Instagram") => {
+    setIsLoading(true);
+    try {
+      if (platform === "Facebook") {
+        const fbAcc = accounts.find((acc) => acc.platform === "Facebook");
+        let user_id = fbAcc ? fbAcc.user_id : null;
+        let app_id = fbAppId;
+        let app_secret = fbAppSecret;
+        let redirect_uri = `https://socialvibe.tradestreet.in/backend/facebook/callback`;
+
+        if (!app_id || !app_secret || !redirect_uri || !user_id) {
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "Please save Facebook App ID/Secret first.",
+            confirmButtonColor: "#6366f1",
+          });
+          setIsLoading(false);
+          return;
         }
-        const igAcc = accounts.find(acc => acc.platform === "Instagram");
-        if (igAcc) {
-            setIgAppId(igAcc.app_id || "");
-            setIgAppSecret(igAcc.app_secret || "");
+
+        const state = encodeURIComponent(
+          JSON.stringify({
+            user_id,
+            app_id,
+            app_secret,
+            redirect_uri,
+            redirect_dashboard: "http://localhost:8080/dashboard",
+          })
+        );
+
+        const scopes = [
+          "public_profile",
+          "email",
+          "pages_show_list",
+          "pages_read_engagement",
+          "pages_manage_posts",
+          "instagram_basic",
+          "instagram_manage_insights",
+          "instagram_manage_comments",
+          "instagram_content_publish",
+          "instagram_manage_messages",
+        ].join(",");
+
+        const url = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${app_id}&redirect_uri=${encodeURIComponent(
+          redirect_uri
+        )}&state=${state}&response_type=code&scope=${encodeURIComponent(scopes)}`;
+        window.location.href = url;
+      } else {
+        const igAcc = accounts.find((acc) => acc.platform === "Instagram");
+        let app_id = igAppId;
+        let app_secret = igAppSecret;
+        let redirect_uri = `https://socialvibe.tradestreet.in/backend/instagram/callback`;
+
+        if (!app_id || !app_secret || !redirect_uri || !igAcc) {
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "Please save Instagram App ID/Secret first.",
+            confirmButtonColor: "#6366f1",
+          });
+          setIsLoading(false);
+          return;
         }
-    }, [accounts]);
 
-    const fetchAccounts = async () => {
-        setIsLoading(true);
-        try {
-            const res = await apiService.getMySocialAccounts();
-            setAccounts(res.data.socialAccounts || []);
-        } catch (error) {
-            Swal.fire({
-                icon: "error",
-                title: "Error",
-                text: error.message || "Failed to fetch accounts",
-                confirmButtonColor: "#6366f1"
-            });
-        } finally {
-            setIsLoading(false);
-        }
-    };
+        const state = encodeURIComponent(
+          JSON.stringify({
+            user_id: igAcc ? igAcc.user_id : null,
+            app_id,
+            app_secret,
+            redirect_uri,
+            redirect_dashboard: "http://localhost:8080/dashboard",
+          })
+        );
 
-    // Save App ID/Secret to backend only
-    const handleSave = async (platform) => {
-        setIsLoading(true);
-        let appId = "", appSecret = "";
-        if (platform === "Facebook") {
-            appId = fbAppId;
-            appSecret = fbAppSecret;
-        } else if (platform === "Instagram") {
-            appId = igAppId;
-            appSecret = igAppSecret;
-        }
-        if (!appId || !appSecret) {
-            Swal.fire({
-                icon: "error",
-                title: "Error",
-                text: "App ID and Secret are required.",
-                confirmButtonColor: "#6366f1"
-            });
-            setIsLoading(false);
-            return;
-        }
-        try {
-            // Check if account exists for this platform
-            const existing = accounts.find(acc => acc.platform === platform);
-            if (existing) {
-                // Update credentials
-                await apiService.updateSocialAccountCredentials({
-                    platform,
-                    app_id: appId,
-                    app_secret: appSecret
-                });
-                Swal.fire({
-                    icon: "success",
-                    title: "Success",
-                    text: `${platform} credentials updated.`,
-                    confirmButtonColor: "#6366f1"
-                });
-            } else {
-                // Create new account
-                await apiService.createSocialAccount({
-                    platform,
-                    app_id: appId,
-                    app_secret: appSecret
-                });
-                Swal.fire({
-                    icon: "success",
-                    title: "Success",
-                    text: `${platform} App ID/Secret saved.`,
-                    confirmButtonColor: "#6366f1"
-                });
-            }
-            fetchAccounts();
-        } catch (error) {
-            Swal.fire({
-                icon: "error",
-                title: "Error",
-                text: error.message || "Failed to save App ID/Secret",
-                confirmButtonColor: "#6366f1"
-            });
-        } finally {
-            setIsLoading(false);
-        }
-    };
+        const oauthUrl = `https://www.instagram.com/oauth/authorize?client_id=${app_id}&redirect_uri=${encodeURIComponent(
+          redirect_uri
+        )}&state=${state}&response_type=code&scope=instagram_business_basic,instagram_business_manage_messages,instagram_business_manage_comments,instagram_business_content_publish`;
+        window.location.href = oauthUrl;
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    // Start OAuth only (credentials must be saved already)
-    const handleConnect = async (platform) => {
+  const handleDisconnect = async (id: any) => {
+    setIsLoading(true);
+    try {
+      await apiService.updateSocialAccountCredentials({ is_active: 0, id });
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "Account disconnected.",
+        confirmButtonColor: "#6366f1",
+      });
+      fetchAccounts();
+    } catch (error: any) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error.message || "Failed to disconnect account",
+        confirmButtonColor: "#6366f1",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  const fbConnected = !!accounts.find((acc) => acc.platform === "Facebook" && Number(acc.is_active) === 1);
+  const igConnected = !!accounts.find((acc) => acc.platform === "Instagram" && Number(acc.is_active) === 1);
 
-        setIsLoading(true);
-        try {
-            console.log('Initiating OAuth for', platform);
-            if (platform === "Facebook") {
-                const fbAcc = accounts.find(acc => acc.platform === "Facebook");
-                let user_id = fbAcc ? fbAcc.user_id : null;
-                let app_id = fbAppId
-                let app_secret = fbAppSecret
-                let redirect_uri = `https://socialvibe.tradestreet.in/backend/facebook/callback`
+  return (
+    <DashboardLayout>
+      <div className=" space-y-8">
+        {/* Header */}
+        <div>
+          <h1 className="flex items-baseline gap-2 text-3xl font-extrabold">
+            <span className="bg-gradient-to-r from-indigo-600 to-sky-400 bg-clip-text text-transparent">Social</span>
+            <span className="text-gray-900">Accounts</span>
+          </h1>
+          <p className="text-muted-foreground">
+            Connect Facebook / Instagram to publish and fetch insights.
+          </p>
+        </div>
 
-                //    const url = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${appid}&redirect_uri=${encodeURIComponent(`https://hometalent4u.in/backend/facebook/callback`)}&state=123&response_type=code&scope=public_profile,email,pages_show_list,pages_read_engagement,pages_manage_posts`;
-                if (!app_id || !app_secret || !redirect_uri || !user_id) {
-                    Swal.fire({
-                        icon: "error",
-                        title: "Error",
-                        text: "Please save Facebook App ID/Secret first.",
-                        confirmButtonColor: "#6366f1"
-                    });
-                    setIsLoading(false);
-                    return;
-                }
+        {/* Parent elevated card */}
+        <Card className="border-indigo-100/70 shadow-xl hover:shadow-2xl transition-shadow rounded-2xl">
+          <CardHeader className="pb-0">
+            <CardTitle className="text-gray-800">Connect Social Account</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6 pt-6">
+            {/* FACEBOOK */}
+         {/* FACEBOOK CARD */}
+{!fbConnected && (
+  <div className="relative rounded-2xl border border-indigo-100 bg-white p-6 shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_25px_rgba(99,102,241,0.12)] transition-all duration-300">
+    <div className="flex items-center justify-between mb-5">
+      <h3 className="text-lg font-semibold text-gray-900">Facebook</h3>
+      <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600 shadow-sm">
+        Not Connected
+      </span>
+    </div>
 
-                let stateData = {
-                    user_id: user_id,
-                    app_id: app_id,
-                    app_secret: app_secret,
-                    redirect_uri: redirect_uri,
-                    redirect_dashboard: "http://localhost:8080/dashboard"
-                };
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div className="space-y-2">
+        <Label>Facebook App ID</Label>
+        <Input
+          value={fbAppId}
+          onChange={(e) => setFbAppId(e.target.value)}
+          placeholder="Facebook App ID"
+          className="bg-white border-gray-200 shadow-sm focus-visible:ring-indigo-500"
+        />
+      </div>
+      <div className="space-y-2">
+        <Label>Facebook App Secret</Label>
+        <Input
+          value={fbAppSecret}
+          onChange={(e) => setFbAppSecret(e.target.value)}
+          placeholder="Facebook App Secret"
+          type="password"
+          className="bg-white border-gray-200 shadow-sm focus-visible:ring-indigo-500"
+        />
+      </div>
+    </div>
 
-                const state = encodeURIComponent(JSON.stringify(stateData));
+    <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+      <Button
+        className="w-full h-10 bg-gradient-to-r from-indigo-600 to-sky-500 hover:from-indigo-500 hover:to-sky-400 text-white font-medium shadow-md hover:shadow-lg active:scale-[0.99] transition-all"
+        onClick={() => handleSave('Facebook')}
+        disabled={isLoading}
+      >
+        Save
+      </Button>
+      <Button
+        className="w-full h-10 bg-indigo-700 hover:bg-indigo-800 text-white font-medium shadow-md hover:shadow-lg active:scale-[0.99] transition-all"
+        onClick={() => handleConnect('Facebook')}
+        disabled={isLoading}
+      >
+        Connect
+      </Button>
+    </div>
 
-                const scopes = [
-                    "public_profile",
-                    "email",
-                    "pages_show_list",
-                    "pages_read_engagement",
-                    "pages_manage_posts",
-                    "instagram_basic",
-                    "instagram_manage_insights",
-                    "instagram_manage_comments",
-                    "instagram_content_publish",
-                    "instagram_manage_messages"
-                ].join(",");
+    <div className="absolute inset-0 rounded-2xl pointer-events-none ring-1 ring-transparent hover:ring-[3px] hover:ring-indigo-400/40 transition-all duration-300" />
+  </div>
+)}
 
-                // const url = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${app_id}&redirect_uri=${encodeURIComponent(redirect_uri)}&state=${state}&response_type=code&scope=public_profile,email,pages_show_list,pages_read_engagement,pages_manage_posts`;
+{/* INSTAGRAM CARD */}
+{!igConnected && (
+  <div className="relative rounded-2xl border border-pink-100 bg-white p-6 shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_25px_rgba(244,114,182,0.15)] transition-all duration-300">
+    <div className="flex items-center justify-between mb-5">
+      <h3 className="text-lg font-semibold text-gray-900">Instagram</h3>
+      <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600 shadow-sm">
+        Not Connected
+      </span>
+    </div>
 
-                const url = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${app_id}&redirect_uri=${encodeURIComponent(redirect_uri)}&state=${state}&response_type=code&scope=${encodeURIComponent(scopes)}
-                `;
-                window.location.href = url;
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div className="space-y-2">
+        <Label>Instagram App ID</Label>
+        <Input
+          value={igAppId}
+          onChange={(e) => setIgAppId(e.target.value)}
+          placeholder="Instagram App ID"
+          className="bg-white border-gray-200 shadow-sm focus-visible:ring-pink-500"
+        />
+      </div>
+      <div className="space-y-2">
+        <Label>Instagram App Secret</Label>
+        <Input
+          value={igAppSecret}
+          onChange={(e) => setIgAppSecret(e.target.value)}
+          placeholder="Instagram App Secret"
+          type="password"
+          className="bg-white border-gray-200 shadow-sm focus-visible:ring-pink-500"
+        />
+      </div>
+    </div>
 
-            } else if (platform === "Instagram") {
-                // Use dynamic App ID and callback URL
-                const igAcc = accounts.find(acc => acc.platform === "Instagram");
-                let app_id = igAppId;
-                let app_secret = igAppSecret;
-                let redirect_uri = `https://socialvibe.tradestreet.in/backend/instagram/callback`;
+    <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+      <Button
+        className="w-full h-10 bg-gradient-to-r from-pink-500 to-rose-400 hover:from-pink-500/90 hover:to-rose-400/90 text-white font-medium shadow-md hover:shadow-lg active:scale-[0.99] transition-all"
+        onClick={() => handleSave('Instagram')}
+        disabled={isLoading}
+      >
+        Save
+      </Button>
+      <Button
+        className="w-full h-10 bg-rose-600 hover:bg-rose-700 text-white font-medium shadow-md hover:shadow-lg active:scale-[0.99] transition-all"
+        onClick={() => handleConnect('Instagram')}
+        disabled={isLoading}
+      >
+        Connect
+      </Button>
+    </div>
 
-                if (!app_id || !app_secret || !redirect_uri || !igAcc) {
-                    Swal.fire({
-                        icon: "error",
-                        title: "Error",
-                        text: "Please save Instagram App ID/Secret first.",
-                        confirmButtonColor: "#6366f1"
-                    });
-                    setIsLoading(false);
-                    return;
-                }
-                let user_id = igAcc ? igAcc.user_id : null;
+    <div className="absolute inset-0 rounded-2xl pointer-events-none ring-1 ring-transparent hover:ring-[3px] hover:ring-pink-400/40 transition-all duration-300" />
+  </div>
 
-                let stateData = {
-                    user_id: user_id,
-                    app_id: app_id,
-                    app_secret: app_secret,
-                    redirect_uri: redirect_uri,
-                    redirect_dashboard: "http://localhost:8080/dashboard"
-                };
+            )}
+          </CardContent>
+        </Card>
 
-                const state = encodeURIComponent(JSON.stringify(stateData));
-
-                const oauthUrl = `https://www.instagram.com/oauth/authorize?client_id=${app_id}&redirect_uri=${encodeURIComponent(redirect_uri)}&state=${state}&response_type=code&scope=instagram_business_basic,instagram_business_manage_messages,instagram_business_manage_comments,instagram_business_content_publish`
-                window.location.href = oauthUrl;
-            }
-            //   window.location.href = oauthUrl;
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handleDisconnect = async (id) => {
-        setIsLoading(true);
-        try {
-            /// await apiService.deleteSocialAccount(id);
-
-            await apiService.updateSocialAccountCredentials({
-                is_active: 0,
-                id: id,
-            });
-            Swal.fire({
-                icon: "success",
-                title: "Success",
-                text: "Account disconnected.",
-                confirmButtonColor: "#6366f1"
-            });
-            fetchAccounts();
-        } catch (error) {
-            Swal.fire({
-                icon: "error",
-                title: "Error",
-                text: error.message || "Failed to disconnect account",
-                confirmButtonColor: "#6366f1"
-            });
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    return (
-        <DashboardLayout>
-            <div className="max-w-2xl mx-auto py-8 space-y-6">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Connect Social Account</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-4">
-                            {/* Facebook fields: show only if not connected */}
-                            {!(accounts.find(acc => acc.platform === "Facebook" && Number(acc.is_active) === 1)) && (
-                                <div className="space-y-2">
-                                    <Label>Facebook App ID</Label>
-                                    <Input value={fbAppId} onChange={e => setFbAppId(e.target.value)} placeholder="Facebook App ID" />
-                                    <Label>Facebook App Secret</Label>
-                                    <Input value={fbAppSecret} onChange={e => setFbAppSecret(e.target.value)} placeholder="Facebook App Secret" type="password" />
-                                    <div className="flex gap-2 mt-2">
-                                        <Button
-                                            className="w-1/2 bg-blue-500 hover:bg-blue-600 text-white"
-                                            onClick={() => handleSave("Facebook")}
-                                            disabled={isLoading}
-                                        >
-                                            Save
-                                        </Button>
-                                        <Button
-                                            className="w-1/2 bg-blue-600 hover:bg-blue-700 text-white"
-                                            onClick={() => handleConnect("Facebook")}
-                                            disabled={isLoading}
-                                        >
-                                            Connect
-                                        </Button>
-                                    </div>
-                                </div>
-                            )}
-                            {/* Instagram fields: show only if not connected */}
-                            {!(accounts.find(acc => acc.platform === "Instagram" && Number(acc.is_active) === 1)) && (
-                                <div className="space-y-2 mt-6">
-                                    <Label>Instagram App ID</Label>
-                                    <Input value={igAppId} onChange={e => setIgAppId(e.target.value)} placeholder="Instagram App ID" />
-                                    <Label>Instagram App Secret</Label>
-                                    <Input value={igAppSecret} onChange={e => setIgAppSecret(e.target.value)} placeholder="Instagram App Secret" type="password" />
-                                    <div className="flex gap-2 mt-2">
-                                        <Button
-                                            className="w-1/2 bg-pink-400 hover:bg-pink-500 text-white"
-                                            onClick={() => handleSave("Instagram")}
-                                            disabled={isLoading}
-                                        >
-                                            Save
-                                        </Button>
-                                        <Button
-                                            className="w-1/2 bg-pink-500 hover:bg-pink-600 text-white"
-                                            onClick={() => handleConnect("Instagram")}
-                                            disabled={isLoading}
-                                        >
-                                            Connect
-                                        </Button>
-                                    </div>
-                                </div>
-                            )}
+        {/* Connected Accounts */}
+        <Card className="border-indigo-100/70 shadow-xl hover:shadow-2xl transition-shadow rounded-2xl">
+          <CardHeader>
+            <CardTitle className="text-gray-800">Connected Accounts</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {accounts.length === 0 ? (
+              <p className="text-muted-foreground">No accounts connected.</p>
+            ) : (
+              <div className="space-y-3">
+                {accounts?.map((acc) => (
+                  <div
+                    key={acc.id}
+                    className="flex items-center justify-between rounded-xl border border-gray-200 bg-white px-3 py-3 shadow-sm"
+                  >
+                    {Number(acc.is_active) === 1 ? (
+                      <>
+                        <div className="flex items-center gap-2">
+                          <Badge
+                            variant="secondary"
+                            className="capitalize shadow-sm bg-gray-100 text-gray-800"
+                          >
+                            {acc.platform}
+                          </Badge>
+                          <span className="text-sm text-gray-700">
+                            {acc.account_name || acc.account_id}
+                          </span>
                         </div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Connected Accounts</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        {accounts.length === 0 ? (
-                            <p className="text-muted-foreground">No accounts connected.</p>
-                        ) : (
-                            <div className="space-y-4">
-                                {accounts && accounts?.map((acc) => (
-                                    <div key={acc.id} className="flex items-center justify-between border-b pb-2">
-                                        {
-                                            Number(acc.is_active) == 1 ?
-                                                <>
-                                                    <div>
-                                                        <Badge>{acc.platform}</Badge> {acc.account_name || acc.account_id}
-                                                    </div>
-                                                    <Button variant="destructive" size="sm" onClick={() => handleDisconnect(acc.id)} disabled={isLoading}>Disconnect</Button>
-                                                </>
-
-                                                : ""
-                                        }
-
-
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
-            </div>
-        </DashboardLayout>
-    );
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleDisconnect(acc.id)}
+                          disabled={isLoading}
+                          className="shadow-sm"
+                        >
+                          Disconnect
+                        </Button>
+                      </>
+                    ) : (
+                      <div className="text-sm text-gray-500">{acc.platform} (inactive)</div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </DashboardLayout>
+  );
 };
 
 export default SocialAccounts;

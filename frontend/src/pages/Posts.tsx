@@ -23,7 +23,7 @@ interface Post {
   id: number;
   title: string;
   content: string;
-  platforms: string[];
+  platforms: string[] | string;
   status: string;
   scheduled_at: string | null;
   is_ai_generated: boolean;
@@ -48,19 +48,18 @@ const Posts = () => {
       }
 
       const response = await apiService.getAllPosts();
-      
       if (response.status) {
         setPosts(response.data.posts || []);
       }
     } catch (error: any) {
-      if (error.message === 'Authentication failed') {
+      if (error.message === "Authentication failed") {
         logout();
       } else {
         Swal.fire({
           icon: "error",
           title: "Error",
           text: error.message || "Failed to fetch posts",
-          confirmButtonColor: "#6366f1"
+          confirmButtonColor: "#6366f1",
         });
       }
     } finally {
@@ -70,28 +69,26 @@ const Posts = () => {
 
   const handleDelete = async () => {
     if (!deletePostId) return;
-
     try {
       const response = await apiService.deletePost(deletePostId);
-
       if (response.status) {
         Swal.fire({
           icon: "success",
           title: "Success",
           text: "Post deleted successfully",
-          confirmButtonColor: "#6366f1"
+          confirmButtonColor: "#6366f1",
         });
         fetchPosts();
       }
     } catch (error: any) {
-      if (error.message === 'Authentication failed') {
+      if (error.message === "Authentication failed") {
         logout();
       } else {
         Swal.fire({
           icon: "error",
           title: "Error",
           text: error.message || "Failed to delete post",
-          confirmButtonColor: "#6366f1"
+          confirmButtonColor: "#6366f1",
         });
       }
     } finally {
@@ -99,123 +96,138 @@ const Posts = () => {
     }
   };
 
-  const getStatusColor = (status: string) => {
+  // Softer pastel chips like your dashboard
+  const statusClasses = (status: string) => {
     switch (status) {
       case "published":
-        return "bg-green-500";
+        return "bg-emerald-100 text-emerald-700 border border-emerald-200";
       case "scheduled":
-        return "bg-blue-500";
+        return "bg-sky-100 text-sky-700 border border-sky-200";
       case "draft":
-        return "bg-gray-500";
       default:
-        return "bg-gray-500";
+        return "bg-gray-100 text-gray-700 border border-gray-200";
     }
+  };
+
+  // Always return array for platforms (string or string[])
+  const getPlatformsArray = (platforms: string[] | string | undefined): string[] => {
+    if (Array.isArray(platforms)) return platforms;
+    if (typeof platforms === "string" && platforms) {
+      return platforms.split(",").map((p) => p.trim()).filter(Boolean);
+    }
+    return [];
   };
 
   if (isLoading) {
     return (
       <DashboardLayout userRole="client">
         <div className="flex items-center justify-center h-full">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
         </div>
       </DashboardLayout>
     );
   }
 
-  console.log("post",posts)
-
-  // Helper to always return array for platforms
-  const getPlatformsArray = (platforms: string[] | string | undefined): string[] => {
-    if (Array.isArray(platforms)) return platforms;
-    if (typeof platforms === 'string' && platforms) return platforms.split(',').map(p => p.trim()).filter(Boolean);
-    return [];
-  };
-
   return (
     <DashboardLayout userRole="client">
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
+        {/* Header — gradient kicker + subtitle for theme consistency */}
+        <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Posts</h1>
+            <h1 className="flex items-baseline gap-2 text-3xl font-extrabold">
+              <span className="bg-gradient-to-r from-indigo-600 to-sky-400 bg-clip-text text-transparent">Posts</span>
+              
+            </h1>
             <p className="text-muted-foreground">Manage your social media posts</p>
           </div>
-          <Button onClick={() => navigate("/posts/new")}> 
+
+          <Button
+            onClick={() => navigate("/posts/new")}
+            className="h-10 bg-gradient-to-r from-indigo-600 to-sky-500 hover:from-indigo-500 hover:to-sky-400 text-white shadow-md"
+          >
             <Plus className="mr-2 h-4 w-4" />
             Create Post
           </Button>
         </div>
 
         {posts.length === 0 ? (
-          <Card>
+          <Card className="border-indigo-100">
             <CardContent className="flex flex-col items-center justify-center py-12">
               <p className="text-muted-foreground mb-4">No posts yet</p>
-              <Button onClick={() => navigate("/posts/new")}> 
+              <Button
+                onClick={() => navigate("/posts/new")}
+                className="bg-gradient-to-r from-indigo-600 to-sky-500 hover:from-indigo-500 hover:to-sky-400 text-white shadow-md"
+              >
                 <Plus className="mr-2 h-4 w-4" />
                 Create Your First Post
               </Button>
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
             {posts.map((post) => (
-              <Card key={post.id} className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="space-y-1 flex-1">
-                      <CardTitle className="text-lg">{post.title}</CardTitle>
-                      <CardDescription className="line-clamp-2">
-                        {post.content}
-                      </CardDescription>
-                    </div>
+              <Card
+                key={post.id}
+                className="border border-indigo-100/60 hover:border-indigo-200 hover:shadow-lg transition-all"
+              >
+                <CardHeader className="pb-3">
+                  <div className="space-y-2">
+                    <CardTitle className="text-lg line-clamp-1">{post.title}</CardTitle>
+                    <CardDescription className="line-clamp-2">{post.content}</CardDescription>
                   </div>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    <Badge className={getStatusColor(post.status)}>
-                      {post.status}
-                    </Badge>
-                    {post.is_ai_generated && (
-                      <Badge variant="outline">AI Generated</Badge>
-                    )}
+
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    <Badge className={statusClasses(post.status)}>{post.status}</Badge>
+                    {post.is_ai_generated && <Badge variant="outline">AI Generated</Badge>}
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex flex-wrap gap-1">
-                      {getPlatformsArray(post.platforms).map((platform) => (
-                        <Badge key={platform} variant="secondary">
-                          {platform}
-                        </Badge>
-                      ))}
+
+                <CardContent className="space-y-4 pt-0">
+                  {/* Platforms */}
+                  <div className="flex flex-wrap gap-1">
+                    {getPlatformsArray(post.platforms).map((platform) => (
+                      <Badge key={platform} variant="secondary" className="capitalize">
+                        {platform}
+                      </Badge>
+                    ))}
+                  </div>
+
+                  {/* Schedule */}
+                  {post.scheduled_at && (
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <Calendar className="mr-2 h-4 w-4" />
+                      {new Date(post.scheduled_at).toLocaleString()}
                     </div>
-                    {post.scheduled_at && (
-                      <div className="flex items-center text-sm text-muted-foreground">
-                        <Calendar className="mr-2 h-4 w-4" />
-                        {new Date(post.scheduled_at).toLocaleString()}
-                      </div>
-                    )}
-                    <div className="flex gap-2">
-                      
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => navigate(`/posts/${post.id}`)}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => navigate(`/posts/edit/${post.id}`)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => setDeletePostId(post.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+                  )}
+
+                  {/* Actions */}
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="hover:bg-indigo-50"
+                      onClick={() => navigate(`/posts/${post.id}`)}
+                      title="View"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="hover:bg-indigo-50"
+                      onClick={() => navigate(`/posts/edit/${post.id}`)}
+                      title="Edit"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => setDeletePostId(post.id)}
+                      title="Delete"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -224,6 +236,7 @@ const Posts = () => {
         )}
       </div>
 
+      {/* Confirm delete */}
       <AlertDialog open={!!deletePostId} onOpenChange={() => setDeletePostId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>

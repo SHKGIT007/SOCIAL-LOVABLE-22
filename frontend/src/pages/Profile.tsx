@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import Swal from "sweetalert2";
 import { apiService } from "@/services/api";
-import DashboardLayout from "@/components/Layout/DashboardLayout";
 
 const initialProfile = {
   business_name: "",
@@ -15,8 +16,6 @@ const initialProfile = {
   image_style: "",
   festival: "",
 };
-
-import { useEffect } from "react";
 
 const Profile = () => {
   const [profile, setProfile] = useState(initialProfile);
@@ -38,8 +37,8 @@ const Profile = () => {
             festival: res.data.profile.festival || "",
           });
         }
-      } catch (error) {
-        // ignore if not found
+      } catch {
+        // ignore
       } finally {
         setIsLoading(false);
       }
@@ -53,25 +52,17 @@ const Profile = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Frontend validation for required fields
-    if (!profile.business_name.trim()) {
+
+    if (!profile.business_name.trim() || !profile.description.trim()) {
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: "Business/Creator Name is required.",
-        confirmButtonColor: "#6366f1"
+        text: "Please fill all required fields.",
+        confirmButtonColor: "#6366f1",
       });
       return;
     }
-    if (!profile.description.trim()) {
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Description is required.",
-        confirmButtonColor: "#6366f1"
-      });
-      return;
-    }
+
     setIsLoading(true);
     try {
       const res = await apiService.saveProfile(profile);
@@ -80,14 +71,14 @@ const Profile = () => {
           icon: "success",
           title: "Profile Saved",
           text: "Your profile details have been updated.",
-          confirmButtonColor: "#6366f1"
+          confirmButtonColor: "#6366f1",
         });
       } else {
         Swal.fire({
           icon: "error",
           title: "Error",
           text: res.message || "Failed to save profile.",
-          confirmButtonColor: "#6366f1"
+          confirmButtonColor: "#6366f1",
         });
       }
     } catch (error: any) {
@@ -95,7 +86,7 @@ const Profile = () => {
         icon: "error",
         title: "Error",
         text: error.message || "Failed to save profile.",
-        confirmButtonColor: "#6366f1"
+        confirmButtonColor: "#6366f1",
       });
     } finally {
       setIsLoading(false);
@@ -104,47 +95,146 @@ const Profile = () => {
 
   return (
     <DashboardLayout userRole="client">
-      <div className="max-w-xl mx-auto py-8">
-        <Card>
+      <div className="space-y-8">
+        {/* Header */}
+        <div>
+          <h1 className="flex items-baseline gap-2 text-3xl font-extrabold">
+            <span className="bg-gradient-to-r from-indigo-600 to-sky-400 bg-clip-text text-transparent">
+              Profile
+            </span>
+            <span className="text-gray-900"> Settings</span>
+          </h1>
+          <p className="text-muted-foreground">
+            Define your brand’s personality and preferences for AI-generated posts.
+          </p>
+        </div>
+
+        <Card className="border-indigo-100 shadow-sm bg-white">
           <CardHeader>
-            <CardTitle>Profile Settings</CardTitle>
+            <CardTitle className="text-gray-800 text-lg font-semibold">
+              Brand & Content Profile
+            </CardTitle>
           </CardHeader>
+
           <CardContent>
-            <form className="space-y-6" onSubmit={handleSubmit}>
-              <div className="space-y-4 bg-white p-6 rounded-lg shadow-md">
-                {/* Each field: label left, input right */}
-                <div className="flex flex-col md:flex-row items-center gap-4">
-                  <label htmlFor="business_name" className="w-full md:w-1/3 text-base font-semibold text-gray-700 md:text-right">Business/Creator Name *</label>
-                  <Input id="business_name" name="business_name" placeholder="Business/Creator Name" value={profile.business_name} onChange={handleChange} required className="w-full md:w-2/3 border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md" />
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* 2-column layout */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Row 1 */}
+                <div className="flex flex-col space-y-1">
+                  <label htmlFor="business_name" className="text-sm font-semibold text-gray-700">
+                    Business/Creator Name *
+                  </label>
+                  <Input
+                    id="business_name"
+                    name="business_name"
+                    placeholder="Your business or creator name"
+                    value={profile.business_name}
+                    onChange={handleChange}
+                    required
+                    className="border-gray-300 focus-visible:ring-indigo-500"
+                  />
                 </div>
-                <div className="flex flex-col md:flex-row items-center gap-4">
-                  <label htmlFor="description" className="w-full md:w-1/3 text-base font-semibold text-gray-700 md:text-right">Description *</label>
-                  <Input id="description" name="description" placeholder="Description" value={profile.description} onChange={handleChange} required className="w-full md:w-2/3 border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md" />
+
+                <div className="flex flex-col space-y-1">
+                  <label htmlFor="platforms" className="text-sm font-semibold text-gray-700">
+                    Preferred Platforms
+                  </label>
+                  <Input
+                    id="platforms"
+                    name="platforms"
+                    placeholder="Facebook, Instagram, X (Twitter)"
+                    value={profile.platforms}
+                    onChange={handleChange}
+                    className="border-gray-300 focus-visible:ring-indigo-500"
+                  />
                 </div>
-                <div className="flex flex-col md:flex-row items-center gap-4">
-                  <label htmlFor="platforms" className="w-full md:w-1/3 text-base font-semibold text-gray-700 md:text-right">Preferred Platforms</label>
-                  <Input id="platforms" name="platforms" placeholder="Preferred Platforms (comma separated)" value={profile.platforms} onChange={handleChange} className="w-full md:w-2/3 border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md" />
+
+                {/* Row 2 — Description + Image Title */}
+                <div className="flex flex-col space-y-1">
+                  <label htmlFor="description" className="text-sm font-semibold text-gray-700">
+                    Description *
+                  </label>
+                  <Textarea
+                    id="description"
+                    name="description"
+                    placeholder="Describe your brand or services"
+                    value={profile.description}
+                    onChange={handleChange}
+                    required
+                    className="border-gray-300 focus-visible:ring-indigo-500 min-h-[100px]"
+                  />
                 </div>
-                <div className="flex flex-col md:flex-row items-center gap-4">
-                  <label htmlFor="brand_voice" className="w-full md:w-1/3 text-base font-semibold text-gray-700 md:text-right">Brand Voice</label>
-                  <Input id="brand_voice" name="brand_voice" placeholder="Brand Voice (e.g. friendly, professional)" value={profile.brand_voice} onChange={handleChange} className="w-full md:w-2/3 border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md" />
+
+                <div className="flex flex-col space-y-1">
+                  <label htmlFor="image_style" className="text-sm font-semibold text-gray-700">
+                    Image Title
+                  </label>
+                  <Textarea
+                    id="image_style"
+                    name="image_style"
+                    placeholder="Enter preferred image style or title"
+                    value={profile.image_style}
+                    onChange={handleChange}
+                    className="border-gray-300 focus-visible:ring-indigo-500 min-h-[100px]"
+                  />
                 </div>
-                <div className="flex flex-col md:flex-row items-center gap-4">
-                  <label htmlFor="hashtags" className="w-full md:w-1/3 text-base font-semibold text-gray-700 md:text-right">Default Hashtags</label>
-                  <Input id="hashtags" name="hashtags" placeholder="Default Hashtags (comma separated)" value={profile.hashtags} onChange={handleChange} className="w-full md:w-2/3 border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md" />
+
+                {/* Row 3 */}
+                <div className="flex flex-col space-y-1">
+                  <label htmlFor="brand_voice" className="text-sm font-semibold text-gray-700">
+                    Brand Voice
+                  </label>
+                  <Input
+                    id="brand_voice"
+                    name="brand_voice"
+                    placeholder="Friendly, Bold, Professional..."
+                    value={profile.brand_voice}
+                    onChange={handleChange}
+                    className="border-gray-300 focus-visible:ring-indigo-500"
+                  />
                 </div>
-                <div className="flex flex-col md:flex-row items-center gap-4">
-                    <label htmlFor="image_style" className="w-full md:w-1/3 text-base font-semibold text-gray-700 md:text-right">Image Title</label>
-                    <Input id="image_style" name="image_style" placeholder="Image Title" value={profile.image_style} onChange={handleChange} className="w-full md:w-2/3 border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md" />
-                  </div>
-                  <div className="flex flex-col md:flex-row items-center gap-4">
-                    <label htmlFor="festival" className="w-full md:w-1/3 text-base font-semibold text-gray-700 md:text-right">Current Festival/Event</label>
-                    <Input id="festival" name="festival" placeholder="e.g. Diwali, Christmas, Eid" value={profile.festival} onChange={handleChange} className="w-full md:w-2/3 border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md" />
-                  </div>
+
+                <div className="flex flex-col space-y-1">
+                  <label htmlFor="hashtags" className="text-sm font-semibold text-gray-700">
+                    Default Hashtags
+                  </label>
+                  <Input
+                    id="hashtags"
+                    name="hashtags"
+                    placeholder="#marketing, #socialmedia"
+                    value={profile.hashtags}
+                    onChange={handleChange}
+                    className="border-gray-300 focus-visible:ring-indigo-500"
+                  />
+                </div>
+
+                {/* Row 4 */}
+                <div className="flex flex-col space-y-1 md:col-span-2">
+                  <label htmlFor="festival" className="text-sm font-semibold text-gray-700">
+                    Current Festival/Event
+                  </label>
+                  <Input
+                    id="festival"
+                    name="festival"
+                    placeholder="e.g. Diwali, Christmas, Eid"
+                    value={profile.festival}
+                    onChange={handleChange}
+                    className="border-gray-300 focus-visible:ring-indigo-500"
+                  />
+                </div>
               </div>
-              <Button type="submit" disabled={isLoading} className="w-full mt-6 text-lg font-bold py-3 rounded-md bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-200">
-                {isLoading ? "Saving..." : "Save Profile"}
-              </Button>
+
+              {/* Submit */}
+              <div className="pt-4">
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full md:w-auto px-10 py-2.5 text-base font-semibold bg-gradient-to-r from-indigo-600 to-sky-500 hover:from-indigo-500 hover:to-sky-400 text-white rounded-md shadow-md"
+                >
+                  {isLoading ? "Saving..." : "Save Profile"}
+                </Button>
+              </div>
             </form>
           </CardContent>
         </Card>
