@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-// import ApiService from "@/services/api"; // Removed default import
 import { apiService } from "@/services/api";
 import { isAuthenticated } from "@/utils/auth";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
@@ -50,7 +49,7 @@ const EditPost = () => {
     image_prompt: "",
     image_url: "",
   });
-  const [connectedAccounts, setConnectedAccounts] = useState([]);
+  const [connectedAccounts, setConnectedAccounts] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -58,22 +57,20 @@ const EditPost = () => {
       try {
         const accRes = await apiService.getMySocialAccounts();
         setConnectedAccounts(accRes.data.socialAccounts || []);
-        // Fetch profile details and set image_prompt if post is AI-generated
         const profileRes = await apiService.request("/profile");
         if (profileRes.status && profileRes.data?.profile) {
           const p = profileRes.data.profile;
-          // If post is AI-generated, fill image_prompt and other fields from profile
           setFormData((prev) => ({
             ...prev,
             image_prompt: prev.image_prompt || p.image_style || "",
-            // Optionally set other fields like brand_voice, hashtags, etc. if needed
           }));
         }
-      } catch (error) {
-        // Optionally show error
+      } catch {
+        // optional
       }
     };
     fetchAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const fetchPost = async () => {
@@ -82,12 +79,8 @@ const EditPost = () => {
         navigate("/auth");
         return;
       }
-      // const api = new ApiService();
-      // const data = await api.getPostById(id);
       const data = await apiService.getPostById(id);
-      console.log("Fetched post data: ", data);
-    
-      if(data.status === false) {
+      if (data.status === false) {
         Swal.fire({
           icon: "error",
           title: "Error",
@@ -96,7 +89,7 @@ const EditPost = () => {
         });
         navigate("/posts");
         return;
-      }else if (!data.data || !data.data.post) {
+      } else if (!data.data || !data.data.post) {
         Swal.fire({
           icon: "error",
           title: "Error",
@@ -120,9 +113,6 @@ const EditPost = () => {
         image_prompt: dataPost.image_prompt || null,
         image_url: dataPost.image_url || null
       });
-
-
-
     } catch (error: any) {
       Swal.fire({
         icon: "error",
@@ -160,11 +150,6 @@ const EditPost = () => {
         return;
       }
 
-      const tagsArray = formData.tags
-        .split(",")
-        .map((tag) => tag.trim())
-        .filter((tag) => tag.length > 0);
-
       const updateData = {
         title: formData.title,
         content: formData.content,
@@ -175,10 +160,7 @@ const EditPost = () => {
         image_url : formData.image_url
       };
 
-      // const api = new ApiService();
-      // await api.updatePost(id, updateData);
-
-       await apiService.updatePost(id, updateData);
+      await apiService.updatePost(id, updateData);
 
       Swal.fire({
         icon: "success",
@@ -212,136 +194,193 @@ const EditPost = () => {
 
   return (
     <DashboardLayout userRole="client">
-      <div className="space-y-6 max-w-4xl mx-auto">
-        <div className="flex items-center justify-between">
-          <Button variant="ghost" onClick={() => navigate("/posts")}>
+      <div className=" space-y-8">
+        {/* Sticky translucent action bar */}
+        <div className="sticky top-0 z-20 -mx-2 px-2 py-3 bg-gradient-to-b from-white/85 to-white/60 backdrop-blur supports-[backdrop-filter]:backdrop-blur border-b border-indigo-50 rounded-b-xl flex items-center justify-between">
+          <Button variant="ghost" onClick={() => navigate("/posts")} className="hover:bg-indigo-50">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Posts
           </Button>
+          {/* This button submits the same form below via its id */}
+          <Button
+            type="submit"
+            form="edit-post-form"
+            disabled={isSaving}
+            className="bg-gradient-to-r from-indigo-600 to-sky-500 hover:from-indigo-500 hover:to-sky-400 text-white shadow-md"
+          >
+            {isSaving ? "Saving..." : (
+              <>
+                <Save className="mr-2 h-4 w-4" />
+                Save Changes
+              </>
+            )}
+          </Button>
         </div>
 
-        <Card>
+        <Card className="rounded-2xl border-indigo-100/70 shadow-xl">
           <CardHeader>
-            <CardTitle>Edit Post</CardTitle>
+            <CardTitle className="text-2xl">Edit Post</CardTitle>
             <CardDescription>Update your post details</CardDescription>
           </CardHeader>
+
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="title">Title</Label>
-                <Input
-                  id="title"
-                  value={formData.title}
-                  onChange={(e) =>
-                    setFormData({ ...formData, title: e.target.value })
-                  }
-                  placeholder="Enter post title"
-                  required
-                />
+            {/* Give the form an id so the top Save button can submit it */}
+            <form id="edit-post-form" onSubmit={handleSubmit} className="space-y-8">
+              {/* Title + Status (two columns) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="title">Title</Label>
+                  <Input
+                    id="title"
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    placeholder="Enter post title"
+                    required
+                    className="border-gray-300 focus-visible:ring-indigo-500"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="status">Status</Label>
+                  <Select
+                    value={formData.status}
+                    onValueChange={(value) => setFormData({ ...formData, status: value })}
+                  >
+                    <SelectTrigger className="border-gray-300 focus-visible:ring-indigo-500">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {statuses.map((status) => (
+                        <SelectItem key={status} value={status}>
+                          {status.charAt(0).toUpperCase() + status.slice(1)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
-              <div className="space-y-2">
+              {/* Content + Preview image */}
+              <div className="space-y-3">
                 <Label htmlFor="content">Content</Label>
                 <Textarea
                   id="content"
                   value={formData.content}
-                  onChange={(e) =>
-                    setFormData({ ...formData, content: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                   placeholder="Write your post content..."
-                  className="min-h-[200px]"
+                  className="min-h-[200px] border-gray-300 focus-visible:ring-indigo-500"
                   required
                 />
-                      {/* Show image from image_url if present */}
-                      {formData.image_url && (
-                        <div className="mb-4">
-                          <img
-                            src={formData.image_url}
-                            alt="Post Image"
-                            className="rounded-lg w-full max-h-64 object-cover"
-                            onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/no-image.png'; }}
-                          />
-                        </div>
-                      )}
+                {formData.image_url && (
+                  <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
+                    <img
+                      src={formData.image_url}
+                      alt="Post Image"
+                      className="w-full max-h-72 object-cover"
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = "/no-image.png";
+                      }}
+                    />
+                  </div>
+                )}
               </div>
 
-          
-
+              {/* Platforms */}
               <div className="space-y-2">
                 <Label>Select Platforms</Label>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                   {connectedAccounts.length === 0 ? (
-                    <p className="text-muted-foreground">No social accounts connected. Connect from dashboard.</p>
+                    <p className="text-muted-foreground">
+                      No social accounts connected. Connect from dashboard.
+                    </p>
                   ) : (
-                    connectedAccounts.map((acc) => (
-                      <div key={acc.id} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={acc.platform}
-                          checked={formData.platforms.includes(acc.platform)}
-                          onCheckedChange={() => handlePlatformToggle(acc.platform)}
-                        />
-                        <Label htmlFor={acc.platform} className="cursor-pointer">
-                          {acc.platform} {acc.account_name ? `(${acc.account_name})` : ""}
-                        </Label>
-                      </div>
-                    ))
+                    connectedAccounts.map((acc) => {
+                      const checked = formData.platforms.includes(acc.platform);
+                      return (
+                        <label
+                          key={acc.id}
+                          htmlFor={`pf-${acc.platform}`}
+                          className={`flex items-center gap-2 rounded-xl border p-3 cursor-pointer transition ${
+                            checked ? "border-indigo-300 bg-indigo-50" : "border-gray-200 hover:bg-gray-50"
+                          }`}
+                        >
+                          <Checkbox
+                            id={`pf-${acc.platform}`}
+                            checked={checked}
+                            onCheckedChange={() => handlePlatformToggle(acc.platform)}
+                          />
+                          <span className="text-sm">
+                            {acc.platform} {acc.account_name ? `(${acc.account_name})` : ""}
+                          </span>
+                        </label>
+                      );
+                    })
                   )}
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
-                <Select
-                  value={formData.status}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, status: value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {statuses.map((status) => (
-                      <SelectItem key={status} value={status}>
-                        {status.charAt(0).toUpperCase() + status.slice(1)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              {/* Schedule (conditional) + Image Prompt (2 columns) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {formData.status === "scheduled" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="scheduled_at">Schedule Date & Time</Label>
+                    <Input
+                      id="scheduled_at"
+                      type="datetime-local"
+                      value={formData.scheduled_at}
+                      onChange={(e) => setFormData({ ...formData, scheduled_at: e.target.value })}
+                      required
+                      className="border-gray-300 focus-visible:ring-indigo-500"
+                    />
+                  </div>
+                )}
 
-              {formData.status === "scheduled" && (
                 <div className="space-y-2">
-                  <Label htmlFor="scheduled_at">Schedule Date & Time</Label>
+                  <Label htmlFor="image_prompt">Image Title / Prompt</Label>
                   <Input
-                    id="scheduled_at"
-                    type="datetime-local"
-                    value={formData.scheduled_at}
-                    onChange={(e) =>
-                      setFormData({ ...formData, scheduled_at: e.target.value })
-                    }
-                    required
+                    id="image_prompt"
+                    value={formData.image_prompt || ""}
+                    onChange={(e) => setFormData({ ...formData, image_prompt: e.target.value })}
+                    placeholder="Optional prompt or title for image"
+                    className="border-gray-300 focus-visible:ring-indigo-500"
                   />
                 </div>
-              )}
+              </div>
 
-              <div className="flex gap-4">
-                <Button type="submit" disabled={isSaving} className="flex-1">
-                  {isSaving ? (
-                    <>Saving...</>
-                  ) : (
+              {/* Image URL (full width) */}
+              <div className="space-y-2">
+                <Label htmlFor="image_url">Image URL</Label>
+                <Input
+                  id="image_url"
+                  value={formData.image_url || ""}
+                  onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                  placeholder="https://..."
+                  className="border-gray-300 focus-visible:ring-indigo-500"
+                />
+              </div>
+
+              {/* Bottom actions (kept as requested; top sticky save also submits) */}
+              <div className="flex flex-col-reverse sm:flex-row gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => navigate("/posts")}
+                  className="sm:w-40"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isSaving}
+                  className="flex-1 sm:flex-none sm:w-48 bg-gradient-to-r from-indigo-600 to-sky-500 hover:from-indigo-500 hover:to-sky-400 text-white shadow-md"
+                >
+                  {isSaving ? "Saving..." : (
                     <>
                       <Save className="mr-2 h-4 w-4" />
                       Save Changes
                     </>
                   )}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => navigate("/posts")}
-                >
-                  Cancel
                 </Button>
               </div>
             </form>
