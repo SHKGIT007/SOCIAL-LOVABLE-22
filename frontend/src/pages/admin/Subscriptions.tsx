@@ -6,7 +6,7 @@ import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
+import Swal from "sweetalert2";
 
 interface SubscriptionData {
   id: string;
@@ -30,7 +30,6 @@ interface SubscriptionData {
 
 const Subscriptions = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [subscriptions, setSubscriptions] = useState<SubscriptionData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -50,10 +49,11 @@ const Subscriptions = () => {
       }
       await fetchSubscriptions();
     } catch (error: any) {
-      toast({
+      Swal.fire({
+        icon: "error",
         title: "Error",
-        description: error.message,
-        variant: "destructive",
+        text: error.message,
+        confirmButtonColor: "#6366f1"
       });
     } finally {
       setIsLoading(false);
@@ -67,18 +67,20 @@ const Subscriptions = () => {
         setSubscriptions(data?.data?.subscriptions || []);
       }else{
         setSubscriptions([]);
-        toast({
+        Swal.fire({
+          icon: "error",
           title: "Error",
-          description: data.message || "Failed to fetch subscriptions.",
-          variant: "destructive",
+          text: data.message || "Failed to fetch subscriptions.",
+          confirmButtonColor: "#6366f1"
         });
         return;
       }
     } catch (error: any) {
-      toast({
+      Swal.fire({
+        icon: "error",
         title: "Error",
-        description: error.message || "Failed to fetch subscriptions.",
-        variant: "destructive",
+        text: error.message || "Failed to fetch subscriptions.",
+        confirmButtonColor: "#6366f1"
       });
     }
   };

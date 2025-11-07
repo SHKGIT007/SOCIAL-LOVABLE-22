@@ -1,11 +1,75 @@
+
 import { API_CONFIG, buildApiUrl, addQueryParams } from '../utils/config';
 import { getAuthToken, logout } from '../utils/auth';
 
-// API service class
-
 class ApiService {
+
+  // Toggle schedule status (active/inactive) via PATCH /schedules/:id/status
+  async toggleScheduleStatus(id, status) {
+    return this.request(`/schedules/${id}/status`, {
+      method: 'PATCH',
+      body: { status },
+    });
+  }
+
+
+  // Delete a schedule
+  async deleteSchedule(id) {
+    return this.request(`/schedules/${id}`, {
+      method: 'DELETE',
+    });
+  }
+  // Create a new schedule
+  async postSchedule(scheduleData) {
+    return this.request('/schedules', {
+      method: 'POST',
+      body: scheduleData,
+    });
+  }
+
+  // Update an existing schedule
+  async updateSchedule(id, scheduleData) {
+    return this.request(`/schedules/${id}`, {
+      method: 'PUT',
+      body: scheduleData,
+    });
+  }
+  // Schedule API methods
+  async getSchedules() {
+    return this.request('/schedules');
+  }
+  // System Settings API methods
+  async getSystemSettings() {
+    return this.request('/system-settings');
+  }
+
+  async updateSystemSettings(settings) {
+    return this.request('/system-settings/update', {
+      method: 'POST',
+      body: { settings },
+    });
+  }
+  // System Settings API methods
+  async getSystemSettings() {
+    return this.request('/system-settings');
+  }
+
+  async updateSystemSettings(settings) {
+    return this.request('/system-settings/update', {
+      method: 'POST',
+      body: { settings },
+    });
+  }
   constructor() {
     this.baseURL = API_CONFIG.BASE_URL;
+  }
+
+  // Profile API methods
+  async saveProfile(profileData) {
+    return this.request('/profile', {
+      method: 'POST',
+      body: profileData,
+    });
   }
 
   // Get OAuth URL for a platform, including user token
@@ -165,11 +229,36 @@ class ApiService {
   }
 
   // Post API methods
-  async createPost(postData) {
-    return this.request(API_CONFIG.ENDPOINTS.POSTS.CREATE, {
-      method: 'POST',
-      body: postData,
-    });
+  async createPost(postData, isMultipart = false) {
+    if (isMultipart) {
+      // For file uploads, use multipart/form-data
+      const token = getAuthToken();
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      // Build full URL for endpoint
+      let url = API_CONFIG.ENDPOINTS.POSTS.CREATE;
+      if (!/^https?:\/\//.test(url)) {
+        url = API_CONFIG.BASE_URL + url;
+      }
+      const response = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: postData,
+      });
+      const data = await response.json();
+      if (response.status === 401) {
+        logout();
+        throw new Error('Authentication failed');
+      }
+      if (!response.ok) {
+        throw new Error(data.message || 'API request failed');
+      }
+      return data;
+    } else {
+      return this.request(API_CONFIG.ENDPOINTS.POSTS.CREATE, {
+        method: 'POST',
+        body: postData,
+      });
+    }
   }
 
   async getAllPosts(queryParams = {}) {
@@ -346,6 +435,5 @@ class ApiService {
     });
   }
 }
-
 // Export singleton instance
 export const apiService = new ApiService();

@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, Save } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import Swal from "sweetalert2";
 import {
   Select,
   SelectContent,
@@ -30,12 +30,13 @@ interface FormData {
   scheduled_at: string;
   category: string;
   tags: string;
+  image_prompt: string | null;
+  image_url: string | null; 
 }
 
 const EditPost = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState<FormData>({
@@ -46,24 +47,34 @@ const EditPost = () => {
     scheduled_at: "",
     category: "",
     tags: "",
+    image_prompt: "",
+    image_url: "",
   });
   const [connectedAccounts, setConnectedAccounts] = useState([]);
 
   useEffect(() => {
-    fetchPost();
-  }, [id]);
-
-  useEffect(() => {
-    const fetchAccounts = async () => {
+    const fetchAll = async () => {
+      await fetchPost();
       try {
-        const res = await apiService.getMySocialAccounts();
-        setConnectedAccounts(res.data.socialAccounts || []);
+        const accRes = await apiService.getMySocialAccounts();
+        setConnectedAccounts(accRes.data.socialAccounts || []);
+        // Fetch profile details and set image_prompt if post is AI-generated
+        const profileRes = await apiService.request("/profile");
+        if (profileRes.status && profileRes.data?.profile) {
+          const p = profileRes.data.profile;
+          // If post is AI-generated, fill image_prompt and other fields from profile
+          setFormData((prev) => ({
+            ...prev,
+            image_prompt: prev.image_prompt || p.image_style || "",
+            // Optionally set other fields like brand_voice, hashtags, etc. if needed
+          }));
+        }
       } catch (error) {
         // Optionally show error
       }
     };
-    fetchAccounts();
-  }, []);
+    fetchAll();
+  }, [id]);
 
   const fetchPost = async () => {
     try {
@@ -77,18 +88,20 @@ const EditPost = () => {
       console.log("Fetched post data: ", data);
     
       if(data.status === false) {
-        toast({
+        Swal.fire({
+          icon: "error",
           title: "Error",
-          description: data.message || "Failed to fetch post.",
-          variant: "destructive",
+          text: data.message || "Failed to fetch post.",
+          confirmButtonColor: "#6366f1"
         });
         navigate("/posts");
         return;
       }else if (!data.data || !data.data.post) {
-        toast({
+        Swal.fire({
+          icon: "error",
           title: "Error",
-          description: "Post not found.",
-          variant: "destructive",
+          text: "Post not found.",
+          confirmButtonColor: "#6366f1"
         });
         navigate("/posts");
         return;
@@ -104,15 +117,18 @@ const EditPost = () => {
           : "",
         category: dataPost.category || "",
         tags: dataPost.tags ? dataPost.tags.join(", ") : "",
+        image_prompt: dataPost.image_prompt || null,
+        image_url: dataPost.image_url || null
       });
 
 
 
     } catch (error: any) {
-      toast({
+      Swal.fire({
+        icon: "error",
         title: "Error",
-        description: error.message || "Failed to fetch post.",
-        variant: "destructive",
+        text: error.message || "Failed to fetch post.",
+        confirmButtonColor: "#6366f1"
       });
     } finally {
       setIsLoading(false);
@@ -134,10 +150,11 @@ const EditPost = () => {
 
     try {
       if (formData.platforms.length === 0) {
-        toast({
+        Swal.fire({
+          icon: "error",
           title: "Error",
-          description: "Please select at least one platform.",
-          variant: "destructive",
+          text: "Please select at least one platform.",
+          confirmButtonColor: "#6366f1"
         });
         setIsSaving(false);
         return;
@@ -154,8 +171,8 @@ const EditPost = () => {
         platforms: formData.platforms,
         status: formData.status,
         scheduled_at: formData.scheduled_at || null,
-        category: formData.category || null,
-        tags: tagsArray.length > 0 ? tagsArray : null,
+        image_prompt: formData.image_prompt || null,
+        image_url : formData.image_url
       };
 
       // const api = new ApiService();
@@ -163,17 +180,20 @@ const EditPost = () => {
 
        await apiService.updatePost(id, updateData);
 
-      toast({
+      Swal.fire({
+        icon: "success",
         title: "Success",
-        description: "Post updated successfully!",
+        text: "Post updated successfully!",
+        confirmButtonColor: "#6366f1"
       });
 
       navigate("/posts");
     } catch (error: any) {
-      toast({
+      Swal.fire({
+        icon: "error",
         title: "Error",
-        description: error.message || "Failed to update post.",
-        variant: "destructive",
+        text: error.message || "Failed to update post.",
+        confirmButtonColor: "#6366f1"
       });
     } finally {
       setIsSaving(false);
@@ -232,31 +252,20 @@ const EditPost = () => {
                   className="min-h-[200px]"
                   required
                 />
+                      {/* Show image from image_url if present */}
+                      {formData.image_url && (
+                        <div className="mb-4">
+                          <img
+                            src={formData.image_url}
+                            alt="Post Image"
+                            className="rounded-lg w-full max-h-64 object-cover"
+                            onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/no-image.png'; }}
+                          />
+                        </div>
+                      )}
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="category">Category (Optional)</Label>
-                <Input
-                  id="category"
-                  value={formData.category}
-                  onChange={(e) =>
-                    setFormData({ ...formData, category: e.target.value })
-                  }
-                  placeholder="e.g., Marketing, Product Update"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="tags">Tags (Optional, comma-separated)</Label>
-                <Input
-                  id="tags"
-                  value={formData.tags}
-                  onChange={(e) =>
-                    setFormData({ ...formData, tags: e.target.value })
-                  }
-                  placeholder="e.g., social media, announcement, sale"
-                />
-              </div>
+          
 
               <div className="space-y-2">
                 <Label>Select Platforms</Label>

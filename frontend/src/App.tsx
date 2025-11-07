@@ -19,7 +19,10 @@ import AdminSubscriptions from "./pages/admin/Subscriptions";
 import AdminPosts from "./pages/admin/Posts";
 import AdminViewPost from "./pages/admin/ViewPost";
 import NotFound from "./pages/NotFound";
+import SystemSettings from "./pages/admin/SystemSettings";
 import SocialAccounts from "./pages/SocialAccounts";
+import Profile from "./pages/Profile";
+import UserSchedules from "./pages/UserSchedules";
 import { Navigate } from "react-router-dom";
 import { getAuthData } from "@/utils/auth";
 function getUserRole() {
@@ -48,6 +51,8 @@ function App() {
             <Route path="/posts/:id" element={userRole === "client" ? <ViewPost /> : <Navigate to="/admin" />} />
             <Route path="/posts/edit/:id" element={userRole === "client" ? <EditPost /> : <Navigate to="/admin" />} />
             <Route path="/plans" element={userRole === "client" ? <ClientPlans /> : <Navigate to="/admin" />} />
+            <Route path="/profile" element={userRole === "client" ? <Profile /> : <Navigate to="/admin" />} />
+            <Route path="/schedules" element={userRole === "client" ? <UserSchedules /> : <Navigate to="/admin" />} />
             <Route path="/admin" element={userRole === "admin" ? <AdminDashboard /> : <Navigate to="/dashboard" />} />
             <Route path="/admin/plans" element={userRole === "admin" ? <AdminPlans /> : <Navigate to="/dashboard" />} />
             <Route path="/admin/users" element={userRole === "admin" ? <AdminUsers /> : <Navigate to="/dashboard" />} />
@@ -55,6 +60,9 @@ function App() {
             <Route path="/admin/subscriptions" element={userRole === "admin" ? <AdminSubscriptions /> : <Navigate to="/dashboard" />} />
             <Route path="/admin/posts" element={userRole === "admin" ? <AdminPosts /> : <Navigate to="/dashboard" />} />
             <Route path="/admin/posts/:id" element={userRole === "admin" ? <AdminViewPost /> : <Navigate to="/dashboard" />} />
+            <Route path="/admin/system-settings" element={userRole === "admin" ? <SystemSettings /> : <Navigate to="/dashboard" />} />
+            
+           
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

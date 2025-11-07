@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Edit, Trash2, Calendar, Eye } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import Swal from "sweetalert2";
 import { apiService } from "@/services/api";
 import { isAuthenticated, logout } from "@/utils/auth";
 import {
@@ -32,7 +32,6 @@ interface Post {
 
 const Posts = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [deletePostId, setDeletePostId] = useState<number | null>(null);
@@ -57,10 +56,11 @@ const Posts = () => {
       if (error.message === 'Authentication failed') {
         logout();
       } else {
-        toast({
+        Swal.fire({
+          icon: "error",
           title: "Error",
-          description: error.message || "Failed to fetch posts",
-          variant: "destructive",
+          text: error.message || "Failed to fetch posts",
+          confirmButtonColor: "#6366f1"
         });
       }
     } finally {
@@ -75,21 +75,23 @@ const Posts = () => {
       const response = await apiService.deletePost(deletePostId);
 
       if (response.status) {
-        toast({
+        Swal.fire({
+          icon: "success",
           title: "Success",
-          description: "Post deleted successfully",
+          text: "Post deleted successfully",
+          confirmButtonColor: "#6366f1"
         });
-
         fetchPosts();
       }
     } catch (error: any) {
       if (error.message === 'Authentication failed') {
         logout();
       } else {
-        toast({
+        Swal.fire({
+          icon: "error",
           title: "Error",
-          description: error.message || "Failed to delete post",
-          variant: "destructive",
+          text: error.message || "Failed to delete post",
+          confirmButtonColor: "#6366f1"
         });
       }
     } finally {
@@ -120,6 +122,15 @@ const Posts = () => {
     );
   }
 
+  console.log("post",posts)
+
+  // Helper to always return array for platforms
+  const getPlatformsArray = (platforms: string[] | string | undefined): string[] => {
+    if (Array.isArray(platforms)) return platforms;
+    if (typeof platforms === 'string' && platforms) return platforms.split(',').map(p => p.trim()).filter(Boolean);
+    return [];
+  };
+
   return (
     <DashboardLayout userRole="client">
       <div className="space-y-6">
@@ -128,7 +139,7 @@ const Posts = () => {
             <h1 className="text-3xl font-bold tracking-tight">Posts</h1>
             <p className="text-muted-foreground">Manage your social media posts</p>
           </div>
-          <Button onClick={() => navigate("/posts/new")}>
+          <Button onClick={() => navigate("/posts/new")}> 
             <Plus className="mr-2 h-4 w-4" />
             Create Post
           </Button>
@@ -138,7 +149,7 @@ const Posts = () => {
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12">
               <p className="text-muted-foreground mb-4">No posts yet</p>
-              <Button onClick={() => navigate("/posts/new")}>
+              <Button onClick={() => navigate("/posts/new")}> 
                 <Plus className="mr-2 h-4 w-4" />
                 Create Your First Post
               </Button>
@@ -169,7 +180,7 @@ const Posts = () => {
                 <CardContent>
                   <div className="space-y-4">
                     <div className="flex flex-wrap gap-1">
-                      {post.platforms.map((platform) => (
+                      {getPlatformsArray(post.platforms).map((platform) => (
                         <Badge key={platform} variant="secondary">
                           {platform}
                         </Badge>

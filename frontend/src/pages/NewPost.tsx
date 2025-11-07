@@ -9,44 +9,59 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useToast } from "@/hooks/use-toast";
+import Swal from "sweetalert2";
 import { Loader2, Sparkles } from "lucide-react";
 import { apiService } from "@/services/api";
 import { isAuthenticated, logout } from "@/utils/auth";
+import { marked } from "marked";
 
 const NewPost = () => {
+  // Manual post file states
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>("");
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [videoPreview, setVideoPreview] = useState<string>("");
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
 
   // Manual post fields
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [htmlContent, setHtmlContent] = useState("");
+  const [imageContent, setImageContent] = useState("");
   const [platforms, setPlatforms] = useState<string[]>([]);
   const [status, setStatus] = useState("draft");
   const [scheduledAt, setScheduledAt] = useState("");
 
   // AI generation fields
-  const [topic, setTopic] = useState("");
-  const [wordCount, setWordCount] = useState(150);
-  const [language, setLanguage] = useState("English");
-  const [style, setStyle] = useState("Formal");
-  const [tone, setTone] = useState("Professional");
-  const [audience, setAudience] = useState("Adults");
-  const [purpose, setPurpose] = useState("Marketing");
+  const [aiPrompt, setAiPrompt] = useState("");
   const [connectedAccounts, setConnectedAccounts] = useState([]);
+  const [imagePrompt, setImagePrompt] = useState("");
 
   useEffect(() => {
-    const fetchAccounts = async () => {
+    const fetchAccountsAndProfile = async () => {
       try {
-        const res = await apiService.getMySocialAccounts();
-        setConnectedAccounts(res.data.socialAccounts || []);
+        const accRes = await apiService.getMySocialAccounts();
+        setConnectedAccounts(accRes.data.socialAccounts || []);
+        // Fetch profile details and set aiPrompt
+        const profileRes = await apiService.request("/profile");
+        if (profileRes.status && profileRes.data?.profile) {
+          const p = profileRes.data.profile;
+          setTitle(p.business_name || "");
+          // Build prompt from profile fields, include festival if present
+          let prompt = `Business/Creator: ${p.business_name}\nDescription: ${p.description}\nPlatforms: ${p.platforms}\nBrand Voice: ${p.brand_voice}\nHashtags: ${p.hashtags}\nImage Style: ${p.image_style}`;
+          if (p.festival && p.festival.trim()) {
+            prompt += `\nFestival/Event: ${p.festival}`;
+          }
+          setAiPrompt(prompt);
+          setImagePrompt(p.image_style || "");
+        }
       } catch (error) {
         // Optionally show error
       }
     };
-    fetchAccounts();
+    fetchAccountsAndProfile();
   }, []);
 
   const handlePlatformToggle = (platform: string) => {
@@ -58,11 +73,12 @@ const NewPost = () => {
   };
 
   const handleGenerateAI = async () => {
-    if (!topic) {
-      toast({
+    if (!aiPrompt) {
+      Swal.fire({
+        icon: "error",
         title: "Error",
-        description: "Please enter a topic",
-        variant: "destructive",
+        text: "Please enter your post prompt",
+        confirmButtonColor: "#6366f1"
       });
       return;
     }
@@ -70,31 +86,30 @@ const NewPost = () => {
     setIsGenerating(true);
     try {
       const response = await apiService.generateAIPost({
-        topic,
-        wordCount,
-        language,
-        style,
-        tone,
-        audience,
-        purpose,
+        title: title || "AI Generated Post",
+        ai_prompt: aiPrompt,
+        image_prompt: imagePrompt
       });
 
       if (response.status) {
         setContent(response.data.content);
-        setTitle(response.data.title);
-        toast({
+        setImageContent(response.data.imageUrl);
+        Swal.fire({
+          icon: "success",
           title: "Success",
-          description: "AI post generated successfully!",
+          text: "AI post generated successfully!",
+          confirmButtonColor: "#6366f1"
         });
       }
     } catch (error: any) {
       if (error.message === 'Authentication failed') {
         logout();
       } else {
-        toast({
+        Swal.fire({
+          icon: "error",
           title: "Error",
-          description: error.message || "Failed to generate AI post",
-          variant: "destructive",
+          text: error.message || "Failed to generate AI post",
+          confirmButtonColor: "#6366f1"
         });
       }
     } finally {
@@ -105,14 +120,36 @@ const NewPost = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!title || !content || platforms.length === 0) {
-      toast({
+    if (!title) {
+      Swal.fire({
+        icon: "error",
         title: "Error",
-        description: "Please fill in all required fields",
-        variant: "destructive",
+        text: "Please update your profile first before creating a post.",
+        confirmButtonColor: "#6366f1"
       });
       return;
     }
+   if (!content) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Please generate post content",
+        confirmButtonColor: "#6366f1"
+      });
+      return;
+    }
+
+    if(platforms.length === 0){
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Please connect and select at least one social platform",
+        confirmButtonColor: "#6366f1"
+      });
+      return;
+    }
+
+ 
 
     setIsLoading(true);
     try {
@@ -121,20 +158,34 @@ const NewPost = () => {
         return;
       }
 
-      const response = await apiService.createPost({
-        title,
-        content,
-        platforms,
-        status,
-        scheduled_at: scheduledAt || null,
-        is_ai_generated: isGenerating || topic !== "",
-        ai_prompt: topic || null,
-      });
+      // Prepare form data for file upload
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("content", content);
+      formData.append("platforms", JSON.stringify(platforms));
+      formData.append("status", status);
+      if (scheduledAt) formData.append("scheduled_at", scheduledAt);
+      formData.append("is_ai_generated", String(isGenerating || aiPrompt !== ""));
+      if (aiPrompt) formData.append("ai_prompt", aiPrompt);
+      if (imagePrompt) formData.append("image_prompt", imagePrompt);
+      if (imageContent) formData.append("image_url", imageContent);
+      if (imageFile) formData.append("image_file", imageFile);
+      if (videoFile) formData.append("video_file", videoFile);
+
+
+      // Debug: print all FormData key-value pairs
+      for (let pair of formData.entries()) {
+        console.log(pair[0], pair[1]);
+      }
+
+      const response = await apiService.createPost(formData, true); // true = multipart
 
       if (response.status) {
-        toast({
+        Swal.fire({
+          icon: "success",
           title: "Success",
-          description: "Post created successfully!",
+          text: "Post created successfully!",
+          confirmButtonColor: "#6366f1"
         });
         navigate("/posts");
       }
@@ -142,10 +193,11 @@ const NewPost = () => {
       if (error.message === 'Authentication failed') {
         logout();
       } else {
-        toast({
+        Swal.fire({
+          icon: "error",
           title: "Error",
-          description: error.message || "Failed to create post",
-          variant: "destructive",
+          text: error.message || "Failed to create post",
+          confirmButtonColor: "#6366f1"
         });
       }
     } finally {
@@ -176,103 +228,23 @@ const NewPost = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="topic">Topic *</Label>
-                    <Input
-                      id="topic"
-                      value={topic}
-                      onChange={(e) => setTopic(e.target.value)}
-                      placeholder="Enter post topic"
-                    />
-                  </div>
+                {/* Removed unused AI input fields. Only prompt and imagePrompt remain. */}
 
-                  <div className="space-y-2">
-                    <Label htmlFor="wordCount">Word Count</Label>
-                    <Input
-                      id="wordCount"
-                      type="number"
-                      value={wordCount}
-                      onChange={(e) => setWordCount(Number(e.target.value))}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="language">Language</Label>
-                    <Select value={language} onValueChange={setLanguage}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="English">English</SelectItem>
-                        <SelectItem value="Spanish">Spanish</SelectItem>
-                        <SelectItem value="French">French</SelectItem>
-                        <SelectItem value="German">German</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="style">Writing Style</Label>
-                    <Select value={style} onValueChange={setStyle}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Formal">Formal</SelectItem>
-                        <SelectItem value="Informal">Informal</SelectItem>
-                        <SelectItem value="Casual">Casual</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="tone">Tone</Label>
-                    <Select value={tone} onValueChange={setTone}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Professional">Professional</SelectItem>
-                        <SelectItem value="Friendly">Friendly</SelectItem>
-                        <SelectItem value="Humorous">Humorous</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="audience">Target Audience</Label>
-                    <Select value={audience} onValueChange={setAudience}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Kids">Kids</SelectItem>
-                        <SelectItem value="Teens">Teens</SelectItem>
-                        <SelectItem value="Adults">Adults</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="purpose">Purpose</Label>
-                    <Select value={purpose} onValueChange={setPurpose}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Marketing">Marketing</SelectItem>
-                        <SelectItem value="Informational">Informational</SelectItem>
-                        <SelectItem value="Educational">Educational</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
+                
+                {/* <div className="space-y-2">
+                  <Label htmlFor="imagePrompt">Image Prompt (Optional)</Label>
+                  <Input
+                    id="imagePrompt"
+                    value={imagePrompt}
+                    onChange={(e) => setImagePrompt(e.target.value)}
+                    placeholder="Enter image prompt"
+                  />
+                </div> */}
 
                 <Button
                   type="button"
                   onClick={handleGenerateAI}
-                  disabled={isGenerating || !topic}
+                  disabled={isGenerating || !aiPrompt}
                   className="w-full"
                 >
                   {isGenerating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -283,12 +255,21 @@ const NewPost = () => {
                 {content && (
                   <div className="space-y-4 border-t pt-4">
                     <div className="space-y-2">
-                      <Label htmlFor="generated-content">Generated Content</Label>
+                      
+                      {/* HTML Preview */}
+                      <div
+                        id="generated-content-preview"
+                        style={{ background: '#f9f9f9', padding: '1rem', borderRadius: '8px', border: '1px solid #eee', marginBottom: '1rem' }}
+                        dangerouslySetInnerHTML={{ __html: imageContent ? `<img src="${imageContent}" alt="Generated" style="max-width: 100%; height: auto; margin-bottom: 1rem;" />` : '' }}
+                      />
+                      {/* Editable textarea if user wants to change */}
+                      <Label htmlFor="generated-content-edit">Edit Content</Label>
                       <Textarea
-                        id="generated-content"
+                        id="generated-content-edit"
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
                         rows={8}
+                        style={{ marginTop: '1rem' }}
                       />
                     </div>
                   </div>
@@ -326,6 +307,50 @@ const NewPost = () => {
                       rows={8}
                       required
                     />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="manual-image">Image Upload</Label>
+                    <Input
+                      id="manual-image"
+                      type="file"
+                      accept="image/*"
+                      onChange={e => {
+                        const file = e.target.files?.[0];
+                        setImageFile(file || null);
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onload = (ev) => setImagePreview(ev.target?.result as string);
+                          reader.readAsDataURL(file);
+                        } else {
+                          setImagePreview("");
+                        }
+                      }}
+                    />
+                    {imagePreview && (
+                      <img src={imagePreview} alt="Preview" style={{ maxWidth: "200px", marginTop: "8px" }} />
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="manual-video">Video Upload</Label>
+                    <Input
+                      id="manual-video"
+                      type="file"
+                      accept="video/*"
+                      onChange={e => {
+                        const file = e.target.files?.[0];
+                        setVideoFile(file || null);
+                        if (file) {
+                          setVideoPreview(URL.createObjectURL(file));
+                        } else {
+                          setVideoPreview("");
+                        }
+                      }}
+                    />
+                    {videoPreview && (
+                      <video src={videoPreview} controls style={{ maxWidth: "200px", marginTop: "8px" }} />
+                    )}
                   </div>
                 </form>
               </CardContent>

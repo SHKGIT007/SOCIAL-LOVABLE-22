@@ -4,12 +4,11 @@ import { apiService } from "@/services/api";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
+import Swal from "sweetalert2";
 
 const UserDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -26,11 +25,21 @@ const UserDetails = () => {
       if (data.status === true) {
         setUser(data.data.user);
       } else {
-        toast({ title: "Error", description: data.message || "User not found.", variant: "destructive" });
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: data.message || "User not found.",
+          confirmButtonColor: "#6366f1"
+        });
         navigate("/admin/users");
       }
     } catch (error) {
-      toast({ title: "Error", description: error.message || "Failed to fetch user.", variant: "destructive" });
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error.message || "Failed to fetch user.",
+        confirmButtonColor: "#6366f1"
+      });
       navigate("/admin/users");
     } finally {
       setIsLoading(false);

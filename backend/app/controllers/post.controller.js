@@ -1,21 +1,121 @@
-const { Post, User, Plan, Subscription } = require('../models');
+const { Post, User, Plan, Subscription, SystemSetting } = require('../models');
+
 const { Op } = require('sequelize');
 const { asyncHandler } = require('../middleware/error.middleware');
 const logger = require('../config/logger');
 const { SocialAccount } = require('../models');
 const axios = require('axios');
-const {facebookPost} = require('../../redirectAuth/facebook/facebookPost');
+const { facebookPost } = require('../../redirectAuth/facebook/facebookPost');
+const { instagramPost } = require('../../redirectAuth/instagram/instagramPost');
 const OpenAI = require("openai");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 require('dotenv').config();
+const fs = require('fs');
+const { type } = require('os');
+const cloudinary = require('cloudinary').v2;
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY // .env file mein apni API key dalein
-});
+
 
 const createPost = asyncHandler(async (req, res) => {
-    const { title, content, platforms, status, scheduled_at, category, tags, media_urls, is_ai_generated, ai_prompt } = req.body;
+    // Debug: Log incoming form data and files
+    console.log("req.body:", req.body);
+    console.log("req.files:", req.files);
+    console.log("platforms:", req.body.platforms);
+    console.log("platforms:", typeof req.body.platforms);
+
+
+    // Support for file uploads (image/video)
     const userId = req.user.id;
+    let image_url = req.body.image_url || null;
+    
+    let video_url = null;
+
+    let { title, content, platforms, status, is_ai_generated } = req.body;
+    // Convert platforms to array if string
+    if (typeof platforms === 'string') {
+        try {
+            platforms = JSON.parse(platforms);
+        } catch {
+            platforms = [platforms];
+        }
+    }
+
+
+
+    // Use environment variables for upload directory and public URL
+    const UPLOAD_DIR = process.env.UPLOAD_DIR || '/var/www/socialvibe/uploads';
+    const PUBLIC_UPLOAD_URL = process.env.PUBLIC_UPLOAD_URL || 'https://socialvibe.tradestreet.in/uploads';
+
+    // Ensure uploads directory exists
+    if (!fs.existsSync(UPLOAD_DIR)) {
+        fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+    }
+
+    //  cloudinary.config({
+    //   cloud_name: 'diapmjeoc',
+    //   api_key: '623293742125568',
+    //   api_secret: '6mzyLVSYqqjhbUbECHqvGPayE_E'
+    // });
+
+    // Fetch Cloudinary config from system_settings table
+    const cloudinarySetting = await SystemSetting.findOne({ where: { id: 1 } });
+    cloudinary.config({
+        cloud_name: cloudinarySetting?.cloudinary_cloud_name || '',
+        api_key: cloudinarySetting?.cloudinary_api_key || '',
+        api_secret: cloudinarySetting?.cloudinary_api_secret || ''
+    });
+
+    if (req.files) {
+        // Get user info for folder naming
+        const user = await User.findByPk(userId);
+        const userFolder = user ? `user_${userId}_${user.user_name}` : `user_${userId}`;
+
+        if (req.files.image_file) {
+            const img = req.files.image_file;
+            let imgPath = img.tempFilePath || undefined;
+            if (!imgPath) {
+                imgPath = `${UPLOAD_DIR}/temp_${Date.now()}_${img.name}`;
+                await img.mv(imgPath);
+            }
+            const uploadRes = await cloudinary.uploader.upload(imgPath, {
+                resource_type: "image",
+                folder: `${userFolder}`,
+                transformation: [{ quality: "auto" }]
+            });
+            image_url = uploadRes.secure_url;
+        }
+        if (req.files.video_file) {
+            const vid = req.files.video_file;
+            let vidPath = vid.tempFilePath || undefined;
+            if (!vidPath) {
+                vidPath = `${UPLOAD_DIR}/temp_${Date.now()}_${vid.name}`;
+                await vid.mv(vidPath);
+            }
+            const uploadRes = await cloudinary.uploader.upload(vidPath, {
+                resource_type: "video",
+                folder: `${userFolder}`,
+                transformation: [{ quality: "auto" }]
+            });
+            video_url = uploadRes.secure_url;
+        }
+    }
+
+    // If image_url is provided and is not null, upload it to Cloudinary
+    if (image_url) {
+        // Get user info for folder naming
+        const user = await User.findByPk(userId);
+        const userFolder = user ? `user_${userId}_${user.user_name}` : `user_${userId}`;
+        try {
+            const uploadRes = await cloudinary.uploader.upload(image_url, {
+                resource_type: "image",
+                folder: `${userFolder}`,
+                transformation: [{ quality: "auto" }]
+            });
+            image_url = uploadRes.secure_url;
+        } catch (err) {
+            logger.error('Cloudinary upload error (image_url from body)', { error: err.message });
+        }
+    }
 
     // Check user's subscription limits
     const subscription = await Subscription.findOne({
@@ -32,7 +132,7 @@ const createPost = asyncHandler(async (req, res) => {
             });
         }
 
-        if (is_ai_generated && subscription.ai_posts_used >= plan.ai_posts) {
+        if (req.body.is_ai_generated && subscription.ai_posts_used >= plan.ai_posts) {
             return res.status(400).json({
                 status: false,
                 message: 'Monthly AI post limit reached'
@@ -40,25 +140,29 @@ const createPost = asyncHandler(async (req, res) => {
         }
     }
 
+
+
+
     // Save post in DB
     const post = await Post.create({
-        title,
-        content,
-        platforms,
-        status: status || 'draft',
-        scheduled_at: scheduled_at || null,
-        category,
-        tags,
-        media_urls,
-        is_ai_generated: is_ai_generated || false,
-        ai_prompt,
-        user_id: userId
+        title: req.body.title,
+        content: req.body.content,
+        platforms: req.body.platforms,
+        status: req.body.status || 'draft',
+        scheduled_at: req.body.scheduled_at || null,
+        media_urls: req.body.media_urls,
+        is_ai_generated: req.body.is_ai_generated || false,
+        ai_prompt: req.body.ai_prompt,
+        user_id: userId,
+        image_prompt: req.body.image_prompt || null,
+        image_url,
+        video_url
     });
 
     // Update subscription usage
     if (subscription) {
         await Subscription.update(
-            { 
+            {
                 posts_used: subscription.posts_used + 1,
                 ai_posts_used: is_ai_generated ? subscription.ai_posts_used + 1 : subscription.ai_posts_used
             },
@@ -66,24 +170,63 @@ const createPost = asyncHandler(async (req, res) => {
         );
     }
 
-    // Facebook publish logic
-    if (status === 'published') {
-        const socialAccount = await SocialAccount.findOne({
-            where: { user_id: userId, platform: 'Facebook', is_active: 1 }
-        });
-        if (socialAccount && socialAccount.access_token) {
-            try {
-                const postData = await facebookPost(socialAccount.access_token, content);
-                logger.info('Facebook post published', { userId, postId: post.id });
-                return res.json({ success: true, message: 'Post published to Facebook', fb: postData });
-            } catch (err) {
-                logger.error('Facebook publish error', { error: err.message });
-                return res.status(500).json({ success: false, message: 'Facebook publish failed', error: err.message });
+
+
+    // Publish logic for Facebook and Instagram
+    if (status === 'published' && Array.isArray(platforms)) {
+
+
+        console.log("Publishing to platformsLLLLLLLLLLLLLLLLLLL:", platforms);
+        let publishResults = {};
+        // Facebook
+        if (platforms.includes('Facebook')) {
+            const fbAccount = await SocialAccount.findOne({
+                where: { user_id: userId, platform: 'Facebook', is_active: 1 }
+            });
+            if (fbAccount && fbAccount.access_token) {
+                try {
+                    const fbPostData = await facebookPost(
+                        fbAccount.access_token,
+                        content,
+                        image_url,
+                        video_url && video_url !== null ? video_url : undefined
+                    );
+                    publishResults.facebook = { success: true, data: fbPostData };
+                } catch (err) {
+                    logger.error('Facebook publish error', { error: err.message });
+                    publishResults.facebook = { success: false, error: err.message };
+                }
             }
+        }
+        // Instagram
+        if (platforms.includes('Instagram')) {
+
+            console.log("Publishing to Instagram INSIDEEEEE");
+            const igAccount = await SocialAccount.findOne({
+                where: { user_id: userId, platform: 'Instagram', is_active: 1 }
+            });
+            if (igAccount && igAccount.access_token) {
+                try {
+                    const igPostData = await instagramPost(
+                        igAccount.access_token,
+                        content,
+                        image_url,
+                        video_url && video_url !== null ? video_url : undefined
+                    );
+                    publishResults.instagram = { success: true, data: igPostData };
+                } catch (err) {
+                    logger.error('Instagram publish error', { error: err.message });
+                    publishResults.instagram = { success: false, error: err.message };
+                }
+            }
+        }
+        // If any platform was published, return result
+        if (Object.keys(publishResults).length > 0) {
+            return res.json({ success: true, message: 'Post published', results: publishResults });
         }
     }
     // For scheduled and draft, just save post, do not publish
-    logger.info('Post created', { postId: post.id, userId });
+    //  logger.info('Post created', { postId: post.id, userId });
     res.status(201).json({
         status: true,
         message: 'Post created successfully',
@@ -98,7 +241,7 @@ const getAllPosts = asyncHandler(async (req, res) => {
     const userType = req.user.user_type;
 
     const whereClause = {};
-    
+
     // If not admin, only show user's own posts
     if (userType !== 'admin') {
         whereClause.user_id = userId;
@@ -120,8 +263,8 @@ const getAllPosts = asyncHandler(async (req, res) => {
     const { count, rows: posts } = await Post.findAndCountAll({
         where: whereClause,
         include: [
-            { 
-                model: User, 
+            {
+                model: User,
                 as: 'User',
                 attributes: ['id', 'user_name', 'email', 'user_fname', 'user_lname']
             }
@@ -130,6 +273,8 @@ const getAllPosts = asyncHandler(async (req, res) => {
         offset: parseInt(offset),
         order: [['created_at', 'DESC']]
     });
+
+    console.log("post", posts)
 
     res.json({
         status: true,
@@ -152,8 +297,8 @@ const getPostById = asyncHandler(async (req, res) => {
 
     const post = await Post.findByPk(id, {
         include: [
-            { 
-                model: User, 
+            {
+                model: User,
                 as: 'User',
                 attributes: ['id', 'user_name', 'email', 'user_fname', 'user_lname']
             }
@@ -185,9 +330,11 @@ const getPostById = asyncHandler(async (req, res) => {
 
 const updatePost = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const { title, content, platforms, status, scheduled_at, category, tags, media_urls } = req.body;
+    const { title, content, platforms, status, scheduled_at, category, tags, media_urls, image_url } = req.body;
     const userId = req.user.id;
     const userType = req.user.user_type;
+
+
 
     const post = await Post.findByPk(id);
     if (!post) {
@@ -219,8 +366,8 @@ const updatePost = asyncHandler(async (req, res) => {
 
     const updatedPost = await Post.findByPk(id, {
         include: [
-            { 
-                model: User, 
+            {
+                model: User,
                 as: 'User',
                 attributes: ['id', 'user_name', 'email', 'user_fname', 'user_lname']
             }
@@ -234,7 +381,7 @@ const updatePost = asyncHandler(async (req, res) => {
         });
         if (socialAccount && socialAccount.access_token) {
             try {
-                const postData = await facebookPost(socialAccount.access_token, content || updatedPost.content);
+                const postData = await facebookPost(socialAccount.access_token, content, image_url);
                 logger.info('Facebook post published (update)', { userId, postId: id });
                 return res.json({ status: true, message: 'Post updated and published to Facebook', fb: postData, data: { post: updatedPost } });
             } catch (err) {
@@ -284,8 +431,11 @@ const deletePost = asyncHandler(async (req, res) => {
 });
 
 const generateAIPost = asyncHandler(async (req, res) => {
-    const { topic, wordCount, language, style, tone, audience, purpose } = req.body;
+
+    let { title, ai_prompt, image_prompt } = req.body;
     const userId = req.user.id;
+    ai_prompt = title ? `Title: ${title}\nDetails: ${ai_prompt}` : ai_prompt;
+
     //let ss = await example1()
     const subscription = await Subscription.findOne({
         where: { user_id: userId, status: 'active' },
@@ -298,48 +448,29 @@ const generateAIPost = asyncHandler(async (req, res) => {
             message: 'Monthly AI post limit reached'
         });
     }
-
-    // AI post generation using OpenAI ChatGPT
-    const aiPrompt = `Generate a ${style.toLowerCase()} ${tone.toLowerCase()} post about ${topic} for ${audience} audience with ${purpose} purpose in ${language}. Word count: ${wordCount}`;
-
     let generatedContent = '';
-    generatedContent = await  generateAIContent(aiPrompt)
-    // try {
-    //     const openaiApiKey = process.env.OPENAI_API_KEY;
-    //     if (!openaiApiKey) throw new Error('OpenAI API key not configured');
-    //     const response = await axios.post(
-    //         'https://api.openai.com/v1/chat/completions',
-    //         {
-    //             model: 'gpt-3.5-turbo',
-    //             messages: [
-    //                 { role: 'system', content: 'You are a helpful social media post generator.' },
-    //                 { role: 'user', content: aiPrompt }
-    //             ],
-    //             max_tokens: 512,
-    //             temperature: 0.7
-    //         },
-    //         {
-    //             headers: {
-    //                 'Authorization': `Bearer ${openaiApiKey}`,
-    //                 'Content-Type': 'application/json'
-    //             }
-    //         }
-    //     );
-    //     generatedContent = response.data.choices[0].message.content;
-    // } catch (err) {
-    //     logger.error('AI post generation error', { error: err.message });
-    //     return res.status(500).json({ status: false, message: 'AI post generation failed', error: err.message });
-    // }
+    let imageUrl = '';
 
-    logger.info('AI post generated', { userId, topic });
-
-    res.json({
+    if (image_prompt !== '') {
+        const imageObj = await generateImagePollinations(image_prompt);
+        imageUrl = imageObj.url || '';
+    }
+    generatedContent = await generateAIContent(ai_prompt);
+    if (generatedContent.status == false) {
+        return res.status(500).json({
+            status: false,
+            message: JSON.stringify(generatedContent.msg),
+            error: generatedContent.msg
+        });
+    }
+    logger.info('AI post generated', { userId, ai_prompt });
+    return res.json({
         status: true,
         message: 'AI post generated successfully',
         data: {
-            content: generatedContent,
-            title: topic,
-            ai_prompt: aiPrompt
+            content: generatedContent.content,
+            ai_prompt: ai_prompt,
+            imageUrl: imageUrl
         }
     });
 });
@@ -352,63 +483,79 @@ const generateAIPost = asyncHandler(async (req, res) => {
 ////////////////-------genrrate Ai code  Start------///////////
 
 // Groq API Configuration
-const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
-const GROQ_API_KEY = process.env.GROQ_API_KEY;
+// const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
+// const GROQ_API_KEY = process.env.GROQ_API_KEY;
+
+
+async function getGroqConfig() {
+    const setting = await SystemSetting.findOne({ where: { id: 1 } });
+    return {
+        api_key: setting?.api_key || '',
+        api_url: setting?.api_url || 'https://api.groq.com/openai/v1/chat/completions'
+    };
+}
 
 // Main function - AI se content generate karne ke liye
 async function generateAIContent(prompt, options = {}) {
-  try {
-    const {
-      model = 'llama-3.3-70b-versatile', // Updated default model (currently supported)
-      temperature = 0.7,
-      maxTokens = 1024
-    } = options;
+    try {
+        const {
+            model = 'llama-3.3-70b-versatile',
+            temperature = 0.7,
+            maxTokens = 1024
+        } = options;
 
-    console.log('🚀 Groq AI se request bhej rahe hain...\n');
+        console.log('🚀 Groq AI se request bhej rahe hain...\n');
 
-    const response = await axios.post(
-      GROQ_API_URL,
-      {
-        model: model,
-        messages: [
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        temperature: temperature,
-        max_tokens: maxTokens,
-        top_p: 1,
-        stream: false
-      },
-      {
-        headers: {
-          'Authorization': `Bearer ${GROQ_API_KEY}`,
-          'Content-Type': 'application/json'
+        // Fetch Groq API key and URL from DB
+        const groqConfig = await getGroqConfig();
+        const groqApiKey = groqConfig.api_key;
+        const groqApiUrl = groqConfig.api_url;
+
+        const response = await axios.post(
+            groqApiUrl,
+            {
+                model: model,
+                messages: [
+                    {
+                        role: 'user',
+                        content: prompt
+                    }
+                ],
+                temperature: temperature,
+                max_tokens: maxTokens,
+                top_p: 1,
+                stream: false
+            },
+            {
+                headers: {
+                    'Authorization': `Bearer ${groqApiKey}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+
+        const content = response.data.choices[0].message.content;
+        const usage = response.data.usage;
+
+        console.log('✅ Response mil gaya!\n');
+        console.log('📊 Token Usage:', {
+            prompt: usage.prompt_tokens,
+            completion: usage.completion_tokens,
+            total: usage.total_tokens
+        });
+
+        return { status: true, content: content };
+
+    } catch (error) {
+        if (error.response) {
+            console.log('❌ API Error:', error.response.data);
+            return { status: false, msg: error.response.data };
+        } else {
+            console.log('❌ Error:', error.message);
+            return { status: false, msg: error.message };
         }
-      }
-    );
-
-    const content = response.data.choices[0].message.content;
-    const usage = response.data.usage;
-
-    console.log('✅ Response mil gaya!\n');
-    console.log('📊 Token Usage:', {
-      prompt: usage.prompt_tokens,
-      completion: usage.completion_tokens,
-      total: usage.total_tokens
-    });
-
-    return content;
-
-  } catch (error) {
-    if (error.response) {
-      console.error('❌ API Error:', error.response.data);
-    } else {
-      console.error('❌ Error:', error.message);
+        throw error;
     }
-    throw error;
-  }
 }
 // Available Models (update to latest Groq supported models)
 const GROQ_MODELS = {
@@ -419,43 +566,131 @@ const GROQ_MODELS = {
 };
 // Chat history ke saath conversation
 async function chatWithAI(messages) {
-  try {
-    const response = await axios.post(
-      GROQ_API_URL,
-      {
-        model: GROQ_MODELS.LLAMA_70B,
-        messages: messages, // Array of {role, content}
-        temperature: 0.7,
-        max_tokens: 1024
-      },
-      {
-        headers: {
-          'Authorization': `Bearer ${GROQ_API_KEY}`,
-          'Content-Type': 'application/json'
+    try {
+        const groqConfig = await getGroqConfig();
+        const groqApiKey = groqConfig.api_key;
+        const groqApiUrl = groqConfig.api_url;
+        const response = await axios.post(
+            groqApiUrl,
+            {
+                model: GROQ_MODELS.LLAMA_70B,
+                messages: messages, // Array of {role, content}
+                temperature: 0.7,
+                max_tokens: 1024
+            },
+            {
+                headers: {
+                    'Authorization': `Bearer ${groqApiKey}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+
+        console.log('✅ Chat response mil gaya!\n');
+        console.log('Response:', response.data);
+
+        return response.data.choices[0].message.content;
+    } catch (error) {
+        console.error('Chat Error:', error.response?.data || error.message);
+        throw error;
+    }
+}
+
+
+async function generateImagePollinations(prompt, retries = 3) {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+        try {
+            console.log(`🎨 Image generating... (Attempt ${attempt}/${retries})`);
+            console.log('Prompt:', prompt);
+
+            // Replace spaces with underscores for better Pollinations API compatibility
+            const cleanPrompt = prompt.trim().replace(/\s+/g, '_');
+            const encodedPrompt = encodeURIComponent(cleanPrompt);
+
+            const urls = [
+                `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true`,
+                `https://image.pollinations.ai/prompt/${encodedPrompt}?model=flux&width=1024&height=1024&nologo=true`,
+                `https://pollinations.ai/p/${encodedPrompt}`
+            ];
+
+            const imageUrl = urls[attempt - 1] || urls[0];
+            console.log('Requesting URL:', imageUrl);
+
+            const response = await axios.get(imageUrl, {
+                responseType: 'arraybuffer',
+                timeout: 45000,
+                maxRedirects: 10,
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                }
+            });
+
+            if (!response.data || response.data.length < 1000) {
+                throw new Error('Invalid or empty image received');
+            }
+
+            const filename = `generated_${Date.now()}.png`;
+            // fs.writeFileSync(filename, response.data);
+
+            const sizeKB = (response.data.length / 1024).toFixed(2);
+            console.log(`✅ Image saved: ${filename} (${sizeKB} KB)`);
+
+            return {
+                url: imageUrl,
+                filename,
+                size: response.data.length,
+                prompt: cleanPrompt
+            };
+
+        } catch (error) {
+            console.error(`❌ Attempt ${attempt} failed:`, error.message);
+
+            if (attempt === retries) {
+                console.error('All attempts failed. Using fallback...');
+                return await generateImageFallback(prompt);
+            }
+
+            const waitTime = attempt * 2000;
+            console.log(`⏳ Waiting ${waitTime / 1000}s before retry...`);
+            await new Promise(resolve => setTimeout(resolve, waitTime));
         }
-      }
-    );
-
-    console.log('✅ Chat response mil gaya!\n');
-    console.log('Response:', response.data);
-
-    return response.data.choices[0].message.content;
-  } catch (error) {
-    console.error('Chat Error:', error.response?.data || error.message);
-    throw error;
-  }
+    }
 }
 
-// Example 1: Simple prompt
-async function example1() {
-  console.log('=== Example 1: Simple Prompt ===\n');
-  
-  const prompt = "JavaScript ke baare mein 5 interesting facts batao";
-  const response = await generateAIContent(prompt);
-  
-  console.log('Response:\n', response);
-  console.log('\n' + '='.repeat(50) + '\n');
+// ⚠️ YE FUNCTION ADD KARNA PADEGA (missing hai)
+async function generateImageFallback(prompt) {
+    try {
+        console.log('🔄 Using fallback API...');
+
+        // Option 1: Picsum (random image based on seed)
+        const seed = prompt.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+        const imageUrl = `https://picsum.photos/seed/${seed}/1024/1024`;
+
+        const response = await axios.get(imageUrl, {
+            responseType: 'arraybuffer',
+            timeout: 30000
+        });
+
+        const filename = `fallback_${Date.now()}.jpg`;
+        // fs.writeFileSync(filename, response.data);
+
+        console.log(`✅ Fallback image saved: ${filename}`);
+        console.log('⚠️ Note: Stock photo (not AI-generated)');
+
+        return {
+            url: imageUrl,
+            filename,
+            size: response.data.length,
+            isFallback: true
+        };
+    } catch (error) {
+        console.error('❌ Fallback failed:', error.message);
+        throw new Error('All image generation methods failed');
+    }
 }
+
+
+
 
 
 
@@ -527,7 +762,7 @@ const publishPost = asyncHandler(async (req, res) => {
     }
 
     await Post.update(
-        { 
+        {
             status: 'published',
             published_at: new Date()
         },

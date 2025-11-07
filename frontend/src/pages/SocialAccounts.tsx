@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
+import Swal from "sweetalert2";
 import { apiService } from "@/services/api";
 import { API_CONFIG } from "@/utils/config";
 import { redirect } from "react-router-dom";
@@ -14,7 +14,6 @@ import { platform } from "os";
 const platforms = ["Facebook", "Instagram"];
 
 const SocialAccounts = () => {
-    const { toast } = useToast();
     const [accounts, setAccounts] = useState([]);
     // App ID/Secret state
     const [fbAppId, setFbAppId] = useState("");
@@ -52,7 +51,12 @@ const SocialAccounts = () => {
             const res = await apiService.getMySocialAccounts();
             setAccounts(res.data.socialAccounts || []);
         } catch (error) {
-            toast({ title: "Error", description: error.message || "Failed to fetch accounts", variant: "destructive" });
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: error.message || "Failed to fetch accounts",
+                confirmButtonColor: "#6366f1"
+            });
         } finally {
             setIsLoading(false);
         }
@@ -70,7 +74,12 @@ const SocialAccounts = () => {
             appSecret = igAppSecret;
         }
         if (!appId || !appSecret) {
-            toast({ title: "Error", description: "App ID and Secret are required.", variant: "destructive" });
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: "App ID and Secret are required.",
+                confirmButtonColor: "#6366f1"
+            });
             setIsLoading(false);
             return;
         }
@@ -84,7 +93,12 @@ const SocialAccounts = () => {
                     app_id: appId,
                     app_secret: appSecret
                 });
-                toast({ title: "Success", description: `${platform} credentials updated.` });
+                Swal.fire({
+                    icon: "success",
+                    title: "Success",
+                    text: `${platform} credentials updated.`,
+                    confirmButtonColor: "#6366f1"
+                });
             } else {
                 // Create new account
                 await apiService.createSocialAccount({
@@ -92,11 +106,21 @@ const SocialAccounts = () => {
                     app_id: appId,
                     app_secret: appSecret
                 });
-                toast({ title: "Success", description: `${platform} App ID/Secret saved.` });
+                Swal.fire({
+                    icon: "success",
+                    title: "Success",
+                    text: `${platform} App ID/Secret saved.`,
+                    confirmButtonColor: "#6366f1"
+                });
             }
             fetchAccounts();
         } catch (error) {
-            toast({ title: "Error", description: error.message || "Failed to save App ID/Secret", variant: "destructive" });
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: error.message || "Failed to save App ID/Secret",
+                confirmButtonColor: "#6366f1"
+            });
         } finally {
             setIsLoading(false);
         }
@@ -104,6 +128,8 @@ const SocialAccounts = () => {
 
     // Start OAuth only (credentials must be saved already)
     const handleConnect = async (platform) => {
+
+
         setIsLoading(true);
         try {
             console.log('Initiating OAuth for', platform);
@@ -116,7 +142,12 @@ const SocialAccounts = () => {
 
                 //    const url = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${appid}&redirect_uri=${encodeURIComponent(`https://hometalent4u.in/backend/facebook/callback`)}&state=123&response_type=code&scope=public_profile,email,pages_show_list,pages_read_engagement,pages_manage_posts`;
                 if (!app_id || !app_secret || !redirect_uri || !user_id) {
-                    toast({ title: "Error", description: "Please save Facebook App ID/Secret first.", variant: "destructive" });
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "Please save Facebook App ID/Secret first.",
+                        confirmButtonColor: "#6366f1"
+                    });
                     setIsLoading(false);
                     return;
                 }
@@ -131,50 +162,57 @@ const SocialAccounts = () => {
 
                 const state = encodeURIComponent(JSON.stringify(stateData));
 
-                const url = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${app_id}&redirect_uri=${encodeURIComponent(redirect_uri)}&state=${state}&response_type=code&scope=public_profile,email,pages_show_list,pages_read_engagement,pages_manage_posts`;
+                const scopes = [
+                    "public_profile",
+                    "email",
+                    "pages_show_list",
+                    "pages_read_engagement",
+                    "pages_manage_posts",
+                    "instagram_basic",
+                    "instagram_manage_insights",
+                    "instagram_manage_comments",
+                    "instagram_content_publish",
+                    "instagram_manage_messages"
+                ].join(",");
 
+                // const url = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${app_id}&redirect_uri=${encodeURIComponent(redirect_uri)}&state=${state}&response_type=code&scope=public_profile,email,pages_show_list,pages_read_engagement,pages_manage_posts`;
+
+                const url = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${app_id}&redirect_uri=${encodeURIComponent(redirect_uri)}&state=${state}&response_type=code&scope=${encodeURIComponent(scopes)}
+                `;
                 window.location.href = url;
 
-
-
             } else if (platform === "Instagram") {
+                // Use dynamic App ID and callback URL
+                const igAcc = accounts.find(acc => acc.platform === "Instagram");
+                let app_id = igAppId;
+                let app_secret = igAppSecret;
+                let redirect_uri = `https://socialvibe.tradestreet.in/backend/instagram/callback`;
 
-                //     dgg {
-                // 'hub.mode': 'subscribe',
-                // 'hub.challenge': '793876193',
-                // 'hub.verify_token': 'nilesh'
-                // }
-                // ✅ Webhook verified successfully
+                if (!app_id || !app_secret || !redirect_uri || !igAcc) {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "Please save Instagram App ID/Secret first.",
+                        confirmButtonColor: "#6366f1"
+                    });
+                    setIsLoading(false);
+                    return;
+                }
+                let user_id = igAcc ? igAcc.user_id : null;
 
+                let stateData = {
+                    user_id: user_id,
+                    app_id: app_id,
+                    app_secret: app_secret,
+                    redirect_uri: redirect_uri,
+                    redirect_dashboard: "http://localhost:8080/dashboard"
+                };
 
-                // for instgram
+                const state = encodeURIComponent(JSON.stringify(stateData));
 
-                let appid = '1579224306600577'
-
-                // secretkey = a61184184766a15c03154b899db189c7
-                // callbackUrl = https://hometalent4u.in/backend/facebook/callback
-                //  VERIFY_TOKEN = "nilesh"; 
-
-                // https://api.instagram.com/oauth/authorize
-                // ?client_id={app-id}
-                // &redirect_uri={redirect-uri}
-                // &scope=user_profile,user_media
-                // &response_type=code
-
-
-                const oauthUrl = `https://api.instagram.com/oauth/authorize?client_id=${appid}&redirect_uri=${encodeURIComponent(`https://hometalent4u.in/backend/facebook/callback`)}&scope=user_profile,user_media&response_type=code`;
+                const oauthUrl = `https://www.instagram.com/oauth/authorize?client_id=${app_id}&redirect_uri=${encodeURIComponent(redirect_uri)}&state=${state}&response_type=code&scope=instagram_business_basic,instagram_business_manage_messages,instagram_business_manage_comments,instagram_business_content_publish`
                 window.location.href = oauthUrl;
-
-
-
-
-
-
             }
-
-
-
-
             //   window.location.href = oauthUrl;
         } finally {
             setIsLoading(false);
@@ -184,16 +222,26 @@ const SocialAccounts = () => {
     const handleDisconnect = async (id) => {
         setIsLoading(true);
         try {
-           /// await apiService.deleteSocialAccount(id);
+            /// await apiService.deleteSocialAccount(id);
 
-           await apiService.updateSocialAccountCredentials({
-                   is_active: 0,
-                   id: id,
-                });
-            toast({ title: "Success", description: "Account disconnected." });
+            await apiService.updateSocialAccountCredentials({
+                is_active: 0,
+                id: id,
+            });
+            Swal.fire({
+                icon: "success",
+                title: "Success",
+                text: "Account disconnected.",
+                confirmButtonColor: "#6366f1"
+            });
             fetchAccounts();
         } catch (error) {
-            toast({ title: "Error", description: error.message || "Failed to disconnect account", variant: "destructive" });
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: error.message || "Failed to disconnect account",
+                confirmButtonColor: "#6366f1"
+            });
         } finally {
             setIsLoading(false);
         }
@@ -208,50 +256,56 @@ const SocialAccounts = () => {
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-4">
-                            <div className="space-y-2">
-                                <Label>Facebook App ID</Label>
-                                <Input value={fbAppId} onChange={e => setFbAppId(e.target.value)} placeholder="Facebook App ID" />
-                                <Label>Facebook App Secret</Label>
-                                <Input value={fbAppSecret} onChange={e => setFbAppSecret(e.target.value)} placeholder="Facebook App Secret" type="password" />
-                                <div className="flex gap-2 mt-2">
-                                    <Button
-                                        className="w-1/2 bg-blue-500 hover:bg-blue-600 text-white"
-                                        onClick={() => handleSave("Facebook")}
-                                        disabled={isLoading}
-                                    >
-                                        Save
-                                    </Button>
-                                    <Button
-                                        className="w-1/2 bg-blue-600 hover:bg-blue-700 text-white"
-                                        onClick={() => handleConnect("Facebook")}
-                                        disabled={isLoading}
-                                    >
-                                        Connect
-                                    </Button>
+                            {/* Facebook fields: show only if not connected */}
+                            {!(accounts.find(acc => acc.platform === "Facebook" && Number(acc.is_active) === 1)) && (
+                                <div className="space-y-2">
+                                    <Label>Facebook App ID</Label>
+                                    <Input value={fbAppId} onChange={e => setFbAppId(e.target.value)} placeholder="Facebook App ID" />
+                                    <Label>Facebook App Secret</Label>
+                                    <Input value={fbAppSecret} onChange={e => setFbAppSecret(e.target.value)} placeholder="Facebook App Secret" type="password" />
+                                    <div className="flex gap-2 mt-2">
+                                        <Button
+                                            className="w-1/2 bg-blue-500 hover:bg-blue-600 text-white"
+                                            onClick={() => handleSave("Facebook")}
+                                            disabled={isLoading}
+                                        >
+                                            Save
+                                        </Button>
+                                        <Button
+                                            className="w-1/2 bg-blue-600 hover:bg-blue-700 text-white"
+                                            onClick={() => handleConnect("Facebook")}
+                                            disabled={isLoading}
+                                        >
+                                            Connect
+                                        </Button>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="space-y-2 mt-6">
-                                <Label>Instagram App ID</Label>
-                                <Input value={igAppId} onChange={e => setIgAppId(e.target.value)} placeholder="Instagram App ID" />
-                                <Label>Instagram App Secret</Label>
-                                <Input value={igAppSecret} onChange={e => setIgAppSecret(e.target.value)} placeholder="Instagram App Secret" type="password" />
-                                <div className="flex gap-2 mt-2">
-                                    <Button
-                                        className="w-1/2 bg-pink-400 hover:bg-pink-500 text-white"
-                                        onClick={() => handleSave("Instagram")}
-                                        disabled={isLoading}
-                                    >
-                                        Save
-                                    </Button>
-                                    <Button
-                                        className="w-1/2 bg-pink-500 hover:bg-pink-600 text-white"
-                                        onClick={() => handleConnect("Instagram")}
-                                        disabled={isLoading}
-                                    >
-                                        Connect
-                                    </Button>
+                            )}
+                            {/* Instagram fields: show only if not connected */}
+                            {!(accounts.find(acc => acc.platform === "Instagram" && Number(acc.is_active) === 1)) && (
+                                <div className="space-y-2 mt-6">
+                                    <Label>Instagram App ID</Label>
+                                    <Input value={igAppId} onChange={e => setIgAppId(e.target.value)} placeholder="Instagram App ID" />
+                                    <Label>Instagram App Secret</Label>
+                                    <Input value={igAppSecret} onChange={e => setIgAppSecret(e.target.value)} placeholder="Instagram App Secret" type="password" />
+                                    <div className="flex gap-2 mt-2">
+                                        <Button
+                                            className="w-1/2 bg-pink-400 hover:bg-pink-500 text-white"
+                                            onClick={() => handleSave("Instagram")}
+                                            disabled={isLoading}
+                                        >
+                                            Save
+                                        </Button>
+                                        <Button
+                                            className="w-1/2 bg-pink-500 hover:bg-pink-600 text-white"
+                                            onClick={() => handleConnect("Instagram")}
+                                            disabled={isLoading}
+                                        >
+                                            Connect
+                                        </Button>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
                         </div>
                     </CardContent>
                 </Card>

@@ -3,16 +3,24 @@ require('dotenv').config();
 const sequelize = require('./app/config/db.config');
 const routes = require('./app/route');
 
+
 const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 9999;
 const path = require('path');
 const bodyParser = require('body-parser');
+const fileUpload = require('express-fileupload');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 
 // Security middleware
 app.use(helmet());
+// Enable file upload middleware
+app.use(fileUpload({
+    useTempFiles: true,
+    tempFileDir: '/tmp/',
+    limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit
+}));
 
 // Rate limiting
 // const limiter = rateLimit({
@@ -29,8 +37,10 @@ app.use(cors(corsOptions));
 
 app.use(bodyParser.json({ limit: '50mb', extended: true }));
 app.use(bodyParser.urlencoded({
-  limit: '50mb', extended: true
+    limit: '50mb', extended: true
 }));
+
+
 
 app.get("/",(req,res)=>{
     res.send("Welcome to Social Lovable API")
@@ -108,3 +118,30 @@ sequelize.sync({ force: false })
         });
     })
     .catch(error => console.log(error));
+
+
+
+
+
+
+
+
+
+
+//     response.data {
+//    access_token: 'IGAAVmGeDYcJ9BZAFFrZAVNwMkIweGlQUVhYa1ZAVZAnpSbi1vbVBPVVE2ZA1REckV0Q3duUi1BaFVHYkItX2xiWjRKMlo3Nk1aRm5zc1ZAhSDNOdC1idHp2TTZAkSURuOUh5amdJRVFQTmtDbVQ2ZAnppOVdySGpKeWVFU29ndjF4aDR4VjBLOXltQ2NxQ1NNNzR1UXhKNFJrSgZDZD',
+//    user_id: 25282034201401110,
+//    permissions: [
+//      'instagram_business_basic',
+//      'instagram_business_manage_messages',
+//      'instagram_business_content_publish',
+//      'instagram_business_manage_comments'
+//    ]
+//  }
+//  userResponse {
+//    id: '25282034201401113',
+//    username: 'sewintechnology',
+//    account_type: 'BUSINESS',
+//    media_count: 66
+//  }
+

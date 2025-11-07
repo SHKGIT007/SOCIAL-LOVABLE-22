@@ -4,12 +4,11 @@ import { apiService } from "@/services/api";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
+import Swal from "sweetalert2";
 
 const AdminViewPost = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [post, setPost] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -25,18 +24,20 @@ const AdminViewPost = () => {
       if (data.status === true) {
         setPost(data.data.post);
       } else {
-        toast({
+        Swal.fire({
+          icon: "error",
           title: "Error",
-          description: data.message || "Post not found.",
-          variant: "destructive",
+          text: data.message || "Post not found.",
+          confirmButtonColor: "#6366f1"
         });
         navigate("/admin/posts");
       }
     } catch (error) {
-      toast({
+      Swal.fire({
+        icon: "error",
         title: "Error",
-        description: error.message || "Failed to fetch post.",
-        variant: "destructive",
+        text: error.message || "Failed to fetch post.",
+        confirmButtonColor: "#6366f1"
       });
       navigate("/admin/posts");
     } finally {
@@ -70,6 +71,13 @@ const AdminViewPost = () => {
     );
   }
 
+  // Helper to always return array for platforms
+  const getPlatformsArray = (platforms: string[] | string | undefined): string[] => {
+    if (Array.isArray(platforms)) return platforms;
+    if (typeof platforms === 'string' && platforms) return platforms.split(',').map(p => p.trim()).filter(Boolean);
+    return [];
+  };
+
   return (
     <DashboardLayout userRole="admin">
       <div className="max-w-2xl mx-auto py-8">
@@ -93,7 +101,13 @@ const AdminViewPost = () => {
               </div>
               <div>
                 <span className="font-semibold">Platforms:</span>{" "}
-                {post.platforms?.join(", ")}
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {getPlatformsArray(post.platforms).map((platform) => (
+                    <Badge key={platform} variant="secondary" className="text-xs">
+                      {platform}
+                    </Badge>
+                  ))}
+                </div>
               </div>
               <div>
                 <span className="font-semibold">Status:</span>{" "}

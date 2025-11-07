@@ -317,8 +317,7 @@ const facebookOAuthInit = (req, res) => {
 
 
   const clientId = process.env.FACEBOOK_CLIENT_ID;
- console.log('Facebook Client ID:', clientId);
-  return
+ 
   const redirectUri = `${process.env.BACKEND_URL}/social-accounts/oauth/facebook/callback`;
   const scope = 'pages_manage_posts,pages_read_engagement,pages_show_list,public_profile,email';
   const state = req.user.id;

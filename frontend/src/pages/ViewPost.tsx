@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Edit, Calendar, Sparkles } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import Swal from "sweetalert2";
 import { AlertTitle } from "@/components/ui/alert";
 
 interface Post {
@@ -23,6 +23,7 @@ interface Post {
   category: string | null;
   tags: string[] | null;
   media_urls: string[] | null;
+  image_url?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -30,7 +31,6 @@ interface Post {
 const ViewPost = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [post, setPost] = useState<Post | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -53,18 +53,20 @@ const ViewPost = () => {
       if(data.status === true) {
          setPost(data.data.post);
       }else {
-        toast({
+        Swal.fire({
+          icon: "error",
           title: "Error",
-          description: data.message || "Failed to fetch post.",
-          variant: "destructive",
+          text: data.message || "Failed to fetch post.",
+          confirmButtonColor: "#6366f1"
         });
         navigate("/posts");
       }
     } catch (error: any) {
-      toast({
+      Swal.fire({
+        icon: "error",
         title: "Error",
-        description: error.message || "Failed to fetch post.",
-        variant: "destructive",
+        text: error.message || "Failed to fetch post.",
+        confirmButtonColor: "#6366f1"
       });
       navigate("/posts");
     } finally {
@@ -109,11 +111,18 @@ const ViewPost = () => {
     );
   }
 
+  // Helper to always return array for platforms
+  const getPlatformsArray = (platforms: string[] | string | undefined): string[] => {
+    if (Array.isArray(platforms)) return platforms;
+    if (typeof platforms === 'string' && platforms) return platforms.split(',').map(p => p.trim()).filter(Boolean);
+    return [];
+  };
+
   return (
     <DashboardLayout userRole="client">
       <div className="space-y-6 max-w-4xl mx-auto">
         <div className="flex items-center justify-between">
-          <Button variant="ghost" onClick={() => navigate("/posts")}>
+          <Button variant="ghost" onClick={() => navigate("/posts")}> 
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Posts
           </Button>
@@ -151,16 +160,26 @@ const ViewPost = () => {
               <p className="whitespace-pre-wrap text-muted-foreground">{post.content}</p>
             </div>
 
+            {/* Show single image_url if present, below content */}
+            {post.image_url && (
+              <div className="mb-4">
+                <img
+                  src={post.image_url}
+                  alt="Post Image"
+                  className="rounded-lg w-full max-h-64 object-cover"
+                  onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/no-image.png'; }}
+                />
+              </div>
+            )}
+
             <div>
               <h3 className="font-semibold mb-2">Platforms</h3>
               <div className="flex flex-wrap gap-2">
-                {
-                post?.platforms?.map((platform) => (
+                {getPlatformsArray(post.platforms).map((platform) => (
                   <Badge key={platform} variant="secondary">
                     {platform}
                   </Badge>
-                ))
-                }
+                ))}
               </div>
             </div>
 
@@ -177,16 +196,17 @@ const ViewPost = () => {
               </div>
             )}
 
-            {post.media_urls && post.media_urls.length > 0 && (
+            {Array.isArray(post.media_urls) && post.media_urls.filter(Boolean).length > 0 && (
               <div>
                 <h3 className="font-semibold mb-2">Media</h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {post.media_urls.map((url, index) => (
+                  {post.media_urls.filter(Boolean).map((url, index) => (
                     <img
                       key={index}
                       src={url}
                       alt={`Media ${index + 1}`}
                       className="rounded-lg w-full h-32 object-cover"
+                      onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/no-image.png'; }}
                     />
                   ))}
                 </div>

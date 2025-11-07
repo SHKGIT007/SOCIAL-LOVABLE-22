@@ -52,12 +52,15 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
         { icon: FileText, label: "Posts", path: "/admin/posts" },
         { icon: Settings, label: "Plans", path: "/admin/plans" },
         { icon: Settings, label: "Subscriptions", path: "/admin/subscriptions" },
+        { icon: Zap, label: "System Settings", path: "/admin/system-settings" },
       ]
-    : [
-        { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
-        { icon: FileText, label: "Posts", path: "/posts" },
-        { icon: Settings, label: "Plans", path: "/plans" },
-        { icon: Settings, label: "Social Accounts", path: "/social-accounts" },
+  : [
+    { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
+    { icon: FileText, label: "Posts", path: "/posts" },
+    { icon: Zap, label: "Auto Post Schedules", path: "/schedules" },
+    { icon: Settings, label: "Plans", path: "/plans" },
+    { icon: Settings, label: "Social Accounts", path: "/social-accounts" },
+    { icon: Settings, label: "Profile", path: "/profile" },
       ];
 
   return (
