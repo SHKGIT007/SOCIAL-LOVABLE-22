@@ -127,7 +127,16 @@ const Posts = () => {
   // Helper to always return array for platforms
   const getPlatformsArray = (platforms: string[] | string | undefined): string[] => {
     if (Array.isArray(platforms)) return platforms;
-    if (typeof platforms === 'string' && platforms) return platforms.split(',').map(p => p.trim()).filter(Boolean);
+    if (typeof platforms === 'string' && platforms) {
+      // Try to parse JSON array string
+      try {
+        const parsed = JSON.parse(platforms);
+        if (Array.isArray(parsed)) return parsed;
+      } catch {
+        // Fallback: comma separated string
+        return platforms.split(',').map(p => p.trim()).filter(Boolean);
+      }
+    }
     return [];
   };
 
