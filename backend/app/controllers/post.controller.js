@@ -471,11 +471,11 @@ const generateAIPost = asyncHandler(async (req, res) => {
         title: title || 'AI Generated Post',
         content: generatedContent.content,
         ai_prompt: ai_prompt,
+        is_ai_generated:1,
         image_prompt: image_prompt || null,
         image_url: imageUrl || null
     });
 
-    
 
 
     return res.json({
