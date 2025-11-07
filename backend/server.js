@@ -47,12 +47,6 @@ app.get("/",(req,res)=>{
 });
 
 
-app.get("/facebook/callback",(req,res)=>{
-    res.send({status:true,msg:"facebook/callback"})
-});
-
-
-
 
 // appid = 1579224306600577
 // secretkey = a61184184766a15c03154b899db189c7
