@@ -55,6 +55,9 @@ export default function UserSchedules() {
   const [rows, setRows] = useState<Row[]>([emptyRow()]);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  // Fix: Add missing state for view modal and selected schedule
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [viewSchedule, setViewSchedule] = useState<any | null>(null);
 
   const fetchSchedules = async () => {
     try {
@@ -207,16 +210,16 @@ export default function UserSchedules() {
   const handleEdit = (sch: any) => {
     setRows([{
       platforms: Array.isArray(sch.platforms)
-        ? sch.platforms
-        : (typeof sch.platforms === 'string' ? sch.platforms.split(',').map((p: string) => p.trim()) : []),
-      days: sch.days || [],
-      times: sch.times || {},
-      recurrence: sch.recurrence || '',
-      customDateFrom: sch.customDateFrom || '',
-      customDateTo: sch.customDateTo || '',
-      singleDate: sch.singleDate || '',
+        ? sch?.platforms
+        : (typeof sch?.platforms === 'string' ? sch?.platforms.split(',').map((p: string) => p.trim()) : []),
+      days: sch?.days || [],
+      times: sch?.times || {},
+      recurrence: sch?.recurrence || '',
+      customDateFrom: sch?.customDateFrom || '',
+      customDateTo: sch?.customDateTo || '',
+      singleDate: sch?.singleDate || '',
     }]);
-    setEditingId(sch.id);
+    setEditingId(sch?.id);
     setModalOpen(true);
   };
 
@@ -287,9 +290,52 @@ export default function UserSchedules() {
                         }}
                       />
                       <button title="View Details" className="p-2 hover:bg-indigo-100 rounded"
-                        onClick={() => Swal.fire('Details', JSON.stringify(sch, null, 2), 'info')}>
+                        onClick={() => { setViewSchedule(sch); setViewModalOpen(true); }}>
                         <Eye className="h-4 w-4 text-indigo-600" />
                       </button>
+      {/* Details Modal */}
+      <Dialog open={viewModalOpen} onClose={() => setViewModalOpen(false)} className="fixed inset-0 z-50 overflow-y-auto">
+        <div className="flex items-center justify-center min-h-screen px-4">
+          <div className="fixed inset-0 bg-black opacity-30" aria-hidden="true" />
+          <Dialog.Panel className="relative bg-white rounded-2xl shadow-xl max-w-md w-full mx-auto p-6 z-10 flex flex-col">
+            <Dialog.Title className="text-xl font-bold mb-2 flex items-center gap-2 text-indigo-700">
+              <Eye className="text-indigo-500" /> Schedule Details
+            </Dialog.Title>
+            {viewSchedule && (
+              <div className="space-y-2">
+                <div className="text-base font-semibold text-gray-700">Platforms: <span className="font-normal">{Array.isArray(viewSchedule.platforms) ? viewSchedule.platforms.join(', ') : viewSchedule.platforms}</span></div>
+                {viewSchedule.days && viewSchedule.days.length > 0 && (
+                  <div>
+                    <div className="font-semibold text-indigo-600 mb-1">Days & Times:</div>
+                    <ul className="list-disc pl-5 space-y-1">
+                      {viewSchedule.days.map(day => (
+                        <li key={day}>
+                          <span className="font-medium">{DAYS.find(d => d.value === day)?.label || day}:</span>
+                          {day === CUSTOM_DATE_KEY && (
+                            <span className="ml-2 text-xs text-gray-500">{viewSchedule.customDateFrom} to {viewSchedule.customDateTo}</span>
+                          )}
+                          {day === SINGLE_DATE_KEY && (
+                            <span className="ml-2 text-xs text-gray-500">{viewSchedule.singleDate}</span>
+                          )}
+                          {viewSchedule.times && viewSchedule.times[day] && viewSchedule.times[day].length > 0 && (
+                            <span className="ml-2">[
+                              {viewSchedule.times[day].filter(Boolean).join(', ')}
+                            ]</span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {viewSchedule.recurrence && <div className="text-xs text-indigo-500">Recurs: {viewSchedule.recurrence}</div>}
+                <div className="flex justify-end mt-4">
+                  <button className="px-4 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700" onClick={() => setViewModalOpen(false)}>Close</button>
+                </div>
+              </div>
+            )}
+          </Dialog.Panel>
+        </div>
+      </Dialog>
                       <button title="Edit" className="p-2 hover:bg-blue-100 rounded" onClick={() => handleEdit(sch)}>
                         <Edit2 className="h-4 w-4 text-blue-600" />
                       </button>
@@ -310,13 +356,11 @@ export default function UserSchedules() {
             <div className="fixed inset-0 bg-black opacity-40" aria-hidden="true" />
             <Dialog.Panel className="relative bg-white rounded-2xl shadow-2xl max-w-4xl w-full h-[95vh] mx-auto p-8 z-10 flex flex-col overflow-y-auto transform transition-all">
               <Dialog.Title className="text-3xl font-extrabold mb-6 flex items-center gap-3 text-indigo-800 border-b pb-3">
-             <h2 className="flex items-center gap-3 text-3xl font-extrabold">
-  <Bell className="text-blue-500 w-8 h-8" />
-  <span className="bg-gradient-to-r from-indigo-600 to-sky-400 bg-clip-text text-transparent">
-    Auto
-  </span>
-  <span className="text-gray-800"> Post Schedules</span>
-</h2>
+              <Bell className="text-blue-500 w-8 h-8" />
+              <span className="bg-gradient-to-r from-indigo-600 to-sky-400 bg-clip-text text-transparent">
+                Auto
+              </span>
+              <span className="text-gray-800"> Post Schedules</span>
 
               </Dialog.Title>
 

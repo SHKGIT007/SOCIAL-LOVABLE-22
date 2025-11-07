@@ -147,7 +147,7 @@ const createPost = asyncHandler(async (req, res) => {
     const post = await Post.create({
         title: req.body.title,
         content: req.body.content,
-        platforms: req.body.platforms,
+        platforms: platforms,
         status: req.body.status || 'draft',
         scheduled_at: req.body.scheduled_at || null,
         media_urls: req.body.media_urls,
