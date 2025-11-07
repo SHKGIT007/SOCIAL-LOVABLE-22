@@ -19,10 +19,8 @@ const Auth = () => {
   const [userFname, setUserFname] = useState("");
   const [userLname, setUserLname] = useState("");
   const [userPhone, setUserPhone] = useState("");
- 
 
   useEffect(() => {
-    // Check if user is already authenticated
     if (isAuthenticated()) {
       const authData = JSON.parse(localStorage.getItem("authData") || "null");
       if (authData?.user?.role === "admin") {
@@ -33,43 +31,24 @@ const Auth = () => {
       return;
     }
 
-    // Listen for auth state changes
     const unsubscribe = onAuthStateChange((authData) => {
       if (authData) {
-        if (authData.user?.role === "admin") {
-          navigate("/admin");
-        } else {
-          navigate("/dashboard");
-        }
+        if (authData.user?.role === "admin") navigate("/admin");
+        else navigate("/dashboard");
       }
     });
 
     return unsubscribe;
   }, [navigate]);
- 
 
   const handleSignIn = async (e: React.FormEvent) => {
-   
     e.preventDefault();
     setIsLoading(true);
-
     try {
-      const response = await apiService.login({
-        email,
-        password,
-      });
-
-      
+      const response = await apiService.login({ email, password });
       if (response.status) {
-        // Store auth data in localStorage
         setAuthData(response.data);
-        Swal.fire({
-          icon: "success",
-          title: "Success",
-          text: "Signed in successfully!",
-          confirmButtonColor: "#6366f1"
-        });
-        // Fallback navigation if onAuthStateChange does not trigger
+        Swal.fire({ icon: "success", title: "Success", text: "Signed in successfully!", confirmButtonColor: "#6366f1" });
         if (response.data.user?.role === "admin") {
           window.location.reload();
           navigate("/admin");
@@ -79,12 +58,7 @@ const Auth = () => {
         }
       }
     } catch (error: any) {
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: error.message || "Login failed",
-        confirmButtonColor: "#6366f1"
-      });
+      Swal.fire({ icon: "error", title: "Error", text: error.message || "Login failed", confirmButtonColor: "#6366f1" });
     } finally {
       setIsLoading(false);
     }
@@ -93,7 +67,6 @@ const Auth = () => {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
     try {
       const response = await apiService.register({
         user_name: userName,
@@ -105,51 +78,49 @@ const Auth = () => {
       });
 
       if (response.status) {
-        // Store auth data in localStorage
         setAuthData(response.data);
-        Swal.fire({
-          icon: "success",
-          title: "Success",
-          text: "Account created successfully!",
-          confirmButtonColor: "#6366f1"
-        });
-        // Fallback navigation if onAuthStateChange does not trigger
-        if (response.data.user?.role === "admin") {
-          navigate("/admin");
-        } else {
-          navigate("/dashboard");
-        }
+        Swal.fire({ icon: "success", title: "Success", text: "Account created successfully!", confirmButtonColor: "#6366f1" });
+        if (response.data.user?.role === "admin") navigate("/admin");
+        else navigate("/dashboard");
       }
     } catch (error: any) {
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: error.message || "Registration failed",
-        confirmButtonColor: "#6366f1"
-      });
+      Swal.fire({ icon: "error", title: "Error", text: error.message || "Registration failed", confirmButtonColor: "#6366f1" });
     } finally {
       setIsLoading(false);
     }
   };
 
-  
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-secondary/10 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Welcome</CardTitle>
-          <CardDescription className="text-center">
-            Sign in or create an account to get started
-          </CardDescription>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-sky-50 px-4">
+      <Card className="w-full max-w-md border-indigo-100/70 shadow-xl rounded-2xl">
+        <CardHeader className="space-y-1 text-center">
+          <CardTitle className="text-3xl font-extrabold">
+            <span className="bg-gradient-to-r from-indigo-600 to-sky-400 bg-clip-text text-transparent">Welcome</span>{" "}
+           
+          </CardTitle>
+          <CardDescription>Sign in or create an account to get started</CardDescription>
         </CardHeader>
+
         <CardContent>
           <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            {/* FULL-WIDTH, THEMED TABS */}
+            <TabsList className="grid w-full grid-cols-2 rounded-xl bg-indigo-50 p-1">
+              <TabsTrigger
+                value="signin"
+                className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-indigo-700 data-[state=active]:shadow-sm"
+              >
+                Sign In
+              </TabsTrigger>
+              <TabsTrigger
+                value="signup"
+                className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-indigo-700 data-[state=active]:shadow-sm"
+              >
+                Sign Up
+              </TabsTrigger>
             </TabsList>
-            <TabsContent value="signin">
+
+            {/* SIGN IN */}
+            <TabsContent value="signin" className="mt-6">
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="signin-email">Email</Label>
@@ -160,6 +131,7 @@ const Auth = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
+                    className="border-gray-300 focus-visible:ring-indigo-500"
                   />
                 </div>
                 <div className="space-y-2">
@@ -170,15 +142,22 @@ const Auth = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
+                    className="border-gray-300 focus-visible:ring-indigo-500"
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button
+                  type="submit"
+                  className="w-full h-10 bg-gradient-to-r from-indigo-600 to-sky-500 hover:from-indigo-500 hover:to-sky-400 text-white shadow-md"
+                  disabled={isLoading}
+                >
                   {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Sign In
                 </Button>
               </form>
             </TabsContent>
-            <TabsContent value="signup">
+
+            {/* SIGN UP */}
+            <TabsContent value="signup" className="mt-6">
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="signup-username">Username</Label>
@@ -189,30 +168,37 @@ const Auth = () => {
                     value={userName}
                     onChange={(e) => setUserName(e.target.value)}
                     required
+                    className="border-gray-300 focus-visible:ring-indigo-500"
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-fname">First Name</Label>
-                  <Input
-                    id="signup-fname"
-                    type="text"
-                    placeholder="John"
-                    value={userFname}
-                    onChange={(e) => setUserFname(e.target.value)}
-                    required
-                  />
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-fname">First Name</Label>
+                    <Input
+                      id="signup-fname"
+                      type="text"
+                      placeholder="John"
+                      value={userFname}
+                      onChange={(e) => setUserFname(e.target.value)}
+                      required
+                      className="border-gray-300 focus-visible:ring-indigo-500"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-lname">Last Name</Label>
+                    <Input
+                      id="signup-lname"
+                      type="text"
+                      placeholder="Doe"
+                      value={userLname}
+                      onChange={(e) => setUserLname(e.target.value)}
+                      required
+                      className="border-gray-300 focus-visible:ring-indigo-500"
+                    />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-lname">Last Name</Label>
-                  <Input
-                    id="signup-lname"
-                    type="text"
-                    placeholder="Doe"
-                    value={userLname}
-                    onChange={(e) => setUserLname(e.target.value)}
-                    required
-                  />
-                </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="signup-phone">Phone Number</Label>
                   <Input
@@ -221,8 +207,10 @@ const Auth = () => {
                     placeholder="+1234567890"
                     value={userPhone}
                     onChange={(e) => setUserPhone(e.target.value)}
+                    className="border-gray-300 focus-visible:ring-indigo-500"
                   />
                 </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="signup-email">Email</Label>
                   <Input
@@ -232,8 +220,10 @@ const Auth = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
+                    className="border-gray-300 focus-visible:ring-indigo-500"
                   />
                 </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="signup-password">Password</Label>
                   <Input
@@ -243,9 +233,15 @@ const Auth = () => {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     minLength={6}
+                    className="border-gray-300 focus-visible:ring-indigo-500"
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
+
+                <Button
+                  type="submit"
+                  className="w-full h-10 bg-gradient-to-r from-indigo-600 to-sky-500 hover:from-indigo-500 hover:to-sky-400 text-white shadow-md"
+                  disabled={isLoading}
+                >
                   {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Sign Up
                 </Button>
