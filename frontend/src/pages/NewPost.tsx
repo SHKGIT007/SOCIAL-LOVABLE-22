@@ -162,21 +162,21 @@ const NewPost = () => {
         {/* AI Section */}
         {mode === "ai" && (
           <Card className="border-indigo-100">
-            <CardHeader>
+            {/* <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Sparkles className="h-5 w-5 text-indigo-600" /> Generate Post with AI
               </CardTitle>
               <CardDescription>Use your brand profile and prompt to generate a post.</CardDescription>
-            </CardHeader>
+            </CardHeader> */}
             <CardContent className="space-y-4">
-              {aiPrompt && (
+              {/* {aiPrompt && (
                 <div className="space-y-1">
                   <Label>Context/Profile</Label>
                   <div className="rounded-md border bg-muted/30 p-3 text-sm whitespace-pre-wrap leading-relaxed">
                     {aiPrompt}
                   </div>
                 </div>
-              )}
+              )} */}
 
               <Button
                 onClick={handleGenerateAI}
