@@ -48,6 +48,20 @@ const Schedule = sequelize.define('Schedule', {
         allowNull: false,
         defaultValue: '1',
    },
+  lastRunAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
+  timezone: {
+    type: DataTypes.STRING(50),
+    allowNull: false,
+    defaultValue: 'Asia/Kolkata',
+  },
+  isPaused: {
+    type: DataTypes.TINYINT,
+    allowNull: false,
+    defaultValue: 0,
+  },
 }, {
   tableName: 'schedules',
   timestamps: true,

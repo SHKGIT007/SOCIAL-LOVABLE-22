@@ -35,4 +35,5 @@ if (SystemSetting.associate) SystemSetting.associate(models);
 if (Schedule.associate) Schedule.associate(models);
 if (AiGenratePost.associate) AiGenratePost.associate(models);
 
-module.exports = models;
+const sequelizeInstance = require('../config/db.config');
+module.exports = { ...models, sequelize: sequelizeInstance };
