@@ -249,6 +249,8 @@ export default function UserSchedules() {
     }
   };
 
+  console.log("viewSchedule: ", viewSchedule);
+
   return (
     <DashboardLayout userRole="client">
       <div className="min-h-[90vh] w-full flex flex-col items-center justify-start bg-gradient-to-br from-blue-50 via-white to-indigo-100 py-8 px-2">

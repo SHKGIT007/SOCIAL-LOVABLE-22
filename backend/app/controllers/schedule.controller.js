@@ -27,14 +27,51 @@ exports.createSchedule = async (req, res) => {
 };
 
 // Get all schedules for the logged-in user
-exports.getSchedules = async (req, res) => {
+// exports.getSchedules = async (req, res) => {
 
+//   try {
+//     const schedules = await Schedule.findAll({
+//       where: { userId: req.user.id },
+//       order: [['createdAt', 'DESC']],
+//     });
+//     res.json({ success: true, schedules });
+//   } catch (err) {
+//     res.status(500).json({ success: false, message: err.message });
+//   }
+// };
+
+exports.getSchedules = async (req, res) => {
   try {
     const schedules = await Schedule.findAll({
       where: { userId: req.user.id },
       order: [['createdAt', 'DESC']],
     });
-    res.json({ success: true, schedules });
+
+    // Parse nested JSON fields properly
+    const parsedSchedules = schedules.map(schedule => {
+      const s = schedule.dataValues;
+
+      const parseSafely = (value) => {
+        try {
+          // Double JSON.parse() for double-encoded strings
+          let parsed = typeof value === "string" ? JSON.parse(value) : value;
+          if (typeof parsed === "string") parsed = JSON.parse(parsed);
+          return parsed;
+        } catch {
+          return value;
+        }
+      };
+
+      return {
+        ...s,
+        platforms: parseSafely(s.platforms),
+        days: parseSafely(s.days),
+        times: parseSafely(s.times),
+      };
+    });
+
+    console.log("Parsed Schedules:", parsedSchedules);
+    res.json({ success: true, schedules: parsedSchedules });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
