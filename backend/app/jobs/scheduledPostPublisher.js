@@ -17,16 +17,25 @@ async function publishScheduledPosts() {
     }
   });
 
-  console.log(`Found ${posts.length} scheduled posts to publish.`);
-
   for (const post of posts) {
-    console.log(`Publishing scheduled post ID: ${post.id} for user ID: ${post.user_id}`);
+    
     let published = false;
+    let platforms=post.platforms;
+    if (typeof post.platforms === "string") {
+      try {
+        platforms = JSON.parse(post.platforms);
+      } catch (e) {
+        console.log("Invalid JSON format:", e);
+        platforms = [];
+      }
+    }
     // Facebook
-    if (Array.isArray(post.platforms) && post.platforms.includes('Facebook')) {
+    if (Array.isArray(platforms) && platforms.includes('Facebook')) {
       const fbAccount = await SocialAccount.findOne({
         where: { user_id: post.user_id, platform: 'Facebook', is_active: 1 }
       });
+
+      console.log("Facebook Account:", fbAccount);
       if (fbAccount && fbAccount.access_token) {
         try {
           await facebookPost(fbAccount.access_token, post.content, post.image_url);
@@ -38,13 +47,13 @@ async function publishScheduledPosts() {
       }
     }
     // Instagram
-    if (Array.isArray(post.platforms) && post.platforms.includes('Instagram')) {
+    if (Array.isArray(platforms) && platforms.includes('Instagram')) {
       const igAccount = await SocialAccount.findOne({
         where: { user_id: post.user_id, platform: 'Instagram', is_active: 1 }
       });
       if (igAccount && igAccount.access_token) {
         try {
-          
+
           await instagramPost(igAccount.access_token, post.content, post.image_url);
           published = true;
           logger.info('Scheduled post published to Instagram', { postId: post.id, userId: post.user_id });
