@@ -7,6 +7,8 @@ const SocialAccount = require('./socialAccount.model');
 const Profile = require('./profile.model');
 const SystemSetting = require('./systemSetting.model');
 const Schedule = require('./schedule.model');
+const AiGenratePost = require('./aiGenratePost.model');
+
 const models = {
     User,
     Role,
@@ -16,7 +18,8 @@ const models = {
     SocialAccount,
     Profile,
     SystemSetting,
-    Schedule
+    Schedule,
+    AiGenratePost
 };
 
 // Define associations in correct order
@@ -30,5 +33,6 @@ if (SocialAccount.associate) SocialAccount.associate(models);
 if (Profile.associate) Profile.associate(models);
 if (SystemSetting.associate) SystemSetting.associate(models);
 if (Schedule.associate) Schedule.associate(models);
+if (AiGenratePost.associate) AiGenratePost.associate(models);
 
 module.exports = models;

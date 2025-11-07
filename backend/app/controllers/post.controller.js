@@ -1,4 +1,4 @@
-const { Post, User, Plan, Subscription, SystemSetting } = require('../models');
+const { Post, User, Plan, Subscription, SystemSetting ,AiGenratePost } = require('../models');
 
 const { Op } = require('sequelize');
 const { asyncHandler } = require('../middleware/error.middleware');
@@ -464,6 +464,20 @@ const generateAIPost = asyncHandler(async (req, res) => {
         });
     }
     logger.info('AI post generated', { userId, ai_prompt });
+
+    // Save generated post in DB
+    const aiPost = await AiGenratePost.create({
+        user_id: userId,
+        title: title || 'AI Generated Post',
+        content: generatedContent.content,
+        ai_prompt: ai_prompt,
+        image_prompt: image_prompt || null,
+        image_url: imageUrl || null
+    });
+
+    
+
+
     return res.json({
         status: true,
         message: 'AI post generated successfully',
