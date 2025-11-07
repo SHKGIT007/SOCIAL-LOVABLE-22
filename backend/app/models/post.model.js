@@ -20,6 +20,8 @@ const Post = sequelize.define('Post', {
             return rawValue;
         }
     },
+
+    
     platforms: {
         type: DataTypes.JSON,
         allowNull: false,
