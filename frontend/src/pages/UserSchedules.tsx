@@ -271,7 +271,7 @@ export default function UserSchedules() {
                       </span>
                       <div>
                         <div className="text-base text-gray-700 font-semibold">
-                          Platforms: <span className="font-normal">{Array.isArray(sch.platforms) ? sch.platforms.join(', ') : sch.platforms}</span>
+                          Platforms: <span className="font-normal">{Array.isArray(sch.platforms) ? sch.platforms.join(', ') : (typeof sch.platforms === 'string' ? sch.platforms.split(',').map(p => p.trim()).join(', ') : '')}</span>
                         </div>
                         {sch.recurrence && <div className="text-xs text-indigo-500">Recurs: {sch.recurrence}</div>}
                       </div>
