@@ -62,7 +62,7 @@ app.get("/",(req,res)=>{
 app.use('/api', routes);
 
 require("./redirectAuth")(app);
-// require("./app/jobs/runScheduler");
+require("./app/jobs/runScheduler");
 require("./app/autoschedulejobs/runScheduler");
 
 // Error handling middleware
