@@ -420,3 +420,5 @@
 {"level":"info","message":"Published to Facebook","postId":2,"service":"social-lovable-api","timestamp":"2025-11-08T08:58:03.668Z"}
 {"err":"Facebook post failed","level":"error","message":"FB publish error","postId":3,"service":"social-lovable-api","timestamp":"2025-11-08T09:05:01.039Z"}
 {"level":"info","message":"Published to Facebook","postId":4,"service":"social-lovable-api","timestamp":"2025-11-08T09:15:13.331Z"}
+{"level":"info","message":"Published to Facebook","postId":5,"service":"social-lovable-api","timestamp":"2025-11-08T09:37:06.853Z"}
+{"level":"info","message":"Published to Facebook","postId":6,"service":"social-lovable-api","timestamp":"2025-11-08T09:38:08.202Z"}
