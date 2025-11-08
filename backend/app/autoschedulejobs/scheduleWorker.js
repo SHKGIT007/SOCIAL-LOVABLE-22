@@ -101,7 +101,7 @@ async function processSchedule(scheduleId) {
     if (parsedSchedule.days.includes('custom_date')) dayKeys.push('custom_date');
     if (parsedSchedule.days.includes('single_date')) dayKeys.push('single_date');
   }
-
+  
   for (const dayKey of dayKeys) {
     const timeSlots = Array.isArray(timesObj[dayKey]) ? timesObj[dayKey] : [];
     for (const timeStr of timeSlots) {
