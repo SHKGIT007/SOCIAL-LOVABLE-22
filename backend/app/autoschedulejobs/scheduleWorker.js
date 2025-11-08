@@ -247,8 +247,7 @@ async function processSchedule(scheduleId) {
 (async () => {
   try {
     const scheduleId = workerData.scheduleId;
-
-    console.log("scheduleId",scheduleId)
+    //console.log("scheduleId",scheduleId)
     await processSchedule(scheduleId);
     parentPort.postMessage({ status: 'done', scheduleId });
     process.exit(0);
@@ -257,10 +256,6 @@ async function processSchedule(scheduleId) {
     process.exit(1);
   }
 })();
-
-
-
-
 
 
 
