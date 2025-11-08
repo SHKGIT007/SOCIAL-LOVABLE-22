@@ -388,14 +388,20 @@ export default function UserSchedules() {
                     <div className="flex items-center justify-between mb-3">
                       <h4 className="text-lg font-semibold text-gray-800">Schedule Block {idx + 1}</h4>
                       <div className="flex gap-2">
-                        <button
+                        {
+                          editingId ? 
+                          null
+                          :
+                          <button
                           type="button"
                           className="bg-emerald-500 text-white rounded-full h-9 w-9 flex items-center justify-center shadow hover:bg-emerald-600"
                           onClick={handleAddRow}
                           title="Add schedule row"
                         >
                           +
-                        </button>
+                        </button> 
+                        }
+                        
                         {rows.length > 1 && (
                           <button
                             type="button"

@@ -116,6 +116,8 @@ async function processSchedule(scheduleId) {
             platforms: [platform],
             status: 'published',
             user_id: userId,
+            is_ai_generated:1,
+            image_url: null,
             scheduleId: schedule.id,
             scheduled_at: new Date(today.getFullYear(), today.getMonth(), today.getDate(), h, m),
             published_at: new Date()
@@ -245,8 +247,7 @@ async function processSchedule(scheduleId) {
 (async () => {
   try {
     const scheduleId = workerData.scheduleId;
-
-    console.log("scheduleId",scheduleId)
+    //console.log("scheduleId",scheduleId)
     await processSchedule(scheduleId);
     parentPort.postMessage({ status: 'done', scheduleId });
     process.exit(0);
@@ -255,3 +256,11 @@ async function processSchedule(scheduleId) {
     process.exit(1);
   }
 })();
+
+
+
+
+
+
+
+
