@@ -105,28 +105,48 @@ async function processSchedule(scheduleId) {
   for (const dayKey of dayKeys) {
     const timeSlots = Array.isArray(timesObj[dayKey]) ? timesObj[dayKey] : [];
     for (const timeStr of timeSlots) {
-      for (const platform of platforms) {
-        // Check if post already exists for this schedule/time/platform/user
-        const existing = await Post.findOne({
-          where: {
-            scheduleId: schedule.id,
-            user_id: userId,
-            scheduled_at: new Date(today.getFullYear(), today.getMonth(), today.getDate(), ...timeStr.split(':').map(Number)),
-            platforms: platform,
-            status: 'scheduled'
-          }
-        });
-        if (!existing) {
-          // Create dummy post
-          await Post.create({
+      // Check if current time matches this time slot
+      const [h, m] = timeStr.split(':').map(Number);
+      if (now.getHours() === h && now.getMinutes() === m) {
+        for (const platform of platforms) {
+          // Create and immediately publish the post
+          const post = await Post.create({
             title: `Auto Post for ${platform} at ${timeStr}`,
             content: `Scheduled post for ${platform} at ${timeStr}`,
             platforms: [platform],
-            status: 'scheduled',
+            status: 'published',
             user_id: userId,
             scheduleId: schedule.id,
-            scheduled_at: new Date(today.getFullYear(), today.getMonth(), today.getDate(), ...timeStr.split(':').map(Number)),
+            scheduled_at: new Date(today.getFullYear(), today.getMonth(), today.getDate(), h, m),
+            published_at: new Date()
           });
+          // Run publish logic (simulate platform publish)
+          if (platform === 'facebook') {
+            const fbAccount = await SocialAccount.findOne({
+              where: { user_id: userId, platform: 'Facebook', is_active: 1 }
+            });
+            if (fbAccount && fbAccount.access_token) {
+              try {
+                await facebookPost(fbAccount.access_token, post.content, post.image_url);
+                logger.info('Published to Facebook', { postId: post.id });
+              } catch (err) {
+                logger.error('FB publish error', { postId: post.id, err: err.message });
+              }
+            }
+          }
+          if (platform === 'instagram') {
+            const igAccount = await SocialAccount.findOne({
+              where: { user_id: userId, platform: 'Instagram', is_active: 1 }
+            });
+            if (igAccount && igAccount.access_token) {
+              try {
+                await instagramPost(igAccount.access_token, post.content, post.image_url);
+                logger.info('Published to IG', { postId: post.id });
+              } catch (err) {
+                logger.error('IG publish error', { postId: post.id, err: err.message });
+              }
+            }
+          }
         }
       }
     }
