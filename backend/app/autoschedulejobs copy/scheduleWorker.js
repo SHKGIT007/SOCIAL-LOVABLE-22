@@ -75,20 +75,85 @@ async function processSchedule(scheduleId) {
 
   // Robustly parse JSON fields
   let parsedSchedule = { ...schedule.dataValues };
-  // Parse platforms
   if (typeof parsedSchedule.platforms === 'string') {
     try { parsedSchedule.platforms = JSON.parse(parsedSchedule.platforms); } catch(e){ parsedSchedule.platforms = []; }
   }
-  // Parse days
   if (typeof parsedSchedule.days === 'string') {
     try { parsedSchedule.days = JSON.parse(parsedSchedule.days); } catch(e){ parsedSchedule.days = []; }
   }
-  // Parse times
   if (typeof parsedSchedule.times === 'string') {
     try { parsedSchedule.times = JSON.parse(parsedSchedule.times); } catch(e){ parsedSchedule.times = {}; }
   }
+
+  // For each scheduled time/platform, create a dummy post if not already present
+  const userId = schedule.userId;
+  const platforms = parsedSchedule.platforms || [];
+  const timesObj = parsedSchedule.times || {};
+  const today = now;
+  const dayNames = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+  const todayName = dayNames[today.getDay()];
+
+  // Determine which day keys to check (daily, todayName, custom_date, single_date)
+  let dayKeys = [];
+  if (Array.isArray(parsedSchedule.days)) {
+    if (parsedSchedule.days.includes('daily')) dayKeys.push('daily');
+    if (parsedSchedule.days.includes(todayName)) dayKeys.push(todayName);
+    if (parsedSchedule.days.includes('custom_date')) dayKeys.push('custom_date');
+    if (parsedSchedule.days.includes('single_date')) dayKeys.push('single_date');
+  }
   
-  
+  for (const dayKey of dayKeys) {
+    const timeSlots = Array.isArray(timesObj[dayKey]) ? timesObj[dayKey] : [];
+    for (const timeStr of timeSlots) {
+      // Check if current time matches this time slot
+      const [h, m] = timeStr.split(':').map(Number);
+      if (now.getHours() === h && now.getMinutes() === m) {
+        for (const platform of platforms) {
+          // Create and immediately publish the post
+          const post = await Post.create({
+            title: `Auto Post for ${platform} at ${timeStr}`,
+            content: `Scheduled post for ${platform} at ${timeStr}`,
+            platforms: [platform],
+            status: 'published',
+            user_id: userId,
+            is_ai_generated:1,
+            image_url: null,
+            scheduleId: schedule.id,
+            scheduled_at: new Date(today.getFullYear(), today.getMonth(), today.getDate(), h, m),
+            published_at: new Date()
+          });
+          // Run publish logic (simulate platform publish)
+          if (platform === 'facebook') {
+            const fbAccount = await SocialAccount.findOne({
+              where: { user_id: userId, platform: 'Facebook', is_active: 1 }
+            });
+            if (fbAccount && fbAccount.access_token) {
+              try {
+                await facebookPost(fbAccount.access_token, post.content, post.image_url);
+                logger.info('Published to Facebook', { postId: post.id });
+              } catch (err) {
+                logger.error('FB publish error', { postId: post.id, err: err.message });
+              }
+            }
+          }
+          if (platform === 'instagram') {
+            const igAccount = await SocialAccount.findOne({
+              where: { user_id: userId, platform: 'Instagram', is_active: 1 }
+            });
+            if (igAccount && igAccount.access_token) {
+              try {
+                await instagramPost(igAccount.access_token, post.content, post.image_url);
+                logger.info('Published to IG', { postId: post.id });
+              } catch (err) {
+                logger.error('IG publish error', { postId: post.id, err: err.message });
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
   console.log("Parsed parsedSchedule.times:", parsedSchedule.times);
 
   const isDue = await matchesSchedule(parsedSchedule, now);
@@ -178,12 +243,12 @@ async function processSchedule(scheduleId) {
   return anyPublished;
 }
 
+
 // worker bootstrap
 (async () => {
   try {
     const scheduleId = workerData.scheduleId;
-
-    console.log("scheduleId",scheduleId)
+    //console.log("scheduleId",scheduleId)
     await processSchedule(scheduleId);
     parentPort.postMessage({ status: 'done', scheduleId });
     process.exit(0);
