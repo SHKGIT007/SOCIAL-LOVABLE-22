@@ -53,3 +53,4 @@
 {"error":"Stale request - reported time is 2025-11-07 16:12:00 +0000 which is more than 1 hour ago","level":"error","message":"Cloudinary upload error (image_url from body)","service":"social-lovable-api","timestamp":"2025-11-07T16:12:02.404Z"}
 {"error":"Stale request - reported time is 2025-11-07 16:21:44 +0000 which is more than 1 hour ago","level":"error","message":"Cloudinary upload error (image_url from body)","service":"social-lovable-api","timestamp":"2025-11-07T16:21:46.022Z"}
 {"err":"Data truncated for column 'status' at row 1","level":"error","message":"Schedule worker error","scheduleId":1,"service":"social-lovable-api","timestamp":"2025-11-08T08:28:00.953Z"}
+{"err":"Facebook post failed","level":"error","message":"FB publish error","postId":3,"service":"social-lovable-api","timestamp":"2025-11-08T09:05:01.039Z"}

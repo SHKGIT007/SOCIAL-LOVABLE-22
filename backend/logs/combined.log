@@ -417,3 +417,6 @@
 {"level":"info","message":"Scheduled post published to Facebook","postId":3,"service":"social-lovable-api","timestamp":"2025-11-08T07:03:02.854Z","userId":2}
 {"err":"Data truncated for column 'status' at row 1","level":"error","message":"Schedule worker error","scheduleId":1,"service":"social-lovable-api","timestamp":"2025-11-08T08:28:00.953Z"}
 {"level":"info","message":"Published to Facebook","postId":1,"service":"social-lovable-api","timestamp":"2025-11-08T08:49:03.344Z"}
+{"level":"info","message":"Published to Facebook","postId":2,"service":"social-lovable-api","timestamp":"2025-11-08T08:58:03.668Z"}
+{"err":"Facebook post failed","level":"error","message":"FB publish error","postId":3,"service":"social-lovable-api","timestamp":"2025-11-08T09:05:01.039Z"}
+{"level":"info","message":"Published to Facebook","postId":4,"service":"social-lovable-api","timestamp":"2025-11-08T09:15:13.331Z"}
