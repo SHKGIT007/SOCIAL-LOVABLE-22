@@ -66,6 +66,7 @@ export const API_CONFIG = {
       TOGGLE_STATUS: '/social-accounts',
       REFRESH_TOKEN: '/social-accounts',
       UPDATE_CREDENTIALS: '/social-accounts/credentials',
+      GET_CONNECTED_ACCOUNTS: '/social-accounts/connected-accounts'
     }
   }
 };

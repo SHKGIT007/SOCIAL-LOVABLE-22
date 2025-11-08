@@ -2,60 +2,149 @@ const { Subscription, Plan, User } = require('../models');
 const { Op } = require('sequelize');
 const { asyncHandler } = require('../middleware/error.middleware');
 const logger = require('../config/logger');
+const moment = require('moment-timezone');
+
+  //const createSubscription = asyncHandler(async (req, res) => {
+        //     const { plan_id } = req.body;
+        //     const userId = req.user.id;
+
+        //     // Check if plan exists
+        //     const plan = await Plan.findByPk(plan_id);
+        //     if (!plan) {
+        //         return res.status(404).json({
+        //             status: false,
+        //             message: 'Plan not found'
+        //         });
+        //     }
+
+        //     if (!plan.is_active) {
+        //         return res.status(400).json({
+        //             status: false,
+        //             message: 'Plan is not active'
+        //         });
+        //     }
+
+        //     // Check if user already has an active subscription
+        //     const existingSubscription = await Subscription.findOne({
+        //         where: { user_id: userId, status: 'active' }
+        //     });
+
+        //     if (existingSubscription) {
+        //         return res.status(400).json({
+        //             status: false,
+        //             message: 'User already has an active subscription'
+        //         });
+        //     }
+
+        //     const subscription = await Subscription.create({
+        //         user_id: userId,
+        //         plan_id,
+        //         start_date: start_date || new Date(),
+        //         end_date: end_date || null,
+        //         status: 'active',
+        //         posts_used: 0,
+        //         ai_posts_used: 0,
+        //         auto_renew: true
+        //     });
+
+        //     logger.info('Subscription created', { subscriptionId: subscription.id, userId, planId: plan_id });
+
+        //     res.status(201).json({
+        //         status: true,
+        //         message: 'Subscription created successfully',
+        //         data: { subscription }
+        //     });
+    //  });
+
 
 const createSubscription = asyncHandler(async (req, res) => {
-    const { plan_id, start_date, end_date } = req.body;
+    const { plan_id } = req.body;
     const userId = req.user.id;
 
-    // Check if plan exists
+    // ✅ 1. Check if plan exists
     const plan = await Plan.findByPk(plan_id);
     if (!plan) {
         return res.status(404).json({
             status: false,
-            message: 'Plan not found'
+            message: 'Plan not found',
         });
     }
 
     if (!plan.is_active) {
         return res.status(400).json({
             status: false,
-            message: 'Plan is not active'
+            message: 'Plan is not active',
         });
     }
 
-    // Check if user already has an active subscription
+    // ✅ 2. Get current time in IST
+    const currentDate = moment().tz('Asia/Kolkata').startOf('day');
+
+    // ✅ 3. Check if user already has a currently active plan
     const existingSubscription = await Subscription.findOne({
-        where: { user_id: userId, status: 'active' }
+        where: {
+            user_id: userId,
+            status: 'active',
+        },
+        order: [['end_date', 'DESC']], // latest plan
     });
 
-    if (existingSubscription) {
-        return res.status(400).json({
-            status: false,
-            message: 'User already has an active subscription'
-        });
+    let startDate;
+    let endDate;
+
+    if (
+        existingSubscription &&
+        currentDate.isBetween(
+            moment(existingSubscription.start_date).tz('Asia/Kolkata').startOf('day'),
+            moment(existingSubscription.end_date).tz('Asia/Kolkata').endOf('day'),
+            null,
+            '[]'
+        )
+    ) {
+        // ✅ User has active plan
+        // Start new plan from the next day after current plan ends
+        startDate = moment(existingSubscription.end_date)
+            .add(1, 'day')
+            .tz('Asia/Kolkata')
+            .toDate();
+    } else {
+        // ✅ No active plan → start today
+        startDate = currentDate.toDate();
     }
 
+    // ✅ 4. Calculate end date (based on plan duration or default 30 days)
+    const endDateMoment = plan.duration_days
+        ? moment(startDate).add(plan.duration_days, 'days').tz('Asia/Kolkata')
+        : moment(startDate).add(30, 'days').tz('Asia/Kolkata');
+
+    endDate = endDateMoment.toDate();
+
+    // ✅ 5. Create new subscription
     const subscription = await Subscription.create({
         user_id: userId,
         plan_id,
-        start_date: start_date || new Date(),
-        end_date: end_date || null,
+        start_date: startDate,
+        end_date: endDate,
         status: 'active',
         posts_used: 0,
         ai_posts_used: 0,
-        auto_renew: true
+        auto_renew: true,
     });
 
-    logger.info('Subscription created', { subscriptionId: subscription.id, userId, planId: plan_id });
+    logger.info('Subscription created', {
+        subscriptionId: subscription.id,
+        userId,
+        planId: plan_id,
+    });
 
     res.status(201).json({
         status: true,
         message: 'Subscription created successfully',
-        data: { subscription }
+        data: { subscription },
     });
 });
 
-const getAllSubscriptions = asyncHandler(async (req, res) => {
+    const getAllSubscriptions = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10, search, status, user_id } = req.query;
     const offset = (page - 1) * limit;
     const userType = req.user.user_type;

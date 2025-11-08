@@ -12,5 +12,4 @@ router.get('/facebook/callback', authenticateToken, socialAccountController.face
 // Instagram OAuth2
 router.get('/instagram', authenticateToken, socialAccountController.instagramOAuthInit);
 router.get('/instagram/callback', authenticateToken, socialAccountController.instagramOAuthCallback);
-
 module.exports = router;

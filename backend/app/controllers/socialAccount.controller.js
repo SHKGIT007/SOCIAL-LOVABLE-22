@@ -1,20 +1,32 @@
 
-const { SocialAccount, User } = require('../models');
+const { SocialAccount, User, Subscription, Plan } = require('../models');
 const { Op } = require('sequelize');
 const { asyncHandler } = require('../middleware/error.middleware');
 const logger = require('../config/logger');
 const axios = require('axios');
+const moment = require('moment-timezone');
 
 const createSocialAccount = asyncHandler(async (req, res) => {
     const { platform, app_id, app_secret } = req.body;
     const userId = req.user.id;
+    const currentIST = moment().tz('Asia/Kolkata').toDate();
+
+    const current_subscription = await Subscription.findOne({
+        where: {
+            user_id: userId,
+            status: 'active',
+            start_date: { [Op.lte]: currentIST },  // start_date <= current IST
+            end_date: { [Op.gte]: currentIST }     // end_date >= current IST
+        },
+        include: [{ model: Plan, as: 'Plan' }]
+    });
 
     // Check if user already has this platform connected
     const existingAccount = await SocialAccount.findOne({
         where: { user_id: userId, platform }
     });
 
-    if (existingAccount) {
+    if (existingAccount){
         return res.status(409).json({
             status: false,
             message: `${platform} account already connected`
@@ -314,10 +326,7 @@ const refreshSocialAccountToken = asyncHandler(async (req, res) => {
 });
 
 const facebookOAuthInit = (req, res) => {
-
-
   const clientId = process.env.FACEBOOK_CLIENT_ID;
- 
   const redirectUri = `${process.env.BACKEND_URL}/social-accounts/oauth/facebook/callback`;
   const scope = 'pages_manage_posts,pages_read_engagement,pages_show_list,public_profile,email';
   const state = req.user.id;
@@ -408,10 +417,56 @@ const instagramOAuthCallback = async (req, res) => {
     }
 };
 
+const getconnnectedAccounts = asyncHandler(async (req, res) => {
+    const userId = req.body.user_id;
+    const currentDate = moment().tz("Asia/Kolkata").startOf("day").toDate();
+    const current_subscription = await Subscription.findOne({
+        include: [
+            { model: Plan, as: 'Plan',
+              attributes: ['id', 'name', 'linked_accounts']
+            },  
+        ],
+        where: {
+            user_id: userId,
+            status: "active",
+            start_date: { [Op.lte]: currentDate },
+            end_date: { [Op.gte]: currentDate },
+        },
+        order: [["end_date", "DESC"]],
+        attributes: [
+            "id",
+        ],
+    });
+    
+    if(!current_subscription){
+        return  res.json({
+            status: false,
+            message: "No active subscription found",
+            limitcount: 0,
+            activecount: 0
+        });
+    }
+
+    console.log("Current Subscription:", current_subscription);
+    const activeLinkedCount = await SocialAccount.count({
+        where: {
+            user_id: userId,
+            is_active: true
+        }
+    });
+
+    return res.json({
+        status: true,
+        limitcount: current_subscription.Plan ? current_subscription.Plan.linked_accounts : 0,
+        activecount: activeLinkedCount
+    });
+});
+
+
 module.exports = {
     createSocialAccount,
     getAllSocialAccounts,
-    getUserSocialAccounts,
+    getUserSocialAccounts, 
     getSocialAccountById,
     updateSocialAccount,
     deleteSocialAccount,
@@ -421,5 +476,6 @@ module.exports = {
     facebookOAuthInit,
     facebookOAuthCallback,
     instagramOAuthInit,
-    instagramOAuthCallback
+    instagramOAuthCallback,
+    getconnnectedAccounts
 };

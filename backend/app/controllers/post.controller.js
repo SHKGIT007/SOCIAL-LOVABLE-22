@@ -13,15 +13,16 @@ require('dotenv').config();
 const fs = require('fs');
 const { type } = require('os');
 const cloudinary = require('cloudinary').v2;
+const moment = require('moment-timezone');
 
 
 
 const createPost = asyncHandler(async (req, res) => {
     // Debug: Log incoming form data and files
-    console.log("req.body:", req.body);
-    console.log("req.files:", req.files);
-    console.log("platforms:", req.body.platforms);
-    console.log("platforms:", typeof req.body.platforms);
+    // console.log("req.body:", req.body);
+    // console.log("req.files:", req.files);
+    // console.log("platforms:", req.body.platforms);
+    // console.log("platforms:", typeof req.body.platforms);
 
 
     // Support for file uploads (image/video)
@@ -39,8 +40,6 @@ const createPost = asyncHandler(async (req, res) => {
             platforms = [platforms];
         }
     }
-
-
 
     // Use environment variables for upload directory and public URL
     const UPLOAD_DIR = process.env.UPLOAD_DIR || '/var/www/socialvibe/uploads';
@@ -123,22 +122,22 @@ const createPost = asyncHandler(async (req, res) => {
         include: [{ model: Plan, as: 'Plan' }]
     });
 
-    if (subscription) {
-        const plan = subscription.Plan;
-        if (subscription.posts_used >= plan.monthly_posts) {
-            return res.status(400).json({
-                status: false,
-                message: 'Monthly post limit reached'
-            });
-        }
+    // if (subscription) {
+    //     const plan = subscription.Plan;
+    //     if (subscription.posts_used >= plan.monthly_posts) {
+    //         return res.status(400).json({
+    //             status: false,
+    //             message: 'Monthly post limit reached'
+    //         });
+    //     }
 
-        if (req.body.is_ai_generated && subscription.ai_posts_used >= plan.ai_posts) {
-            return res.status(400).json({
-                status: false,
-                message: 'Monthly AI post limit reached'
-            });
-        }
-    }
+    //     if (req.body.is_ai_generated && subscription.ai_posts_used >= plan.ai_posts) {
+    //         return res.status(400).json({
+    //             status: false,
+    //             message: 'Monthly AI post limit reached'
+    //         });
+    //     }
+    // }
 
 
 
@@ -164,7 +163,7 @@ const createPost = asyncHandler(async (req, res) => {
         await Subscription.update(
             {
                 posts_used: subscription.posts_used + 1,
-                ai_posts_used: is_ai_generated ? subscription.ai_posts_used + 1 : subscription.ai_posts_used
+                // ai_posts_used: is_ai_generated ? subscription.ai_posts_used + 1 : subscription.ai_posts_used
             },
             { where: { id: subscription.id } }
         );
@@ -173,8 +172,7 @@ const createPost = asyncHandler(async (req, res) => {
 
 
     // Publish logic for Facebook and Instagram
-    if (status === 'published' && Array.isArray(platforms)) {
-
+    if (req.body.status === 'published' && Array.isArray(platforms)) {
 
         console.log("Publishing to platformsLLLLLLLLLLLLLLLLLLL:", platforms);
         let publishResults = {};
@@ -430,64 +428,51 @@ const deletePost = asyncHandler(async (req, res) => {
     });
 });
 
-const generateAIPost = asyncHandler(async (req, res) => {
+// const generateAIPost = asyncHandler(async (req, res) => {
 
-    let { title, ai_prompt, image_prompt } = req.body;
-    const userId = req.user.id;
-    ai_prompt = title ? `Title: ${title}\nDetails: ${ai_prompt}` : ai_prompt;
+//     let { title, ai_prompt, image_prompt } = req.body;
+//     const userId = req.user.id;
+//     ai_prompt = title ? `Title: ${title}\nDetails: ${ai_prompt}` : ai_prompt;
 
-    //let ss = await example1()
-    const subscription = await Subscription.findOne({
-        where: { user_id: userId, status: 'active' },
-        include: [{ model: Plan, as: 'Plan' }]
-    });
+//     //let ss = await example1()
+//     const subscription = await Subscription.findOne({
+//         where: { user_id: userId, status: 'active' },
+//         include: [{ model: Plan, as: 'Plan' }]
+//     });
 
-    if (subscription && subscription.ai_posts_used >= subscription.Plan.ai_posts) {
-        return res.status(400).json({
-            status: false,
-            message: 'Monthly AI post limit reached'
-        });
-    }
-    let generatedContent = '';
-    let imageUrl = '';
+//     if (subscription && subscription.ai_posts_used >= subscription.Plan.ai_posts) {
+//         return res.status(400).json({
+//             status: false,
+//             message: 'Monthly AI post limit reached'
+//         });
+//     }
+    
+//     let generatedContent = '';
+//     let imageUrl = '';
 
-    if (image_prompt !== '') {
-        const imageObj = await generateImagePollinations(image_prompt);
-        imageUrl = imageObj.url || '';
-    }
-    generatedContent = await generateAIContent(ai_prompt);
-    if (generatedContent.status == false) {
-        return res.status(500).json({
-            status: false,
-            message: JSON.stringify(generatedContent.msg),
-            error: generatedContent.msg
-        });
-    }
-    logger.info('AI post generated', { userId, ai_prompt });
-
-    // Save generated post in DB
-    const aiPost = await AiGenratePost.create({
-        user_id: userId,
-        title: title || 'AI Generated Post',
-        content: generatedContent.content,
-        ai_prompt: ai_prompt,
-        is_ai_generated:1,
-        image_prompt: image_prompt || null,
-        image_url: imageUrl || null
-    });
-
-
-
-    return res.json({
-        status: true,
-        message: 'AI post generated successfully',
-        data: {
-            content: generatedContent.content,
-            ai_prompt: ai_prompt,
-            imageUrl: imageUrl
-        }
-    });
-});
+//     if (image_prompt !== '') {
+//         const imageObj = await generateImagePollinations(image_prompt);
+//         imageUrl = imageObj.url || '';
+//     }
+//     generatedContent = await generateAIContent(ai_prompt);
+//     if (generatedContent.status == false) {
+//         return res.status(500).json({
+//             status: false,
+//             message: JSON.stringify(generatedContent.msg),
+//             error: generatedContent.msg
+//         });
+//     }
+//     logger.info('AI post generated', { userId, ai_prompt });
+//     return res.json({
+//         status: true,
+//         message: 'AI post generated successfully',
+//         data: {
+//             content: generatedContent.content,
+//             ai_prompt: ai_prompt,
+//             imageUrl: imageUrl
+//         }
+//     });
+// });
 
 
 
@@ -500,6 +485,89 @@ const generateAIPost = asyncHandler(async (req, res) => {
 // const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 // const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
+const generateAIPost = asyncHandler(async (req, res) => {
+    let { title, ai_prompt, image_prompt } = req.body;
+    const userId = req.user.id;
+
+    ai_prompt = title ? `Title: ${title}\nDetails: ${ai_prompt}` : ai_prompt;
+
+    // ✅ Get current IST date for comparison
+    const currentIST = moment().tz('Asia/Kolkata');
+
+    // ✅ Find active subscription based on status and date range
+    const subscription = await Subscription.findOne({
+        where: {
+            user_id: userId,
+            status: 'active'
+        },
+        include: [{ model: Plan, as: 'Plan' }],
+        order: [['end_date', 'DESC']]
+    });
+
+    // ✅ Check if user has an active subscription valid for current date
+    if (
+        !subscription ||
+        !subscription.Plan ||
+        !currentIST.isBetween(
+            moment(subscription.start_date).tz('Asia/Kolkata').startOf('day'),
+            moment(subscription.end_date).tz('Asia/Kolkata').endOf('day'),
+            null,
+            '[]'
+        )
+    ) {
+        return res.status(400).json({
+            status: false,
+            message: 'No active subscription found. Please purchase or renew your plan.'
+        });
+    }
+
+    // ✅ Check AI post limit
+    if (subscription.ai_posts_used >= subscription.Plan.ai_posts) {
+        return res.status(400).json({
+            status: false,
+            message: 'Monthly AI post limit reached. Upgrade your plan or wait for renewal.'
+        });
+    }
+
+    // ✅ Generate AI post content & image
+    let generatedContent = '';
+    let imageUrl = '';
+
+    if (image_prompt && image_prompt.trim() !== '') {
+        const imageObj = await generateImagePollinations(image_prompt);
+        imageUrl = imageObj.url || '';
+    }
+
+    generatedContent = await generateAIContent(ai_prompt);
+    if (generatedContent.status === false) {
+        return res.status(500).json({
+            status: false,
+            message: JSON.stringify(generatedContent.msg),
+            error: generatedContent.msg
+        });
+    }
+
+    // ✅ Log and respond
+    logger.info('AI post generated', { userId, ai_prompt });
+     
+        await Subscription.update(
+            {
+                //posts_used: subscription.posts_used + 1,
+                ai_posts_used: subscription.ai_posts_used + 1
+            },
+            { where: { id: subscription.id } }
+        );
+
+    return res.json({
+        status: true,
+        message: 'AI post generated successfully',
+        data: {
+            content: generatedContent.content,
+            ai_prompt: ai_prompt,
+            imageUrl: imageUrl
+        }
+    });
+});
 
 async function getGroqConfig() {
     const setting = await SystemSetting.findOne({ where: { id: 1 } });

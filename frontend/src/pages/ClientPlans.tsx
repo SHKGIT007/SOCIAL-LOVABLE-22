@@ -79,7 +79,7 @@ const ClientPlans = () => {
 
       const response = await apiService.createSubscription({
         plan_id: planId,
-        start_date: new Date().toISOString(),
+        // start_date: new Date().toISOString(),
       });
 
       if (response.status) {
@@ -178,35 +178,27 @@ const ClientPlans = () => {
               <CardTitle className="text-gray-800">Current Subscription</CardTitle>
               <CardDescription>Your active plan details</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div className="flex items-center justify-between rounded-lg border bg-white px-3 py-2">
-                  <span className="font-medium text-gray-700">Plan</span>
-                  <Badge variant="secondary" className="capitalize">
-                    {currentSubscription.plans?.name}
-                  </Badge>
+            <CardContent>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="font-medium">Plan:</span>
+                  <Badge>{currentSubscription.Plan?.name}</Badge>
                 </div>
-                <div className="flex items-center justify-between rounded-lg border bg-white px-3 py-2">
-                  <span className="font-medium text-gray-700">Status</span>
-                  <Badge variant="default" className="capitalize">
-                    {currentSubscription.status}
-                  </Badge>
+                {/* <div className="flex justify-between">
+                  <span className="font-medium">Posts Used:</span>
+                  <span>{currentSubscription.posts_used} / {currentSubscription.plans?.monthly_posts}</span>
+                </div> */}
+                <div className="flex justify-between">
+                  <span className="font-medium">AI Posts Used:</span>
+                  <span>{currentSubscription.ai_posts_used} / {currentSubscription.Plan?.ai_posts}</span>
                 </div>
-                <div className="flex items-center justify-between rounded-lg border bg-white px-3 py-2">
-                  <span className="font-medium text-gray-700">Posts Used</span>
-                  <span className="text-gray-800">
-                    {currentSubscription.posts_used} / {currentSubscription.plans?.monthly_posts}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between rounded-lg border bg-white px-3 py-2">
-                  <span className="font-medium text-gray-700">AI Posts Used</span>
-                  <span className="text-gray-800">
-                    {currentSubscription.ai_posts_used} / {currentSubscription.plans?.ai_posts}
-                  </span>
+                <div className="flex justify-between">
+                  <span className="font-medium">Status:</span>
+                  <Badge style={{ backgroundColor: "green" }}>{currentSubscription.status}</Badge>
                 </div>
               </div>
             </CardContent>
-            <CardFooter className="flex justify-end">
+            {/* <CardFooter>
               <Button
                 variant="destructive"
                 onClick={handleCancelSubscription}
@@ -215,7 +207,7 @@ const ClientPlans = () => {
               >
                 Cancel Subscription
               </Button>
-            </CardFooter>
+            </CardFooter> */}
           </Card>
         )}
 
