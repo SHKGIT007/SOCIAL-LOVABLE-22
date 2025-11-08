@@ -116,6 +116,8 @@ async function processSchedule(scheduleId) {
             platforms: [platform],
             status: 'published',
             user_id: userId,
+            is_ai_generated:1,
+            image_url: null,
             scheduleId: schedule.id,
             scheduled_at: new Date(today.getFullYear(), today.getMonth(), today.getDate(), h, m),
             published_at: new Date()
