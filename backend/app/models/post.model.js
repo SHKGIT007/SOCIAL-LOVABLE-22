@@ -29,18 +29,10 @@ const Post = sequelize.define('Post', {
         allowNull: false,
         defaultValue: 'draft',
     },
-    content: {
-        type: DataTypes.TEXT('long'),
+    is_ai_generated: {
+        type: DataTypes.BOOLEAN,
         allowNull: false,
-        // Ensure support for emojis/unicode
-        get() {
-            const rawValue = this.getDataValue('content');
-            return rawValue;
-        }
-    },
-    platforms: {
-        type: DataTypes.JSON,
-        allowNull: false,
+        defaultValue: false,
     },
     ai_prompt: {
         type: DataTypes.TEXT,
@@ -57,6 +49,10 @@ const Post = sequelize.define('Post', {
     user_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
+        references: {
+            model: 'users',
+            key: 'id'
+        }
     },
     category: {
         type: DataTypes.STRING,
@@ -79,23 +75,29 @@ const Post = sequelize.define('Post', {
         allowNull: true,
     },
     image_url: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: true,
     },
     video_url: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: true,
     },
-    scheduleId: {
+     scheduleId: {
         type: DataTypes.INTEGER,
         allowNull: true,
     },
+
 }, {
+    tableName: 'posts',
     timestamps: true,
     createdAt: 'created_at',
     updatedAt: 'updated_at',
     charset: 'utf8mb4',
     collate: 'utf8mb4_unicode_ci'
 });
+
+Post.associate = (models) => {
+    Post.belongsTo(models.User, { foreignKey: 'user_id', as: 'User' });
+};
 
 module.exports = Post;

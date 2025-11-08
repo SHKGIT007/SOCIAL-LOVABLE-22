@@ -75,63 +75,20 @@ async function processSchedule(scheduleId) {
 
   // Robustly parse JSON fields
   let parsedSchedule = { ...schedule.dataValues };
+  // Parse platforms
   if (typeof parsedSchedule.platforms === 'string') {
     try { parsedSchedule.platforms = JSON.parse(parsedSchedule.platforms); } catch(e){ parsedSchedule.platforms = []; }
   }
+  // Parse days
   if (typeof parsedSchedule.days === 'string') {
     try { parsedSchedule.days = JSON.parse(parsedSchedule.days); } catch(e){ parsedSchedule.days = []; }
   }
+  // Parse times
   if (typeof parsedSchedule.times === 'string') {
     try { parsedSchedule.times = JSON.parse(parsedSchedule.times); } catch(e){ parsedSchedule.times = {}; }
   }
-
-  // For each scheduled time/platform, create a dummy post if not already present
-  const userId = schedule.userId;
-  const platforms = parsedSchedule.platforms || [];
-  const timesObj = parsedSchedule.times || {};
-  const today = now;
-  const dayNames = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
-  const todayName = dayNames[today.getDay()];
-
-  // Determine which day keys to check (daily, todayName, custom_date, single_date)
-  let dayKeys = [];
-  if (Array.isArray(parsedSchedule.days)) {
-    if (parsedSchedule.days.includes('daily')) dayKeys.push('daily');
-    if (parsedSchedule.days.includes(todayName)) dayKeys.push(todayName);
-    if (parsedSchedule.days.includes('custom_date')) dayKeys.push('custom_date');
-    if (parsedSchedule.days.includes('single_date')) dayKeys.push('single_date');
-  }
-
-  for (const dayKey of dayKeys) {
-    const timeSlots = Array.isArray(timesObj[dayKey]) ? timesObj[dayKey] : [];
-    for (const timeStr of timeSlots) {
-      for (const platform of platforms) {
-        // Check if post already exists for this schedule/time/platform/user
-        const existing = await Post.findOne({
-          where: {
-            scheduleId: schedule.id,
-            user_id: userId,
-            scheduled_at: new Date(today.getFullYear(), today.getMonth(), today.getDate(), ...timeStr.split(':').map(Number)),
-            platforms: platform,
-            status: 'scheduled'
-          }
-        });
-        if (!existing) {
-          // Create dummy post
-          await Post.create({
-            title: `Auto Post for ${platform} at ${timeStr}`,
-            content: `Scheduled post for ${platform} at ${timeStr}`,
-            platforms: [platform],
-            status: 'scheduled',
-            user_id: userId,
-            scheduleId: schedule.id,
-            scheduled_at: new Date(today.getFullYear(), today.getMonth(), today.getDate(), ...timeStr.split(':').map(Number)),
-          });
-        }
-      }
-    }
-  }
-
+  
+  
   console.log("Parsed parsedSchedule.times:", parsedSchedule.times);
 
   const isDue = await matchesSchedule(parsedSchedule, now);
