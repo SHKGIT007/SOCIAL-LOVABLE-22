@@ -48,6 +48,8 @@ const defaultSchedule = {
   customDateFrom: null,
   customDateTo: null,
   singleDate: null,
+  content_ai_prompt: '',
+  image_prompt: '',
 };
 const emptyRow = () => ({ ...defaultSchedule });
 
@@ -114,6 +116,10 @@ export default function UserSchedules() {
         updated[idx].singleDate = value;
       } else if (name === 'recurrence') {
         updated[idx] = { ...updated[idx], recurrence: value };
+      } else if (name === 'content_ai_prompt') {
+        updated[idx].content_ai_prompt = value;
+      } else if (name === 'image_prompt') {
+        updated[idx].image_prompt = value;
       }
       return updated;
     });
@@ -197,6 +203,8 @@ export default function UserSchedules() {
       customDateFrom: schedule.customDateFrom || '',
       customDateTo: schedule.customDateTo || '',
       singleDate: schedule.singleDate || '',
+      content_ai_prompt: schedule.content_ai_prompt || '',
+      image_prompt: schedule.image_prompt || '',
     }]);
     setEditingId(schedule.id);
     setModalOpen(true);
@@ -435,6 +443,32 @@ export default function UserSchedules() {
                           </label>
                         ))}
                       </div>
+                    </div>
+
+                    {/* Content Prompt */}
+                    <div className="mb-4">
+                      <label className="text-sm font-semibold text-gray-700 mb-2 block">Content Prompt:</label>
+                      <textarea
+                        name="content_ai_prompt"
+                        value={row.content_ai_prompt || ''}
+                        onChange={e => handleRowChange(idx, e)}
+                        className="w-full p-2 rounded border border-indigo-200 focus:border-indigo-400 focus:ring focus:ring-indigo-100 text-sm"
+                        rows={2}
+                        placeholder="Enter content prompt for AI post generation..."
+                      />
+                    </div>
+
+                    {/* Image Prompt */}
+                    <div className="mb-4">
+                      <label className="text-sm font-semibold text-gray-700 mb-2 block">Image Prompt:</label>
+                      <textarea
+                        name="image_prompt"
+                        value={row.image_prompt || ''}
+                        onChange={e => handleRowChange(idx, e)}
+                        className="w-full p-2 rounded border border-indigo-200 focus:border-indigo-400 focus:ring focus:ring-indigo-100 text-sm"
+                        rows={2}
+                        placeholder="Enter image prompt for AI image generation..."
+                      />
                     </div>
 
                     {/* Frequency / Days */}

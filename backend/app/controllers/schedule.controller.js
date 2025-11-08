@@ -67,6 +67,8 @@ exports.getSchedules = async (req, res) => {
         platforms: parseSafely(s.platforms),
         days: parseSafely(s.days),
         times: parseSafely(s.times),
+        content_ai_prompt: s.content_ai_prompt,
+        image_prompt: s.image_prompt,
       };
     });
 
@@ -111,7 +113,9 @@ exports.updateSchedule = async (req, res) => {
         recurrence, 
         customDateFrom, 
         customDateTo, 
-        singleDate 
+        singleDate,
+        content_ai_prompt: req.body.content_ai_prompt || schedule.content_ai_prompt,
+        image_prompt: req.body.image_prompt || schedule.image_prompt
       }
     );
     res.json({ success: true, data: schedule });

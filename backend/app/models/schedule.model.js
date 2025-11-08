@@ -44,10 +44,10 @@ const Schedule = sequelize.define('Schedule', {
     allowNull: true,
   },
   status: {
-        type: DataTypes.ENUM('0', '1'),
-        allowNull: false,
-        defaultValue: '1',
-   },
+    type: DataTypes.ENUM('0', '1'),
+    allowNull: false,
+    defaultValue: '1',
+  },
   lastRunAt: {
     type: DataTypes.DATE,
     allowNull: true,
@@ -61,6 +61,14 @@ const Schedule = sequelize.define('Schedule', {
     type: DataTypes.TINYINT,
     allowNull: false,
     defaultValue: 0,
+  },
+  content_ai_prompt: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
+  image_prompt: {
+    type: DataTypes.TEXT,
+    allowNull: true,
   },
 }, {
   tableName: 'schedules',
