@@ -1,12 +1,13 @@
 // scheduleWorker.js
 const { parentPort, workerData } = require('worker_threads');
-const { Schedule, Post, SocialAccount, sequelize } = require('../models'); // adjust path
+const { Schedule, Post, SocialAccount, SystemSetting,sequelize } = require('../models'); // adjust path
 const logger =  require('../config/logger');
 // const { facebookPost } = require('./redirectAuth/facebook/facebookPost');
 // const { instagramPost } = require('./redirectAuth/instagram/instagramPost');
 const { facebookPost } = require('../../redirectAuth/facebook/facebookPost');
 const { instagramPost } = require('../../redirectAuth/instagram/instagramPost');
 const { Op } = require('sequelize');
+const axios = require('axios');
 
 async function matchesSchedule(schedule, now) {
   // schedule.platforms, schedule.days and schedule.times are JSON per your table
@@ -101,18 +102,36 @@ async function processSchedule(scheduleId) {
     if (parsedSchedule.days.includes('custom_date')) dayKeys.push('custom_date');
     if (parsedSchedule.days.includes('single_date')) dayKeys.push('single_date');
   }
-  
+   let generatedContent = '';
+   let imageUrl = '';
   for (const dayKey of dayKeys) {
     const timeSlots = Array.isArray(timesObj[dayKey]) ? timesObj[dayKey] : [];
     for (const timeStr of timeSlots) {
+      
+      console.log("Processing auto-post for schedule:", scheduleId, "at parsedSchedule:", parsedSchedule);
+
+      
+       if(!['',null,undefined].includes(parsedSchedule.content_ai_prompt)){
+       generatedContent = await generateAIContent(parsedSchedule.content_ai_prompt);
+       }
+
+       console.log("generatedContent--->>>>:", generatedContent);
+
+
       // Check if current time matches this time slot
       const [h, m] = timeStr.split(':').map(Number);
       if (now.getHours() === h && now.getMinutes() === m) {
+
+
+      
+
+
         for (const platform of platforms) {
           // Create and immediately publish the post
           const post = await Post.create({
             title: `Auto Post for ${platform} at ${timeStr}`,
-            content: `Scheduled post for ${platform} at ${timeStr}`,
+           // content: `Scheduled post for ${platform} at ${timeStr}`,
+            content: generatedContent.content || `Scheduled post for ${platform} at ${timeStr}`,
             platforms: [platform],
             status: 'published',
             user_id: userId,
@@ -257,3 +276,81 @@ async function processSchedule(scheduleId) {
     process.exit(1);
   }
 })();
+
+
+
+
+
+
+async function getGroqConfig() {
+    const setting = await SystemSetting.findOne({ where: { id: 1 } });
+    return {
+        api_key: setting?.api_key || '',
+        api_url: setting?.api_url || 'https://api.groq.com/openai/v1/chat/completions'
+    };
+}
+
+// Main function - AI se content generate karne ke liye
+async function generateAIContent(prompt, options = {}) {
+    try {
+        const {
+            model = 'llama-3.3-70b-versatile',
+            temperature = 0.7,
+            maxTokens = 1024
+        } = options;
+
+        console.log('🚀 Groq AI se request bhej rahe hain...\n');
+
+        // Fetch Groq API key and URL from DB
+        const groqConfig = await getGroqConfig();
+        const groqApiKey = groqConfig.api_key;
+        const groqApiUrl = groqConfig.api_url;
+
+        
+
+        const response = await axios.post(
+            groqApiUrl,
+            {
+                model: model,
+                messages: [
+                    {
+                        role: 'user',
+                        content: prompt
+                    }
+                ],
+                temperature: temperature,
+                max_tokens: maxTokens,
+                top_p: 1,
+                stream: false
+            },
+            {
+                headers: {
+                    'Authorization': `Bearer ${groqApiKey}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+
+        const content = response.data.choices[0].message.content;
+        const usage = response.data.usage;
+
+        console.log('✅ Response mil gaya!\n');
+        console.log('📊 Token Usage:', {
+            prompt: usage.prompt_tokens,
+            completion: usage.completion_tokens,
+            total: usage.total_tokens
+        });
+
+        return { status: true, content: content };
+
+    } catch (error) {
+        if (error.response) {
+            console.log('❌ API Error:', error.response.data);
+            return { status: false, msg: error.response.data };
+        } else {
+            console.log('❌ Error:', error.message);
+            return { status: false, msg: error.message };
+        }
+        throw error;
+    }
+}
