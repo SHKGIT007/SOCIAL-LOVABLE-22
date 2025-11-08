@@ -243,6 +243,7 @@ async function processSchedule(scheduleId) {
   return anyPublished;
 }
 
+
 // worker bootstrap
 (async () => {
   try {
