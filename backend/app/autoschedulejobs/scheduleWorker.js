@@ -256,7 +256,3 @@ async function processSchedule(scheduleId) {
     process.exit(1);
   }
 })();
-
-
-
-// --- IGNORE ---
