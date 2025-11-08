@@ -417,8 +417,14 @@
 {"level":"info","message":"Scheduled post published to Facebook","postId":3,"service":"social-lovable-api","timestamp":"2025-11-08T07:03:02.854Z","userId":2}
 {"err":"Data truncated for column 'status' at row 1","level":"error","message":"Schedule worker error","scheduleId":1,"service":"social-lovable-api","timestamp":"2025-11-08T08:28:00.953Z"}
 {"level":"info","message":"Published to Facebook","postId":1,"service":"social-lovable-api","timestamp":"2025-11-08T08:49:03.344Z"}
+<<<<<<< HEAD
 {"level":"info","message":"Published to Facebook","postId":2,"service":"social-lovable-api","timestamp":"2025-11-08T08:58:03.668Z"}
 {"err":"Facebook post failed","level":"error","message":"FB publish error","postId":3,"service":"social-lovable-api","timestamp":"2025-11-08T09:05:01.039Z"}
 {"level":"info","message":"Published to Facebook","postId":4,"service":"social-lovable-api","timestamp":"2025-11-08T09:15:13.331Z"}
 {"level":"info","message":"Published to Facebook","postId":5,"service":"social-lovable-api","timestamp":"2025-11-08T09:37:06.853Z"}
 {"level":"info","message":"Published to Facebook","postId":6,"service":"social-lovable-api","timestamp":"2025-11-08T09:38:08.202Z"}
+=======
+{"ai_prompt":"Title: Brielle Cannon\nDetails: Business/Creator: Brielle Cannon\nDescription: Molestiae quis dolor\nPlatforms: Autem sunt commodi c\nBrand Voice: Quia duis rem iure n\nHashtags: Dolore et autem in n\nImage Style: Laudantium quis pro\nFestival/Event: Est et et exercitat","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-11-08T09:29:26.386Z","userId":3}
+{"ai_prompt":"Title: Brielle Cannon\nDetails: Business/Creator: Brielle Cannon\nDescription: Molestiae quis dolor\nPlatforms: Autem sunt commodi c\nBrand Voice: Quia duis rem iure n\nHashtags: Dolore et autem in n\nImage Style: Laudantium quis pro\nFestival/Event: Est et et exercitat","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-11-08T09:30:16.745Z","userId":3}
+{"ai_prompt":"Title: Brielle Cannon\nDetails: Business/Creator: Brielle Cannon\nDescription: Molestiae quis dolor\nPlatforms: Autem sunt commodi c\nBrand Voice: Quia duis rem iure n\nHashtags: Dolore et autem in n\nImage Style: Laudantium quis pro\nFestival/Event: Est et et exercitat","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-11-08T09:31:00.948Z","userId":3}
+>>>>>>> f3abb3f88f3055f4542509bef87c23d323254c8a
