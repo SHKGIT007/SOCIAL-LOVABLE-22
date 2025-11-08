@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Nov 08, 2025 at 10:58 AM
+-- Generation Time: Nov 08, 2025 at 12:45 PM
 -- Server version: 5.7.36
 -- PHP Version: 7.4.26
 
@@ -128,7 +128,7 @@ CREATE TABLE IF NOT EXISTS `posts` (
   `updated_at` datetime NOT NULL,
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `posts`
@@ -145,7 +145,8 @@ INSERT INTO `posts` (`id`, `title`, `content`, `platforms`, `status`, `is_ai_gen
 (8, 'Auto Post for facebook at 15:38', 'Scheduled post for facebook at 15:38', '[\"facebook\"]', 'published', 1, NULL, '2025-11-08 10:08:00', '2025-11-08 10:08:01', 2, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 3, '2025-11-08 10:08:01', '2025-11-08 10:08:01'),
 (9, 'jewelery', 'Here\'s a social media post for Tanishq jewelry on Instagram, incorporating the given details:\r\n\r\n**Post:**\r\n\"Holi Hai! \r\nAs we celebrate the festival of colors, let\'s add a touch of gold to our festivities! \r\nIntroducing our stunning collection of yellow jewelry, perfect for the occasion. \r\nFrom elegant necklaces to vibrant earrings, our pieces are designed to make you shine. \r\nAt Tanishq, we believe that jewelry is not just a form of personal adornment, but a symbol of love, tradition, and culture. \r\nSo, why settle for just any color when you can wear the brightest and most beautiful yellow jewelry? \r\n#HoliVibes #YellowJewelry #Tanishq #DpPunjab #JewelryLover #FestivalFashion #GoldJewelry #IndianJewelry #TraditionalElegance\"\r\n\r\n**Image:** A beautiful model wearing a stunning yellow gold necklace, earrings, and bangles, with a vibrant Holi-themed background. The image is bright, colorful, and eye-catching, perfect for the festive occasion.\r\n\r\n**Hashtags:** #DpPunjab #HoliVibes #YellowJewelry #Tanishq #JewelryLover #FestivalFashion #GoldJewelry #IndianJewelry #TraditionalElegance\r\n\r\n**Brand Voice:** The post is written in a tone that reflects Tanishq\'s brand voice, which is elegant, sophisticated, and festive. The language used is descriptive, and the tone is inviting, making the reader want to explore the collection and celebrate Holi with Tanishq\'s beautiful yellow jewelry.', '[\"Facebook\"]', 'published', 1, 'Business/Creator: jewelery\r\nDescription: Jewelry is a form of personal adornment made from precious metals, gemstones, and other decorative materials. It includes items such as necklaces, earrings, rings, bracelets, bangles, and anklets. Jewelry is not only worn for beauty but also symbolizes love, tradition, culture, and status. From ancient times to modern fashion, jewelry has always been an expression of personality and elegance.\r\nPlatforms: instagaram\r\nBrand Voice: tanishq\r\nHashtags: dp punjab\r\nImage Style: yellow jewelery\r\nFestival/Event: holi', NULL, NULL, 2, NULL, NULL, NULL, NULL, 'yellow jewelery', 'https://res.cloudinary.com/diapmjeoc/image/upload/v1762596560/user_2_test/vq0wdoqvrup3bwhmfatv.jpg', NULL, NULL, '2025-11-08 10:09:21', '2025-11-08 10:09:21'),
 (10, 'Auto Post for facebook at 16:02', 'Scheduled post for facebook at 16:02', '[\"facebook\"]', 'published', 1, NULL, '2025-11-08 10:32:00', '2025-11-08 10:32:01', 2, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 3, '2025-11-08 10:32:01', '2025-11-08 10:32:01'),
-(11, 'Auto Post for facebook at 16:16', 'Scheduled post for facebook at 16:16', '[\"facebook\"]', 'published', 1, NULL, '2025-11-08 10:46:00', '2025-11-08 10:46:01', 2, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 3, '2025-11-08 10:46:01', '2025-11-08 10:46:01');
+(11, 'Auto Post for facebook at 16:16', 'Scheduled post for facebook at 16:16', '[\"facebook\"]', 'published', 1, NULL, '2025-11-08 10:46:00', '2025-11-08 10:46:01', 2, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 3, '2025-11-08 10:46:01', '2025-11-08 10:46:01'),
+(12, 'jewelery', 'sdcscf', '[\"Facebook\"]', 'draft', 0, 'Business/Creator: jewelery\r\nDescription: Jewelry is a form of personal adornment made from precious metals, gemstones, and other decorative materials. It includes items such as necklaces, earrings, rings, bracelets, bangles, and anklets. Jewelry is not only worn for beauty but also symbolizes love, tradition, culture, and status. From ancient times to modern fashion, jewelry has always been an expression of personality and elegance.\r\nPlatforms: instagaram\r\nBrand Voice: tanishq\r\nHashtags: dp punjab\r\nImage Style: yellow jewelery\r\nFestival/Event: holi', NULL, NULL, 2, NULL, NULL, NULL, NULL, 'yellow jewelery', NULL, NULL, NULL, '2025-11-08 12:42:44', '2025-11-08 12:42:44');
 
 -- --------------------------------------------------------
 
@@ -223,22 +224,27 @@ CREATE TABLE IF NOT EXISTS `schedules` (
   `lastRunAt` datetime DEFAULT NULL,
   `timezone` varchar(50) NOT NULL DEFAULT 'Asia/Kolkata',
   `isPaused` tinyint(1) NOT NULL DEFAULT '0',
+  `content_ai_prompt` text,
+  `image_prompt` text,
   `status` enum('0','1') NOT NULL DEFAULT '1',
   `createdAt` datetime NOT NULL,
   `updatedAt` datetime NOT NULL,
   PRIMARY KEY (`id`),
   KEY `userId` (`userId`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `schedules`
 --
 
-INSERT INTO `schedules` (`id`, `userId`, `platforms`, `days`, `times`, `recurrence`, `customDateFrom`, `customDateTo`, `singleDate`, `lastRunAt`, `timezone`, `isPaused`, `status`, `createdAt`, `updatedAt`) VALUES
-(1, 2, '[\"facebook\"]', '[\"daily\"]', '{\"daily\": [\"13:58\", \"14:28\", \"14:31\", \"15:13\"]}', NULL, NULL, NULL, NULL, '2025-11-08 10:58:00', 'Asia/Kolkata', 0, '1', '2025-11-08 07:07:59', '2025-11-08 10:58:00'),
-(2, 2, '[\"facebook\"]', '[\"friday\", \"saturday\"]', '{\"friday\": [\"14:17\"], \"saturday\": [\"14:08\"]}', NULL, NULL, NULL, NULL, '2025-11-08 10:58:00', 'Asia/Kolkata', 0, '1', '2025-11-08 08:45:26', '2025-11-08 10:58:00'),
-(3, 2, '[\"facebook\"]', '[\"daily\"]', '{\"daily\": [\"16:16\"]}', NULL, NULL, NULL, NULL, '2025-11-08 10:58:00', 'Asia/Kolkata', 0, '1', '2025-11-08 09:57:05', '2025-11-08 10:58:00'),
-(4, 2, '[\"facebook\"]', '[\"tuesday\"]', '{\"tuesday\": [\"03:27\"]}', NULL, NULL, NULL, NULL, '2025-11-08 10:58:00', 'Asia/Kolkata', 0, '1', '2025-11-08 09:57:05', '2025-11-08 10:58:00');
+INSERT INTO `schedules` (`id`, `userId`, `platforms`, `days`, `times`, `recurrence`, `customDateFrom`, `customDateTo`, `singleDate`, `lastRunAt`, `timezone`, `isPaused`, `content_ai_prompt`, `image_prompt`, `status`, `createdAt`, `updatedAt`) VALUES
+(1, 2, '[\"facebook\"]', '[\"daily\"]', '{\"daily\": [\"13:58\", \"14:28\", \"14:31\", \"15:13\"]}', NULL, NULL, NULL, NULL, '2025-11-08 12:45:00', 'Asia/Kolkata', 0, NULL, NULL, '1', '2025-11-08 07:07:59', '2025-11-08 12:45:00'),
+(2, 2, '[\"facebook\"]', '[\"friday\", \"saturday\"]', '{\"friday\": [\"14:17\"], \"saturday\": [\"14:08\"]}', NULL, NULL, NULL, NULL, '2025-11-08 12:45:00', 'Asia/Kolkata', 0, NULL, NULL, '1', '2025-11-08 08:45:26', '2025-11-08 12:45:00'),
+(3, 2, '[\"facebook\"]', '[\"daily\"]', '{\"daily\": [\"16:16\"]}', NULL, NULL, NULL, NULL, '2025-11-08 12:45:00', 'Asia/Kolkata', 0, NULL, NULL, '1', '2025-11-08 09:57:05', '2025-11-08 12:45:00'),
+(4, 2, '[\"facebook\"]', '[\"tuesday\"]', '{\"tuesday\": [\"03:27\"]}', NULL, NULL, NULL, NULL, '2025-11-08 12:45:00', 'Asia/Kolkata', 0, NULL, NULL, '1', '2025-11-08 09:57:05', '2025-11-08 12:45:00'),
+(5, 2, '[\"facebook\"]', '[\"daily\"]', '{\"daily\": [\"18:51\"]}', NULL, NULL, NULL, NULL, '2025-11-08 12:45:00', 'Asia/Kolkata', 0, 'abc', 'aa', '1', '2025-11-08 12:21:44', '2025-11-08 12:45:00'),
+(6, 2, '[\"facebook\"]', '[\"daily\"]', '{\"daily\": [\"19:52\"]}', NULL, NULL, NULL, NULL, '2025-11-08 12:45:00', 'Asia/Kolkata', 0, 'AAAAAAAAAA', 'DFFFFFFFFFF', '1', '2025-11-08 12:23:28', '2025-11-08 12:45:00'),
+(7, 2, '[\"facebook\"]', '[\"tuesday\"]', '{\"tuesday\": [\"17:53\"]}', NULL, NULL, NULL, NULL, '2025-11-08 12:45:00', 'Asia/Kolkata', 0, 'BBBBBBBBBBBBB', 'NNNNNNNNNNNNN', '1', '2025-11-08 12:23:28', '2025-11-08 12:45:00');
 
 -- --------------------------------------------------------
 
