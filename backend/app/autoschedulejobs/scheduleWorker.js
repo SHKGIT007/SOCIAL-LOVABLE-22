@@ -103,7 +103,7 @@ async function processSchedule(scheduleId) {
     if (parsedSchedule.days.includes('single_date')) dayKeys.push('single_date');
   }
    let generatedContent = '';
-   let imageUrl = '';
+   let imageUrl = null;
   for (const dayKey of dayKeys) {
     const timeSlots = Array.isArray(timesObj[dayKey]) ? timesObj[dayKey] : [];
     for (const timeStr of timeSlots) {
@@ -115,11 +115,17 @@ async function processSchedule(scheduleId) {
        generatedContent = await generateAIContent(parsedSchedule.content_ai_prompt);
        }
 
+       if (!['',null,undefined].includes(parsedSchedule.image_prompt)) {
+        const imageObj = await generateImagePollinations(parsedSchedule.image_prompt);
+        imageUrl = imageObj.url || '';
+      }
+
        console.log("generatedContent--->>>>:", generatedContent);
 
 
       // Check if current time matches this time slot
       const [h, m] = timeStr.split(':').map(Number);
+      let d = 1;
       if (now.getHours() === h && now.getMinutes() === m) {
 
 
@@ -136,7 +142,7 @@ async function processSchedule(scheduleId) {
             status: 'published',
             user_id: userId,
             is_ai_generated:1,
-            image_url: null,
+            image_url: imageUrl || null,
             scheduleId: schedule.id,
             scheduled_at: new Date(today.getFullYear(), today.getMonth(), today.getDate(), h, m),
             published_at: new Date()
@@ -173,7 +179,7 @@ async function processSchedule(scheduleId) {
     }
   }
 
-  console.log("Parsed parsedSchedule.times:", parsedSchedule.times);
+  //console.log("Parsed parsedSchedule.times:", parsedSchedule.times);
 
   const isDue = await matchesSchedule(parsedSchedule, now);
   if (!isDue) return;
@@ -306,7 +312,8 @@ async function generateAIContent(prompt, options = {}) {
         const groqApiKey = groqConfig.api_key;
         const groqApiUrl = groqConfig.api_url;
 
-        
+       // console.log("groqApiKey:", groqApiKey);
+       // console.log("groqApiUrl:", groqApiUrl);
 
         const response = await axios.post(
             groqApiUrl,
@@ -352,5 +359,97 @@ async function generateAIContent(prompt, options = {}) {
             return { status: false, msg: error.message };
         }
         throw error;
+    }
+}
+
+// function for Image generate 
+async function generateImagePollinations(prompt, retries = 3) {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+        try {
+            console.log(`🎨 Image generating... (Attempt ${attempt}/${retries})`);
+            console.log('Prompt:', prompt);
+
+            // Replace spaces with underscores for better Pollinations API compatibility
+            const cleanPrompt = prompt.trim().replace(/\s+/g, '_');
+            const encodedPrompt = encodeURIComponent(cleanPrompt);
+
+            const urls = [
+                `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true`,
+                `https://image.pollinations.ai/prompt/${encodedPrompt}?model=flux&width=1024&height=1024&nologo=true`,
+                `https://pollinations.ai/p/${encodedPrompt}`
+            ];
+
+            const imageUrl = urls[attempt - 1] || urls[0];
+            console.log('Requesting URL:', imageUrl);
+
+            const response = await axios.get(imageUrl, {
+                responseType: 'arraybuffer',
+                timeout: 45000,
+                maxRedirects: 10,
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                }
+            });
+
+            if (!response.data || response.data.length < 1000) {
+                throw new Error('Invalid or empty image received');
+            }
+
+            const filename = `generated_${Date.now()}.png`;
+            // fs.writeFileSync(filename, response.data);
+
+            const sizeKB = (response.data.length / 1024).toFixed(2);
+            console.log(`✅ Image saved: ${filename} (${sizeKB} KB)`);
+
+            return {
+                url: imageUrl,
+                filename,
+                size: response.data.length,
+                prompt: cleanPrompt
+            };
+
+        } catch (error) {
+            console.error(`❌ Attempt ${attempt} failed:`, error.message);
+
+            if (attempt === retries) {
+                console.error('All attempts failed. Using fallback...');
+                return await generateImageFallback(prompt);
+            }
+
+            const waitTime = attempt * 2000;
+            console.log(`⏳ Waiting ${waitTime / 1000}s before retry...`);
+            await new Promise(resolve => setTimeout(resolve, waitTime));
+        }
+    }
+}
+
+async function generateImageFallback(prompt) {
+    try {
+        console.log('🔄 Using fallback API...');
+
+        // Option 1: Picsum (random image based on seed)
+        const seed = prompt.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+        const imageUrl = `https://picsum.photos/seed/${seed}/1024/1024`;
+
+        const response = await axios.get(imageUrl, {
+            responseType: 'arraybuffer',
+            timeout: 30000
+        });
+
+        const filename = `fallback_${Date.now()}.jpg`;
+        // fs.writeFileSync(filename, response.data);
+
+        console.log(`✅ Fallback image saved: ${filename}`);
+        console.log('⚠️ Note: Stock photo (not AI-generated)');
+
+        return {
+            url: imageUrl,
+            filename,
+            size: response.data.length,
+            isFallback: true
+        };
+    } catch (error) {
+        console.error('❌ Fallback failed:', error.message);
+        throw new Error('All image generation methods failed');
     }
 }

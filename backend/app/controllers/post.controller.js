@@ -678,7 +678,7 @@ async function chatWithAI(messages) {
     }
 }
 
-
+// function for Image generate
 async function generateImagePollinations(prompt, retries = 3) {
     for (let attempt = 1; attempt <= retries; attempt++) {
         try {
@@ -739,7 +739,7 @@ async function generateImagePollinations(prompt, retries = 3) {
     }
 }
 
-// ⚠️ YE FUNCTION ADD KARNA PADEGA (missing hai)
+
 async function generateImageFallback(prompt) {
     try {
         console.log('🔄 Using fallback API...');
