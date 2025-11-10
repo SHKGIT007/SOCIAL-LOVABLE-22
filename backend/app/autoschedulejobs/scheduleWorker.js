@@ -119,12 +119,24 @@ async function processSchedule(scheduleId) {
     const timeSlots = Array.isArray(timesObj[dayKey]) ? timesObj[dayKey] : [];
     for (const timeStr of timeSlots) {
       
-      console.log("Processing auto-post for schedule:", scheduleId, "at parsedSchedule:", parsedSchedule);
+     // console.log("Processing auto-post for schedule:", scheduleId, "at parsedSchedule:", parsedSchedule);
 
       
-       if(!['',null,undefined].includes(parsedSchedule.content_ai_prompt)){
+     
+
+
+     
+
+
+      // Check if current time matches this time slot
+      const [h, m] = timeStr.split(':').map(Number);
+      let d = 2;
+      if (now.getHours() === h && now.getMinutes() === m && d===2) {
+
+         if(!['',null,undefined].includes(parsedSchedule.content_ai_prompt)){
        generatedContent = await generateAIContent(parsedSchedule.content_ai_prompt);
        }else{
+       // console.log("profileAiPrompt--->>>>:", profileAiPrompt);
         generatedContent = await generateAIContent(profileAiPrompt);
        }
 
@@ -141,17 +153,6 @@ async function processSchedule(scheduleId) {
       }
 
        console.log("generatedContent--->>>>:", generatedContent);
-
-
-     
-
-
-      // Check if current time matches this time slot
-      const [h, m] = timeStr.split(':').map(Number);
-      let d = 1;
-      if (now.getHours() === h && now.getMinutes() === m) {
-
-
       
 
 
@@ -320,7 +321,7 @@ async function getGroqConfig() {
 }
 
 // Main function - AI se content generate karne ke liye
-async function generateAIContent(prompt, options = {}) {
+async function generateAIContent1(prompt, options = {}) {
     try {
         const {
             model = 'llama-3.3-70b-versatile',
@@ -383,6 +384,75 @@ async function generateAIContent(prompt, options = {}) {
         }
         throw error;
     }
+}
+async function generateAIContent(prompt, options = {}) {
+  const {
+    model = 'llama-3.3-70b-versatile',
+    temperature = 0.7,
+    maxTokens = 1024,
+    retries = 3, // max retry attempts
+    retryDelay = 90000 // default 90 sec if rate limit reached
+  } = options;
+
+  try {
+    console.log('🚀 Groq AI se request bhej rahe hain...\n');
+
+    // Get API config
+    const groqConfig = await getGroqConfig();
+    const groqApiKey = groqConfig.api_key;
+    const groqApiUrl = groqConfig.api_url;
+
+    // Make API request
+    const response = await axios.post(
+      groqApiUrl,
+      {
+        model,
+        messages: [{ role: 'user', content: prompt }],
+        temperature,
+        max_tokens: maxTokens,
+        top_p: 1,
+        stream: false
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${groqApiKey}`,
+          'Content-Type': 'application/json'
+        },
+        timeout: 60000 // 60 sec timeout
+      }
+    );
+
+    const content = response.data.choices[0].message.content;
+    const usage = response.data.usage;
+
+    console.log('✅ Response mil gaya!\n');
+    console.log('📊 Token Usage:', {
+      prompt: usage.prompt_tokens,
+      completion: usage.completion_tokens,
+      total: usage.total_tokens
+    });
+
+    return { status: true, content };
+
+  } catch (error) {
+    // If rate limit reached, wait and retry
+    if (error.response?.data?.error?.code === 'rate_limit_exceeded' && retries > 0) {
+      const waitTime =
+        (error.response.data.error.message.match(/in (\d+m?\d*\.?\d*)s/)?.[1] || 90) * 1000;
+      console.warn(`⚠️ Rate limit reached. Waiting ${waitTime / 1000}s before retry...`);
+      await new Promise(r => setTimeout(r, waitTime));
+      return generateAIContent(prompt, { ...options, retries: retries - 1 });
+    }
+
+    // Other API or network errors
+    if (error.response) {
+      console.error('❌ API Error:', error.response.data);
+      return { status: false, msg: error.response.data };
+    } else {
+      console.error('❌ Error:', error.message);
+      return { status: false, msg: error.message };
+    }
+  }
 }
 
 // function for Image generate 
