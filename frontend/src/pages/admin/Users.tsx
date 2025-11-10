@@ -120,9 +120,9 @@ const Users = () => {
                 <CardTitle className="text-xl font-bold text-gray-800">All Users ({users.length})</CardTitle>
                 <CardDescription>Complete list of registered users and their details.</CardDescription>
             </div>
-            <Button className="bg-indigo-600 hover:bg-indigo-700 shadow-md">
+            {/* <Button className="bg-indigo-600 hover:bg-indigo-700 shadow-md">
                 <User className="mr-2 h-4 w-4" /> Add New User
-            </Button>
+            </Button> */}
           </CardHeader>
           <CardContent>
             <Table>

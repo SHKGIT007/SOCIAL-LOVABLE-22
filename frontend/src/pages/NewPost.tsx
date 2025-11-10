@@ -250,7 +250,7 @@ const NewPost = () => {
                   {imageContent && (
                     <img src={imageContent} alt="Generated" className="rounded-md border max-w-sm" />
                   )}
-                  <Label>Edit Content</Label>
+                  <Label>Edit Caption</Label>
                   <Textarea
                     value={content}
                     onChange={e => setContent(e.target.value)}
