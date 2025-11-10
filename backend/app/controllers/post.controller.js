@@ -579,9 +579,11 @@ async function generateAIContent(prompt, options = {}) {
         return { status: true, content: content };
 
     } catch (error) {
+        console.log("error", error);
+        
         if (error.response) {
             console.log('❌ API Error:', error.response.data);
-            return { status: false, msg: error.response.data };
+            return { status: false, msg: error.response.data.error.message || 'API Error' };
         } else {
             console.log('❌ Error:', error.message);
             return { status: false, msg: error.message };

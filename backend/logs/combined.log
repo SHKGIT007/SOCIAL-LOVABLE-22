@@ -473,6 +473,7 @@
 {"ai_prompt":"Title: jewelery\nDetails: Business/Creator: jewelery\nDescription: Jewelry is a form of personal adornment made from precious metals, gemstones, and other decorative materials. It includes items such as necklaces, earrings, rings, bracelets, bangles, and anklets. Jewelry is not only worn for beauty but also symbolizes love, tradition, culture, and status. From ancient times to modern fashion, jewelry has always been an expression of personality and elegance.\nPlatforms: instagaram\nBrand Voice: tanishq\nHashtags: dp punjab\nImage Style: yellow jewelery\nFestival/Event: holi","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-11-10T04:51:10.912Z","userId":2}
 {"level":"info","message":"Published to Facebook","postId":15,"service":"social-lovable-api","timestamp":"2025-11-10T05:02:07.457Z"}
 {"level":"info","message":"Published to Facebook","postId":16,"service":"social-lovable-api","timestamp":"2025-11-10T05:38:06.135Z"}
+<<<<<<< HEAD
 {"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-10T06:16:09.147Z","userId":2}
 {"level":"info","message":"Subscription created","planId":1,"service":"social-lovable-api","subscriptionId":9,"timestamp":"2025-11-10T06:25:07.855Z","userId":2}
 {"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-10T06:30:47.374Z","userId":1}
@@ -491,3 +492,6 @@
 {"email":"shaktijatpnp09@gmail.com","level":"info","message":"User registered successfully","service":"social-lovable-api","timestamp":"2025-11-10T07:12:22.083Z","userId":15}
 {"email":"shaktijatpnp09@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-10T07:14:12.255Z","userId":15}
 {"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-10T07:15:51.750Z","userId":2}
+=======
+{"level":"info","message":"Subscription created","planId":1,"service":"social-lovable-api","subscriptionId":9,"timestamp":"2025-11-10T07:11:52.865Z","userId":2}
+>>>>>>> b99cc61e6dab80d3063c0942cd10ca7d2cf4805e
