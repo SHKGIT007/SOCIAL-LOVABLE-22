@@ -580,3 +580,5 @@
 >>>>>>> 7798cfc0837975bd06b3018efce9ce75ad56d4f3
 >>>>>>> 950200ebeb8032d8eaf48429dfe6821d51701b15
 {"level":"info","message":"Scheduled post published to Facebook","postId":31,"service":"social-lovable-api","timestamp":"2025-11-10T12:02:03.284Z","userId":2}
+{"level":"info","message":"Post updated","postId":"29","service":"social-lovable-api","timestamp":"2025-11-10T12:05:26.654Z","userId":2}
+{"level":"info","message":"Post updated","postId":"29","service":"social-lovable-api","timestamp":"2025-11-10T12:05:37.586Z","userId":2}
