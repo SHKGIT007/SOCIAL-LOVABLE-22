@@ -474,3 +474,4 @@
 {"level":"info","message":"Published to Facebook","postId":15,"service":"social-lovable-api","timestamp":"2025-11-10T05:02:07.457Z"}
 {"level":"info","message":"Published to Facebook","postId":16,"service":"social-lovable-api","timestamp":"2025-11-10T05:38:06.135Z"}
 {"level":"info","message":"Subscription created","planId":1,"service":"social-lovable-api","subscriptionId":9,"timestamp":"2025-11-10T07:11:52.865Z","userId":2}
+{"level":"info","message":"Subscription created","planId":1,"service":"social-lovable-api","subscriptionId":10,"timestamp":"2025-11-10T09:41:29.508Z","userId":2}

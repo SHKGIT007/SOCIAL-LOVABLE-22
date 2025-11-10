@@ -92,44 +92,41 @@ const createSubscription = asyncHandler(async (req, res) => {
     let startDate;
     let endDate;
 
-    if (
-        existingSubscription &&
-        currentDate.isBetween(
-            moment(existingSubscription.start_date).tz('Asia/Kolkata').startOf('day'),
-            moment(existingSubscription.end_date).tz('Asia/Kolkata').endOf('day'),
-            null,
-            '[]'
-        )
-    ) {
-        // ✅ User has active plan
-        // Start new plan from the next day after current plan ends
-        startDate = moment(existingSubscription.end_date)
-            .add(1, 'day')
-            .tz('Asia/Kolkata')
-            .toDate();
-    } else {
-        // ✅ No active plan → start today
-        startDate = currentDate.toDate();
-    }
+   if (
+    existingSubscription &&
+    currentDate.isBetween(
+        moment(existingSubscription.start_date).tz('Asia/Kolkata').startOf('day'),
+        moment(existingSubscription.end_date).tz('Asia/Kolkata').endOf('day'),
+        null,
+        '[]'
+    )
+) {
+    // ✅ User has active plan → start new plan from next day after current plan ends
+    startDate = moment(existingSubscription.end_date)
+        .tz('Asia/Kolkata')
+        .add(1, 'day')
+        .startOf('day');
+} else {
+    // ✅ No active plan → start today
+    startDate = currentDate.clone();
+}
 
-    // ✅ 4. Calculate end date (based on plan duration or default 30 days)
-    const endDateMoment = plan.duration_days
-        ? moment(startDate).add(plan.duration_days, 'days').tz('Asia/Kolkata')
-        : moment(startDate).add(30, 'days').tz('Asia/Kolkata');
+// ✅ 4. Calculate end date (based on plan duration or default 30 days)
+const endDateMoment = plan.duration_days
+    ? startDate.clone().add(plan.duration_days, 'days').endOf('day')
+    : startDate.clone().add(30, 'days').endOf('day');
 
-    endDate = endDateMoment.toDate();
-
-    // ✅ 5. Create new subscription
-    const subscription = await Subscription.create({
-        user_id: userId,
-        plan_id,
-        start_date: startDate,
-        end_date: endDate,
-        status: 'active',
-        posts_used: 0,
-        ai_posts_used: 0,
-        auto_renew: true,
-    });
+// ✅ Convert to Indian time strings for DB
+const subscription = await Subscription.create({
+    user_id: userId,
+    plan_id,
+    start_date: startDate.format('YYYY-MM-DD HH:mm:ss'),
+    end_date: endDateMoment.format('YYYY-MM-DD HH:mm:ss'),
+    status: 'active',
+    posts_used: 0,
+    ai_posts_used: 0,
+    auto_renew: true,
+});
 
     logger.info('Subscription created', {
         subscriptionId: subscription.id,
