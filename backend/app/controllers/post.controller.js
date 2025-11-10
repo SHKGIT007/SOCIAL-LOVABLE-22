@@ -640,12 +640,12 @@ async function generateAIContent(prompt, options = {}) {
     const content = response.data.choices[0].message.content;
     const usage = response.data.usage;
 
-    console.log('✅ Response mil gaya!\n');
-    console.log('📊 Token Usage:', {
-      prompt: usage.prompt_tokens,
-      completion: usage.completion_tokens,
-      total: usage.total_tokens
-    });
+    // console.log('✅ Response mil gaya!\n');
+    // console.log('📊 Token Usage:', {
+    //   prompt: usage.prompt_tokens,
+    //   completion: usage.completion_tokens,
+    //   total: usage.total_tokens
+    // });
 
     return { status: true, content };
 
