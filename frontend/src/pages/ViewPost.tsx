@@ -183,11 +183,12 @@ const ViewPost = () => {
             {post.image_url && (
               <section className="space-y-3">
                 <h3 className="text-sm font-semibold text-gray-900">Featured Image</h3>
-                <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm bg-gray-50">
+                <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm bg-gray-50 flex justify-start">
                   <img
                     src={post.image_url}
                     alt="Post"
-                    className="w-full max-h-[520px] object-cover"
+                    className="w-auto max-h-72 object-contain "
+                    style={{ alignSelf: "flex-start" }}
                     onError={(e) => {
                       e.currentTarget.onerror = null;
                       e.currentTarget.src = "/no-image.png";

@@ -154,7 +154,7 @@ async function processSchedule(scheduleId) {
     }
   }
 
-  console.log("Parsed parsedSchedule.times:", parsedSchedule.times);
+  // console.log("Parsed parsedSchedule.times:", parsedSchedule.times);
 
   const isDue = await matchesSchedule(parsedSchedule, now);
   if (!isDue) return;

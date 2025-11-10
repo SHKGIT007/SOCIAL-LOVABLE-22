@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
@@ -23,18 +23,43 @@ import SystemSettings from "./pages/admin/SystemSettings";
 import SocialAccounts from "./pages/SocialAccounts";
 import Profile from "./pages/Profile";
 import UserSchedules from "./pages/UserSchedules";
-import { Navigate } from "react-router-dom";
-import { getAuthData } from "@/utils/auth";
-function getUserRole() {
-  const auth = getAuthData && getAuthData();
-  return auth?.user?.role || null;
-}
+import { getAuthData, isAuthenticated } from "@/utils/auth";
 
 const queryClient = new QueryClient();
 
+// Protected Route Component for Client
+function ClientRoute({ children }: { children: React.ReactNode }) {
+  const authData = getAuthData();
+  const userRole = authData?.user?.user_type;
+
+  if (!isAuthenticated()) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  if (userRole === "admin") {
+    return <Navigate to="/admin" replace />;
+  }
+
+  return <>{children}</>;
+}
+
+// Protected Route Component for Admin
+function AdminRoute({ children }: { children: React.ReactNode }) {
+  const authData = getAuthData();
+  const userRole = authData?.user?.user_type;
+
+  if (!isAuthenticated()) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  if (userRole !== "admin") {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <>{children}</>;
+}
 
 function App() {
-  const userRole = getUserRole();
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
@@ -44,25 +69,28 @@ function App() {
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
-            <Route path="/dashboard" element={userRole === "client" ? <Dashboard /> : <Navigate to="/admin" />} />
-            <Route path="/social-accounts" element={userRole === "client" ? <SocialAccounts /> : <Navigate to="/admin" />} />
-            <Route path="/posts" element={userRole === "client" ? <Posts /> : <Navigate to="/admin" />} />
-            <Route path="/posts/new" element={userRole === "client" ? <NewPost /> : <Navigate to="/admin" />} />
-            <Route path="/posts/:id" element={userRole === "client" ? <ViewPost /> : <Navigate to="/admin" />} />
-            <Route path="/posts/edit/:id" element={userRole === "client" ? <EditPost /> : <Navigate to="/admin" />} />
-            <Route path="/plans" element={userRole === "client" ? <ClientPlans /> : <Navigate to="/admin" />} />
-            <Route path="/profile" element={userRole === "client" ? <Profile /> : <Navigate to="/admin" />} />
-            <Route path="/schedules" element={userRole === "client" ? <UserSchedules /> : <Navigate to="/admin" />} />
-            <Route path="/admin" element={userRole === "admin" ? <AdminDashboard /> : <Navigate to="/dashboard" />} />
-            <Route path="/admin/plans" element={userRole === "admin" ? <AdminPlans /> : <Navigate to="/dashboard" />} />
-            <Route path="/admin/users" element={userRole === "admin" ? <AdminUsers /> : <Navigate to="/dashboard" />} />
-            <Route path="/admin/users/:id" element={userRole === "admin" ? <UserDetails /> : <Navigate to="/dashboard" />} />
-            <Route path="/admin/subscriptions" element={userRole === "admin" ? <AdminSubscriptions /> : <Navigate to="/dashboard" />} />
-            <Route path="/admin/posts" element={userRole === "admin" ? <AdminPosts /> : <Navigate to="/dashboard" />} />
-            <Route path="/admin/posts/:id" element={userRole === "admin" ? <AdminViewPost /> : <Navigate to="/dashboard" />} />
-            <Route path="/admin/system-settings" element={userRole === "admin" ? <SystemSettings /> : <Navigate to="/dashboard" />} />
             
-           
+            {/* Client Routes */}
+            <Route path="/dashboard" element={<ClientRoute><Dashboard /></ClientRoute>} />
+            <Route path="/social-accounts" element={<ClientRoute><SocialAccounts /></ClientRoute>} />
+            <Route path="/posts" element={<ClientRoute><Posts /></ClientRoute>} />
+            <Route path="/posts/new" element={<ClientRoute><NewPost /></ClientRoute>} />
+            <Route path="/posts/:id" element={<ClientRoute><ViewPost /></ClientRoute>} />
+            <Route path="/posts/edit/:id" element={<ClientRoute><EditPost /></ClientRoute>} />
+            <Route path="/plans" element={<ClientRoute><ClientPlans /></ClientRoute>} />
+            <Route path="/profile" element={<ClientRoute><Profile /></ClientRoute>} />
+            <Route path="/schedules" element={<ClientRoute><UserSchedules /></ClientRoute>} />
+            
+            {/* Admin Routes */}
+            <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+            <Route path="/admin/plans" element={<AdminRoute><AdminPlans /></AdminRoute>} />
+            <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
+            <Route path="/admin/users/:id" element={<AdminRoute><UserDetails /></AdminRoute>} />
+            <Route path="/admin/subscriptions" element={<AdminRoute><AdminSubscriptions /></AdminRoute>} />
+            <Route path="/admin/posts" element={<AdminRoute><AdminPosts /></AdminRoute>} />
+            <Route path="/admin/posts/:id" element={<AdminRoute><AdminViewPost /></AdminRoute>} />
+            <Route path="/admin/system-settings" element={<AdminRoute><SystemSettings /></AdminRoute>} />
+            
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

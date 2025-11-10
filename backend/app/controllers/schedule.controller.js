@@ -97,8 +97,12 @@ exports.updateSchedule = async (req, res) => {
       recurrence,
       customDateFrom,
       customDateTo,
-      singleDate
+      singleDate,
+      content_ai_prompt,
+      image_prompt
     } = req.body;
+
+
 
     recurrence = recurrence == '' ? null : recurrence;
     customDateFrom = customDateFrom == '' ? null : customDateFrom;
@@ -114,8 +118,8 @@ exports.updateSchedule = async (req, res) => {
         customDateFrom, 
         customDateTo, 
         singleDate,
-        content_ai_prompt: req.body.content_ai_prompt || schedule.content_ai_prompt,
-        image_prompt: req.body.image_prompt || schedule.image_prompt
+        content_ai_prompt: content_ai_prompt || null,
+        image_prompt: image_prompt || null
       }
     );
     res.json({ success: true, data: schedule });

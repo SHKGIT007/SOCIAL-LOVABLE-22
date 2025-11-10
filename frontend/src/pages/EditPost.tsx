@@ -276,7 +276,7 @@ const EditPost = () => {
                     <img
                       src={formData.image_url}
                       alt="Post Image"
-                      className="w-full max-h-72 object-cover"
+                      className="w-auto max-h-72 object-contain "
                       onError={(e) => {
                         e.currentTarget.onerror = null;
                         e.currentTarget.src = "/no-image.png";
@@ -321,32 +321,42 @@ const EditPost = () => {
               </div>
 
               {/* Schedule (conditional) + Image Prompt (2 columns) */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {formData.status === "scheduled" && (
-                  <div className="space-y-2">
-                    <Label htmlFor="scheduled_at">Schedule Date & Time</Label>
-                    <Input
-                      id="scheduled_at"
-                      type="datetime-local"
-                      value={formData.scheduled_at}
-                      onChange={(e) => setFormData({ ...formData, scheduled_at: e.target.value })}
-                      required
-                      className="border-gray-300 focus-visible:ring-indigo-500"
-                    />
-                  </div>
-                )}
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+  {formData.status === "scheduled" && (
+    <div className="space-y-2 md:col-span-4">
+      <Label htmlFor="scheduled_at">Schedule Date & Time</Label>
+      <Input
+        id="scheduled_at"
+        type="datetime-local"
+        value={formData.scheduled_at}
+        onChange={(e) =>
+          setFormData({ ...formData, scheduled_at: e.target.value })
+        }
+        required
+        className="border-gray-300 focus-visible:ring-indigo-500 block"
+      />
+    </div>
+  )}
 
-                <div className="space-y-2">
-                  <Label htmlFor="image_prompt">Image Title / Prompt</Label>
-                  <Input
-                    id="image_prompt"
-                    value={formData.image_prompt || ""}
-                    onChange={(e) => setFormData({ ...formData, image_prompt: e.target.value })}
-                    placeholder="Optional prompt or title for image"
-                    className="border-gray-300 focus-visible:ring-indigo-500"
-                  />
-                </div>
-              </div>
+  <div
+    className={`space-y-2 ${
+      formData.status === "scheduled" ? "md:col-span-8" : "md:col-span-12"
+    }`}
+  >
+    <Label htmlFor="image_prompt">Image Title / Prompt</Label>
+    <Input
+      id="image_prompt"
+      value={formData.image_prompt || ""}
+      onChange={(e) =>
+        setFormData({ ...formData, image_prompt: e.target.value })
+      }
+      placeholder="Optional prompt or title for image"
+       readOnly
+      className="border-gray-300 focus-visible:ring-indigo-500"
+    />
+  </div>
+</div>
+
 
               {/* Image URL (full width) */}
               <div className="space-y-2">
@@ -356,6 +366,7 @@ const EditPost = () => {
                   value={formData.image_url || ""}
                   onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
                   placeholder="https://..."
+                   readOnly
                   className="border-gray-300 focus-visible:ring-indigo-500"
                 />
               </div>
