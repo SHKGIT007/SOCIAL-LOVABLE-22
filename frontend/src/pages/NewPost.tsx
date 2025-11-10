@@ -29,7 +29,13 @@ const NewPost = () => {
   const [imagePrompt, setImagePrompt] = useState("");
 
   const [optionalContentPrompt, setOptionalContentPrompt] = useState("");
-  const [optionalPrompt, setOptionalPrompt] = useState("");
+  const [optionalImagePrompt, setOptionalImagePrompt] = useState("");
+  const [optionalTitlePrompt, setOptionalTitlePrompt] = useState("");
+
+
+  console.log("optionalContentPrompt",optionalContentPrompt)
+  console.log("optionalImagePrompt",optionalImagePrompt)
+
 
 
   const [connectedAccounts, setConnectedAccounts] = useState<any[]>([]);
@@ -71,10 +77,17 @@ const NewPost = () => {
     }
     setIsGenerating(true);
     try {
+      // const res = await apiService.generateAIPost({
+      //   title: title || "AI Generated Post",
+      //   ai_prompt: aiPrompt,
+      //   image_prompt: imagePrompt,
+      // });
+   
       const res = await apiService.generateAIPost({
-        title: title || "AI Generated Post",
-        ai_prompt: aiPrompt,
-        image_prompt: imagePrompt,
+        //title: title || "AI Generated Post",
+        title: ['',null,undefined].includes(optionalTitlePrompt) ?title : optionalTitlePrompt,
+        ai_prompt: ['',null,undefined].includes(optionalContentPrompt) ?aiPrompt : optionalContentPrompt,
+        image_prompt: ['',null,undefined].includes(optionalImagePrompt) ? imagePrompt : optionalImagePrompt,
       });
       if (res.status) {
         setContent(res.data.content);
@@ -174,6 +187,17 @@ const NewPost = () => {
               <CardDescription>Use your brand profile and prompt to generate a post.</CardDescription>
             </CardHeader> */}
             <CardContent className="space-y-4">
+              {/* Optional Title Prompt */}
+              <div className="mb-2">
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Optional Title Prompt</label>
+                <input
+                  type="text"
+                  value={optionalTitlePrompt}
+                  onChange={e => setOptionalTitlePrompt(e.target.value)}
+                  className="w-full p-2 rounded border border-indigo-200 focus:border-indigo-400 focus:ring focus:ring-indigo-100 text-sm"
+                  placeholder="Add extra instructions for AI title..."
+                />
+              </div>
               {/* {aiPrompt && (
                 <div className="space-y-1">
                   <Label>Context/Profile</Label>
@@ -183,6 +207,28 @@ const NewPost = () => {
                 </div>
               )} */}
 
+              {/* Optional Content Prompt */}
+              <div className="mb-2">
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Optional Content Prompt</label>
+                <textarea
+                  value={optionalContentPrompt}
+                  onChange={e => setOptionalContentPrompt(e.target.value)}
+                  className="w-full p-2 rounded border border-indigo-200 focus:border-indigo-400 focus:ring focus:ring-indigo-100 text-sm"
+                  rows={2}
+                  placeholder="Add extra instructions for AI content..."
+                />
+              </div>
+              {/* Optional Image Prompt */}
+              <div className="mb-2">
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Optional Image Prompt</label>
+                <textarea
+                  value={optionalImagePrompt}
+                  onChange={e => setOptionalImagePrompt(e.target.value)}
+                  className="w-full p-2 rounded border border-indigo-200 focus:border-indigo-400 focus:ring focus:ring-indigo-100 text-sm"
+                  rows={2}
+                  placeholder="Add extra instructions for AI image..."
+                />
+              </div>
               <Button
                 onClick={handleGenerateAI}
                 disabled={isGenerating || !aiPrompt}
