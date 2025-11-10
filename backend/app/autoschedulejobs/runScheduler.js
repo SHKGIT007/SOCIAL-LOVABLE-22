@@ -7,7 +7,7 @@ const { claimAndDispatchDueSchedules } = require('./scheduleDispatcher');
 cron.schedule('* * * * *', async () => {
   try {
     await claimAndDispatchDueSchedules();
-    console.log('Checked schedules at --', new Date().toISOString());
+   // console.log('Checked schedules at --', new Date().toISOString());
   } catch (err) {
     console.error('Scheduler error', err);
   }
