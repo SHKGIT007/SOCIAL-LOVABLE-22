@@ -381,6 +381,7 @@ const NewPost = () => {
                   value={scheduledAt}
                   onChange={e => setScheduledAt(e.target.value)}
                   className="border-gray-300 focus-visible:ring-indigo-500"
+                  min={new Date().toISOString().slice(0,16)}
                 />
               </div>
             )}

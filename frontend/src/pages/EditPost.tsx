@@ -257,24 +257,6 @@ const EditPost = () => {
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="status">Status</Label>
-                  <Select
-                    value={formData.status}
-                    onValueChange={(value) => setFormData({ ...formData, status: value })}
-                  >
-                    <SelectTrigger className="border-gray-300 focus-visible:ring-indigo-500">
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {statuses.map((status) => (
-                        <SelectItem key={status} value={status}>
-                          {status.charAt(0).toUpperCase() + status.slice(1)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
               </div>
 
               {/* Content + Preview image */}
@@ -336,10 +318,26 @@ const EditPost = () => {
                 </div>
               </div>
 
-         
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                  <Label htmlFor="status">Status</Label>
+                  <Select
+                    value={formData.status}
+                    onValueChange={(value) => setFormData({ ...formData, status: value })}
+                  >
+                    <SelectTrigger className="border-gray-300 focus-visible:ring-indigo-500">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {statuses.map((status) => (
+                        <SelectItem key={status} value={status}>
+                          {status.charAt(0).toUpperCase() + status.slice(1)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              {/* Schedule (conditional) + Image Prompt (2 columns) */}
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
                 {formData.status === "scheduled" && (
                   <div className="space-y-2 md:col-span-4">
                     <Label htmlFor="scheduled_at">Schedule Date & Time</Label>
@@ -352,6 +350,7 @@ const EditPost = () => {
                       }
                       required
                       className="border-gray-300 focus-visible:ring-indigo-500 block"
+                      min={new Date().toISOString().slice(0,16)}
                     />
                     {formData.scheduled_at && (
                       <div className="text-xs text-gray-500 mt-1">
@@ -376,7 +375,10 @@ const EditPost = () => {
                     className="border-gray-300 focus-visible:ring-indigo-500"
                   />
                 </div>
-              </div>
+            
+                </div>
+              {/* Schedule (conditional) + Image Prompt (2 columns) */}
+              
 
 
               {/* Image URL (full width) */}
