@@ -122,11 +122,6 @@ async function processSchedule(scheduleId) {
      // console.log("Processing auto-post for schedule:", scheduleId, "at parsedSchedule:", parsedSchedule);
 
       
-     
-
-
-     
-
 
       // Check if current time matches this time slot
       const [h, m] = timeStr.split(':').map(Number);
