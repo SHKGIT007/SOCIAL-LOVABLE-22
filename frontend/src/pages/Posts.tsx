@@ -227,23 +227,27 @@ const Posts = () => {
                     >
                       <Eye className="h-4 w-4" />
                     </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="hover:bg-indigo-50"
-                      onClick={() => navigate(`/posts/edit/${post.id}`)}
-                      title="Edit"
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => setDeletePostId(post.id)}
-                      title="Delete"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    {post.status !== "published" && (
+                      <>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="hover:bg-indigo-50"
+                          onClick={() => navigate(`/posts/edit/${post.id}`)}
+                          title="Edit"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => setDeletePostId(post.id)}
+                          title="Delete"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </CardContent>
               </Card>
