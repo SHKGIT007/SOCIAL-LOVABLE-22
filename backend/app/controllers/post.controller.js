@@ -428,56 +428,6 @@ const deletePost = asyncHandler(async (req, res) => {
     });
 });
 
-// const generateAIPost = asyncHandler(async (req, res) => {
-
-//     let { title, ai_prompt, image_prompt } = req.body;
-//     const userId = req.user.id;
-//     ai_prompt = title ? `Title: ${title}\nDetails: ${ai_prompt}` : ai_prompt;
-
-//     //let ss = await example1()
-//     const subscription = await Subscription.findOne({
-//         where: { user_id: userId, status: 'active' },
-//         include: [{ model: Plan, as: 'Plan' }]
-//     });
-
-//     if (subscription && subscription.ai_posts_used >= subscription.Plan.ai_posts) {
-//         return res.status(400).json({
-//             status: false,
-//             message: 'Monthly AI post limit reached'
-//         });
-//     }
-    
-//     let generatedContent = '';
-//     let imageUrl = '';
-
-//     if (image_prompt !== '') {
-//         const imageObj = await generateImagePollinations(image_prompt);
-//         imageUrl = imageObj.url || '';
-//     }
-//     generatedContent = await generateAIContent(ai_prompt);
-//     if (generatedContent.status == false) {
-//         return res.status(500).json({
-//             status: false,
-//             message: JSON.stringify(generatedContent.msg),
-//             error: generatedContent.msg
-//         });
-//     }
-//     logger.info('AI post generated', { userId, ai_prompt });
-//     return res.json({
-//         status: true,
-//         message: 'AI post generated successfully',
-//         data: {
-//             content: generatedContent.content,
-//             ai_prompt: ai_prompt,
-//             imageUrl: imageUrl
-//         }
-//     });
-// });
-
-
-
-
-
 
 ////////////////-------genrrate Ai code  Start------///////////
 

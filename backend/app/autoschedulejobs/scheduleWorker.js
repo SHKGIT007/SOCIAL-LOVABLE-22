@@ -1,6 +1,6 @@
 // scheduleWorker.js
 const { parentPort, workerData } = require('worker_threads');
-const { Schedule, Post, SocialAccount, SystemSetting,sequelize } = require('../models'); // adjust path
+const { Schedule, Post, SocialAccount, SystemSetting,Profile,sequelize } = require('../models'); // adjust path
 const logger =  require('../config/logger');
 // const { facebookPost } = require('./redirectAuth/facebook/facebookPost');
 // const { instagramPost } = require('./redirectAuth/instagram/instagramPost');
@@ -104,6 +104,17 @@ async function processSchedule(scheduleId) {
   }
    let generatedContent = '';
    let imageUrl = null;
+
+   const profileData = await Profile.findOne({ where: { user_id: userId } });
+   let profileAiPrompt = '';
+   let profileImageAiPrompt = '';
+    if(profileData){
+        profileAiPrompt = `Business/Creator: ${profileData?.business_name}\nDescription: ${profileData?.description}\nPlatforms: ${profileData?.platforms}\nBrand Voice: ${profileData?.brand_voice}\nHashtags: ${profileData?.hashtags}`;
+
+        profileImageAiPrompt = profileData?.image_style || '';
+    }
+    
+
   for (const dayKey of dayKeys) {
     const timeSlots = Array.isArray(timesObj[dayKey]) ? timesObj[dayKey] : [];
     for (const timeStr of timeSlots) {
@@ -113,14 +124,26 @@ async function processSchedule(scheduleId) {
       
        if(!['',null,undefined].includes(parsedSchedule.content_ai_prompt)){
        generatedContent = await generateAIContent(parsedSchedule.content_ai_prompt);
+       }else{
+        generatedContent = await generateAIContent(profileAiPrompt);
        }
+
+
 
        if (!['',null,undefined].includes(parsedSchedule.image_prompt)) {
         const imageObj = await generateImagePollinations(parsedSchedule.image_prompt);
         imageUrl = imageObj.url || '';
+      }else{
+        if(!['',null,undefined].includes(profileImageAiPrompt)){
+          const imageObj = await generateImagePollinations(profileImageAiPrompt);
+          imageUrl = imageObj.url || '';
+        }
       }
 
        console.log("generatedContent--->>>>:", generatedContent);
+
+
+     
 
 
       // Check if current time matches this time slot

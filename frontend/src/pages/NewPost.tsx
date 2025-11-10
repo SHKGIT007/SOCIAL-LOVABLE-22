@@ -42,7 +42,7 @@ const NewPost = () => {
         if (profileRes.status && profileRes.data?.profile) {
           const p = profileRes.data.profile;
           setTitle(p.business_name || "");
-          let prompt = `Business/Creator: ${p.business_name}\nDescription: ${p.description}\nPlatforms: ${p.platforms}\nBrand Voice: ${p.brand_voice}\nHashtags: ${p.hashtags}\nImage Style: ${p.image_style}`;
+          let prompt = `Business/Creator: ${p.business_name}\nDescription: ${p.description}\nPlatforms: ${p.platforms}\nBrand Voice: ${p.brand_voice}\nHashtags: ${p.hashtags}`;
           if (p.festival?.trim()) prompt += `\nFestival/Event: ${p.festival}`;
           setAiPrompt(prompt);
           setImagePrompt(p.image_style || "");
