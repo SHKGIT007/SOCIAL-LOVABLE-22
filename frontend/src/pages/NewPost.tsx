@@ -408,7 +408,7 @@ const NewPost = () => {
                   )}
                 </div>
 
-                <div>
+                {/* <div>
                   <Label className="flex items-center gap-2">
                     <Film className="h-4 w-4 text-indigo-600" /> Video Upload
                   </Label>
@@ -428,7 +428,7 @@ const NewPost = () => {
                       className="mt-2 rounded-md border max-w-xs"
                     />
                   )}
-                </div>
+                </div> */}
               </div>
             </CardContent>
           </Card>
