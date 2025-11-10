@@ -64,69 +64,59 @@ const createSubscription = asyncHandler(async (req, res) => {
     // ✅ 1. Check if plan exists
     const plan = await Plan.findByPk(plan_id);
     if (!plan) {
-        return res.status(404).json({
-            status: false,
-            message: 'Plan not found',
-        });
+        return res.status(404).json({ status: false, message: 'Plan not found' });
     }
 
     if (!plan.is_active) {
-        return res.status(400).json({
-            status: false,
-            message: 'Plan is not active',
-        });
+        return res.status(400).json({ status: false, message: 'Plan is not active' });
     }
 
-    // ✅ 2. Get current time in IST
+    // ✅ 2. Get current date in Indian time
     const currentDate = moment().tz('Asia/Kolkata').startOf('day');
 
-    // ✅ 3. Check if user already has a currently active plan
+    // ✅ 3. Check if user has an active plan
     const existingSubscription = await Subscription.findOne({
-        where: {
-            user_id: userId,
-            status: 'active',
-        },
-        order: [['end_date', 'DESC']], // latest plan
+        where: { user_id: userId, status: 'active' },
+        order: [['end_date', 'DESC']],
     });
 
-    let startDate;
-    let endDate;
+    let startDate, endDate;
 
-   if (
-    existingSubscription &&
-    currentDate.isBetween(
-        moment(existingSubscription.start_date).tz('Asia/Kolkata').startOf('day'),
-        moment(existingSubscription.end_date).tz('Asia/Kolkata').endOf('day'),
-        null,
-        '[]'
-    )
-) {
-    // ✅ User has active plan → start new plan from next day after current plan ends
-    startDate = moment(existingSubscription.end_date)
-        .tz('Asia/Kolkata')
-        .add(1, 'day')
-        .startOf('day');
-} else {
-    // ✅ No active plan → start today
-    startDate = currentDate.clone();
-}
+    if (
+        existingSubscription &&
+        currentDate.isBetween(
+            moment(existingSubscription.start_date).tz('Asia/Kolkata').startOf('day'),
+            moment(existingSubscription.end_date).tz('Asia/Kolkata').endOf('day'),
+            null,
+            '[]'
+        )
+    ) {
+        // Active plan found — start from next day after existing end
+        startDate = moment(existingSubscription.end_date)
+            .tz('Asia/Kolkata')
+            .add(1, 'day')
+            .startOf('day');
+    } else {
+        // No active plan — start today
+        startDate = currentDate.clone();
+    }
 
-// ✅ 4. Calculate end date (based on plan duration or default 30 days)
-const endDateMoment = plan.duration_days
-    ? startDate.clone().add(plan.duration_days, 'days').endOf('day')
-    : startDate.clone().add(30, 'days').endOf('day');
+    // ✅ 4. Calculate end date based on plan duration
+    const endDateMoment = plan.duration_days
+        ? startDate.clone().add(plan.duration_days, 'days').endOf('day')
+        : startDate.clone().add(30, 'days').endOf('day');
 
-// ✅ Convert to Indian time strings for DB
-const subscription = await Subscription.create({
-    user_id: userId,
-    plan_id,
-    start_date: startDate.format('YYYY-MM-DD HH:mm:ss'),
-    end_date: endDateMoment.format('YYYY-MM-DD HH:mm:ss'),
-    status: 'active',
-    posts_used: 0,
-    ai_posts_used: 0,
-    auto_renew: true,
-});
+    // ✅ 5. Save as IST formatted strings (not UTC)
+    const subscription = await Subscription.create({
+        user_id: userId,
+        plan_id,
+        start_date: startDate.format('YYYY-MM-DD HH:mm:ss'),
+        end_date: endDateMoment.format('YYYY-MM-DD HH:mm:ss'),
+        status: 'active',
+        posts_used: 0,
+        ai_posts_used: 0,
+        auto_renew: true,
+    });
 
     logger.info('Subscription created', {
         subscriptionId: subscription.id,
@@ -140,6 +130,7 @@ const subscription = await Subscription.create({
         data: { subscription },
     });
 });
+
 
     const getAllSubscriptions = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10, search, status, user_id } = req.query;

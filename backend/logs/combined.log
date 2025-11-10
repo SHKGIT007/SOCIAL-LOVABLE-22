@@ -534,3 +534,5 @@
 {"email":"shaktijatpnp09@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-10T09:41:53.275Z","userId":15}
 {"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-10T09:48:03.394Z","userId":2}
 >>>>>>> 3e8780d99a47683578d48019a43c36b0230204d9
+{"level":"info","message":"Subscription created","planId":1,"service":"social-lovable-api","subscriptionId":11,"timestamp":"2025-11-10T10:27:12.654Z","userId":2}
+{"level":"info","message":"Subscription created","planId":1,"service":"social-lovable-api","subscriptionId":12,"timestamp":"2025-11-10T10:36:14.393Z","userId":2}
