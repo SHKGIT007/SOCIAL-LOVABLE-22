@@ -26,6 +26,11 @@ const createPost = asyncHandler(async (req, res) => {
 
 
     // Support for file uploads (image/video)
+     
+    try {
+        
+   
+
     const userId = req.user.id;
     let image_url = req.body.image_url || null;
     
@@ -225,11 +230,21 @@ const createPost = asyncHandler(async (req, res) => {
     }
     // For scheduled and draft, just save post, do not publish
     //  logger.info('Post created', { postId: post.id, userId });
-    res.status(201).json({
+   return res.status(201).json({
         status: true,
         message: 'Post created successfully',
         data: { post }
     });
+
+     } catch (error) {
+         console.error("Error in createPost:", error);
+         return res.status(500).json({
+        status: false,
+        message: 'Internal server error'
+         });
+
+        
+    }
 });
 
 const getAllPosts = asyncHandler(async (req, res) => {
