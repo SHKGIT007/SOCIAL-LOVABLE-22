@@ -251,128 +251,167 @@ export default function UserSchedules() {
                 <div className="text-gray-400 text-center py-10">No schedules set.</div>
               )}
 
-              {schedules.map(sch => {
-                const isActive = sch.status === '1' || sch.status === 1;
-                return (
-                  <div
-                    key={sch.id}
-                    className={`flex items-center justify-between p-4 rounded-xl shadow-sm border transition-all ${
-                      isActive ? 'bg-indigo-50 border-indigo-200' : 'bg-gray-50 border-gray-200'
-                    }`}
-                  >
-                    <div className="flex items-center gap-4">
-                      <span className="text-3xl">
-                        {isActive ? <Bell className="text-indigo-500" /> : <BellOff className="text-gray-400" />}
-                      </span>
-                      <div>
-                        <div className="text-sm text-gray-700 font-semibold">
-                          Platforms:{' '}
-                          <span className="font-normal">
-                            {Array.isArray(sch.platforms) ? sch.platforms.join(', ') : sch.platforms}
+   {/* GRID WRAPPER */}
+<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-6">
+  {schedules.map((sch) => {
+    const isActive = sch.status === '1' || sch.status === 1;
+    return (
+      <div key={sch.id} className="flex flex-col justify-between p-5 rounded-2xl border shadow-md">
+       <div className="flex items-start justify-between">
+          <div className="flex items-center gap-4">
+            <span className="grid place-items-center h-10 w-10 rounded-full border bg-indigo-100">
+              {isActive ? <Bell className="h-5 w-5 text-indigo-600" /> : <BellOff className="h-5 w-5 text-gray-400" />}
+            </span>
+            <div>
+              <div className="text-sm text-gray-700 font-semibold">
+                Platforms:{' '}
+                <span className="font-normal">
+                  {Array.isArray(sch.platforms) ? sch.platforms.join(', ') : sch.platforms}
+                </span>
+              </div>
+              {sch.recurrence && (
+                <div className="text-xs text-indigo-600 mt-0.5">Recurs: {sch.recurrence}</div>
+              )}
+            </div>
+          </div>
+
+          {/* Toggle Switch */}
+          <ToggleSwitch
+            checked={isActive}
+            onChange={async () => {
+              try {
+                await apiService.toggleScheduleStatus(sch.id, isActive ? '0' : '1');
+                fetchSchedules();
+              } catch {
+                Swal.fire('Error', 'Failed to update status', 'error');
+              }
+            }}
+          />
+        </div>
+
+
+        <div className="flex items-center justify-end gap-3 mt-4 pt-3 border-t border-slate-200">
+          <button
+            type="button"
+            title="View Details"
+            className="p-2 rounded-lg hover:bg-indigo-100 transition"
+            onClick={() => { setViewSchedule(sch); setViewModalOpen(true); }}
+          >
+            <Eye className="h-4 w-4 text-indigo-600" />
+          </button>
+
+          <button
+            type="button"
+            title="Edit"
+            className="p-2 rounded-lg hover:bg-indigo-100 transition"
+            onClick={() => handleEdit(sch)}
+          >
+            <Edit2 className="h-4 w-4 text-indigo-600" />
+          </button>
+
+          <button
+            type="button"
+            title="Delete"
+            className="p-2 rounded-lg hover:bg-rose-100 transition"
+            onClick={() => handleDelete(sch.id)}
+          >
+            <Trash2 className="h-4 w-4 text-rose-600" />
+          </button>
+        </div>
+      </div>
+    );
+  })}
+</div>
+
+{/* SINGLE DIALOG (outside map) */}
+<Dialog open={viewModalOpen} onClose={() => setViewModalOpen(false)} className="fixed inset-0 z-50 overflow-y-auto">
+  <div className="flex items-center justify-center min-h-screen px-4">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" aria-hidden="true" />
+    <Dialog.Panel className="relative w-full max-w-lg mx-auto rounded-2xl shadow-2xl overflow-hidden z-10">
+      <div className="bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-4">
+        <Dialog.Title className="text-white text-xl font-bold flex items-center gap-2">
+          <span className="inline-flex items-center justify-center bg-white/15 rounded-md p-1.5">
+            <Eye className="h-5 w-5 text-white" />
+          </span>
+          Schedule Details
+        </Dialog.Title>
+      </div>
+
+      <div className="bg-white px-6 py-5">
+        {viewSchedule && (
+          <div className="space-y-4">
+            {/* platforms pills */}
+            <div>
+              <div className="text-sm font-semibold text-gray-700 mb-1">Platforms</div>
+              <div className="flex flex-wrap gap-2">
+                {(Array.isArray(viewSchedule.platforms)
+                  ? viewSchedule.platforms
+                  : String(viewSchedule.platforms || '').split(',').map(p => p.trim()))
+                  .filter(Boolean)
+                  .map((p, i) => (
+                    <span key={`${p}-${i}`} className="px-3 py-1.5 text-xs font-medium rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
+                      {p}
+                    </span>
+                  ))}
+              </div>
+            </div>
+
+            {/* days & times */}
+            {viewSchedule.days?.length ? (
+              <div>
+                <div className="text-sm font-semibold text-gray-700 mb-2">Days & Times</div>
+                <ul className="space-y-2">
+                  {viewSchedule.days.map((day) => (
+                    <li key={day} className="rounded-lg border border-slate-200 bg-slate-50/60 px-3 py-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-sm font-medium text-slate-800">{getDayLabel(day)}:</span>
+                        {day === 'custom_date' && (
+                          <span className="text-xs text-slate-500">
+                            {viewSchedule.customDateFrom} to {viewSchedule.customDateTo}
                           </span>
-                        </div>
-                        {sch.recurrence && (
-                          <div className="text-xs text-indigo-600 mt-0.5">Recurs: {sch.recurrence}</div>
+                        )}
+                        {day === 'single_date' && (
+                          <span className="text-xs text-slate-500">{viewSchedule.singleDate}</span>
+                        )}
+                        {viewSchedule.times?.[day]?.filter(Boolean).length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 ml-auto">
+                            {viewSchedule.times[day].filter(Boolean).map((t, idx) => (
+                              <span key={`${day}-${t}-${idx}`} className="px-2 py-0.5 text-xs rounded-md bg-white border border-slate-200 text-slate-700">
+                                {t}
+                              </span>
+                            ))}
+                          </div>
                         )}
                       </div>
-                    </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
 
-                    <div className="flex items-center gap-2">
-                      <ToggleSwitch
-                        checked={isActive}
-                        onChange={async () => {
-                          try {
-                            await apiService.toggleScheduleStatus(sch.id, isActive ? '0' : '1');
-                            fetchSchedules();
-                          } catch {
-                            Swal.fire('Error', 'Failed to update status', 'error');
-                          }
-                        }}
-                      />
+            {viewSchedule?.recurrence && (
+              <div className="text-xs text-indigo-600">
+                Recurs: <span className="font-medium">{viewSchedule.recurrence}</span>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
-                      <button
-                        title="View Details"
-                        className="p-2 rounded hover:bg-indigo-100"
-                        onClick={() => { setViewSchedule(sch); setViewModalOpen(true); }}
-                      >
-                        <Eye className="h-4 w-4 text-indigo-600" />
-                      </button>
+      <div className="bg-slate-50 px-6 py-3 flex justify-end">
+        <button
+          type="button"
+          className="inline-flex items-center px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 shadow"
+          onClick={() => setViewModalOpen(false)}
+        >
+          Close
+        </button>
+      </div>
+    </Dialog.Panel>
+  </div>
+</Dialog>
 
-                      <Dialog open={viewModalOpen} onClose={() => setViewModalOpen(false)} className="fixed inset-0 z-50 overflow-y-auto">
-                        <div className="flex items-center justify-center min-h-screen px-4">
-                          <div className="fixed inset-0 bg-black/40" aria-hidden="true" />
-                          <Dialog.Panel className="relative bg-white rounded-2xl shadow-xl max-w-md w-full mx-auto p-6 z-10">
-                            <Dialog.Title className="text-xl font-bold mb-3 flex items-center gap-2 text-indigo-700">
-                              <Eye className="text-indigo-500" /> Schedule Details
-                            </Dialog.Title>
 
-                            {viewSchedule && (
-                              <div className="space-y-2">
-                                <div className="text-sm font-semibold text-gray-700">
-                                  Platforms:{' '}
-                                  <span className="font-normal">
-                                    {Array.isArray(viewSchedule.platforms) ? viewSchedule.platforms.join(', ') : viewSchedule.platforms}
-                                  </span>
-                                </div>
-
-                                {viewSchedule.days && viewSchedule.days.length > 0 && (
-                                  <div>
-                                    <div className="font-semibold text-indigo-600 mb-1">Days & Times:</div>
-                                    <ul className="list-disc pl-5 space-y-1 text-sm">
-                                      {viewSchedule.days.map(day => (
-                                        <li key={day}>
-                                          <span className="font-medium">{getDayLabel(day)}:</span>
-                                          {day === 'custom_date' && (
-                                            <span className="ml-2 text-xs text-gray-500">
-                                              {viewSchedule.customDateFrom} to {viewSchedule.customDateTo}
-                                            </span>
-                                          )}
-                                          {day === 'single_date' && (
-                                            <span className="ml-2 text-xs text-gray-500">
-                                              {viewSchedule.singleDate}
-                                            </span>
-                                          )}
-                                          {viewSchedule.times && viewSchedule.times[day] && viewSchedule.times[day].length > 0 && (
-                                            <span className="ml-2">
-                                              [
-                                              {viewSchedule.times[day].filter(Boolean).join(', ')}
-                                              ]
-                                            </span>
-                                          )}
-                                        </li>
-                                      ))}
-                                    </ul>
-                                  </div>
-                                )}
-
-                                {viewSchedule.recurrence && (
-                                  <div className="text-xs text-indigo-500">Recurs: {viewSchedule.recurrence}</div>
-                                )}
-
-                                <div className="flex justify-end mt-4">
-                                  <button
-                                    className="px-4 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700"
-                                    onClick={() => setViewModalOpen(false)}
-                                  >
-                                    Close
-                                  </button>
-                                </div>
-                              </div>
-                            )}
-                          </Dialog.Panel>
-                        </div>
-                      </Dialog>
-
-                      <button title="Edit" className="p-2 rounded hover:bg-indigo-100" onClick={() => handleEdit(sch)}>
-                        <Edit2 className="h-4 w-4 text-indigo-600" />
-                      </button>
-                      <button title="Delete" className="p-2 rounded hover:bg-red-100" onClick={() => handleDelete(sch.id)}>
-                        <Trash2 className="h-4 w-4 text-red-600" />
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
             </div>
           </div>
         </div>
