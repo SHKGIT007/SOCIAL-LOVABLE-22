@@ -27,6 +27,11 @@ const NewPost = () => {
   const [scheduledAt, setScheduledAt] = useState("");
   const [aiPrompt, setAiPrompt] = useState("");
   const [imagePrompt, setImagePrompt] = useState("");
+
+  const [optionalContentPrompt, setOptionalContentPrompt] = useState("");
+  const [optionalPrompt, setOptionalPrompt] = useState("");
+
+
   const [connectedAccounts, setConnectedAccounts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
