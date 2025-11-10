@@ -165,7 +165,10 @@ const NewPost = () => {
           {["ai", "manual"].map(m => (
             <button
               key={m}
-              onClick={() => setMode(m as "ai" | "manual")}
+              onClick={() => {
+                setMode(m as "ai" | "manual");
+                setContent("");
+              }}
               className={`flex-1 py-3 text-sm font-semibold rounded-xl transition-all ${
                 mode === m
                   ? "bg-gradient-to-r from-indigo-600 to-cyan-500 text-white shadow-md"
