@@ -3,12 +3,18 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Swal from "sweetalert2";
 import { Loader2 } from "lucide-react";
 import { apiService } from "@/services/api";
-import { setAuthData, isAuthenticated, onAuthStateChange } from "@/utils/auth";
+import { setAuthData, isAuthenticated, getAuthData } from "@/utils/auth";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -22,23 +28,13 @@ const Auth = () => {
 
   useEffect(() => {
     if (isAuthenticated()) {
-      const authData = JSON.parse(localStorage.getItem("authData") || "null");
-      if (authData?.user?.role === "admin") {
+      const authData = getAuthData();
+      if (authData?.user?.user_type === "admin") {
         navigate("/admin");
       } else {
         navigate("/dashboard");
       }
-      return;
     }
-
-    const unsubscribe = onAuthStateChange((authData) => {
-      if (authData) {
-        if (authData.user?.role === "admin") navigate("/admin");
-        else navigate("/dashboard");
-      }
-    });
-
-    return unsubscribe;
   }, [navigate]);
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -48,17 +44,27 @@ const Auth = () => {
       const response = await apiService.login({ email, password });
       if (response.status) {
         setAuthData(response.data);
-        Swal.fire({ icon: "success", title: "Success", text: "Signed in successfully!", confirmButtonColor: "#6366f1" });
-        if (response.data.user?.role === "admin") {
-          window.location.reload();
+        Swal.fire({
+          icon: "success",
+          title: "Success",
+          text: "Signed in successfully!",
+          confirmButtonColor: "#6366f1",
+        });
+
+        // Navigate based on role WITHOUT reload
+        if (response.data.user?.user_type === "admin") {
           navigate("/admin");
         } else {
-          window.location.reload();
           navigate("/dashboard");
         }
       }
     } catch (error: any) {
-      Swal.fire({ icon: "error", title: "Error", text: error.message || "Login failed", confirmButtonColor: "#6366f1" });
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error.message || "Login failed",
+        confirmButtonColor: "#6366f1",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -79,12 +85,27 @@ const Auth = () => {
 
       if (response.status) {
         setAuthData(response.data);
-        Swal.fire({ icon: "success", title: "Success", text: "Account created successfully!", confirmButtonColor: "#6366f1" });
-        if (response.data.user?.role === "admin") navigate("/admin");
-        else navigate("/dashboard");
+        Swal.fire({
+          icon: "success",
+          title: "Success",
+          text: "Account created successfully!",
+          confirmButtonColor: "#6366f1",
+        });
+
+        // Navigate based on role WITHOUT reload
+        if (response.data.user?.user_type === "admin") {
+          navigate("/admin");
+        } else {
+          navigate("/dashboard");
+        }
       }
     } catch (error: any) {
-      Swal.fire({ icon: "error", title: "Error", text: error.message || "Registration failed", confirmButtonColor: "#6366f1" });
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error.message || "Registration failed",
+        confirmButtonColor: "#6366f1",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -95,15 +116,17 @@ const Auth = () => {
       <Card className="w-full max-w-md border-indigo-100/70 shadow-xl rounded-2xl">
         <CardHeader className="space-y-1 text-center">
           <CardTitle className="text-3xl font-extrabold">
-            <span className="bg-gradient-to-r from-indigo-600 to-sky-400 bg-clip-text text-transparent">Welcome</span>{" "}
-           
+            <span className="bg-gradient-to-r from-indigo-600 to-sky-400 bg-clip-text text-transparent">
+              Welcome
+            </span>
           </CardTitle>
-          <CardDescription>Sign in or create an account to get started</CardDescription>
+          <CardDescription>
+            Sign in or create an account to get started
+          </CardDescription>
         </CardHeader>
 
         <CardContent>
           <Tabs defaultValue="signin" className="w-full">
-            {/* FULL-WIDTH, THEMED TABS */}
             <TabsList className="grid w-full grid-cols-2 rounded-xl bg-indigo-50 p-1">
               <TabsTrigger
                 value="signin"
@@ -119,7 +142,6 @@ const Auth = () => {
               </TabsTrigger>
             </TabsList>
 
-            {/* SIGN IN */}
             <TabsContent value="signin" className="mt-6">
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
@@ -150,13 +172,14 @@ const Auth = () => {
                   className="w-full h-10 bg-gradient-to-r from-indigo-600 to-sky-500 hover:from-indigo-500 hover:to-sky-400 text-white shadow-md"
                   disabled={isLoading}
                 >
-                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {isLoading && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
                   Sign In
                 </Button>
               </form>
             </TabsContent>
 
-            {/* SIGN UP */}
             <TabsContent value="signup" className="mt-6">
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
@@ -242,7 +265,9 @@ const Auth = () => {
                   className="w-full h-10 bg-gradient-to-r from-indigo-600 to-sky-500 hover:from-indigo-500 hover:to-sky-400 text-white shadow-md"
                   disabled={isLoading}
                 >
-                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {isLoading && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
                   Sign Up
                 </Button>
               </form>
