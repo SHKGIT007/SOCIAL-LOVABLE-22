@@ -35,7 +35,7 @@ async function publishScheduledPosts() {
         where: { user_id: post.user_id, platform: 'Facebook', is_active: 1 }
       });
 
-      console.log("Facebook Account:", fbAccount);
+      //console.log("Facebook Account:", fbAccount);
       if (fbAccount && fbAccount.access_token) {
         try {
           await facebookPost(fbAccount.access_token, post.content, post.image_url);

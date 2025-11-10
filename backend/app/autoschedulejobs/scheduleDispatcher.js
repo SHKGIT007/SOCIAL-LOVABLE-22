@@ -49,7 +49,7 @@ function spawnWorker(schedule) {
     });
     worker.on('message', (msg) => {
       // msg could be { status: 'done' }
-      console.log('Worker message', msg);
+      //console.log('Worker message', msg);
     });
     worker.on('error', (err) => {
       console.error('Worker error', err);
