@@ -11,9 +11,8 @@ class ApiService {
       body: { status },
     });
   }
-
-
   // Delete a schedule
+  
   async deleteSchedule(id) {
     return this.request(`/schedules/${id}`, {
       method: 'DELETE',
@@ -154,7 +153,6 @@ class ApiService {
       throw error;
     }
   }
-
   // Auth API methods
   async register(userData) {
     return this.request(API_CONFIG.ENDPOINTS.AUTH.REGISTER, {
