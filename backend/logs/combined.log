@@ -485,3 +485,5 @@
 >>>>>>> c3d5692250d70e7ff8956e9b88b775142841c41f
 {"level":"info","message":"Scheduled post published to Facebook","postId":22,"service":"social-lovable-api","timestamp":"2025-11-10T08:21:04.434Z","userId":2}
 {"level":"info","message":"Published to Facebook","postId":23,"service":"social-lovable-api","timestamp":"2025-11-10T08:28:07.854Z"}
+{"level":"info","message":"Published to Facebook","postId":24,"service":"social-lovable-api","timestamp":"2025-11-10T08:58:07.638Z"}
+{"level":"info","message":"Published to Facebook","postId":25,"service":"social-lovable-api","timestamp":"2025-11-10T09:01:06.934Z"}
