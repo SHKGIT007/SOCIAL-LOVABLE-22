@@ -1,3 +1,20 @@
+// Helper to convert UTC ISO string to local datetime-local format
+function toLocalDatetimeLocal(isoString: string) {
+  if (!isoString) return "";
+  const date = new Date(isoString);
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+// Helper to convert UTC/ISO to Asia/Kolkata local datetime-local format
+function toKolkataDatetimeLocal(isoString: string) {
+  if (!isoString) return "";
+  const date = new Date(isoString);
+  // Convert to Asia/Kolkata time
+  const kolkataDate = new Date(date.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+  // Format as YYYY-MM-DDTHH:mm
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  return `${kolkataDate.getFullYear()}-${pad(kolkataDate.getMonth() + 1)}-${pad(kolkataDate.getDate())}T${pad(kolkataDate.getHours())}:${pad(kolkataDate.getMinutes())}`;
+}
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { apiService } from "@/services/api";
@@ -30,7 +47,7 @@ interface FormData {
   category: string;
   tags: string;
   image_prompt: string | null;
-  image_url: string | null; 
+  image_url: string | null;
 }
 
 const EditPost = () => {
@@ -106,7 +123,7 @@ const EditPost = () => {
         platforms: dataPost.platforms,
         status: dataPost.status,
         scheduled_at: dataPost.scheduled_at
-          ? new Date(dataPost.scheduled_at).toISOString().slice(0, 16)
+          ? toLocalDatetimeLocal(dataPost.scheduled_at)
           : "",
         category: dataPost.category || "",
         tags: dataPost.tags ? dataPost.tags.join(", ") : "",
@@ -157,7 +174,7 @@ const EditPost = () => {
         status: formData.status,
         scheduled_at: formData.scheduled_at || null,
         image_prompt: formData.image_prompt || null,
-        image_url : formData.image_url
+        image_url: formData.image_url
       };
 
       await apiService.updatePost(id, updateData);
@@ -301,9 +318,8 @@ const EditPost = () => {
                         <label
                           key={acc.id}
                           htmlFor={`pf-${acc.platform}`}
-                          className={`flex items-center gap-2 rounded-xl border p-3 cursor-pointer transition ${
-                            checked ? "border-indigo-300 bg-indigo-50" : "border-gray-200 hover:bg-gray-50"
-                          }`}
+                          className={`flex items-center gap-2 rounded-xl border p-3 cursor-pointer transition ${checked ? "border-indigo-300 bg-indigo-50" : "border-gray-200 hover:bg-gray-50"
+                            }`}
                         >
                           <Checkbox
                             id={`pf-${acc.platform}`}
@@ -320,41 +336,47 @@ const EditPost = () => {
                 </div>
               </div>
 
+         
+
               {/* Schedule (conditional) + Image Prompt (2 columns) */}
               <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-  {formData.status === "scheduled" && (
-    <div className="space-y-2 md:col-span-4">
-      <Label htmlFor="scheduled_at">Schedule Date & Time</Label>
-      <Input
-        id="scheduled_at"
-        type="datetime-local"
-        value={formData.scheduled_at}
-        onChange={(e) =>
-          setFormData({ ...formData, scheduled_at: e.target.value })
-        }
-        required
-        className="border-gray-300 focus-visible:ring-indigo-500 block"
-      />
-    </div>
-  )}
+                {formData.status === "scheduled" && (
+                  <div className="space-y-2 md:col-span-4">
+                    <Label htmlFor="scheduled_at">Schedule Date & Time</Label>
+                    <Input
+                      id="scheduled_at"
+                      type="datetime-local"
+                      value={formData.scheduled_at}
+                      onChange={(e) =>
+                        setFormData({ ...formData, scheduled_at: e.target.value })
+                      }
+                      required
+                      className="border-gray-300 focus-visible:ring-indigo-500 block"
+                    />
+                    {formData.scheduled_at && (
+                      <div className="text-xs text-gray-500 mt-1">
+                        India Time: {new Date(formData.scheduled_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
+                      </div>
+                    )}
+                  </div>
+                )}
 
-  <div
-    className={`space-y-2 ${
-      formData.status === "scheduled" ? "md:col-span-8" : "md:col-span-12"
-    }`}
-  >
-    <Label htmlFor="image_prompt">Image Title / Prompt</Label>
-    <Input
-      id="image_prompt"
-      value={formData.image_prompt || ""}
-      onChange={(e) =>
-        setFormData({ ...formData, image_prompt: e.target.value })
-      }
-      placeholder="Optional prompt or title for image"
-      className="border-gray-300 focus-visible:ring-indigo-500"
-    />
-  </div>
-</div>
+                <div
+                  className={`space-y-2 ${formData.status === "scheduled" ? "md:col-span-8" : "md:col-span-12"
+                    }`}
+                >
+                  <Label htmlFor="image_prompt">Image Title / Prompt</Label>
+                  <Input
+                    id="image_prompt"
+                    value={formData.image_prompt || ""}
+                    onChange={(e) =>
+                      setFormData({ ...formData, image_prompt: e.target.value })
+                    }
+                    placeholder="Optional prompt or title for image"
+                    className="border-gray-300 focus-visible:ring-indigo-500"
+                  />
+                </div>
+              </div>
 
 
               {/* Image URL (full width) */}

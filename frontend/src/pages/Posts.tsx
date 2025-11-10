@@ -203,8 +203,11 @@ const Posts = () => {
                     ))}
                   </div>
 
+                
+
                   {/* Schedule */}
                   {post.scheduled_at && (
+                  
                     <div className="flex items-center text-sm text-muted-foreground">
                       <Calendar className="mr-2 h-4 w-4" />
                       {new Date(post.scheduled_at).toLocaleString()}
