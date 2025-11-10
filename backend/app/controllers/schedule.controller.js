@@ -16,8 +16,34 @@ exports.toggleScheduleStatus = async (req, res) => {
 // Create a new schedule
 exports.createSchedule = async (req, res) => {
   try {
+    let {
+      platforms,
+      days,
+      times,
+      recurrence,
+      customDateFrom,
+      customDateTo,
+      singleDate,
+      content_ai_prompt,
+      image_prompt
+    } = req.body;
+
+    recurrence = recurrence == '' ? null : recurrence;
+    customDateFrom = customDateFrom == '' ? null : customDateFrom;
+    customDateTo = customDateTo == '' ? null : customDateTo;
+    singleDate = singleDate == "" ? null : singleDate;
+    content_ai_prompt = content_ai_prompt || null;
+    image_prompt = image_prompt || null;
     const schedule = await Schedule.create({
-      ...req.body,
+      platforms,
+      days,
+      times,
+      recurrence,
+      customDateFrom,
+      customDateTo,
+      singleDate,
+      content_ai_prompt,
+      image_prompt,
       userId: req.user.id, // assuming user is set in auth middleware
     });
     res.status(201).json({ success: true, data: schedule });
@@ -107,16 +133,20 @@ exports.updateSchedule = async (req, res) => {
     recurrence = recurrence == '' ? null : recurrence;
     customDateFrom = customDateFrom == '' ? null : customDateFrom;
     customDateTo = customDateTo == '' ? null : customDateTo;
-    singleDate = singleDate == '' ? null : singleDate;
+    singleDate = singleDate == "" ? null : singleDate;
+
+
+
+
 
     await schedule.update(
-      { 
-        platforms, 
-        days, 
-        times, 
-        recurrence, 
-        customDateFrom, 
-        customDateTo, 
+      {
+        platforms,
+        days,
+        times,
+        recurrence,
+        customDateFrom,
+        customDateTo,
         singleDate,
         content_ai_prompt: content_ai_prompt || null,
         image_prompt: image_prompt || null
