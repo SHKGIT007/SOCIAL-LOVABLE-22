@@ -59,6 +59,20 @@ const SocialAccounts = () => {
     }
   };
 
+const getLocalUserId = () => {
+  const raw = localStorage.getItem("social_lovable_auth");
+  if (!raw) return null;
+
+  try {
+    const parsed = JSON.parse(raw);
+    return parsed?.user?.id ?? null;
+  } catch (err) {
+    console.error("Error parsing auth:", err);
+    return null;
+  }
+};
+
+
   const handleSave = async (platform: "Facebook" | "Instagram") => {
     setIsLoading(true);
     let appId = "",
@@ -122,7 +136,7 @@ const SocialAccounts = () => {
 
   const handleConnect = async (platform: "Facebook" | "Instagram") => {
 
-     const user_id = localStorage.getItem("user_id");
+     const user_id = getLocalUserId();
         const connectedAccounts = await apiService.getconnnectedAccounts({ user_id:user_id });
         console.log("Connected Accounts:", connectedAccounts);
         if (connectedAccounts.status == false){

@@ -351,6 +351,7 @@ const EditPost = () => {
         setFormData({ ...formData, image_prompt: e.target.value })
       }
       placeholder="Optional prompt or title for image"
+       readOnly
       className="border-gray-300 focus-visible:ring-indigo-500"
     />
   </div>
@@ -365,6 +366,7 @@ const EditPost = () => {
                   value={formData.image_url || ""}
                   onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
                   placeholder="https://..."
+                   readOnly
                   className="border-gray-300 focus-visible:ring-indigo-500"
                 />
               </div>
