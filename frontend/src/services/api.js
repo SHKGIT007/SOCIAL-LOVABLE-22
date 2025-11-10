@@ -11,8 +11,8 @@ class ApiService {
       body: { status },
     });
   }
-  // Delete a schedule
   
+  // Delete a schedule
   async deleteSchedule(id) {
     return this.request(`/schedules/${id}`, {
       method: 'DELETE',
