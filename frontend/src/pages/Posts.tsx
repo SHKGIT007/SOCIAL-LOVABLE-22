@@ -30,7 +30,14 @@ interface Post {
   created_at: string;
 }
 
+// Helper to filter posts by status
+function filteredPosts(posts: Post[], status: string) {
+  if (status === 'all') return posts;
+  return posts.filter(post => post.status === status);
+}
+
 const Posts = () => {
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const navigate = useNavigate();
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -144,14 +151,21 @@ const Posts = () => {
       <div className="space-y-6">
         {/* Header — gradient kicker + subtitle for theme consistency */}
         <div className="flex items-center justify-between">
-          <div>
+          <div className="flex items-center gap-4">
             <h1 className="flex items-baseline gap-2 text-3xl font-extrabold">
               <span className="bg-gradient-to-r from-indigo-600 to-sky-400 bg-clip-text text-transparent">Posts</span>
-              
             </h1>
-            <p className="text-muted-foreground">Manage your social media posts</p>
+            <select
+              value={statusFilter}
+              onChange={e => setStatusFilter(e.target.value)}
+              className="ml-4 px-3 py-2 rounded-lg border border-indigo-200 text-indigo-700 bg-indigo-50 focus:outline-none focus:ring focus:ring-indigo-100 text-sm font-semibold"
+            >
+              <option value="all">All</option>
+              <option value="draft">Draft</option>
+              <option value="scheduled">Scheduled</option>
+              <option value="published">Published</option>
+            </select>
           </div>
-
           <Button
             onClick={() => navigate("/posts/new")}
             className="h-10 bg-gradient-to-r from-indigo-600 to-sky-500 hover:from-indigo-500 hover:to-sky-400 text-white shadow-md"
@@ -161,7 +175,7 @@ const Posts = () => {
           </Button>
         </div>
 
-        {posts.length === 0 ? (
+  {filteredPosts(posts, statusFilter).length === 0 ? (
           <Card className="border-indigo-100">
             <CardContent className="flex flex-col items-center justify-center py-12">
               <p className="text-muted-foreground mb-4">No posts yet</p>
@@ -176,7 +190,7 @@ const Posts = () => {
           </Card>
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-            {posts.map((post) => (
+            {filteredPosts(posts, statusFilter).map((post) => (
               <Card
                 key={post.id}
                 className="border border-indigo-100/60 hover:border-indigo-200 hover:shadow-lg transition-all"
