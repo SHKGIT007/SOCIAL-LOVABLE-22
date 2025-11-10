@@ -495,3 +495,4 @@
 {"ai_prompt":"Title: animal\nDetails: forest description","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-11-10T10:08:06.061Z","userId":2}
 {"level":"info","message":"Published to Facebook","postId":28,"service":"social-lovable-api","timestamp":"2025-11-10T10:46:08.471Z"}
 {"ai_prompt":"Title: wood\nDetails: wooden spoon","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-11-10T11:09:06.371Z","userId":2}
+{"level":"info","message":"Post updated","postId":"31","service":"social-lovable-api","timestamp":"2025-11-10T11:19:24.367Z","userId":2}
