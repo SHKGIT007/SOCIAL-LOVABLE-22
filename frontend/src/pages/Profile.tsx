@@ -168,7 +168,7 @@ const Profile = () => {
 
                 <div className="flex flex-col space-y-1">
                   <label htmlFor="image_style" className="text-sm font-semibold text-gray-700">
-                    Image Title
+                    Image Prompt
                   </label>
                   <Textarea
                     id="image_style"

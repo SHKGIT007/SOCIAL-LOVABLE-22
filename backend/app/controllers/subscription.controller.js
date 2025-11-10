@@ -64,33 +64,23 @@ const createSubscription = asyncHandler(async (req, res) => {
     // ✅ 1. Check if plan exists
     const plan = await Plan.findByPk(plan_id);
     if (!plan) {
-        return res.status(404).json({
-            status: false,
-            message: 'Plan not found',
-        });
+        return res.status(404).json({ status: false, message: 'Plan not found' });
     }
 
     if (!plan.is_active) {
-        return res.status(400).json({
-            status: false,
-            message: 'Plan is not active',
-        });
+        return res.status(400).json({ status: false, message: 'Plan is not active' });
     }
 
-    // ✅ 2. Get current time in IST
+    // ✅ 2. Get current date in Indian time
     const currentDate = moment().tz('Asia/Kolkata').startOf('day');
 
-    // ✅ 3. Check if user already has a currently active plan
+    // ✅ 3. Check if user has an active plan
     const existingSubscription = await Subscription.findOne({
-        where: {
-            user_id: userId,
-            status: 'active',
-        },
-        order: [['end_date', 'DESC']], // latest plan
+        where: { user_id: userId, status: 'active' },
+        order: [['end_date', 'DESC']],
     });
 
-    let startDate;
-    let endDate;
+    let startDate, endDate;
 
     if (
         existingSubscription &&
@@ -101,30 +91,27 @@ const createSubscription = asyncHandler(async (req, res) => {
             '[]'
         )
     ) {
-        // ✅ User has active plan
-        // Start new plan from the next day after current plan ends
+        // Active plan found — start from next day after existing end
         startDate = moment(existingSubscription.end_date)
-            .add(1, 'day')
             .tz('Asia/Kolkata')
-            .toDate();
+            .add(1, 'day')
+            .startOf('day');
     } else {
-        // ✅ No active plan → start today
-        startDate = currentDate.toDate();
+        // No active plan — start today
+        startDate = currentDate.clone();
     }
 
-    // ✅ 4. Calculate end date (based on plan duration or default 30 days)
+    // ✅ 4. Calculate end date based on plan duration
     const endDateMoment = plan.duration_days
-        ? moment(startDate).add(plan.duration_days, 'days').tz('Asia/Kolkata')
-        : moment(startDate).add(30, 'days').tz('Asia/Kolkata');
+        ? startDate.clone().add(plan.duration_days, 'days').endOf('day')
+        : startDate.clone().add(30, 'days').endOf('day');
 
-    endDate = endDateMoment.toDate();
-
-    // ✅ 5. Create new subscription
+    // ✅ 5. Save as IST formatted strings (not UTC)
     const subscription = await Subscription.create({
         user_id: userId,
         plan_id,
-        start_date: startDate,
-        end_date: endDate,
+        start_date: startDate.format('YYYY-MM-DD HH:mm:ss'),
+        end_date: endDateMoment.format('YYYY-MM-DD HH:mm:ss'),
         status: 'active',
         posts_used: 0,
         ai_posts_used: 0,
@@ -143,6 +130,7 @@ const createSubscription = asyncHandler(async (req, res) => {
         data: { subscription },
     });
 });
+
 
     const getAllSubscriptions = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10, search, status, user_id } = req.query;

@@ -203,7 +203,12 @@ const Posts = () => {
 
                   <div className="flex flex-wrap gap-2 mt-3">
                     <Badge className={statusClasses(post.status)}>{post.status}</Badge>
-                    {post.is_ai_generated && <Badge variant="outline">AI Generated</Badge>}
+                {post.is_ai_generated ? (
+  <Badge variant="outline">AI Generated</Badge>
+) : (
+  <Badge variant="outline">Manually Generated</Badge>
+)}
+
                   </div>
                 </CardHeader>
 

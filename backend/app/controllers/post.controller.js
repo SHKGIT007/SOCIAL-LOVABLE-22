@@ -14,6 +14,7 @@ const fs = require('fs');
 const { type } = require('os');
 const cloudinary = require('cloudinary').v2;
 const moment = require('moment-timezone');
+const { log } = require('console');
 
 
 
@@ -476,7 +477,13 @@ const generateAIPost = asyncHandler(async (req, res) => {
         include: [{ model: Plan, as: 'Plan' }],
         order: [['end_date', 'DESC']]
     });
+     
+    // console.log("subscription start date", subscription.start_date);
+    // console.log("hghghgh",moment(subscription.start_date).tz('Asia/Kolkata').startOf('day'));
+    // console.log("hghghgh",moment(subscription.end_date).tz('Asia/Kolkata').endOf('day'));
+    // console.log("currentIST",currentIST); 
 
+    
     // ✅ Check if user has an active subscription valid for current date
     if (
         !subscription ||
@@ -593,21 +600,23 @@ async function generateAIContent1(prompt, options = {}) {
         const content = response.data.choices[0].message.content;
         const usage = response.data.usage;
 
-        console.log('✅ Response mil gaya!\n');
-        console.log('📊 Token Usage:', {
-            prompt: usage.prompt_tokens,
-            completion: usage.completion_tokens,
-            total: usage.total_tokens
-        });
+        // console.log('✅ Response mil gaya!\n');
+        // console.log('📊 Token Usage:', {
+        //     prompt: usage.prompt_tokens,
+        //     completion: usage.completion_tokens,
+        //     total: usage.total_tokens
+        // });
 
         return { status: true, content: content };
 
     } catch (error) {
+        // console.log("error", error);
+        
         if (error.response) {
-            console.log('❌ API Error:', error.response.data);
-            return { status: false, msg: error.response.data };
+           // console.log('❌ API Error:', error.response.data);
+            return { status: false, msg: error.response.data.error.message || 'API Error' };
         } else {
-            console.log('❌ Error:', error.message);
+           // console.log('❌ Error:', error.message);
             return { status: false, msg: error.message };
         }
         throw error;
@@ -654,12 +663,12 @@ async function generateAIContent(prompt, options = {}) {
     const content = response.data.choices[0].message.content;
     const usage = response.data.usage;
 
-    console.log('✅ Response mil gaya!\n');
-    console.log('📊 Token Usage:', {
-      prompt: usage.prompt_tokens,
-      completion: usage.completion_tokens,
-      total: usage.total_tokens
-    });
+    // console.log('✅ Response mil gaya!\n');
+    // console.log('📊 Token Usage:', {
+    //   prompt: usage.prompt_tokens,
+    //   completion: usage.completion_tokens,
+    //   total: usage.total_tokens
+    // });
 
     return { status: true, content };
 
@@ -712,8 +721,8 @@ async function chatWithAI(messages) {
             }
         );
 
-        console.log('✅ Chat response mil gaya!\n');
-        console.log('Response:', response.data);
+        //.log('✅ Chat response mil gaya!\n');
+       // console.log('Response:', response.data);
 
         return response.data.choices[0].message.content;
     } catch (error) {
