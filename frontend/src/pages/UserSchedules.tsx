@@ -110,6 +110,10 @@ export default function UserSchedules() {
         updated[idx] = { ...updated[idx], days };
       } else if (name === 'customDateFrom') {
         updated[idx].customDateFrom = value;
+        // If To date is set and From > To, update To to match From
+        if (updated[idx].customDateTo && value > updated[idx].customDateTo) {
+          updated[idx].customDateTo = value;
+        }
       } else if (name === 'customDateTo') {
         updated[idx].customDateTo = value;
       } else if (name === 'singleDate') {
@@ -167,6 +171,16 @@ export default function UserSchedules() {
       if (!rows[i].days || rows[i].days.length === 0) {
         Swal.fire('Validation Error', 'Please select at least one day, custom date, or single date for every schedule.', 'warning');
         return;
+      }
+      if (rows[i].days.includes(CUSTOM_DATE_KEY)) {
+        if (!rows[i].customDateFrom) {
+          Swal.fire('Validation Error', 'Please select the "From" date before selecting "To" date for Custom Date Range.', 'warning');
+          return;
+        }
+        if (!rows[i].customDateTo) {
+          Swal.fire('Validation Error', 'Please select the "To" date for Custom Date Range.', 'warning');
+          return;
+        }
       }
     }
     try {
@@ -561,8 +575,10 @@ export default function UserSchedules() {
                               onChange={e => handleRowChange(idx, e)}
                               className="p-2 rounded border border-slate-200"
                               required
+                              min={new Date().toISOString().split('T')[0]}
                             />
                             <span className="text-xs text-slate-500">To</span>
+                            
                             <input
                               type="date"
                               name="customDateTo"
@@ -570,6 +586,8 @@ export default function UserSchedules() {
                               onChange={e => handleRowChange(idx, e)}
                               className="p-2 rounded border border-slate-200"
                               required
+                              min={row.customDateFrom || new Date().toISOString().split('T')[0]}
+                              disabled={!row.customDateFrom}
                             />
                           </>
                         )}
@@ -597,6 +615,7 @@ export default function UserSchedules() {
                             onChange={e => handleRowChange(idx, e)}
                             className="p-2 rounded border border-slate-200"
                             required
+                            min={new Date().toISOString().split('T')[0]}
                           />
                         )}
                       </div>
