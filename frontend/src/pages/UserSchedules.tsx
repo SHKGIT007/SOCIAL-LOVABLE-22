@@ -276,7 +276,7 @@ export default function UserSchedules() {
           </div>
 
           {/* Toggle Switch */}
-          <ToggleSwitch
+          {/* <ToggleSwitch
             checked={isActive}
             onChange={async () => {
               try {
@@ -286,7 +286,37 @@ export default function UserSchedules() {
                 Swal.fire('Error', 'Failed to update status', 'error');
               }
             }}
-          />
+          /> */}
+
+<ToggleSwitch
+  checked={isActive}
+  onChange={async () => {
+    const result = await Swal.fire({
+      title: isActive ? "Deactivate?" : "Activate?",
+      text: `Are you sure you want to ${isActive ? "deactivate" : "activate"} this schedule?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes",
+      cancelButtonText: "No",
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      await apiService.toggleScheduleStatus(sch.id, isActive ? '0' : '1');
+      Swal.fire(
+        isActive ? "Deactivated!" : "Activated!",
+        `Schedule has been ${isActive ? "deactivated" : "activated"}.`,
+        "success"
+      );
+      fetchSchedules();
+    } catch {
+      Swal.fire('Error', 'Failed to update status', 'error');
+    }
+  }}
+/>
+
+
         </div>
 
 

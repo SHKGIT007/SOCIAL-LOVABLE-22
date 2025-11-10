@@ -550,3 +550,7 @@
 {"level":"info","message":"Subscription created","planId":1,"service":"social-lovable-api","subscriptionId":11,"timestamp":"2025-11-10T10:27:12.654Z","userId":2}
 {"level":"info","message":"Subscription created","planId":1,"service":"social-lovable-api","subscriptionId":12,"timestamp":"2025-11-10T10:36:14.393Z","userId":2}
 >>>>>>> d9976de7bb5e435dd443427b1abb4b35c599c3fc
+{"level":"info","message":"Subscription created","planId":1,"service":"social-lovable-api","subscriptionId":11,"timestamp":"2025-11-10T10:38:40.200Z","userId":2}
+{"level":"info","message":"Post updated","postId":"27","service":"social-lovable-api","timestamp":"2025-11-10T10:44:32.308Z","userId":2}
+{"level":"info","message":"Post updated","postId":"27","service":"social-lovable-api","timestamp":"2025-11-10T10:47:08.742Z","userId":2}
+{"level":"info","message":"Post updated","postId":"26","service":"social-lovable-api","timestamp":"2025-11-10T10:58:05.724Z","userId":2}
