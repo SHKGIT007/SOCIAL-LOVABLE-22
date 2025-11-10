@@ -343,7 +343,7 @@ const getPostById = asyncHandler(async (req, res) => {
 
 const updatePost = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const { title, content, platforms, status, scheduled_at, category, tags, media_urls, image_url } = req.body;
+    let { title, content, platforms, status, scheduled_at, category, tags, media_urls, image_url } = req.body;
     const userId = req.user.id;
     const userType = req.user.user_type;
 
@@ -363,6 +363,14 @@ const updatePost = asyncHandler(async (req, res) => {
             status: false,
             message: 'Access denied'
         });
+    }
+
+    if (typeof platforms === 'string') {
+        try {
+            platforms = JSON.parse(platforms);
+        } catch {
+            platforms = [platforms];
+        }
     }
 
     const updateData = {};
