@@ -225,16 +225,16 @@ const createPost = asyncHandler(async (req, res) => {
         }
         // If any platform was published, return result
         if (Object.keys(publishResults).length > 0) {
-            return res.json({ success: true, message: 'Post published', results: publishResults });
+            return res.json({ status: true, message: 'Post published successfully', results: publishResults });
         }
     }
     // For scheduled and draft, just save post, do not publish
     //  logger.info('Post created', { postId: post.id, userId });
-   return res.status(201).json({
-        status: true,
-        message: 'Post created successfully',
-        data: { post }
-    });
+    return res.status(201).json({
+            status: true,
+            message: 'Post created successfully',
+            data: { post }
+        });
 
      } catch (error) {
          console.error("Error in createPost:", error);
