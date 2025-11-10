@@ -4,7 +4,13 @@ import { apiService } from "@/services/api";
 import { isAuthenticated } from "@/utils/auth";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -30,7 +36,7 @@ interface FormData {
   category: string;
   tags: string;
   image_prompt: string | null;
-  image_url: string | null; 
+  image_url: string | null;
 }
 
 const EditPost = () => {
@@ -85,7 +91,7 @@ const EditPost = () => {
           icon: "error",
           title: "Error",
           text: data.message || "Failed to fetch post.",
-          confirmButtonColor: "#6366f1"
+          confirmButtonColor: "#6366f1",
         });
         navigate("/posts");
         return;
@@ -94,7 +100,7 @@ const EditPost = () => {
           icon: "error",
           title: "Error",
           text: "Post not found.",
-          confirmButtonColor: "#6366f1"
+          confirmButtonColor: "#6366f1",
         });
         navigate("/posts");
         return;
@@ -111,14 +117,14 @@ const EditPost = () => {
         category: dataPost.category || "",
         tags: dataPost.tags ? dataPost.tags.join(", ") : "",
         image_prompt: dataPost.image_prompt || null,
-        image_url: dataPost.image_url || null
+        image_url: dataPost.image_url || null,
       });
     } catch (error: any) {
       Swal.fire({
         icon: "error",
         title: "Error",
         text: error.message || "Failed to fetch post.",
-        confirmButtonColor: "#6366f1"
+        confirmButtonColor: "#6366f1",
       });
     } finally {
       setIsLoading(false);
@@ -134,6 +140,54 @@ const EditPost = () => {
     }));
   };
 
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   setIsSaving(true);
+
+  //   try {
+  //     if (formData.platforms.length === 0) {
+  //       Swal.fire({
+  //         icon: "error",
+  //         title: "Error",
+  //         text: "Please select at least one platform.",
+  //         confirmButtonColor: "#6366f1"
+  //       });
+  //       setIsSaving(false);
+  //       return;
+  //     }
+
+  //     const updateData = {
+  //       title: formData.title,
+  //       content: formData.content,
+  //       platforms: formData.platforms,
+  //       status: formData.status,
+  //       scheduled_at: formData.scheduled_at || null,
+  //       image_prompt: formData.image_prompt || null,
+  //       image_url : formData.image_url
+  //     };
+
+  //     await apiService.updatePost(id, updateData);
+
+  //     Swal.fire({
+  //       icon: "success",
+  //       title: "Success",
+  //       text: "Post updated successfully!",
+  //       confirmButtonColor: "#6366f1"
+  //     });
+
+  //     navigate("/posts");
+  //   } catch (error: any) {
+  //     Swal.fire({
+  //       icon: "error",
+  //       title: "Error",
+  //       text: error.message || "Failed to update post.",
+  //       confirmButtonColor: "#6366f1"
+  //     });
+  //   } finally {
+  //     setIsSaving(false);
+  //   }
+  // };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
@@ -144,10 +198,27 @@ const EditPost = () => {
           icon: "error",
           title: "Error",
           text: "Please select at least one platform.",
-          confirmButtonColor: "#6366f1"
+          confirmButtonColor: "#6366f1",
         });
         setIsSaving(false);
         return;
+      }
+
+      // ✅ FUTURE DATE VALIDATION
+      if (formData.status === "scheduled") {
+        const now = new Date();
+        const selectedDate = new Date(formData.scheduled_at);
+
+        if (!formData.scheduled_at || selectedDate <= now) {
+          Swal.fire({
+            icon: "error",
+            title: "Invalid Date",
+            text: "Please select a future date and time for scheduled posts.",
+            confirmButtonColor: "#6366f1",
+          });
+          setIsSaving(false);
+          return;
+        }
       }
 
       const updateData = {
@@ -157,7 +228,7 @@ const EditPost = () => {
         status: formData.status,
         scheduled_at: formData.scheduled_at || null,
         image_prompt: formData.image_prompt || null,
-        image_url : formData.image_url
+        image_url: formData.image_url,
       };
 
       await apiService.updatePost(id, updateData);
@@ -166,7 +237,7 @@ const EditPost = () => {
         icon: "success",
         title: "Success",
         text: "Post updated successfully!",
-        confirmButtonColor: "#6366f1"
+        confirmButtonColor: "#6366f1",
       });
 
       navigate("/posts");
@@ -175,7 +246,7 @@ const EditPost = () => {
         icon: "error",
         title: "Error",
         text: error.message || "Failed to update post.",
-        confirmButtonColor: "#6366f1"
+        confirmButtonColor: "#6366f1",
       });
     } finally {
       setIsSaving(false);
@@ -197,7 +268,11 @@ const EditPost = () => {
       <div className=" space-y-8">
         {/* Sticky translucent action bar */}
         <div className="sticky top-0 z-20 -mx-2 px-2 py-3 bg-gradient-to-b from-white/85 to-white/60 backdrop-blur supports-[backdrop-filter]:backdrop-blur border-b border-indigo-50 rounded-b-xl flex items-center justify-between">
-          <Button variant="ghost" onClick={() => navigate("/posts")} className="hover:bg-indigo-50">
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/posts")}
+            className="hover:bg-indigo-50"
+          >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Posts
           </Button>
@@ -208,7 +283,9 @@ const EditPost = () => {
             disabled={isSaving}
             className="bg-gradient-to-r from-indigo-600 to-sky-500 hover:from-indigo-500 hover:to-sky-400 text-white shadow-md"
           >
-            {isSaving ? "Saving..." : (
+            {isSaving ? (
+              "Saving..."
+            ) : (
               <>
                 <Save className="mr-2 h-4 w-4" />
                 Save Changes
@@ -225,7 +302,11 @@ const EditPost = () => {
 
           <CardContent>
             {/* Give the form an id so the top Save button can submit it */}
-            <form id="edit-post-form" onSubmit={handleSubmit} className="space-y-8">
+            <form
+              id="edit-post-form"
+              onSubmit={handleSubmit}
+              className="space-y-8"
+            >
               {/* Title + Status (two columns) */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
@@ -233,7 +314,9 @@ const EditPost = () => {
                   <Input
                     id="title"
                     value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, title: e.target.value })
+                    }
                     placeholder="Enter post title"
                     required
                     className="border-gray-300 focus-visible:ring-indigo-500"
@@ -244,7 +327,9 @@ const EditPost = () => {
                   <Label htmlFor="status">Status</Label>
                   <Select
                     value={formData.status}
-                    onValueChange={(value) => setFormData({ ...formData, status: value })}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, status: value })
+                    }
                   >
                     <SelectTrigger className="border-gray-300 focus-visible:ring-indigo-500">
                       <SelectValue placeholder="Select status" />
@@ -266,7 +351,9 @@ const EditPost = () => {
                 <Textarea
                   id="content"
                   value={formData.content}
-                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, content: e.target.value })
+                  }
                   placeholder="Write your post content..."
                   className="min-h-[200px] border-gray-300 focus-visible:ring-indigo-500"
                   required
@@ -302,16 +389,21 @@ const EditPost = () => {
                           key={acc.id}
                           htmlFor={`pf-${acc.platform}`}
                           className={`flex items-center gap-2 rounded-xl border p-3 cursor-pointer transition ${
-                            checked ? "border-indigo-300 bg-indigo-50" : "border-gray-200 hover:bg-gray-50"
+                            checked
+                              ? "border-indigo-300 bg-indigo-50"
+                              : "border-gray-200 hover:bg-gray-50"
                           }`}
                         >
                           <Checkbox
                             id={`pf-${acc.platform}`}
                             checked={checked}
-                            onCheckedChange={() => handlePlatformToggle(acc.platform)}
+                            onCheckedChange={() =>
+                              handlePlatformToggle(acc.platform)
+                            }
                           />
                           <span className="text-sm">
-                            {acc.platform} {acc.account_name ? `(${acc.account_name})` : ""}
+                            {acc.platform}{" "}
+                            {acc.account_name ? `(${acc.account_name})` : ""}
                           </span>
                         </label>
                       );
@@ -322,41 +414,45 @@ const EditPost = () => {
 
               {/* Schedule (conditional) + Image Prompt (2 columns) */}
               <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-  {formData.status === "scheduled" && (
-    <div className="space-y-2 md:col-span-4">
-      <Label htmlFor="scheduled_at">Schedule Date & Time</Label>
-      <Input
-        id="scheduled_at"
-        type="datetime-local"
-        value={formData.scheduled_at}
-        onChange={(e) =>
-          setFormData({ ...formData, scheduled_at: e.target.value })
-        }
-        required
-        className="border-gray-300 focus-visible:ring-indigo-500 block"
-      />
-    </div>
-  )}
+                {formData.status === "scheduled" && (
+                  <div className="space-y-2 md:col-span-4">
+                    <Label htmlFor="scheduled_at">Schedule Date & Time</Label>
+                    <Input
+                      id="scheduled_at"
+                      type="datetime-local"
+                      value={formData.scheduled_at}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          scheduled_at: e.target.value,
+                        })
+                      }
+                      required
+                      className="border-gray-300 focus-visible:ring-indigo-500 block"
+                    />
+                  </div>
+                )}
 
-  <div
-    className={`space-y-2 ${
-      formData.status === "scheduled" ? "md:col-span-8" : "md:col-span-12"
-    }`}
-  >
-    <Label htmlFor="image_prompt">Image Title / Prompt</Label>
-    <Input
-      id="image_prompt"
-      value={formData.image_prompt || ""}
-      onChange={(e) =>
-        setFormData({ ...formData, image_prompt: e.target.value })
-      }
-      placeholder="Optional prompt or title for image"
-       readOnly
-      className="border-gray-300 focus-visible:ring-indigo-500"
-    />
-  </div>
-</div>
-
+                <div
+                  className={`space-y-2 ${
+                    formData.status === "scheduled"
+                      ? "md:col-span-8"
+                      : "md:col-span-12"
+                  }`}
+                >
+                  <Label htmlFor="image_prompt">Image Title / Prompt</Label>
+                  <Input
+                    id="image_prompt"
+                    value={formData.image_prompt || ""}
+                    onChange={(e) =>
+                      setFormData({ ...formData, image_prompt: e.target.value })
+                    }
+                    placeholder="Optional prompt or title for image"
+                    readOnly
+                    className="border-gray-300 focus-visible:ring-indigo-500"
+                  />
+                </div>
+              </div>
 
               {/* Image URL (full width) */}
               <div className="space-y-2">
@@ -364,9 +460,11 @@ const EditPost = () => {
                 <Input
                   id="image_url"
                   value={formData.image_url || ""}
-                  onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, image_url: e.target.value })
+                  }
                   placeholder="https://..."
-                   readOnly
+                  readOnly
                   className="border-gray-300 focus-visible:ring-indigo-500"
                 />
               </div>
@@ -386,7 +484,9 @@ const EditPost = () => {
                   disabled={isSaving}
                   className="flex-1 sm:flex-none sm:w-48 bg-gradient-to-r from-indigo-600 to-sky-500 hover:from-indigo-500 hover:to-sky-400 text-white shadow-md"
                 >
-                  {isSaving ? "Saving..." : (
+                  {isSaving ? (
+                    "Saving..."
+                  ) : (
                     <>
                       <Save className="mr-2 h-4 w-4" />
                       Save Changes
