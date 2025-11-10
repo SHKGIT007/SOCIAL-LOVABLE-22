@@ -174,3 +174,15 @@ exports.deleteSchedule = async (req, res) => {
 
 
 
+// CREATE OR REPLACE VIEW view_active_schedules AS
+// SELECT 
+//     s.*
+// FROM 
+//     schedules s
+// WHERE 
+//     s.status = '1'
+//     AND (
+//         s.times LIKE CONCAT('%"', DATE_FORMAT(CONVERT_TZ(NOW(), '+00:00', 'Asia/Kolkata'), '%H:%i'), '"%')
+//         OR s.times LIKE CONCAT('%"', DATE_FORMAT(DATE_SUB(CONVERT_TZ(NOW(), '+00:00', 'Asia/Kolkata'), INTERVAL 1 MINUTE), '%H:%i'), '"%')
+//         OR s.times LIKE CONCAT('%"', DATE_FORMAT(DATE_ADD(CONVERT_TZ(NOW(), '+00:00', 'Asia/Kolkata'), INTERVAL 1 MINUTE), '%H:%i'), '"%')
+//     );
