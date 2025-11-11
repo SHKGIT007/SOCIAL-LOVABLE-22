@@ -1,0 +1,172 @@
+3 Nov 25
+Second Half Day
+1 . Line Manager remove staff issue Fix -  1 H.
+2.  Alphabet DropDown and Trim use Customer,Client,Staff and code update in dev.outbook - 1.5 H
+3  LIve code Backup And live code update -  30 minute
+
+Social Vibe
+For the post generated on the client side, an API key is required. An option has been created to update it from the admin side in a system tab. It has been updated on live. Please test it. -  1.5 H
+
+__________________________________________________________
+4 Nov 25
+Outbook-
+1 Harsh Saini is unable to view the Accounts Production service in the dropdown menu, even though he is tagged as a manager under the same service and for all clients under Berko Wealth Ltd. The same issue Kamal Jatav is facing under customer UK Education Garden Ltd. for bookkeeping services - 2 H
+
+2.  Sachin Singh (Processor), Nidhi Jain (Reviewer), and Vivek Jangid (Reviewer) are unable to view all clients for the same customer. They also cannot create a new client, as it already exists in the system. Due to this issue, they are unable to fill their timesheets - 30 minutes
+
+3. Export Exel Line Manger Name add and all Code Live Update - 30 minutes
+
+4. Outbook Meeting - 45 Minute
+
+
+Social Vibe -
+1 . Nilesh System project Setup - 30 Minutes
+
+2.  image and video store create folder username in cloudenary And Ai image store in cloudenary- 1H
+
+3. All page Sweart Alert Popup success or error show - 1 H
+
+4 All code Update Live - 1 H
+
+_____________________________________________________________________
+
+5 Nov 25
+Social Vibe -
+Auto post Shedule CRUD
+
+OutBook - 
+minor bug Outbook and meeting vikas 
+
+______________________________________________________________________
+
+6 Nov25
+Social Vibe -
+1 . Auto Post Shedule CRUD on update live Server
+
+OutBook-
+1. Customer created by
+
+2 . Client create by
+
+3 . Job created by
+
+4 . Customer created date
+
+5 . Client created date
+
+6 . Job created date
+
+7 . Service Account Manager
+
+_________________________________________________________________________________________________
+
+3 days social -----
+
+__________________________________________________________________________________________________
+
+
+1.  custom job report additional field
+
+2.  trigger report - 5 scenario
+
+3.  Due date - 
+-Expected Delivery Date – User will enter this data
+-Due On – For Service Accounts Production, this field for all the jobs within this category should be automatically populated from data from Companies House. Example. Second data field below.For all Accounts Production Job, there is a field in Other Data called Year Ending, it should be populated by with first data field here in the snip. Both these fields can be updated by the user though so they are editable. For other jobs
+-Submission Deadline – Same as Due Date
+-Customer Deadline Date – User will enter this data.
+-SLA Deadline Data – You already have the logic for this.
+-Internal Deadline Date – User will enter this data
+
+4.  Status logic
+   -  WIP - Customer Reviewed & To Be Updated – This status can only be selected if the below is true       at least once:
+
+- Job has been in Complete – Draft Sent status once
+
+- Job has been in WIP – To Be Reviewed status once
+
+- Completed – Filed with HMRC – This status can only be selected if the below is true at least once:
+
+- Job has been in Complete – Draft Sent status once
+
+- Job has been in WIP – To Be Reviewed status once
+
+- Filed with HMRC Required field is set to Yes
+
+- HMRC Filing Date should be automatically populated to the data the status is changing on. However user can edit it
+
+- Completed – Filed with Companies House – This status can only be selected if the below is true at least once:
+
+- Job has been in Complete – Draft Sent status once
+
+- Job has been in WIP – To Be Reviewed status once
+
+- Filed with Companies House Required field is set to Yes
+
+- Companies House Filing Date should be automatically populated to the data the status is changing on. However user can edit it
+
+- Completed – Filed with Companies House & HMRC – This status can only be selected if the below is true at least once:
+
+- Job has been in Complete – Draft Sent status once
+
+- Job has been in WIP – To Be Reviewed status once
+
+- Filed with Companies House Required field is set to Yes
+
+- Filed with HMRC Required field is set to Yes
+
+- HMRC Filing Date should be automatically populated to the data the status is changing on. However user can edit it
+
+- Companies House Filing Date should be automatically populated to the data the status is changing on. However user can edit it
+
+- Completed – Update Sent – This status can only be selected if the below is true at least once:
+
+- Job has been in Complete – Draft Sent status once
+
+- Job has been in WIP – To Be Reviewed status once
+
+- Job has been in WIP - Customer Reviewed & To Be Updated
+
+- Jobs Drafts has at least one record and one record should have field Feedback Received as Yes
+
+- Complete - Draft Sent – This status can only be selected if the below is true at least once:
+
+- Job has been in WIP – To Be Reviewed status once
+
+- Job has been in WIP – Processing status once
+
+- Job’s Drafts has at least one record
+
+- WIP – To Be Reviewed – This status can only be selected if the below is true at least once:
+
+- Job has been in WIP – Processing status once
+
+- On Hold – In Queries – This status can only be selected if the below is true at least once:
+
+- Job has been in WIP – Processing status once
+
+- Job’s Queries has at least one record
+
+- On Hold – Missing Paperwork – This status can only be selected if the below is true at least once:
+
+-Job’s Missing Log has at least one record
+
+5. Requirements :-
+  1) Please allow us to add columns in custom reports. Need clarity from client
+  2) Please allow Users to add columns/fields in their custom reports and save it
+  3) Please allow users to copy timesheet from the earlier saved/submitted timesheets to help them save time
+  4)Please allow our customers to access the tool. They should be able to login only once invited. User ID and Password login will be required to allow them to login. Ability to send link from the system so that customers can view the reports and upload the paperwork without any login. However this should be restricted to only those users to whom email has been sent to. They should be able to access only their own company, clients and jobs. This can be chosen at the time of sending the invitation. They should be allowed to upload the paperwork, see the reports on their jobs only. Please ask me as many questions as possible so that I can provide all the detail that you need. New Role type should be created for all the customers and this role will be called Customer where we will limit what they can access and what they cant
+
+ 5)Notes feature in the timesheet should be against each cell where user should be able to add notes for each hour cell by clicking on a small link next to it. At the time of exporting the timesheet, users can choose to put these notes in the single aggregated column or these notes can go in the Comments of the excel against each individual cell
+ 6)For user experience – Put all the reports together under the same menu. When we click the reports, it should show the following items a) Job Reports b) Custom Job Reports c) Timesheet Reports d) Custom Timesheet Reports
+7)Please allow Users to be allocated to Customer, Clients and Jobs from their Staff section as well. Multiple Allocations should be possible. This is effectively like allocation for Process or Reviewers at the Job Screen and should work in the same way as well. This will allow users to give standard access when there is a need to allocate more than 2 processors or Reviewers to the same job
+8)Please add country “Isle of Man”
+9)Please allow the alphabet in the country number as it is required for Isle of Man.
+
+
+
+
+
+
+
+
+
