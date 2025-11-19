@@ -4,7 +4,13 @@ import { apiService } from "@/services/api";
 import { isAuthenticated } from "@/utils/auth";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Edit, Calendar, Sparkles } from "lucide-react";
 import Swal from "sweetalert2";
@@ -107,9 +113,26 @@ const ViewPost = () => {
   }
 
   // Always return string[]
-  const getPlatformsArray = (platforms: string[] | string | undefined): string[] => {
+  const getPlatformsArray = (
+    platforms: string[] | string | undefined
+  ): string[] => {
+    if (!platforms) return [];
+
+    // If already array
     if (Array.isArray(platforms)) return platforms;
-    if (typeof platforms === "string" && platforms) return platforms.split(",").map((p) => p.trim()).filter(Boolean);
+
+    try {
+      // If JSON string like ["Facebook", "Instagram"]
+      const parsed = JSON.parse(platforms);
+      if (Array.isArray(parsed)) return parsed;
+    } catch (e) {
+      // If normal comma-separated string: Facebook,Instagram
+      return platforms
+        .split(",")
+        .map((p) => p.trim())
+        .filter(Boolean);
+    }
+
     return [];
   };
 
@@ -118,7 +141,11 @@ const ViewPost = () => {
       <div className=" space-y-8">
         {/* Sticky action bar */}
         <div className="sticky top-0 z-10 -mx-2 px-2 py-3 bg-gradient-to-b from-white/85 to-white/60 backdrop-blur supports-[backdrop-filter]:backdrop-blur rounded-b-xl border-b border-indigo-50 flex items-center justify-between">
-          <Button variant="ghost" onClick={() => navigate("/posts")} className="hover:bg-indigo-50">
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/posts")}
+            className="hover:bg-indigo-50"
+          >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Posts
           </Button>
@@ -155,18 +182,29 @@ const ViewPost = () => {
 
           <CardHeader className={`pt-6 ${post.image_url ? "pl-28" : ""}`}>
             <div className="flex flex-col gap-2">
-              <CardTitle className="text-3xl tracking-tight text-gray-900">{post.title}</CardTitle>
+              <CardTitle className="text-3xl tracking-tight text-gray-900">
+                {post.title}
+              </CardTitle>
               <div className="flex flex-wrap gap-2">
-                <Badge className={`${getStatusColor(post.status)} text-white`}>{post.status}</Badge>
+                <Badge className={`${getStatusColor(post.status)} text-white`}>
+                  {post.status}
+                </Badge>
                 {post.is_ai_generated && (
-                  <Badge variant="outline" className="border-indigo-200 text-indigo-700">
+                  <Badge
+                    variant="outline"
+                    className="border-indigo-200 text-indigo-700"
+                  >
                     <Sparkles className="mr-1 h-3 w-3" />
                     AI Generated
                   </Badge>
                 )}
-                {post.category && <Badge variant="secondary">{post.category}</Badge>}
+                {post.category && (
+                  <Badge variant="secondary">{post.category}</Badge>
+                )}
               </div>
-              <CardDescription>Detailed post view with content, media and schedule info.</CardDescription>
+              <CardDescription>
+                Detailed post view with content, media and schedule info.
+              </CardDescription>
             </div>
           </CardHeader>
 
@@ -175,14 +213,18 @@ const ViewPost = () => {
             <section className="space-y-3">
               <h3 className="text-sm font-semibold text-gray-900">Content</h3>
               <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                <p className="whitespace-pre-wrap text-gray-700 leading-relaxed">{post.content}</p>
+                <p className="whitespace-pre-wrap text-gray-700 leading-relaxed">
+                  {post.content}
+                </p>
               </div>
             </section>
 
             {/* Featured image (bigger preview below, if needed) */}
             {post.image_url && (
               <section className="space-y-3">
-                <h3 className="text-sm font-semibold text-gray-900">Featured Image</h3>
+                <h3 className="text-sm font-semibold text-gray-900">
+                  Featured Image
+                </h3>
                 <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm bg-gray-50 flex justify-start">
                   <img
                     src={post.image_url}
@@ -216,7 +258,11 @@ const ViewPost = () => {
                 <h3 className="text-sm font-semibold text-gray-900">Tags</h3>
                 <div className="flex flex-wrap gap-2">
                   {post.tags.map((tag) => (
-                    <Badge key={tag} variant="outline" className="border-gray-300">
+                    <Badge
+                      key={tag}
+                      variant="outline"
+                      className="border-gray-300"
+                    >
                       #{tag}
                     </Badge>
                   ))}
@@ -225,13 +271,12 @@ const ViewPost = () => {
             )}
 
             {/* Media gallery */}
-            {Array.isArray(post.media_urls) && post.media_urls.filter(Boolean).length > 0 && (
-              <section className="space-y-3">
-                <h3 className="text-sm font-semibold text-gray-900">Media</h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {post.media_urls
-                    .filter(Boolean)
-                    .map((url, idx) => (
+            {Array.isArray(post.media_urls) &&
+              post.media_urls.filter(Boolean).length > 0 && (
+                <section className="space-y-3">
+                  <h3 className="text-sm font-semibold text-gray-900">Media</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {post.media_urls.filter(Boolean).map((url, idx) => (
                       <div
                         key={idx}
                         className="group rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-gray-50 aspect-[4/3]"
@@ -247,14 +292,16 @@ const ViewPost = () => {
                         />
                       </div>
                     ))}
-                </div>
-              </section>
-            )}
+                  </div>
+                </section>
+              )}
 
             {/* Prompt (if any) */}
             {post.ai_prompt && (
               <section className="space-y-3">
-                <h3 className="text-sm font-semibold text-gray-900">Prompt Used</h3>
+                <h3 className="text-sm font-semibold text-gray-900">
+                  Prompt Used
+                </h3>
                 <p className="text-sm text-gray-600 bg-gradient-to-br from-slate-50 to-white p-3 rounded-lg border border-gray-200 shadow-sm">
                   {post.ai_prompt}
                 </p>
@@ -269,25 +316,37 @@ const ViewPost = () => {
                     <Calendar className="mr-2 h-4 w-4 text-indigo-600" />
                     Scheduled For
                   </h4>
-                  <p className="text-sm text-gray-600">{new Date(post.scheduled_at).toLocaleString()}</p>
+                  <p className="text-sm text-gray-600">
+                    {new Date(post.scheduled_at).toLocaleString()}
+                  </p>
                 </div>
               )}
 
               {post.published_at && (
                 <div className="rounded-xl border border-gray-200 p-4 bg-white shadow-sm">
-                  <h4 className="font-semibold mb-1 text-gray-900">Published At</h4>
-                  <p className="text-sm text-gray-600">{new Date(post.published_at).toLocaleString()}</p>
+                  <h4 className="font-semibold mb-1 text-gray-900">
+                    Published At
+                  </h4>
+                  <p className="text-sm text-gray-600">
+                    {new Date(post.published_at).toLocaleString()}
+                  </p>
                 </div>
               )}
 
               <div className="rounded-xl border border-gray-200 p-4 bg-white shadow-sm">
                 <h4 className="font-semibold mb-1 text-gray-900">Created</h4>
-                <p className="text-sm text-gray-600">{new Date(post.created_at).toLocaleString()}</p>
+                <p className="text-sm text-gray-600">
+                  {new Date(post.created_at).toLocaleString()}
+                </p>
               </div>
 
               <div className="rounded-xl border border-gray-200 p-4 bg-white shadow-sm">
-                <h4 className="font-semibold mb-1 text-gray-900">Last Updated</h4>
-                <p className="text-sm text-gray-600">{new Date(post.updated_at).toLocaleString()}</p>
+                <h4 className="font-semibold mb-1 text-gray-900">
+                  Last Updated
+                </h4>
+                <p className="text-sm text-gray-600">
+                  {new Date(post.updated_at).toLocaleString()}
+                </p>
               </div>
             </section>
           </CardContent>

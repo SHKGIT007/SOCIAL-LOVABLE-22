@@ -4,12 +4,32 @@ import { apiService } from "@/services/api";
 import { isAdmin, isAuthenticated } from "@/utils/auth";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import Swal from "sweetalert2";
 
@@ -22,6 +42,7 @@ interface Plan {
   linked_accounts: number;
   is_active: boolean;
   features: any;
+  description: string;
 }
 
 const Plans = () => {
@@ -37,6 +58,7 @@ const Plans = () => {
     ai_posts: 0,
     linked_accounts: 0,
     is_active: true,
+    description: "",
   });
 
   useEffect(() => {
@@ -59,7 +81,7 @@ const Plans = () => {
         icon: "error",
         title: "Error",
         text: error.message,
-        confirmButtonColor: "#6366f1"
+        confirmButtonColor: "#6366f1",
       });
     } finally {
       setIsLoading(false);
@@ -69,15 +91,15 @@ const Plans = () => {
   const fetchPlans = async () => {
     try {
       const data = await apiService.getAllPlans();
-      if(data.status === true){
-      setPlans(data?.data?.plans || []);
-      }else{
+      if (data.status === true) {
+        setPlans(data?.data?.plans || []);
+      } else {
         setPlans([]);
         Swal.fire({
           icon: "error",
           title: "Error",
           text: data.message || "Failed to fetch plans.",
-          confirmButtonColor: "#6366f1"
+          confirmButtonColor: "#6366f1",
         });
         return;
       }
@@ -86,7 +108,7 @@ const Plans = () => {
         icon: "error",
         title: "Error",
         text: error.message || "Failed to fetch plans.",
-        confirmButtonColor: "#6366f1"
+        confirmButtonColor: "#6366f1",
       });
     }
   };
@@ -95,6 +117,11 @@ const Plans = () => {
     e.preventDefault();
     setIsLoading(true);
 
+    const payload = {
+      ...formData,
+      is_active: formData.is_active ? 1 : 0, // convert boolean → 0/1
+    };
+
     try {
       if (editingPlan) {
         await apiService.updatePlan(editingPlan.id, formData);
@@ -102,7 +129,7 @@ const Plans = () => {
           icon: "success",
           title: "Success",
           text: "Plan updated successfully!",
-          confirmButtonColor: "#6366f1"
+          confirmButtonColor: "#6366f1",
         });
       } else {
         await apiService.createPlan(formData);
@@ -110,7 +137,7 @@ const Plans = () => {
           icon: "success",
           title: "Success",
           text: "Plan created successfully!",
-          confirmButtonColor: "#6366f1"
+          confirmButtonColor: "#6366f1",
         });
       }
       setIsDialogOpen(false);
@@ -122,6 +149,7 @@ const Plans = () => {
         ai_posts: 0,
         linked_accounts: 0,
         is_active: true,
+        description: "",
       });
       await fetchPlans();
     } catch (error: any) {
@@ -129,7 +157,7 @@ const Plans = () => {
         icon: "error",
         title: "Error",
         text: error.message || "Failed to save plan.",
-        confirmButtonColor: "#6366f1"
+        confirmButtonColor: "#6366f1",
       });
     } finally {
       setIsLoading(false);
@@ -145,6 +173,7 @@ const Plans = () => {
       ai_posts: plan.ai_posts,
       linked_accounts: plan.linked_accounts,
       is_active: plan.is_active,
+      description: plan.description || "",
     });
     setIsDialogOpen(true);
   };
@@ -157,7 +186,7 @@ const Plans = () => {
       showCancelButton: true,
       confirmButtonColor: "#6366f1",
       cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!"
+      confirmButtonText: "Yes, delete it!",
     });
     if (!result.isConfirmed) return;
 
@@ -167,7 +196,7 @@ const Plans = () => {
         icon: "success",
         title: "Success",
         text: "Plan deleted successfully!",
-        confirmButtonColor: "#6366f1"
+        confirmButtonColor: "#6366f1",
       });
       await fetchPlans();
     } catch (error: any) {
@@ -175,7 +204,7 @@ const Plans = () => {
         icon: "error",
         title: "Error",
         text: error.message || "Failed to delete plan.",
-        confirmButtonColor: "#6366f1"
+        confirmButtonColor: "#6366f1",
       });
     }
   };
@@ -197,31 +226,42 @@ const Plans = () => {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Plans Management</h1>
-            <p className="text-muted-foreground">Create and manage subscription plans</p>
+            <h1 className="text-3xl font-bold tracking-tight">
+              Plans Management
+            </h1>
+            <p className="text-muted-foreground">
+              Create and manage subscription plans
+            </p>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={() => {
-                setEditingPlan(null);
-                setFormData({
-                  name: "",
-                  price: 0,
-                  monthly_posts: 0,
-                  ai_posts: 0,
-                  linked_accounts: 0,
-                  is_active: true,
-                });
-              }}>
+              <Button
+                onClick={() => {
+                  setEditingPlan(null);
+                  setFormData({
+                    name: "",
+                    price: 0,
+                    monthly_posts: 0,
+                    ai_posts: 0,
+                    linked_accounts: 0,
+                    is_active: true,
+                    description: "",
+                  });
+                }}
+              >
                 <Plus className="mr-2 h-4 w-4" />
                 Create Plan
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-md">
               <DialogHeader>
-                <DialogTitle>{editingPlan ? "Edit Plan" : "Create New Plan"}</DialogTitle>
+                <DialogTitle>
+                  {editingPlan ? "Edit Plan" : "Create New Plan"}
+                </DialogTitle>
                 <DialogDescription>
-                  {editingPlan ? "Update plan details" : "Add a new subscription plan"}
+                  {editingPlan
+                    ? "Update plan details"
+                    : "Add a new subscription plan"}
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -230,10 +270,24 @@ const Plans = () => {
                   <Input
                     id="name"
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
                     required
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="description">Description</Label>
+                  <Input
+                    id="description"
+                    value={formData.description}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="price">Price ($)</Label>
                   <Input
@@ -241,7 +295,12 @@ const Plans = () => {
                     type="number"
                     step="0.01"
                     value={formData.price}
-                    onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        price: parseFloat(e.target.value),
+                      })
+                    }
                     required
                   />
                 </div>
@@ -261,7 +320,12 @@ const Plans = () => {
                     id="ai_posts"
                     type="number"
                     value={formData.ai_posts}
-                    onChange={(e) => setFormData({ ...formData, ai_posts: parseInt(e.target.value) })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        ai_posts: parseInt(e.target.value),
+                      })
+                    }
                     required
                   />
                 </div>
@@ -271,7 +335,12 @@ const Plans = () => {
                     id="linked_accounts"
                     type="number"
                     value={formData.linked_accounts}
-                    onChange={(e) => setFormData({ ...formData, linked_accounts: parseInt(e.target.value) })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        linked_accounts: parseInt(e.target.value),
+                      })
+                    }
                     required
                   />
                 </div>
@@ -279,7 +348,9 @@ const Plans = () => {
                   <Switch
                     id="is_active"
                     checked={formData.is_active}
-                    onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+                    onCheckedChange={(checked) =>
+                      setFormData({ ...formData, is_active: checked })
+                    }
                   />
                   <Label htmlFor="is_active">Active</Label>
                 </div>
@@ -294,15 +365,18 @@ const Plans = () => {
         <Card>
           <CardHeader>
             <CardTitle>All Plans</CardTitle>
-            <CardDescription>Manage subscription plans for your platform</CardDescription>
+            <CardDescription>
+              Manage subscription plans for your platform
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
+                  <TableHead>Description</TableHead>
                   <TableHead>Price</TableHead>
-                  <TableHead>Posts/Month</TableHead>
+                  {/* <TableHead>Posts/Month</TableHead> */}
                   <TableHead>AI Posts</TableHead>
                   <TableHead>Accounts</TableHead>
                   <TableHead>Status</TableHead>
@@ -313,23 +387,36 @@ const Plans = () => {
                 {plans?.map((plan) => (
                   <TableRow key={plan.id}>
                     <TableCell className="font-medium">{plan.name}</TableCell>
+                    <TableCell>{plan.description}</TableCell>
                     <TableCell>${plan.price}</TableCell>
-                    <TableCell>{plan.monthly_posts}</TableCell>
+                    {/* <TableCell>{plan.monthly_posts}</TableCell> */}
                     <TableCell>{plan.ai_posts}</TableCell>
                     <TableCell>{plan.linked_accounts}</TableCell>
                     <TableCell>
-                      <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-                        plan.is_active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"
-                      }`}>
+                      <span
+                        className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
+                          plan.is_active
+                            ? "bg-green-100 text-green-700"
+                            : "bg-gray-100 text-gray-700"
+                        }`}
+                      >
                         {plan.is_active ? "Active" : "Inactive"}
                       </span>
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">
-                        <Button variant="ghost" size="icon" onClick={() => handleEdit(plan)}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleEdit(plan)}
+                        >
                           <Pencil className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => handleDelete(plan.id)}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDelete(plan.id)}
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>

@@ -40,7 +40,7 @@ const Plan = sequelize.define('Plan', {
         defaultValue: true,
     },
     description: {
-        type: DataTypes.TEXT,
+        type: DataTypes.STRING,
         allowNull: true,
     }
 }, {

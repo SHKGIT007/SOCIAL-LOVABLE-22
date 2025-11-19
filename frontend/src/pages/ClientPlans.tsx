@@ -1,8 +1,21 @@
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Check } from "lucide-react";
 import Swal from "sweetalert2";
@@ -16,7 +29,8 @@ interface Plan {
   monthly_posts: number;
   ai_posts: number;
   linked_accounts: number;
-  features: any;
+  features?: any;
+  description: string;
 }
 
 const ClientPlans = () => {
@@ -24,10 +38,22 @@ const ClientPlans = () => {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [currentSubscription, setCurrentSubscription] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [userId, setUserId] = useState<number | null>(null);
 
+  // ----------------------------
+  // Razorpay + Fetch Data Fix
+  // ----------------------------
   useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    document.body.appendChild(script);
+
+    // 🌟 FIXED: calling function BEFORE return
     checkAuthAndFetchData();
+
+    return () => {
+      document.body.removeChild(script);
+    };
   }, []);
 
   const checkAuthAndFetchData = async () => {
@@ -50,102 +76,101 @@ const ClientPlans = () => {
       if (error.message === "Authentication failed") {
         logout();
       } else {
-        console.error("Error:", error);
-        Swal.fire({
-          icon: "error",
-          title: "Error",
-          text: "Failed to load plans data",
-          confirmButtonColor: "#6366f1",
-        });
+        Swal.fire("Error", "Failed to load plans", "error");
       }
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleSubscribe = async (planId: number) => {
+  // ---------------------------------------------------
+  // Start Razorpay Payment
+  // ---------------------------------------------------
+  const startRazorpayPayment = async (plan: Plan) => {
     try {
-      setIsLoading(true);
+      const orderResponse = await apiService.createRazorpayOrder({
+        plan_id: plan.id,
+      });
 
-      if (currentSubscription) {
-        Swal.fire({
-          icon: "info",
-          title: "Info",
-          text: "You already have an active subscription. Please cancel it first.",
-          confirmButtonColor: "#6366f1",
-        });
+      if (!orderResponse.status) {
+        Swal.fire("Error", "Failed to create Razorpay order", "error");
         return;
       }
 
-      const response = await apiService.createSubscription({
-        plan_id: planId,
-        // start_date: new Date().toISOString(),
-      });
+      const { order_id, amount, currency, key } = orderResponse.data;
 
-      if (response.status) {
-        Swal.fire({
-          icon: "success",
-          title: "Success",
-          text: "Successfully subscribed to the plan!",
-          confirmButtonColor: "#6366f1",
-        });
-        await checkAuthAndFetchData();
-      }
-    } catch (error: any) {
-      if (error.message === "Authentication failed") {
-        logout();
-      } else {
-        Swal.fire({
-          icon: "error",
-          title: "Error",
-          text: error.message || "Failed to subscribe to plan",
-          confirmButtonColor: "#6366f1",
-        });
-      }
-    } finally {
-      setIsLoading(false);
+      const options = {
+        key,
+        amount,
+        currency,
+        name: "SocialVibe",
+        description: `Subscription - ${plan.name}`,
+        order_id,
+        handler: async function (response: any) {
+          const verify = await apiService.verifyRazorpayPayment({
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature,
+            plan_id: plan.id,
+          });
+
+          if (verify.status) {
+            Swal.fire("Success", "Subscription Activated!", "success");
+            checkAuthAndFetchData();
+          } else {
+            Swal.fire("Error", verify.message || "Payment failed", "error");
+          }
+        },
+        modal: {
+          ondismiss: () => {
+            Swal.fire("Cancelled", "Payment cancelled", "info");
+          },
+        },
+        theme: { color: "#6366f1" },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (err) {
+      Swal.fire("Error", "Unable to start payment", "error");
     }
   };
 
-  const handleCancelSubscription = async () => {
-    const result = await Swal.fire({
-      icon: "warning",
-      title: "Are you sure?",
-      text: "Do you want to cancel your subscription?",
-      showCancelButton: true,
-      confirmButtonColor: "#6366f1",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, cancel it!",
-    });
-    if (!result.isConfirmed) return;
-
+  // ---------------------------------------------------
+  // Subscribe Button
+  // ---------------------------------------------------
+  const handleSubscribe = async (planId: number) => {
     try {
-      setIsLoading(true);
-
-      const response = await apiService.cancelSubscription(currentSubscription.id);
-
-      if (response.status) {
-        Swal.fire({
-          icon: "success",
-          title: "Success",
-          text: "Subscription cancelled successfully",
-          confirmButtonColor: "#6366f1",
-        });
-        await checkAuthAndFetchData();
+      if (currentSubscription) {
+        Swal.fire(
+          "Info",
+          "You already have an active subscription. Please cancel it first.",
+          "info"
+        );
+        return;
       }
-    } catch (error: any) {
-      if (error.message === "Authentication failed") {
-        logout();
-      } else {
-        Swal.fire({
-          icon: "error",
-          title: "Error",
-          text: error.message || "Failed to cancel subscription",
-          confirmButtonColor: "#6366f1",
-        });
-      }
-    } finally {
-      setIsLoading(false);
+
+      const plan = plans.find((p) => p.id === planId);
+      if (!plan) return;
+
+      // 🔥 Confirmation Popup BEFORE starting payment
+      const result = await Swal.fire({
+        title: "Confirm Subscription",
+        html: `Are you sure you want to subscribe to <b>${plan.name}</b> for <b>$${plan.price}/month</b>?`,
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Yes, Continue",
+        cancelButtonText: "No, Cancel",
+        confirmButtonColor: "#6366f1",
+      });
+
+      // ❌ If cancelled, stop here
+      if (!result.isConfirmed) return;
+
+      // ✅ If confirmed → Start Razorpay
+      startRazorpayPayment(plan);
+    } catch (e: any) {
+      Swal.fire("Error", e.message || "Failed to subscribe", "error");
     }
   };
 
@@ -162,21 +187,23 @@ const ClientPlans = () => {
   return (
     <DashboardLayout userRole="client">
       <div className="space-y-8">
-        {/* Header with gradient kicker for consistency */}
         <div>
           <h1 className="flex items-baseline gap-2 text-3xl font-extrabold">
-            <span className="bg-gradient-to-r from-indigo-600 to-sky-400 bg-clip-text text-transparent">Subscription</span>
+            <span className="bg-gradient-to-r from-indigo-600 to-sky-400 bg-clip-text text-transparent">
+              Subscription
+            </span>
             <span className="text-gray-900"> Plans</span>
           </h1>
-          <p className="text-muted-foreground">Choose a plan that fits your needs</p>
+          <p className="text-muted-foreground">
+            Choose a plan that fits your needs
+          </p>
         </div>
 
-        {/* Current Subscription card */}
+        {/* Current Subscription */}
         {currentSubscription && (
           <Card className="border-indigo-200 shadow-sm">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-gray-800">Current Subscription</CardTitle>
-              <CardDescription>Your active plan details</CardDescription>
+            <CardHeader>
+              <CardTitle>Current Subscription</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
@@ -184,75 +211,79 @@ const ClientPlans = () => {
                   <span className="font-medium">Plan:</span>
                   <Badge>{currentSubscription.Plan?.name}</Badge>
                 </div>
-                {/* <div className="flex justify-between">
-                  <span className="font-medium">Posts Used:</span>
-                  <span>{currentSubscription.posts_used} / {currentSubscription.plans?.monthly_posts}</span>
-                </div> */}
+
                 <div className="flex justify-between">
                   <span className="font-medium">AI Posts Used:</span>
-                  <span>{currentSubscription.ai_posts_used} / {currentSubscription.Plan?.ai_posts}</span>
+                  <span>
+                    {currentSubscription.ai_posts_used} /{" "}
+                    {currentSubscription.Plan?.ai_posts}
+                  </span>
                 </div>
+
                 <div className="flex justify-between">
                   <span className="font-medium">Status:</span>
-                  <Badge style={{ backgroundColor: "green" }}>{currentSubscription.status}</Badge>
+                  <Badge style={{ backgroundColor: "green" }}>
+                    {currentSubscription.status}
+                  </Badge>
                 </div>
               </div>
             </CardContent>
-            {/* <CardFooter>
-              <Button
-                variant="destructive"
-                onClick={handleCancelSubscription}
-                disabled={isLoading}
-                className="shadow-sm"
-              >
-                Cancel Subscription
-              </Button>
-            </CardFooter> */}
           </Card>
         )}
 
-        {/* Plans grid */}
+        {/* Plans */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {plans.map((plan) => {
             const isCurrent = currentSubscription?.plan_id === plan.id;
+
             return (
               <Card
                 key={plan.id}
                 className={`relative overflow-hidden transition-all hover:shadow-lg ${
-                  isCurrent ? "border-indigo-300 ring-1 ring-indigo-200" : "border-indigo-100"
+                  isCurrent
+                    ? "border-indigo-300 ring-1 ring-indigo-200"
+                    : "border-indigo-100"
                 }`}
               >
-                {/* Top accent bar */}
                 <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-600 to-sky-500" />
 
-                {/* Ribbon for current plan */}
                 {isCurrent && (
                   <div className="absolute right-0 top-3 -translate-y-1/2 rounded-s-full bg-indigo-600 px-3 py-1 text-xs font-semibold text-white shadow">
                     Current
                   </div>
                 )}
 
-                <CardHeader className="pb-2">
+                <CardHeader>
                   <CardTitle className="text-xl">{plan.name}</CardTitle>
                   <CardDescription>
-                    <span className="text-3xl font-extrabold text-gray-900">${plan.price}</span>
-                    <span className="text-muted-foreground"> / month</span>
+                    <span className="text-3xl font-extrabold text-gray-900">
+                      ${plan.price}
+                    </span>
+                    {/* <span className="text-muted-foreground"> / month</span> */}
+                  </CardDescription>
+                  <CardDescription>
+                    <span className="text-l font-bold text-gray-900">
+                      {plan.description}
+                    </span>
+                    {/* <span className="text-muted-foreground"> / month</span> */}
                   </CardDescription>
                 </CardHeader>
 
-                <CardContent className="space-y-4 pt-2">
+                <CardContent>
                   <div className="space-y-2 text-gray-800">
                     <div className="flex items-center gap-2">
                       <Check className="h-4 w-4 text-indigo-600" />
                       <span>{plan.monthly_posts} posts per month</span>
                     </div>
+
                     <div className="flex items-center gap-2">
                       <Check className="h-4 w-4 text-indigo-600" />
                       <span>{plan.ai_posts} AI-generated posts</span>
                     </div>
+
                     <div className="flex items-center gap-2">
                       <Check className="h-4 w-4 text-indigo-600" />
-                      <span>{plan.linked_accounts} linked social accounts</span>
+                      <span>{plan.linked_accounts} linked accounts</span>
                     </div>
                   </div>
                 </CardContent>
@@ -261,11 +292,11 @@ const ClientPlans = () => {
                   <Button
                     className={`w-full shadow-md ${
                       isCurrent
-                        ? "bg-gray-200 text-gray-700 hover:bg-gray-200 cursor-not-allowed"
-                        : "bg-gradient-to-r from-indigo-600 to-sky-500 hover:from-indigo-500 hover:to-sky-400 text-white"
+                        ? "bg-gray-200 text-gray-700 cursor-not-allowed"
+                        : "bg-gradient-to-r from-indigo-600 to-sky-500 text-white"
                     }`}
                     onClick={() => handleSubscribe(plan.id)}
-                    disabled={isLoading || isCurrent || !!currentSubscription}
+                    disabled={isCurrent || !!currentSubscription}
                   >
                     {isCurrent
                       ? "Current Plan"

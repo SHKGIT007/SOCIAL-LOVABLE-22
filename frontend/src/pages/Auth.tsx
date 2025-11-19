@@ -30,49 +30,79 @@ const Auth = () => {
     if (isAuthenticated()) {
       const authData = getAuthData();
       if (authData?.user?.user_type === "admin") {
-        navigate("/admin");
+        navigate("/admin", { replace: true });
       } else {
-        navigate("/dashboard");
+        navigate("/dashboard", { replace: true });
       }
     }
   }, [navigate]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Prevent multiple submissions
+    if (isLoading) return;
+
     setIsLoading(true);
+
     try {
       const response = await apiService.login({ email, password });
-      if (response.status) {
+
+      console.log("Login response:", response); // Debug log
+
+      if (response && response.status) {
         setAuthData(response.data);
+
         Swal.fire({
           icon: "success",
           title: "Success",
           text: "Signed in successfully!",
           confirmButtonColor: "#6366f1",
+          timer: 1500,
+          showConfirmButton: false,
         });
 
-        // Navigate based on role WITHOUT reload
-        if (response.data.user?.user_type === "admin") {
-          navigate("/admin");
-        } else {
-          navigate("/dashboard");
-        }
+        // Small delay before navigation
+        setTimeout(() => {
+          if (response.data.user?.user_type === "admin") {
+            navigate("/admin", { replace: true });
+          } else {
+            navigate("/dashboard", { replace: true });
+          }
+        }, 1500);
+      } else {
+        setIsLoading(false);
+        Swal.fire({
+          icon: "error",
+          title: "Login Failed",
+          text: response?.message || "Invalid email or password",
+          confirmButtonColor: "#ef4444",
+        });
       }
     } catch (error: any) {
+      console.error("Login error:", error); // Debug log
+      setIsLoading(false);
+
       Swal.fire({
         icon: "error",
-        title: "Error",
-        text: error.message || "Login failed",
-        confirmButtonColor: "#6366f1",
+        title: "Login Failed",
+        text:
+          error?.response?.data?.message ||
+          error?.message ||
+          "Invalid email or password. Please try again.",
+        confirmButtonColor: "#ef4444",
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Prevent multiple submissions
+    if (isLoading) return;
+
     setIsLoading(true);
+
     try {
       const response = await apiService.register({
         user_name: userName,
@@ -83,31 +113,50 @@ const Auth = () => {
         user_phone: userPhone,
       });
 
-      if (response.status) {
+      console.log("Register response:", response); // Debug log
+
+      if (response && response.status) {
         setAuthData(response.data);
+
         Swal.fire({
           icon: "success",
           title: "Success",
           text: "Account created successfully!",
           confirmButtonColor: "#6366f1",
+          timer: 1500,
+          showConfirmButton: false,
         });
 
-        // Navigate based on role WITHOUT reload
-        if (response.data.user?.user_type === "admin") {
-          navigate("/admin");
-        } else {
-          navigate("/dashboard");
-        }
+        // Small delay before navigation
+        setTimeout(() => {
+          if (response.data.user?.user_type === "admin") {
+            navigate("/admin", { replace: true });
+          } else {
+            navigate("/dashboard", { replace: true });
+          }
+        }, 1500);
+      } else {
+        setIsLoading(false);
+        Swal.fire({
+          icon: "error",
+          title: "Registration Failed",
+          text: response?.message || "Unable to create account",
+          confirmButtonColor: "#ef4444",
+        });
       }
     } catch (error: any) {
+      console.error("Registration error:", error); // Debug log
+      setIsLoading(false);
+
       Swal.fire({
         icon: "error",
-        title: "Error",
-        text: error.message || "Registration failed",
-        confirmButtonColor: "#6366f1",
+        title: "Registration Failed",
+        text:
+          error?.response?.data?.message ||
+          error?.message ||
+          "Unable to create account. Please try again.",
+        confirmButtonColor: "#ef4444",
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -153,6 +202,7 @@ const Auth = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
+                    disabled={isLoading}
                     className="border-gray-300 focus-visible:ring-indigo-500"
                   />
                 </div>
@@ -164,6 +214,7 @@ const Auth = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
+                    disabled={isLoading}
                     className="border-gray-300 focus-visible:ring-indigo-500"
                   />
                 </div>
@@ -172,10 +223,14 @@ const Auth = () => {
                   className="w-full h-10 bg-gradient-to-r from-indigo-600 to-sky-500 hover:from-indigo-500 hover:to-sky-400 text-white shadow-md"
                   disabled={isLoading}
                 >
-                  {isLoading && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Signing In...
+                    </>
+                  ) : (
+                    "Sign In"
                   )}
-                  Sign In
                 </Button>
               </form>
             </TabsContent>
@@ -191,6 +246,7 @@ const Auth = () => {
                     value={userName}
                     onChange={(e) => setUserName(e.target.value)}
                     required
+                    disabled={isLoading}
                     className="border-gray-300 focus-visible:ring-indigo-500"
                   />
                 </div>
@@ -205,6 +261,7 @@ const Auth = () => {
                       value={userFname}
                       onChange={(e) => setUserFname(e.target.value)}
                       required
+                      disabled={isLoading}
                       className="border-gray-300 focus-visible:ring-indigo-500"
                     />
                   </div>
@@ -217,6 +274,7 @@ const Auth = () => {
                       value={userLname}
                       onChange={(e) => setUserLname(e.target.value)}
                       required
+                      disabled={isLoading}
                       className="border-gray-300 focus-visible:ring-indigo-500"
                     />
                   </div>
@@ -230,6 +288,7 @@ const Auth = () => {
                     placeholder="+1234567890"
                     value={userPhone}
                     onChange={(e) => setUserPhone(e.target.value)}
+                    disabled={isLoading}
                     className="border-gray-300 focus-visible:ring-indigo-500"
                   />
                 </div>
@@ -243,6 +302,7 @@ const Auth = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
+                    disabled={isLoading}
                     className="border-gray-300 focus-visible:ring-indigo-500"
                   />
                 </div>
@@ -256,6 +316,7 @@ const Auth = () => {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     minLength={6}
+                    disabled={isLoading}
                     className="border-gray-300 focus-visible:ring-indigo-500"
                   />
                 </div>
@@ -265,10 +326,14 @@ const Auth = () => {
                   className="w-full h-10 bg-gradient-to-r from-indigo-600 to-sky-500 hover:from-indigo-500 hover:to-sky-400 text-white shadow-md"
                   disabled={isLoading}
                 >
-                  {isLoading && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Creating Account...
+                    </>
+                  ) : (
+                    "Sign Up"
                   )}
-                  Sign Up
                 </Button>
               </form>
             </TabsContent>

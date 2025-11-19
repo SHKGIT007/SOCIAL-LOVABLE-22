@@ -3,6 +3,7 @@ const { Op } = require('sequelize');
 const { asyncHandler } = require('../middleware/error.middleware');
 const logger = require('../config/logger');
 const moment = require('moment-timezone');
+const razorpayService = require('../services/razorpay.service');
 
   //const createSubscription = asyncHandler(async (req, res) => {
         //     const { plan_id } = req.body;
@@ -57,30 +58,15 @@ const moment = require('moment-timezone');
     //  });
 
 
-const createSubscription = asyncHandler(async (req, res) => {
-    const { plan_id } = req.body;
-    const userId = req.user.id;
-
-    // ✅ 1. Check if plan exists
-    const plan = await Plan.findByPk(plan_id);
-    if (!plan) {
-        return res.status(404).json({ status: false, message: 'Plan not found' });
-    }
-
-    if (!plan.is_active) {
-        return res.status(400).json({ status: false, message: 'Plan is not active' });
-    }
-
-    // ✅ 2. Get current date in Indian time
+const createSubscriptionRecord = async ({ userId, plan }) => {
     const currentDate = moment().tz('Asia/Kolkata').startOf('day');
 
-    // ✅ 3. Check if user has an active plan
     const existingSubscription = await Subscription.findOne({
         where: { user_id: userId, status: 'active' },
         order: [['end_date', 'DESC']],
     });
 
-    let startDate, endDate;
+    let startDate;
 
     if (
         existingSubscription &&
@@ -91,25 +77,20 @@ const createSubscription = asyncHandler(async (req, res) => {
             '[]'
         )
     ) {
-        // Active plan found — start from next day after existing end
         startDate = moment(existingSubscription.end_date)
             .tz('Asia/Kolkata')
             .add(1, 'day')
             .startOf('day');
     } else {
-        // No active plan — start today
         startDate = currentDate.clone();
     }
 
-    // ✅ 4. Calculate end date based on plan duration
-    const endDateMoment = plan.duration_days
-        ? startDate.clone().add(plan.duration_days, 'days').endOf('day')
-        : startDate.clone().add(30, 'days').endOf('day');
+    const durationDays = plan.duration_days || 30;
+    const endDateMoment = startDate.clone().add(durationDays, 'days').endOf('day');
 
-    // ✅ 5. Save as IST formatted strings (not UTC)
     const subscription = await Subscription.create({
         user_id: userId,
-        plan_id,
+        plan_id: plan.id,
         start_date: startDate.format('YYYY-MM-DD HH:mm:ss'),
         end_date: endDateMoment.format('YYYY-MM-DD HH:mm:ss'),
         status: 'active',
@@ -121,12 +102,125 @@ const createSubscription = asyncHandler(async (req, res) => {
     logger.info('Subscription created', {
         subscriptionId: subscription.id,
         userId,
-        planId: plan_id,
+        planId: plan.id,
     });
+
+    return subscription;
+};
+
+const createSubscription = asyncHandler(async (req, res) => {
+    const { plan_id } = req.body;
+    const userId = req.user.id;
+
+    const plan = await Plan.findByPk(plan_id);
+    if (!plan) {
+        return res.status(404).json({ status: false, message: 'Plan not found' });
+    }
+
+    if (!plan.is_active) {
+        return res.status(400).json({ status: false, message: 'Plan is not active' });
+    }
+
+    const subscription = await createSubscriptionRecord({ userId, plan });
 
     res.status(201).json({
         status: true,
         message: 'Subscription created successfully',
+        data: { subscription },
+    });
+});
+
+const createRazorpayOrder = asyncHandler(async (req, res) => {
+    const { plan_id } = req.body;
+    const userId = req.user.id;
+
+    if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+        return res.status(500).json({
+            status: false,
+            message: 'Razorpay credentials are not configured',
+        });
+    }
+
+    const plan = await Plan.findByPk(plan_id);
+    if (!plan) {
+        return res.status(404).json({ status: false, message: 'Plan not found' });
+    }
+
+    if (!plan.is_active) {
+        return res.status(400).json({ status: false, message: 'Plan is not active' });
+    }
+
+    const amountInPaise = Math.round(Number(plan.price) * 100);
+
+    if (!amountInPaise || amountInPaise <= 0) {
+        return res.status(400).json({
+            status: false,
+            message: 'Plan price must be greater than zero',
+        });
+    }
+
+    const receipt = `sub_${userId}_${plan_id}_${Date.now()}`;
+
+    const order = await razorpayService.createOrder({
+        amount: amountInPaise,
+        currency: 'INR',
+        receipt,
+        notes: {
+            plan_id: plan.id,
+            user_id: userId,
+        },
+    });
+
+    logger.info('Razorpay order created', { orderId: order.id, userId, planId: plan.id });
+
+    res.status(201).json({
+        status: true,
+        data: {
+            order_id: order.id,
+            amount: order.amount,
+            currency: order.currency,
+            key: process.env.RAZORPAY_KEY_ID,
+        },
+    });
+});
+
+const verifyRazorpayPayment = asyncHandler(async (req, res) => {
+    const { plan_id, razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+    const userId = req.user.id;
+
+    const isValid = razorpayService.verifySignature(
+        razorpay_order_id,
+        razorpay_payment_id,
+        razorpay_signature
+    );
+
+    if (!isValid) {
+        return res.status(400).json({
+            status: false,
+            message: 'Invalid Razorpay signature',
+        });
+    }
+
+    const plan = await Plan.findByPk(plan_id);
+    if (!plan) {
+        return res.status(404).json({ status: false, message: 'Plan not found' });
+    }
+
+    if (!plan.is_active) {
+        return res.status(400).json({ status: false, message: 'Plan is not active' });
+    }
+
+    const subscription = await createSubscriptionRecord({ userId, plan });
+
+    logger.info('Razorpay payment verified', {
+        orderId: razorpay_order_id,
+        paymentId: razorpay_payment_id,
+        subscriptionId: subscription.id,
+    });
+
+    res.json({
+        status: true,
+        message: 'Payment verified and subscription activated',
         data: { subscription },
     });
 });
@@ -399,6 +493,8 @@ const renewSubscription = asyncHandler(async (req, res) => {
 
 module.exports = {
     createSubscription,
+    createRazorpayOrder,
+    verifyRazorpayPayment,
     getAllSubscriptions,
     getSubscriptionById,
     getUserSubscription,

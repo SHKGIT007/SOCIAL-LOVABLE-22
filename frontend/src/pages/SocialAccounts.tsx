@@ -73,175 +73,219 @@ const getLocalUserId = () => {
 };
 
 
-  const handleSave = async (platform: "Facebook" | "Instagram") => {
+ const handleSave = async (platform: "Facebook" | "Instagram") => {
+  let appId = "", appSecret = "";
+  let existing;
+
+  if (platform === "Facebook") {
+    appId = fbAppId;
+    appSecret = fbAppSecret;
+    existing = accounts.find((acc) => acc.platform === "Facebook");
+  } else {
+    appId = igAppId;
+    appSecret = igAppSecret;
+    existing = accounts.find((acc) => acc.platform === "Instagram");
+  }
+
+  // ❗ If blank → error
+  if (!appId || !appSecret) {
+    return Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "App ID and Secret are required.",
+      confirmButtonColor: "#6366f1",
+    });
+  }
+
+  // ❗ If nothing changed → show "No changes made"
+  if (existing && existing.app_id === appId && existing.app_secret === appSecret) {
+    return Swal.fire({
+      icon: "info",
+      title: "No changes made",
+      text: `${platform} App ID/Secret are already the same.`,
+      confirmButtonColor: "#6366f1",
+    });
+  }
+
+  // ❗ Save Confirm Popup
+  const confirm = await Swal.fire({
+    icon: "question",
+    title: "Confirm Save",
+    text: `Do you want to save changes for ${platform}?`,
+    showCancelButton: true,
+    confirmButtonColor: "#6366f1",
+    cancelButtonColor: "#d33",
+    confirmButtonText: "Yes, save",
+  });
+
+  if (!confirm.isConfirmed) return;
+
+  // Proceed to save
+  try {
     setIsLoading(true);
-    let appId = "",
-      appSecret = "";
-    if (platform === "Facebook") {
-      appId = fbAppId;
-      appSecret = fbAppSecret;
-    } else if (platform === "Instagram") {
-      appId = igAppId;
-      appSecret = igAppSecret;
-    }
-    if (!appId || !appSecret) {
+
+    if (existing) {
+      await apiService.updateSocialAccountCredentials({
+        platform,
+        app_id: appId,
+        app_secret: appSecret,
+      });
       Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "App ID and Secret are required.",
+        icon: "success",
+        title: "Updated",
+        text: `${platform} credentials updated.`,
         confirmButtonColor: "#6366f1",
       });
-      setIsLoading(false);
+    } else {
+      await apiService.createSocialAccount({
+        platform,
+        app_id: appId,
+        app_secret: appSecret,
+      });
+      Swal.fire({
+        icon: "success",
+        title: "Saved",
+        text: `${platform} App ID/Secret saved.`,
+        confirmButtonColor: "#6366f1",
+      });
+    }
+
+    fetchAccounts();
+  } catch (error: any) {
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: error.message || "Failed to save App ID/Secret",
+      confirmButtonColor: "#6366f1",
+    });
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+
+const handleConnect = async (platform: "Facebook" | "Instagram") => {
+
+  // ❗ Confirmation before connecting
+  const confirm = await Swal.fire({
+    icon: "question",
+    title: `Connect ${platform}?`,
+    text: `Do you want to continue connecting your ${platform} account?`,
+    showCancelButton: true,
+    confirmButtonColor: "#6366f1",
+    cancelButtonColor: "#d33",
+    confirmButtonText: "Yes, continue",
+  });
+
+  if (!confirm.isConfirmed) return;
+
+  setIsLoading(true);
+
+  try {
+    const user_id = getLocalUserId();
+    const connectedAccounts = await apiService.getconnnectedAccounts({ user_id });
+
+    if (!connectedAccounts.status) {
+      Swal.fire({
+        icon: "error",
+        title: "No active subscription",
+        text: connectedAccounts.message,
+        confirmButtonColor: "#6366f1",
+      });
       return;
     }
-    try {
-      const existing = accounts.find((acc) => acc.platform === platform);
-      if (existing) {
-        await apiService.updateSocialAccountCredentials({
-          platform,
-          app_id: appId,
-          app_secret: appSecret,
-        });
-        Swal.fire({
-          icon: "success",
-          title: "Success",
-          text: `${platform} credentials updated.`,
-          confirmButtonColor: "#6366f1",
-        });
-      } else {
-        await apiService.createSocialAccount({
-          platform,
-          app_id: appId,
-          app_secret: appSecret,
-        });
-        Swal.fire({
-          icon: "success",
-          title: "Success",
-          text: `${platform} App ID/Secret saved.`,
-          confirmButtonColor: "#6366f1",
-        });
-      }
-      fetchAccounts();
-    } catch (error: any) {
+
+    if (connectedAccounts.connected_accounts_count >= connectedAccounts.limitcount) {
       Swal.fire({
         icon: "error",
-        title: "Error",
-        text: error.message || "Failed to save App ID/Secret",
+        title: "Limit Reached",
+        text: `You have reached your limit of ${connectedAccounts.limitcount} connected accounts.`,
         confirmButtonColor: "#6366f1",
       });
-    } finally {
-      setIsLoading(false);
+      return;
     }
-  };
 
-  const handleConnect = async (platform: "Facebook" | "Instagram") => {
+    // Rest of your existing logic continues untouched....
+    if (platform === "Facebook") {
+      const fbAcc = accounts.find((acc) => acc.platform === "Facebook");
+      let user_id = fbAcc ? fbAcc.user_id : null;
+      let app_id = fbAppId;
+      let app_secret = fbAppSecret;
+      let redirect_uri = `https://socialvibe.tradestreet.in/backend/facebook/callback`;
 
-     const user_id = getLocalUserId();
-        const connectedAccounts = await apiService.getconnnectedAccounts({ user_id:user_id });
-        console.log("Connected Accounts:", connectedAccounts);
-        if (connectedAccounts.status == false){
-            Swal.fire({
-                icon: "error",
-                title: "No active subscription",
-                text: connectedAccounts.message,
-                confirmButtonColor: "#6366f1"
-            });
-            return;
-        }else{
-            if(connectedAccounts.connected_accounts_count >= connectedAccounts.limitcount){
-                Swal.fire({
-                    icon: "error",
-                    title: "Limit Reached",
-                    text: `You have reached your limit of ${connectedAccounts.limitcount} connected accounts.`,
-                    confirmButtonColor: "#6366f1"
-                });
-                return;
-            }
-        }
-
-    setIsLoading(true);
-    try {
-      if (platform === "Facebook") {
-        const fbAcc = accounts.find((acc) => acc.platform === "Facebook");
-        let user_id = fbAcc ? fbAcc.user_id : null;
-        let app_id = fbAppId;
-        let app_secret = fbAppSecret;
-        let redirect_uri = `https://socialvibe.tradestreet.in/backend/facebook/callback`;
-
-        if (!app_id || !app_secret || !redirect_uri || !user_id) {
-          Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: "Please save Facebook App ID/Secret first.",
-            confirmButtonColor: "#6366f1",
-          });
-          setIsLoading(false);
-          return;
-        }
-
-        const state = encodeURIComponent(
-          JSON.stringify({
-            user_id,
-            app_id,
-            app_secret,
-            redirect_uri,
-            redirect_dashboard: "http://localhost:8080/dashboard",
-          })
-        );
-
-        const scopes = [
-          "public_profile",
-          "email",
-          "pages_show_list",
-          "pages_read_engagement",
-          "pages_manage_posts",
-          "instagram_basic",
-          "instagram_manage_insights",
-          "instagram_manage_comments",
-          "instagram_content_publish",
-          "instagram_manage_messages",
-        ].join(",");
-
-        const url = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${app_id}&redirect_uri=${encodeURIComponent(
-          redirect_uri
-        )}&state=${state}&response_type=code&scope=${encodeURIComponent(scopes)}`;
-        window.location.href = url;
-      } else {
-        const igAcc = accounts.find((acc) => acc.platform === "Instagram");
-        let app_id = igAppId;
-        let app_secret = igAppSecret;
-        let redirect_uri = `https://socialvibe.tradestreet.in/backend/instagram/callback`;
-
-        if (!app_id || !app_secret || !redirect_uri || !igAcc) {
-          Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: "Please save Instagram App ID/Secret first.",
-            confirmButtonColor: "#6366f1",
-          });
-          setIsLoading(false);
-          return;
-        }
-
-        const state = encodeURIComponent(
-          JSON.stringify({
-            user_id: igAcc ? igAcc.user_id : null,
-            app_id,
-            app_secret,
-            redirect_uri,
-            redirect_dashboard: "http://localhost:8080/dashboard",
-          })
-        );
-
-        const oauthUrl = `https://www.instagram.com/oauth/authorize?client_id=${app_id}&redirect_uri=${encodeURIComponent(
-          redirect_uri
-        )}&state=${state}&response_type=code&scope=instagram_business_basic,instagram_business_manage_messages,instagram_business_manage_comments,instagram_business_content_publish`;
-        window.location.href = oauthUrl;
+      if (!app_id || !app_secret || !redirect_uri || !user_id) {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Please save Facebook App ID/Secret first.",
+          confirmButtonColor: "#6366f1",
+        });
+        return;
       }
-    } finally {
-      setIsLoading(false);
+
+      const state = encodeURIComponent(
+        JSON.stringify({
+          user_id,
+          app_id,
+          app_secret,
+          redirect_uri,
+          redirect_dashboard: "http://localhost:8080/dashboard",
+        })
+      );
+
+      const scopes = [
+        "public_profile",
+        "email",
+        "pages_show_list",
+        "pages_read_engagement",
+        "pages_manage_posts",
+        "instagram_basic",
+        "instagram_manage_insights",
+        "instagram_manage_comments",
+        "instagram_content_publish",
+        "instagram_manage_messages",
+      ].join(",");
+
+      const url = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${app_id}&redirect_uri=${encodeURIComponent(
+        redirect_uri
+      )}&state=${state}&response_type=code&scope=${encodeURIComponent(scopes)}`;
+      window.location.href = url;
+    } else {
+      const igAcc = accounts.find((acc) => acc.platform === "Instagram");
+      let app_id = igAppId;
+      let app_secret = igAppSecret;
+      let redirect_uri = `https://socialvibe.tradestreet.in/backend/instagram/callback`;
+
+      if (!app_id || !app_secret || !redirect_uri || !igAcc) {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Please save Instagram App ID/Secret first.",
+          confirmButtonColor: "#6366f1",
+        });
+        return;
+      }
+
+      const state = encodeURIComponent(
+        JSON.stringify({
+          user_id: igAcc ? igAcc.user_id : null,
+          app_id,
+          app_secret,
+          redirect_uri,
+          redirect_dashboard: "http://localhost:8080/dashboard",
+        })
+      );
+
+      const oauthUrl = `https://www.instagram.com/oauth/authorize?client_id=${app_id}&redirect_uri=${encodeURIComponent(
+        redirect_uri
+      )}&state=${state}&response_type=code&scope=instagram_business_basic,instagram_business_manage_messages,instagram_business_manage_comments,instagram_business_content_publish`;
+      window.location.href = oauthUrl;
     }
-  };
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   const handleDisconnect = async (id: any) => {
     setIsLoading(true);

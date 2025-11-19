@@ -1,27 +1,25 @@
-
-import { API_CONFIG, buildApiUrl, addQueryParams } from '../utils/config';
-import { getAuthToken, logout } from '../utils/auth';
+import { API_CONFIG, buildApiUrl, addQueryParams } from "../utils/config";
+import { getAuthToken, logout } from "../utils/auth";
 
 class ApiService {
-
   // Toggle schedule status (active/inactive) via PATCH /schedules/:id/status
   async toggleScheduleStatus(id, status) {
     return this.request(`/schedules/${id}/status`, {
-      method: 'PATCH',
+      method: "PATCH",
       body: { status },
     });
   }
-  
+
   // Delete a schedule
   async deleteSchedule(id) {
     return this.request(`/schedules/${id}`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
   }
   // Create a new schedule
   async postSchedule(scheduleData) {
-    return this.request('/schedules', {
-      method: 'POST',
+    return this.request("/schedules", {
+      method: "POST",
       body: scheduleData,
     });
   }
@@ -29,44 +27,34 @@ class ApiService {
   // Update an existing schedule
   async updateSchedule(id, scheduleData) {
     return this.request(`/schedules/${id}`, {
-      method: 'PUT',
+      method: "PUT",
       body: scheduleData,
     });
   }
   // Schedule API methods
   async getSchedules() {
-    return this.request('/schedules');
+    return this.request("/schedules");
   }
   // System Settings API methods
   async getSystemSettings() {
-    return this.request('/system-settings');
+    return this.request("/system-settings");
   }
 
   async updateSystemSettings(settings) {
-    return this.request('/system-settings/update', {
-      method: 'POST',
+    return this.request("/system-settings/update", {
+      method: "POST",
       body: { settings },
     });
-  }
-  // System Settings API methods
-  async getSystemSettings() {
-    return this.request('/system-settings');
   }
 
-  async updateSystemSettings(settings) {
-    return this.request('/system-settings/update', {
-      method: 'POST',
-      body: { settings },
-    });
-  }
   constructor() {
     this.baseURL = API_CONFIG.BASE_URL;
   }
 
   // Profile API methods
   async saveProfile(profileData) {
-    return this.request('/profile', {
-      method: 'POST',
+    return this.request("/profile", {
+      method: "POST",
       body: profileData,
     });
   }
@@ -74,13 +62,13 @@ class ApiService {
   // Get OAuth URL for a platform, including user token
   async getOAuthUrl(platform) {
     const token = getAuthToken();
-    let url = '';
-    if (platform === 'Facebook') {
+    let url = "";
+    if (platform === "Facebook") {
       url = `${API_CONFIG.BASE_URL}/social-accounts/oauth/facebook`;
-    } else if (platform === 'Instagram') {
+    } else if (platform === "Instagram") {
       url = `${API_CONFIG.BASE_URL}/social-accounts/oauth/instagram`;
     } else {
-      throw new Error('Unsupported platform');
+      throw new Error("Unsupported platform");
     }
     if (token) {
       url += `?token=${encodeURIComponent(token)}`;
@@ -92,7 +80,7 @@ class ApiService {
   // Get headers for API requests
   getHeaders(includeAuth = true) {
     const headers = {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     };
 
     if (includeAuth) {
@@ -108,16 +96,17 @@ class ApiService {
   // Generic API request method
   async request(endpoint, options = {}) {
     const {
-      method = 'GET',
+      method = "GET",
       body = null,
       params = {},
       queryParams = {},
       includeAuth = true,
+      skipAuthLogout = false, // NEW: Flag to skip logout on 401
       ...restOptions
     } = options;
 
     let url = buildApiUrl(endpoint, params);
-    
+
     if (Object.keys(queryParams).length > 0) {
       url = addQueryParams(url, queryParams);
     }
@@ -129,44 +118,63 @@ class ApiService {
     };
 
     if (body) {
-      config.body = typeof body === 'string' ? body : JSON.stringify(body);
+      config.body = typeof body === "string" ? body : JSON.stringify(body);
     }
 
     try {
       const response = await fetch(url, config);
       const data = await response.json();
       console.log("API Response:", data);
-      
+
       // Handle authentication errors
-      if (response.status === 401) {
+      // FIXED: Only logout if it's an authenticated request AND not login/register
+      if (response.status === 401 && includeAuth && !skipAuthLogout) {
         logout();
-        throw new Error('Authentication failed');
+        throw new Error("Session expired. Please login again.");
       }
 
+      // For login/register errors, just return the error response
       if (!response.ok) {
-        throw new Error(data.message || 'API request failed');
+        // Return the full response data so frontend can handle it
+        return {
+          status: false,
+          message: data.message || "API request failed",
+          ...data,
+        };
       }
 
       return data;
     } catch (error) {
-      console.error('API request error:', error);
+      console.error("API request error:", error);
+
+      // If it's a network error, return a structured response
+      if (error.message === "Failed to fetch" || error.name === "TypeError") {
+        return {
+          status: false,
+          message: "Network error. Please check your connection.",
+        };
+      }
+
       throw error;
     }
   }
+
   // Auth API methods
   async register(userData) {
     return this.request(API_CONFIG.ENDPOINTS.AUTH.REGISTER, {
-      method: 'POST',
+      method: "POST",
       body: userData,
       includeAuth: false,
+      skipAuthLogout: true, // Don't logout on 401 for register
     });
   }
 
   async login(credentials) {
     return this.request(API_CONFIG.ENDPOINTS.AUTH.LOGIN, {
-      method: 'POST',
+      method: "POST",
       body: credentials,
       includeAuth: false,
+      skipAuthLogout: true, // Don't logout on 401 for login
     });
   }
 
@@ -176,14 +184,14 @@ class ApiService {
 
   async updateProfile(profileData) {
     return this.request(API_CONFIG.ENDPOINTS.AUTH.UPDATE_PROFILE, {
-      method: 'PUT',
+      method: "PUT",
       body: profileData,
     });
   }
 
   async changePassword(passwordData) {
     return this.request(API_CONFIG.ENDPOINTS.AUTH.CHANGE_PASSWORD, {
-      method: 'PUT',
+      method: "PUT",
       body: passwordData,
     });
   }
@@ -199,7 +207,7 @@ class ApiService {
 
   async createUser(userData) {
     return this.request(API_CONFIG.ENDPOINTS.USERS.CREATE, {
-      method: 'POST',
+      method: "POST",
       body: userData,
     });
   }
@@ -211,19 +219,19 @@ class ApiService {
   }
 
   async getUserById(id) {
-  return this.request(`${API_CONFIG.ENDPOINTS.USERS.GET_BY_ID}/${id}`);
+    return this.request(`${API_CONFIG.ENDPOINTS.USERS.GET_BY_ID}/${id}`);
   }
 
   async updateUser(id, userData) {
     return this.request(`${API_CONFIG.ENDPOINTS.USERS.UPDATE}/${id}`, {
-      method: 'PUT',
+      method: "PUT",
       body: userData,
     });
   }
 
   async deleteUser(id) {
     return this.request(`${API_CONFIG.ENDPOINTS.USERS.DELETE}/${id}`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
   }
 
@@ -239,22 +247,22 @@ class ApiService {
         url = API_CONFIG.BASE_URL + url;
       }
       const response = await fetch(url, {
-        method: 'POST',
+        method: "POST",
         headers,
         body: postData,
       });
       const data = await response.json();
       if (response.status === 401) {
         logout();
-        throw new Error('Authentication failed');
+        throw new Error("Authentication failed");
       }
       if (!response.ok) {
-        throw new Error(data.message || 'API request failed');
+        throw new Error(data.message || "API request failed");
       }
       return data;
     } else {
       return this.request(API_CONFIG.ENDPOINTS.POSTS.CREATE, {
-        method: 'POST',
+        method: "POST",
         body: postData,
       });
     }
@@ -272,27 +280,27 @@ class ApiService {
 
   async updatePost(id, postData) {
     return this.request(`${API_CONFIG.ENDPOINTS.POSTS.UPDATE}/${id}`, {
-      method: 'PUT',
+      method: "PUT",
       body: postData,
     });
   }
 
   async deletePost(id) {
     return this.request(`${API_CONFIG.ENDPOINTS.POSTS.DELETE}/${id}`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
   }
 
   async generateAIPost(aiData) {
     return this.request(API_CONFIG.ENDPOINTS.POSTS.GENERATE_AI, {
-      method: 'POST',
+      method: "POST",
       body: aiData,
     });
   }
 
   async publishPost(id) {
     return this.request(`${API_CONFIG.ENDPOINTS.POSTS.PUBLISH}/${id}/publish`, {
-      method: 'POST',
+      method: "POST",
     });
   }
 
@@ -313,28 +321,31 @@ class ApiService {
 
   async createPlan(planData) {
     return this.request(API_CONFIG.ENDPOINTS.PLANS.CREATE, {
-      method: 'POST',
+      method: "POST",
       body: planData,
     });
   }
 
   async updatePlan(id, planData) {
     return this.request(`${API_CONFIG.ENDPOINTS.PLANS.UPDATE}/${id}`, {
-      method: 'PUT',
+      method: "PUT",
       body: planData,
     });
   }
 
   async deletePlan(id) {
     return this.request(`${API_CONFIG.ENDPOINTS.PLANS.DELETE}/${id}`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
   }
 
   async togglePlanStatus(id) {
-    return this.request(`${API_CONFIG.ENDPOINTS.PLANS.TOGGLE_STATUS}/${id}/toggle-status`, {
-      method: 'PATCH',
-    });
+    return this.request(
+      `${API_CONFIG.ENDPOINTS.PLANS.TOGGLE_STATUS}/${id}/toggle-status`,
+      {
+        method: "PATCH",
+      }
+    );
   }
 
   // Subscription API methods
@@ -349,32 +360,54 @@ class ApiService {
   }
 
   async getSubscriptionById(id) {
-    return this.request(`${API_CONFIG.ENDPOINTS.SUBSCRIPTIONS.GET_BY_ID}/${id}`);
+    return this.request(
+      `${API_CONFIG.ENDPOINTS.SUBSCRIPTIONS.GET_BY_ID}/${id}`
+    );
   }
 
   async createSubscription(subscriptionData) {
     return this.request(API_CONFIG.ENDPOINTS.SUBSCRIPTIONS.CREATE, {
-      method: 'POST',
+      method: "POST",
       body: subscriptionData,
     });
   }
 
   async updateSubscription(id, subscriptionData) {
     return this.request(`${API_CONFIG.ENDPOINTS.SUBSCRIPTIONS.UPDATE}/${id}`, {
-      method: 'PUT',
+      method: "PUT",
       body: subscriptionData,
     });
   }
 
   async cancelSubscription(id) {
-    return this.request(`${API_CONFIG.ENDPOINTS.SUBSCRIPTIONS.CANCEL}/${id}/cancel`, {
-      method: 'PUT',
-    });
+    return this.request(
+      `${API_CONFIG.ENDPOINTS.SUBSCRIPTIONS.CANCEL}/${id}/cancel`,
+      {
+        method: "PUT",
+      }
+    );
   }
 
   async renewSubscription(id) {
-    return this.request(`${API_CONFIG.ENDPOINTS.SUBSCRIPTIONS.RENEW}/${id}/renew`, {
-      method: 'PUT',
+    return this.request(
+      `${API_CONFIG.ENDPOINTS.SUBSCRIPTIONS.RENEW}/${id}/renew`,
+      {
+        method: "PUT",
+      }
+    );
+  }
+
+  async createRazorpayOrder(data) {
+    return this.request(API_CONFIG.ENDPOINTS.SUBSCRIPTIONS.CREATE_ORDER, {
+      method: "POST",
+      body: data,
+    });
+  }
+
+  async verifyRazorpayPayment(data) {
+    return this.request(API_CONFIG.ENDPOINTS.SUBSCRIPTIONS.VERIFY_PAYMENT, {
+      method: "POST",
+      body: data,
     });
   }
 
@@ -390,57 +423,77 @@ class ApiService {
   }
 
   async getSocialAccountById(id) {
-    return this.request(`${API_CONFIG.ENDPOINTS.SOCIAL_ACCOUNTS.GET_BY_ID}/${id}`);
+    return this.request(
+      `${API_CONFIG.ENDPOINTS.SOCIAL_ACCOUNTS.GET_BY_ID}/${id}`
+    );
   }
 
   async createSocialAccount(socialAccountData) {
     return this.request(API_CONFIG.ENDPOINTS.SOCIAL_ACCOUNTS.CREATE, {
-      method: 'POST',
+      method: "POST",
       body: socialAccountData,
     });
   }
 
   async updateSocialAccount(id, socialAccountData) {
-    return this.request(`${API_CONFIG.ENDPOINTS.SOCIAL_ACCOUNTS.UPDATE}/${id}`, {
-      method: 'PUT',
-      body: socialAccountData,
-    });
+    return this.request(
+      `${API_CONFIG.ENDPOINTS.SOCIAL_ACCOUNTS.UPDATE}/${id}`,
+      {
+        method: "PUT",
+        body: socialAccountData,
+      }
+    );
   }
 
   async deleteSocialAccount(id) {
-    return this.request(`${API_CONFIG.ENDPOINTS.SOCIAL_ACCOUNTS.DELETE}/${id}`, {
-      method: 'DELETE',
-    });
+    return this.request(
+      `${API_CONFIG.ENDPOINTS.SOCIAL_ACCOUNTS.DELETE}/${id}`,
+      {
+        method: "DELETE",
+      }
+    );
   }
 
   async toggleSocialAccountStatus(id) {
-    return this.request(`${API_CONFIG.ENDPOINTS.SOCIAL_ACCOUNTS.TOGGLE_STATUS}/${id}/toggle-status`, {
-      method: 'PATCH',
-    });
+    return this.request(
+      `${API_CONFIG.ENDPOINTS.SOCIAL_ACCOUNTS.TOGGLE_STATUS}/${id}/toggle-status`,
+      {
+        method: "PATCH",
+      }
+    );
   }
 
   async refreshSocialAccountToken(id, tokenData) {
-    return this.request(`${API_CONFIG.ENDPOINTS.SOCIAL_ACCOUNTS.REFRESH_TOKEN}/${id}/refresh-token`, {
-      method: 'PUT',
-      body: tokenData,
-    });
+    return this.request(
+      `${API_CONFIG.ENDPOINTS.SOCIAL_ACCOUNTS.REFRESH_TOKEN}/${id}/refresh-token`,
+      {
+        method: "PUT",
+        body: tokenData,
+      }
+    );
   }
 
   // Update app_id/app_secret for logged-in user and platform
   async updateSocialAccountCredentials(data) {
-    return this.request(API_CONFIG.ENDPOINTS.SOCIAL_ACCOUNTS.UPDATE_CREDENTIALS, {
-      method: 'POST',
-      body: data,
-    });
+    return this.request(
+      API_CONFIG.ENDPOINTS.SOCIAL_ACCOUNTS.UPDATE_CREDENTIALS,
+      {
+        method: "POST",
+        body: data,
+      }
+    );
   }
 
   async getconnnectedAccounts(data) {
-    return this.request(API_CONFIG.ENDPOINTS.SOCIAL_ACCOUNTS.GET_CONNECTED_ACCOUNTS, {
-    method: 'POST',
-      body: data
-    });
+    return this.request(
+      API_CONFIG.ENDPOINTS.SOCIAL_ACCOUNTS.GET_CONNECTED_ACCOUNTS,
+      {
+        method: "POST",
+        body: data,
+      }
+    );
   }
-  
 }
+
 // Export singleton instance
 export const apiService = new ApiService();

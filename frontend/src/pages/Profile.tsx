@@ -20,6 +20,7 @@ const initialProfile = {
 const Profile = () => {
   const [profile, setProfile] = useState(initialProfile);
   const [isLoading, setIsLoading] = useState(false);
+  const [originalProfile, setOriginalProfile] = useState(initialProfile);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -27,7 +28,7 @@ const Profile = () => {
       try {
         const res = await apiService.request("/profile");
         if (res.status && res.data?.profile) {
-          setProfile({
+          const fetched = {
             business_name: res.data.profile.business_name || "",
             description: res.data.profile.description || "",
             platforms: res.data.profile.platforms || "",
@@ -35,7 +36,10 @@ const Profile = () => {
             hashtags: res.data.profile.hashtags || "",
             image_style: res.data.profile.image_style || "",
             festival: res.data.profile.festival || "",
-          });
+          };
+
+          setProfile(fetched);
+          setOriginalProfile(fetched); // <-- important
         }
       } catch {
         // ignore
@@ -46,13 +50,20 @@ const Profile = () => {
     fetchProfile();
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const isProfileChanged = () => {
+    return JSON.stringify(profile) !== JSON.stringify(originalProfile);
+  };
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setProfile({ ...profile, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Required field validation
     if (!profile.business_name.trim() || !profile.description.trim()) {
       Swal.fire({
         icon: "error",
@@ -63,10 +74,39 @@ const Profile = () => {
       return;
     }
 
+    // If no changes made
+    if (!isProfileChanged()) {
+      Swal.fire({
+        icon: "info",
+        title: "No Changes",
+        text: "You haven't made any changes to save.",
+        confirmButtonColor: "#6366f1",
+      });
+      return;
+    }
+
+    // Confirm before saving
+    const confirm = await Swal.fire({
+      icon: "warning",
+      title: "Save Changes?",
+      text: "Are you sure you want to save the updated profile?",
+      showCancelButton: true,
+      confirmButtonText: "Yes, Save",
+      cancelButtonText: "Cancel",
+      confirmButtonColor: "#6366f1",
+    });
+
+    if (!confirm.isConfirmed) return;
+
+    // Save API
     setIsLoading(true);
+
     try {
       const res = await apiService.saveProfile(profile);
+
       if (res.status) {
+        setOriginalProfile(profile); // update original reference
+
         Swal.fire({
           icon: "success",
           title: "Profile Saved",
@@ -81,7 +121,7 @@ const Profile = () => {
           confirmButtonColor: "#6366f1",
         });
       }
-    } catch (error: any) {
+    } catch (error) {
       Swal.fire({
         icon: "error",
         title: "Error",
@@ -105,7 +145,8 @@ const Profile = () => {
             <span className="text-gray-900"> Settings</span>
           </h1>
           <p className="text-muted-foreground">
-            Define your brand’s personality and preferences for AI-generated posts.
+            Define your brand’s personality and preferences for AI-generated
+            posts.
           </p>
         </div>
 
@@ -122,7 +163,10 @@ const Profile = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Row 1 */}
                 <div className="flex flex-col space-y-1">
-                  <label htmlFor="business_name" className="text-sm font-semibold text-gray-700">
+                  <label
+                    htmlFor="business_name"
+                    className="text-sm font-semibold text-gray-700"
+                  >
                     Business/Creator Name *
                   </label>
                   <Input
@@ -137,7 +181,10 @@ const Profile = () => {
                 </div>
 
                 <div className="flex flex-col space-y-1">
-                  <label htmlFor="platforms" className="text-sm font-semibold text-gray-700">
+                  <label
+                    htmlFor="platforms"
+                    className="text-sm font-semibold text-gray-700"
+                  >
                     Preferred Platforms
                   </label>
                   <Input
@@ -152,7 +199,10 @@ const Profile = () => {
 
                 {/* Row 2 — Description + Image Title */}
                 <div className="flex flex-col space-y-1">
-                  <label htmlFor="description" className="text-sm font-semibold text-gray-700">
+                  <label
+                    htmlFor="description"
+                    className="text-sm font-semibold text-gray-700"
+                  >
                     Description *
                   </label>
                   <Textarea
@@ -167,7 +217,10 @@ const Profile = () => {
                 </div>
 
                 <div className="flex flex-col space-y-1">
-                  <label htmlFor="image_style" className="text-sm font-semibold text-gray-700">
+                  <label
+                    htmlFor="image_style"
+                    className="text-sm font-semibold text-gray-700"
+                  >
                     Image Prompt
                   </label>
                   <Textarea
@@ -182,7 +235,10 @@ const Profile = () => {
 
                 {/* Row 3 */}
                 <div className="flex flex-col space-y-1">
-                  <label htmlFor="brand_voice" className="text-sm font-semibold text-gray-700">
+                  <label
+                    htmlFor="brand_voice"
+                    className="text-sm font-semibold text-gray-700"
+                  >
                     Brand Voice
                   </label>
                   <Input
@@ -196,7 +252,10 @@ const Profile = () => {
                 </div>
 
                 <div className="flex flex-col space-y-1">
-                  <label htmlFor="hashtags" className="text-sm font-semibold text-gray-700">
+                  <label
+                    htmlFor="hashtags"
+                    className="text-sm font-semibold text-gray-700"
+                  >
                     Default Hashtags
                   </label>
                   <Input
@@ -211,7 +270,10 @@ const Profile = () => {
 
                 {/* Row 4 */}
                 <div className="flex flex-col space-y-1 md:col-span-2">
-                  <label htmlFor="festival" className="text-sm font-semibold text-gray-700">
+                  <label
+                    htmlFor="festival"
+                    className="text-sm font-semibold text-gray-700"
+                  >
                     Current Festival/Event
                   </label>
                   <Input

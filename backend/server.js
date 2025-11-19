@@ -1,5 +1,6 @@
 const express = require('express');
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 const sequelize = require('./app/config/db.config');
 const routes = require('./app/route');
 
@@ -7,7 +8,6 @@ const routes = require('./app/route');
 const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 9999;
-const path = require('path');
 const bodyParser = require('body-parser');
 const fileUpload = require('express-fileupload');
 const helmet = require('helmet');

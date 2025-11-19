@@ -53,7 +53,9 @@ export const API_CONFIG = {
       CREATE: '/subscriptions',
       UPDATE: '/subscriptions',
       CANCEL: '/subscriptions',
-      RENEW: '/subscriptions'
+      RENEW: '/subscriptions',
+      CREATE_ORDER: '/subscriptions/razorpay/order',
+      VERIFY_PAYMENT: '/subscriptions/razorpay/verify'
     },
     // Social Account endpoints
     SOCIAL_ACCOUNTS: {

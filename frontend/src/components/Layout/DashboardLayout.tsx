@@ -1,10 +1,25 @@
 import { ReactNode, useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom"; // Added useLocation
-import { getCurrentUser, getUserRole, isAuthenticated, logout, onAuthStateChange } from "@/utils/auth";
+import {
+  getCurrentUser,
+  getUserRole,
+  isAuthenticated,
+  logout,
+  onAuthStateChange,
+} from "@/utils/auth";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { LayoutDashboard, FileText, Users, Settings, LogOut, Menu, X, Zap } from "lucide-react"; // Added Zap
-
+import {
+  LayoutDashboard,
+  FileText,
+  Users,
+  Settings,
+  LogOut,
+  Menu,
+  X,
+  Zap,
+} from "lucide-react"; // Added Zap
+import Swal from "sweetalert2";
 // --- No data or logic removed ---
 
 interface DashboardLayoutProps {
@@ -18,7 +33,7 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
   const { toast } = useToast();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [user, setUser] = useState(getCurrentUser());
-  
+
   // Define the primary gradient class for theme consistency
   const primaryGradient = "from-indigo-600 to-cyan-500";
   const primaryGradientClass = `bg-gradient-to-r ${primaryGradient}`;
@@ -41,32 +56,64 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
   }, [navigate]);
 
   const handleSignOut = () => {
-    logout();
-    navigate("/auth");
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You will be logged out from your account.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#6366F1",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, Logout",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        logout();
+        navigate("/auth");
+
+        Swal.fire({
+          title: "Logged Out",
+          text: "You have been successfully logged out.",
+          icon: "success",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+      }
+    });
   };
 
-  const menuItems = userRole === "admin" 
-    ? [
-        { icon: LayoutDashboard, label: "Dashboard", path: "/admin" },
-        { icon: Users, label: "Users", path: "/admin/users" },
-        { icon: FileText, label: "Posts", path: "/admin/posts" },
-        { icon: Settings, label: "Plans", path: "/admin/plans" },
-        { icon: Settings, label: "Subscriptions", path: "/admin/subscriptions" },
-        { icon: Zap, label: "System Settings", path: "/admin/system-settings" },
-      ]
-  : [
-    { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
-    { icon: FileText, label: "Posts", path: "/posts" },
-    { icon: Zap, label: "Auto Post Schedules", path: "/schedules" },
-    { icon: Settings, label: "Plans", path: "/plans" },
-    { icon: Settings, label: "Social Accounts", path: "/social-accounts" },
-    { icon: Settings, label: "Profile", path: "/profile" },
-      ];
+  const menuItems =
+    userRole === "admin"
+      ? [
+          { icon: LayoutDashboard, label: "Dashboard", path: "/admin" },
+          { icon: Users, label: "Users", path: "/admin/users" },
+          { icon: FileText, label: "Posts", path: "/admin/posts" },
+          { icon: Settings, label: "Plans", path: "/admin/plans" },
+          {
+            icon: Settings,
+            label: "Subscriptions",
+            path: "/admin/subscriptions",
+          },
+          {
+            icon: Zap,
+            label: "System Settings",
+            path: "/admin/system-settings",
+          },
+        ]
+      : [
+          { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
+          { icon: FileText, label: "Posts", path: "/posts" },
+          { icon: Zap, label: "Auto Post Schedules", path: "/schedules" },
+          { icon: Settings, label: "Plans", path: "/plans" },
+          {
+            icon: Settings,
+            label: "Social Accounts",
+            path: "/social-accounts",
+          },
+          { icon: Settings, label: "Profile", path: "/profile" },
+        ];
 
   return (
     // Base background is light gray for contrast with the white cards/layout
     <div className="min-h-screen bg-gray-50">
-      
       {/* Mobile menu button (Themed) */}
       <div className="lg:hidden fixed top-4 left-4 z-50">
         <Button
@@ -75,7 +122,11 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
           size="icon"
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
         >
-          {isSidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          {isSidebarOpen ? (
+            <X className="h-5 w-5" />
+          ) : (
+            <Menu className="h-5 w-5" />
+          )}
         </Button>
       </div>
 
@@ -91,10 +142,14 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
             <Zap className="h-6 w-6 mr-2 text-indigo-600" />
             <h1 className="text-xl font-extrabold">
               {/* Apply gradient to the brand text */}
-              <span className={`text-transparent bg-clip-text ${primaryGradientClass}`}>SocialPost AI</span>
+              <span
+                className={`text-transparent bg-clip-text ${primaryGradientClass}`}
+              >
+                SocialPost AI
+              </span>
             </h1>
           </div>
-          
+
           {/* Navigation Menu */}
           <nav className="flex-1 space-y-1 px-3 py-4">
             {menuItems.map((item) => {
@@ -120,16 +175,20 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
               );
             })}
           </nav>
-          
+
           {/* User Info and Sign Out */}
           <div className="border-t border-gray-100 p-4">
             <div className="mb-4 rounded-lg bg-indigo-50 p-3 shadow-sm">
-              <p className="text-sm font-semibold text-gray-800">{user?.email}</p>
-              <p className="text-xs text-indigo-600 capitalize">{getUserRole()} Account</p>
+              <p className="text-sm font-semibold text-gray-800">
+                {user?.email}
+              </p>
+              <p className="text-xs text-indigo-600 capitalize">
+                {getUserRole()} Account
+              </p>
             </div>
-            <Button 
-              variant="outline" 
-              className="w-full border-2 border-indigo-300 text-indigo-600 hover:bg-indigo-50 transition-colors" 
+            <Button
+              variant="outline"
+              className="w-full border-2 border-indigo-300 text-indigo-600 hover:bg-indigo-50 transition-colors"
               onClick={handleSignOut}
             >
               <LogOut className="mr-2 h-4 w-4" />

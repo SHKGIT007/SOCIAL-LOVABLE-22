@@ -204,6 +204,29 @@ const validateSubscriptionCreation = [
     handleValidationErrors
 ];
 
+const validateRazorpayOrder = [
+    body('plan_id')
+        .isInt({ min: 1 })
+        .withMessage('Valid plan ID is required'),
+    handleValidationErrors
+];
+
+const validateRazorpayVerification = [
+    body('plan_id')
+        .isInt({ min: 1 })
+        .withMessage('Valid plan ID is required'),
+    body('razorpay_order_id')
+        .notEmpty()
+        .withMessage('Razorpay order ID is required'),
+    body('razorpay_payment_id')
+        .notEmpty()
+        .withMessage('Razorpay payment ID is required'),
+    body('razorpay_signature')
+        .notEmpty()
+        .withMessage('Razorpay signature is required'),
+    handleValidationErrors
+];
+
 // Social Account validation rules
 const validateSocialAccountCreation = [
     body('platform')
@@ -285,6 +308,8 @@ module.exports = {
     validatePostUpdate,
     validatePlanCreation,
     validateSubscriptionCreation,
+    validateRazorpayOrder,
+    validateRazorpayVerification,
     validateSocialAccountCreation,
      validateSocialAccountCredentialsUpdate,
     validateAIPostGeneration,

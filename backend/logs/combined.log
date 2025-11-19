@@ -586,3 +586,63 @@
 {"level":"info","message":"Scheduled post published to Facebook","postId":29,"service":"social-lovable-api","timestamp":"2025-11-11T05:16:09.870Z","userId":2}
 {"level":"info","message":"Published to Facebook","postId":36,"service":"social-lovable-api","timestamp":"2025-11-11T06:25:08.933Z"}
 {"level":"info","message":"Published to Facebook","postId":37,"service":"social-lovable-api","timestamp":"2025-11-11T06:42:08.204Z"}
+{"email":"shaktijatpnp09@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-17T06:32:07.980Z","userId":17}
+{"level":"info","message":"Razorpay order created","orderId":"order_RgmSnUC7qAzsbH","planId":2,"service":"social-lovable-api","timestamp":"2025-11-17T10:51:37.051Z","userId":17}
+{"level":"info","message":"Subscription created","planId":2,"service":"social-lovable-api","subscriptionId":12,"timestamp":"2025-11-17T10:52:04.014Z","userId":17}
+{"level":"info","message":"Razorpay payment verified","orderId":"order_RgmSnUC7qAzsbH","paymentId":"pay_RgmT2rzvawq97O","service":"social-lovable-api","subscriptionId":12,"timestamp":"2025-11-17T10:52:04.016Z"}
+{"level":"info","message":"Razorpay order created","orderId":"order_RgmaKdSyRLHTgO","planId":2,"service":"social-lovable-api","timestamp":"2025-11-17T10:58:45.013Z","userId":17}
+{"level":"info","message":"Subscription created","planId":2,"service":"social-lovable-api","subscriptionId":13,"timestamp":"2025-11-17T11:04:59.551Z","userId":17}
+{"level":"info","message":"Razorpay payment verified","orderId":"order_RgmaKdSyRLHTgO","paymentId":"pay_RgmgckPOVsUIFz","service":"social-lovable-api","subscriptionId":13,"timestamp":"2025-11-17T11:04:59.552Z"}
+{"level":"info","message":"Razorpay order created","orderId":"order_Rh4ZpYC6Zd0YBX","planId":2,"service":"social-lovable-api","timestamp":"2025-11-18T04:34:46.429Z","userId":17}
+{"email":"shaktijatpnp09@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-18T04:35:02.259Z","userId":17}
+{"email":"shaktijatpnp09@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-18T04:35:18.007Z","userId":17}
+{"level":"info","message":"Razorpay order created","orderId":"order_Rh4xjgftcU7Jm8","planId":2,"service":"social-lovable-api","timestamp":"2025-11-18T04:57:24.244Z","userId":17}
+{"level":"info","message":"Razorpay order created","orderId":"order_Rh4yXd7qtx9eKZ","planId":2,"service":"social-lovable-api","timestamp":"2025-11-18T04:58:10.001Z","userId":17}
+{"level":"info","message":"Razorpay order created","orderId":"order_Rh52D27LoO0ZU9","planId":2,"service":"social-lovable-api","timestamp":"2025-11-18T05:01:38.345Z","userId":17}
+{"level":"info","message":"Razorpay order created","orderId":"order_Rh53OwD3TYM9ok","planId":2,"service":"social-lovable-api","timestamp":"2025-11-18T05:02:46.044Z","userId":17}
+{"level":"info","message":"Subscription created","planId":2,"service":"social-lovable-api","subscriptionId":14,"timestamp":"2025-11-18T05:03:02.467Z","userId":17}
+{"level":"info","message":"Razorpay payment verified","orderId":"order_Rh53OwD3TYM9ok","paymentId":"pay_Rh53UGjfOmy5zN","service":"social-lovable-api","subscriptionId":14,"timestamp":"2025-11-18T05:03:02.468Z"}
+{"ai_prompt":"Title: Fire \nDetails: A powerful and professional visual representing a fire-related business. The image features bright, dynamic flames forming the shape of a phoenix or fire swirl, symbolizing energy, strength, and transformation. The background has a dark gradient to make the fire glow stand out. Sparks and embers rise upward, giving the design an intense and premium look. Perfect for branding fire-safety services, firewood business, heating solutions, or any fire-themed brand.","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-11-18T05:03:26.073Z","userId":17}
+{"ai_prompt":"Title: Fire \nDetails: A powerful and professional visual representing a fire-related business. The image features bright, dynamic flames forming the shape of a phoenix or fire swirl, symbolizing energy, strength, and transformation. The background has a dark gradient to make the fire glow stand out. Sparks and embers rise upward, giving the design an intense and premium look. Perfect for branding fire-safety services, firewood business, heating solutions, or any fire-themed brand.","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-11-18T05:03:55.495Z","userId":17}
+{"email":"shaktijatpnp09@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-18T05:47:08.950Z","userId":17}
+{"email":"shaktijatpnp09@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-18T06:00:15.406Z","userId":17}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-18T06:20:26.433Z","userId":2}
+{"ai_prompt":"Title: test\nDetails: test","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-11-18T06:56:12.051Z","userId":2}
+{"ai_prompt":"Title: test\nDetails: test","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-11-18T07:02:55.702Z","userId":2}
+{"level":"info","message":"Post updated","postId":"44","service":"social-lovable-api","timestamp":"2025-11-18T07:07:22.962Z","userId":2}
+{"level":"info","message":"Post deleted","postId":"45","service":"social-lovable-api","timestamp":"2025-11-18T07:08:46.031Z","userId":2}
+{"level":"info","message":"Post deleted","postId":"44","service":"social-lovable-api","timestamp":"2025-11-18T07:08:48.757Z","userId":2}
+{"ai_prompt":"Title: Thor Image\nDetails: Give me an Image of anime thor holding his hammer in his hand ","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-11-18T08:19:38.748Z","userId":2}
+{"ai_prompt":"Title: Thor Image\nDetails: Give me an Image of anime thor holding his hammer in his hand ","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-11-18T08:20:46.671Z","userId":2}
+{"ai_prompt":"Title: Thor Image\nDetails: Give me an Image of anime thor holding his hammer in his hand ","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-11-18T08:23:39.415Z","userId":2}
+{"ai_prompt":"Title: Thor Image\nDetails: Give me an Image of anime thor holding his hammer in his hand ","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-11-18T08:26:09.724Z","userId":2}
+{"ai_prompt":"Title: Company Logo\nDetails: Company Logo","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-11-18T08:27:51.289Z","userId":2}
+{"ai_prompt":"Title: Company Logo\nDetails: Company Logo","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-11-18T08:28:17.726Z","userId":2}
+{"ai_prompt":"Title: Company Logo\nDetails: Company Logo","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-11-18T08:30:57.228Z","userId":2}
+{"ai_prompt":"Title: Company Logo\nDetails: Company Logo","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-11-18T08:31:27.992Z","userId":2}
+{"ai_prompt":"Title: Company Logo\nDetails: Company Logo","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-11-18T08:32:50.193Z","userId":2}
+{"ai_prompt":"Title: Company Logo\nDetails: Company Logo","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-11-18T08:33:07.651Z","userId":2}
+{"ai_prompt":"Title: Company Logo\nDetails: Company Logo","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-11-18T08:35:56.507Z","userId":2}
+{"ai_prompt":"Title: Company Logo\nDetails: Company Logo","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-11-18T09:12:13.539Z","userId":2}
+{"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-18T09:56:42.912Z","userId":1}
+{"level":"info","message":"Plan updated","planId":"1","service":"social-lovable-api","timestamp":"2025-11-18T10:04:07.209Z","updatedBy":1}
+{"level":"info","message":"Plan updated","planId":"1","service":"social-lovable-api","timestamp":"2025-11-18T10:04:11.890Z","updatedBy":1}
+{"level":"info","message":"Plan updated","planId":"5","service":"social-lovable-api","timestamp":"2025-11-18T10:04:15.276Z","updatedBy":1}
+{"level":"info","message":"Plan updated","planId":"1","service":"social-lovable-api","timestamp":"2025-11-18T10:06:14.155Z","updatedBy":1}
+{"level":"info","message":"Plan updated","planId":"1","service":"social-lovable-api","timestamp":"2025-11-18T10:06:18.708Z","updatedBy":1}
+{"createdBy":1,"level":"info","message":"Plan created","planId":6,"service":"social-lovable-api","timestamp":"2025-11-18T10:07:15.057Z"}
+{"level":"info","message":"Plan updated","planId":"6","service":"social-lovable-api","timestamp":"2025-11-18T10:10:04.995Z","updatedBy":1}
+{"deletedBy":1,"level":"info","message":"Plan deleted","planId":"6","service":"social-lovable-api","timestamp":"2025-11-18T10:12:08.380Z"}
+{"createdBy":1,"level":"info","message":"Plan created","planId":7,"service":"social-lovable-api","timestamp":"2025-11-18T10:12:22.943Z"}
+{"createdBy":1,"level":"info","message":"Plan created","planId":8,"service":"social-lovable-api","timestamp":"2025-11-18T10:12:52.077Z"}
+{"level":"info","message":"Plan updated","planId":"8","service":"social-lovable-api","timestamp":"2025-11-18T10:14:58.101Z","updatedBy":1}
+{"deletedBy":1,"level":"info","message":"Plan deleted","planId":"8","service":"social-lovable-api","timestamp":"2025-11-18T10:20:10.052Z"}
+{"deletedBy":1,"level":"info","message":"Plan deleted","planId":"7","service":"social-lovable-api","timestamp":"2025-11-18T10:20:13.849Z"}
+{"createdBy":1,"level":"info","message":"Plan created","planId":9,"service":"social-lovable-api","timestamp":"2025-11-18T10:20:34.630Z"}
+{"deletedBy":1,"level":"info","message":"Plan deleted","planId":"9","service":"social-lovable-api","timestamp":"2025-11-18T10:23:05.217Z"}
+{"createdBy":1,"level":"info","message":"Plan created","planId":10,"service":"social-lovable-api","timestamp":"2025-11-18T10:23:26.677Z"}
+{"createdBy":1,"level":"info","message":"Plan created","planId":11,"service":"social-lovable-api","timestamp":"2025-11-18T10:23:48.634Z"}
+{"createdBy":1,"level":"info","message":"Plan created","planId":12,"service":"social-lovable-api","timestamp":"2025-11-18T10:34:56.487Z"}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-18T10:38:47.382Z","userId":2}
+{"email":"shaktijatpnp09@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-18T11:42:33.601Z","userId":17}
+{"level":"info","message":"Razorpay order created","orderId":"order_RhBsbcG3me3195","planId":12,"service":"social-lovable-api","timestamp":"2025-11-18T11:43:23.774Z","userId":17}
