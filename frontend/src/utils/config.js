@@ -23,7 +23,8 @@ export const API_CONFIG = {
       GET_ALL: '/users',
       GET_BY_ID: '/users',
       UPDATE: '/users',
-      DELETE: '/users'
+      DELETE: '/users',
+      UPDATE_STATUS: '/users/:id/status'
     },
     // Post endpoints
     POSTS: {

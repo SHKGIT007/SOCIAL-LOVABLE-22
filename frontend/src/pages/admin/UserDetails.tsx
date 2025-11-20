@@ -12,8 +12,6 @@ const UserDetails = () => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  
-
   useEffect(() => {
     fetchUserDetails();
   }, [id]);
@@ -29,7 +27,7 @@ const UserDetails = () => {
           icon: "error",
           title: "Error",
           text: data.message || "User not found.",
-          confirmButtonColor: "#6366f1"
+          confirmButtonColor: "#6366f1",
         });
         navigate("/admin/users");
       }
@@ -38,7 +36,7 @@ const UserDetails = () => {
         icon: "error",
         title: "Error",
         text: error.message || "Failed to fetch user.",
-        confirmButtonColor: "#6366f1"
+        confirmButtonColor: "#6366f1",
       });
       navigate("/admin/users");
     } finally {
@@ -74,24 +72,41 @@ const UserDetails = () => {
           <CardContent>
             <div className="space-y-4">
               <div>
-                <span className="font-semibold">Name:</span> {user.user_name || "N/A"}
+                <span className="font-semibold">Name:</span>{" "}
+                {user?.user_name
+                  ? user.user_name.charAt(0).toUpperCase() +
+                    user.user_name.slice(1).toLowerCase()
+                  : "N/A"}
               </div>
+
               <div>
                 <span className="font-semibold">Email:</span> {user.email}
               </div>
-              <div>
+            
+
+              {/* <div>
                 <span className="font-semibold">Role:</span> <Badge variant={user.role === "admin" ? "default" : "secondary"}>{user.role}</Badge>
+              </div> */}
+              <div>
+                <span className="font-semibold">Joined:</span>{" "}
+                {new Date(user.created_at).toLocaleDateString()}
               </div>
               <div>
-                <span className="font-semibold">Joined:</span> {new Date(user.created_at).toLocaleDateString()}
+                <span className="font-semibold">Plan:</span>{" "}
+              {user?.Subscriptions?.[0]?.Plan?.name||"No plan"}
               </div>
-              {user.subscription && (
+  <div>
+                <span className="font-semibold">Plan Status:</span>{" "}
+                {user?.Subscriptions?.[0]?.status?.charAt(0).toUpperCase() +
+                  user?.Subscriptions?.[0]?.status?.slice(1).toLowerCase()}
+              </div>
+              {/* {user.Subscriptions && (
                 <div>
-                  <span className="font-semibold">Plan:</span> {user.subscription.plan?.name || "No plan"}
+                  <span className="font-semibold">Plan:</span> {user.Subscriptions.Plan?.name || "No plan"}
                   <br />
-                  <span className="font-semibold">Status:</span> <Badge variant={user.subscription.status === "active" ? "default" : "outline"}>{user.subscription.status || "inactive"}</Badge>
+                  <span className="font-semibold">Status:</span> <Badge variant={user.Subscriptions.status === "active" ? "default" : "outline"}>{user.Subscriptions.status || "inactive"}</Badge>
                 </div>
-              )}
+              )} */}
             </div>
           </CardContent>
         </Card>

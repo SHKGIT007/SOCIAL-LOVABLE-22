@@ -18,5 +18,6 @@ router.get('/admin-stats', requireAdmin, userController.getAdminStats);
 router.get('/:id', requireAdmin, userController.getUserById);
 router.put('/:id', requireAdmin, validateId, userController.updateUser);
 router.delete('/:id', requireAdmin, validateId, userController.deleteUser);
+router.put('/:id/status', requireAdmin, validateId, userController.updateUserStatus);
 
 module.exports = router;

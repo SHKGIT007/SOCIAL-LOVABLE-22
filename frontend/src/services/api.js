@@ -291,7 +291,6 @@ class ApiService {
     });
   }
 
-  
   async approvePost(id, status = "approved") {
     return this.request(`${API_CONFIG.ENDPOINTS.POSTS.APPROVE}/${id}`, {
       method: "PUT",
@@ -498,6 +497,16 @@ class ApiService {
       {
         method: "POST",
         body: data,
+      }
+    );
+  }
+
+  async updateUserStatus(id, statusData) {
+    return this.request(
+      API_CONFIG.ENDPOINTS.USERS.UPDATE_STATUS.replace(":id", id),
+      {
+        method: "PUT",
+        body: statusData,
       }
     );
   }

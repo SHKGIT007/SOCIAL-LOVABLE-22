@@ -24,6 +24,7 @@ import SocialAccounts from "./pages/SocialAccounts";
 import Profile from "./pages/Profile";
 import UserSchedules from "./pages/UserSchedules";
 import { getAuthData, isAuthenticated } from "@/utils/auth";
+import CreateUser from "./pages/admin/CreateUser";
 
 const queryClient = new QueryClient();
 
@@ -90,7 +91,7 @@ function App() {
             <Route path="/admin/posts" element={<AdminRoute><AdminPosts /></AdminRoute>} />
             <Route path="/admin/posts/:id" element={<AdminRoute><AdminViewPost /></AdminRoute>} />
             <Route path="/admin/system-settings" element={<AdminRoute><SystemSettings /></AdminRoute>} />
-            
+            <Route path="/admin/create-user" element={<AdminRoute><CreateUser/></AdminRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
