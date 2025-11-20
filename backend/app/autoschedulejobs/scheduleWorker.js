@@ -207,7 +207,8 @@ async function processSchedule(scheduleId) {
   const posts = await Post.findAll({
     where: {
       scheduleId: schedule.id,
-      status: 'scheduled'
+      status: 'scheduled',
+      review_status: 'approved'
     }
   });
 

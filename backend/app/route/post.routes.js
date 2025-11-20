@@ -14,6 +14,9 @@ const {
 router.use(authenticateToken);
 
 // Post CRUD operations
+
+router.put('/approve/:id', validateId, postController.approvePost);
+
 // router.post('/', validatePostCreation, postController.createPost);
 router.post('/', postController.createPost);
 router.get('/', validatePagination, postController.getAllPosts);

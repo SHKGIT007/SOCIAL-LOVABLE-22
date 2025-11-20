@@ -38,6 +38,36 @@ import {
 
 const statuses = ["draft", "scheduled", "published"];
 
+const normalizePlatforms = (platforms: string[] | string | null | undefined): string[] => {
+  if (!platforms) return [];
+  if (Array.isArray(platforms)) return platforms;
+  try {
+    const parsed = JSON.parse(platforms);
+    if (Array.isArray(parsed)) return parsed;
+  } catch {
+    return platforms
+      .split(",")
+      .map((p) => p.trim())
+      .filter(Boolean);
+  }
+  return [];
+};
+
+const normalizeTags = (tags: string[] | string | null | undefined): string[] => {
+  if (!tags) return [];
+  if (Array.isArray(tags)) return tags;
+  try {
+    const parsed = JSON.parse(tags);
+    if (Array.isArray(parsed)) return parsed;
+  } catch {
+    return tags
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
+  }
+  return [];
+};
+
 interface FormData {
   title: string;
   content: string;
@@ -117,16 +147,18 @@ const EditPost = () => {
         return;
       }
       const dataPost = data.data.post;
+      const normalizedPlatforms = normalizePlatforms(dataPost.platforms);
+      const normalizedTags = normalizeTags(dataPost.tags);
       setFormData({
         title: dataPost.title,
         content: dataPost.content,
-        platforms: dataPost.platforms,
+        platforms: normalizedPlatforms,
         status: dataPost.status,
         scheduled_at: dataPost.scheduled_at
           ? toLocalDatetimeLocal(dataPost.scheduled_at)
           : "",
         category: dataPost.category || "",
-        tags: dataPost.tags ? dataPost.tags.join(", ") : "",
+        tags: normalizedTags.join(", "),
         image_prompt: dataPost.image_prompt || null,
         image_url: dataPost.image_url || null
       });

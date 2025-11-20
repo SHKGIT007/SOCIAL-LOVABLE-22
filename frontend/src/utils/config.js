@@ -33,7 +33,8 @@ export const API_CONFIG = {
       UPDATE: '/posts',
       DELETE: '/posts',
       GENERATE_AI: '/posts/generate-ai',
-      PUBLISH: '/posts'
+      PUBLISH: '/posts',
+      APPROVE: '/posts/approve'
     },
     // Plan endpoints
     PLANS: {

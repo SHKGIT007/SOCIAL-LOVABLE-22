@@ -71,6 +71,8 @@ const ClientPlans = () => {
       const subscriptionResponse = await apiService.getMySubscription();
       if (subscriptionResponse.status) {
         setCurrentSubscription(subscriptionResponse.data.subscription);
+      } else {
+        setCurrentSubscription(null);
       }
     } catch (error: any) {
       if (error.message === "Authentication failed") {
@@ -139,9 +141,21 @@ const ClientPlans = () => {
   // ---------------------------------------------------
   // Subscribe Button
   // ---------------------------------------------------
+  const subscriptionEndDate = currentSubscription?.end_date
+    ? new Date(currentSubscription.end_date)
+    : null;
+  const isSubscriptionExpired =
+    currentSubscription &&
+    subscriptionEndDate !== null &&
+    subscriptionEndDate < new Date();
+  const hasActiveSubscription =
+    currentSubscription &&
+    currentSubscription.status === "active" &&
+    !isSubscriptionExpired;
+
   const handleSubscribe = async (planId: number) => {
     try {
-      if (currentSubscription) {
+      if (hasActiveSubscription) {
         Swal.fire(
           "Info",
           "You already have an active subscription. Please cancel it first.",
@@ -166,6 +180,24 @@ const ClientPlans = () => {
 
       // ❌ If cancelled, stop here
       if (!result.isConfirmed) return;
+
+      const planPrice = Number(plan.price) || 0;
+      if (planPrice <= 0) {
+        const freeResponse = await apiService.createSubscription({
+          plan_id: plan.id,
+        });
+        if (freeResponse.status) {
+          Swal.fire("Success", "Subscription Activated!", "success");
+          checkAuthAndFetchData();
+        } else {
+          Swal.fire(
+            "Error",
+            freeResponse.message || "Failed to activate plan",
+            "error"
+          );
+        }
+        return;
+      }
 
       // ✅ If confirmed → Start Razorpay
       startRazorpayPayment(plan);
@@ -222,10 +254,22 @@ const ClientPlans = () => {
 
                 <div className="flex justify-between">
                   <span className="font-medium">Status:</span>
-                  <Badge style={{ backgroundColor: "green" }}>
-                    {currentSubscription.status}
+                  <Badge
+                    style={{
+                      backgroundColor: hasActiveSubscription ? "green" : "gray",
+                    }}
+                  >
+                    {hasActiveSubscription ? "Active" : "Expired"}
                   </Badge>
                 </div>
+                {currentSubscription.end_date && (
+                  <div className="flex justify-between">
+                    <span className="font-medium">Ends:</span>
+                    <span>
+                      {new Date(currentSubscription.end_date).toLocaleString()}
+                    </span>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -235,6 +279,13 @@ const ClientPlans = () => {
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {plans.map((plan) => {
             const isCurrent = currentSubscription?.plan_id === plan.id;
+            const buttonDisabled = hasActiveSubscription;
+            const buttonLabel = (() => {
+              if (isCurrent && hasActiveSubscription) return "Current Plan";
+              if (hasActiveSubscription) return "Cancel current plan first";
+              if (isCurrent && !hasActiveSubscription) return "Renew Plan";
+              return "Subscribe";
+            })();
 
             return (
               <Card
@@ -291,18 +342,14 @@ const ClientPlans = () => {
                 <CardFooter>
                   <Button
                     className={`w-full shadow-md ${
-                      isCurrent
+                      buttonDisabled
                         ? "bg-gray-200 text-gray-700 cursor-not-allowed"
                         : "bg-gradient-to-r from-indigo-600 to-sky-500 text-white"
                     }`}
                     onClick={() => handleSubscribe(plan.id)}
-                    disabled={isCurrent || !!currentSubscription}
+                    disabled={buttonDisabled}
                   >
-                    {isCurrent
-                      ? "Current Plan"
-                      : currentSubscription
-                      ? "Cancel current plan first"
-                      : "Subscribe"}
+                    {buttonLabel}
                   </Button>
                 </CardFooter>
               </Card>
