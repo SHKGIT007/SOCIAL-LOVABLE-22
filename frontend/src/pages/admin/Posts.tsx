@@ -3,8 +3,21 @@ import { useNavigate } from "react-router-dom";
 import { apiService } from "@/services/api";
 import { isAdmin, isAuthenticated } from "@/utils/auth";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -33,6 +46,8 @@ interface Post {
     email: string;
     user_name: string | null;
   };
+  review_status: string;
+  scheduled_at: string | null;
 }
 
 const AdminPosts = () => {
@@ -77,7 +92,7 @@ const AdminPosts = () => {
         icon: "error",
         title: "Error",
         text: error.message,
-        confirmButtonColor: "#6366f1"
+        confirmButtonColor: "#6366f1",
       });
     } finally {
       setIsLoading(false);
@@ -90,17 +105,17 @@ const AdminPosts = () => {
   const fetchPosts = async () => {
     try {
       const data = await apiService.getAllPosts();
-      if(data.status === true){
-      setPosts(data?.data?.posts || []);
-      setFilteredPosts(data?.data?.posts || []);
-      }else{
+      if (data.status === true) {
+        setPosts(data?.data?.posts || []);
+        setFilteredPosts(data?.data?.posts || []);
+      } else {
         setPosts([]);
         setFilteredPosts([]);
         Swal.fire({
           icon: "error",
           title: "Error",
           text: data.message || "Failed to fetch posts.",
-          confirmButtonColor: "#6366f1"
+          confirmButtonColor: "#6366f1",
         });
         return;
       }
@@ -109,7 +124,7 @@ const AdminPosts = () => {
         icon: "error",
         title: "Error",
         text: error.message || "Failed to fetch posts.",
-        confirmButtonColor: "#6366f1"
+        confirmButtonColor: "#6366f1",
       });
     }
   };
@@ -122,7 +137,7 @@ const AdminPosts = () => {
         icon: "success",
         title: "Success",
         text: "Post deleted successfully",
-        confirmButtonColor: "#6366f1"
+        confirmButtonColor: "#6366f1",
       });
       await fetchPosts();
     } catch (error: any) {
@@ -130,7 +145,7 @@ const AdminPosts = () => {
         icon: "error",
         title: "Error",
         text: error.message || "Failed to delete post.",
-        confirmButtonColor: "#6366f1"
+        confirmButtonColor: "#6366f1",
       });
     } finally {
       setDeletePostId(null);
@@ -145,22 +160,28 @@ const AdminPosts = () => {
         </div>
       </DashboardLayout>
     );
-    
   }
 
- const getPlatformsArray = (platforms: string[] | string | undefined): string[] => {
-    if (Array.isArray(platforms)) return platforms;
-    if (typeof platforms === 'string' && platforms) return platforms.split(',').map(p => p.trim()).filter(Boolean);
-    return [];
-  };
+  const getPlatformsArray = (platforms) => {
+    try {
+      if (!platforms) return [];
+      if (Array.isArray(platforms)) return platforms;
 
+      return JSON.parse(platforms); // string → array
+    } catch (error) {
+      console.error("Invalid platforms format:", error);
+      return [];
+    }
+  };
 
   return (
     <DashboardLayout userRole="admin">
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">All Posts</h1>
-          <p className="text-muted-foreground">View and manage posts from all users</p>
+          <p className="text-muted-foreground">
+            View and manage posts from all users
+          </p>
         </div>
 
         <Card>
@@ -186,92 +207,119 @@ const AdminPosts = () => {
                   <TableHead>User</TableHead>
                   <TableHead>Platforms</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Type</TableHead>
+                  <TableHead>Review Status</TableHead>
+                                    <TableHead>Scheduled At</TableHead>
+
+                  <TableHead>Type</TableHead> <TableHead>Actions</TableHead>
                   <TableHead>Created</TableHead>
-                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredPosts && filteredPosts?.map((post) => (
-                  <TableRow key={post.id}>
-                    <TableCell className="font-medium max-w-xs truncate">
-                      {post.title}
-                    </TableCell>
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">{post?.User?.user_name || "N/A"}</div>
-                        <div className="text-sm text-muted-foreground">{post?.User?.email}</div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap gap-1">
-                        {getPlatformsArray(post.platforms).map((platform) => (
-                        <Badge key={platform} variant="secondary">
-                          {platform}
-                        </Badge>
-                      ))}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={
-                          post.status === "published"
-                            ? "default"
-                            : post.status === "scheduled"
-                            ? "secondary"
-                            : "outline"
-                        }
-                      >
-                        {post.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {post.is_ai_generated ? (
-                        <Badge variant="outline">AI</Badge>
-                      ) : (
-                        <Badge variant="outline">Manual</Badge>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-sm">
-                      {new Date(post.created_at).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => navigate(`/admin/posts/${post.id}`)}
+                {filteredPosts &&
+                  filteredPosts?.map((post) => (
+                    <TableRow key={post.id}>
+                      <TableCell className="font-medium max-w-xs truncate">
+                        {post.title}
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">
+                            {post?.User?.user_name || "N/A"}
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            {post?.User?.email}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          {getPlatformsArray(post.platforms).map((platform) => (
+                            <Badge key={platform} variant="secondary">
+                              {platform}
+                            </Badge>
+                          ))}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={
+                            post.status === "published"
+                              ? "default"
+                              : post.status === "scheduled"
+                              ? "secondary"
+                              : "outline"
+                          }
                         >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button
+                          {post.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                        >
+                          {post.review_status}
+                        </Badge>
+                      </TableCell>
+
+<TableCell>
+                        <Badge variant="outline">
+                          {post.scheduled_at
+                            ? new Date(post.scheduled_at).toLocaleString()
+                            : "N/A"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {post.is_ai_generated ? (
+                          <Badge variant="outline">AI</Badge>
+                        ) : (
+                          <Badge variant="outline">Manual</Badge>
+                        )}
+                      </TableCell>{" "}
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => navigate(`/admin/posts/${post.id}`)}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          {/* <Button
                           variant="ghost"
                           size="icon"
                           onClick={() => setDeletePostId(post.id)}
                         >
                           <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                        </Button> */}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-sm">
+                        {new Date(post.created_at).toLocaleDateString()}
+                      </TableCell>
+                    </TableRow>
+                  ))}
               </TableBody>
             </Table>
             {filteredPosts.length === 0 && (
               <div className="text-center py-8 text-muted-foreground">
-                {searchTerm ? "No posts found matching your search" : "No posts yet"}
+                {searchTerm
+                  ? "No posts found matching your search"
+                  : "No posts yet"}
               </div>
             )}
           </CardContent>
         </Card>
       </div>
 
-      <AlertDialog open={!!deletePostId} onOpenChange={() => setDeletePostId(null)}>
+      <AlertDialog
+        open={!!deletePostId}
+        onOpenChange={() => setDeletePostId(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the post.
+              This action cannot be undone. This will permanently delete the
+              post.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -82,7 +82,21 @@ const UserDetails = () => {
               <div>
                 <span className="font-semibold">Email:</span> {user.email}
               </div>
-            
+
+              <div>
+                <span className="font-semibold">Phone No:</span>{" "}
+                {user.user_phone}
+              </div>
+
+              <div>
+                <span className="font-semibold">First Name:</span>{" "}
+                {user.user_fname}
+              </div>
+
+              <div>
+                <span className="font-semibold">Last Name:</span>{" "}
+                {user.user_lname}
+              </div>
 
               {/* <div>
                 <span className="font-semibold">Role:</span> <Badge variant={user.role === "admin" ? "default" : "secondary"}>{user.role}</Badge>
@@ -93,9 +107,9 @@ const UserDetails = () => {
               </div>
               <div>
                 <span className="font-semibold">Plan:</span>{" "}
-              {user?.Subscriptions?.[0]?.Plan?.name||"No plan"}
+                {user?.Subscriptions?.[0]?.Plan?.name || "No plan"}
               </div>
-  <div>
+              <div>
                 <span className="font-semibold">Plan Status:</span>{" "}
                 {user?.Subscriptions?.[0]?.status?.charAt(0).toUpperCase() +
                   user?.Subscriptions?.[0]?.status?.slice(1).toLowerCase()}

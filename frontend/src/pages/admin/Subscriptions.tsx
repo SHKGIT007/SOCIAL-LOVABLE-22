@@ -20,11 +20,12 @@ interface SubscriptionData {
     email: string;
     user_name: string | null;
   };
-  plan: {
+  Plan: {
     name: string;
     price: number;
     monthly_posts: number;
     ai_posts: number;
+    linked_accounts: number;
   } | null;
 }
 
@@ -117,6 +118,7 @@ const Subscriptions = () => {
                   <TableHead>Status</TableHead>
                   <TableHead>Posts Used</TableHead>
                   <TableHead>AI Posts Used</TableHead>
+                  <TableHead>Linked Accounts</TableHead>
                   <TableHead>Start Date</TableHead>
                   <TableHead>End Date</TableHead>
                 </TableRow>
@@ -132,9 +134,9 @@ const Subscriptions = () => {
                     </TableCell>
                     <TableCell>
                       <div>
-                        <div className="font-medium">{sub.plan?.name || "No plan"}</div>
-                        {sub.plan && (
-                          <div className="text-sm text-muted-foreground">${sub.plan.price}/month</div>
+                        <div className="font-medium">{sub.Plan?.name || "No plan"}</div>
+                        {sub.Plan && (
+                          <div className="text-sm text-muted-foreground">{sub.Plan.price}</div>
                         )}
                       </div>
                     </TableCell>
@@ -151,12 +153,16 @@ const Subscriptions = () => {
                         {sub.status}
                       </Badge>
                     </TableCell>
-                    <TableCell>
-                      {sub.posts_used} / {sub.plan?.monthly_posts || 0}
-                    </TableCell>
-                    <TableCell>
-                      {sub.ai_posts_used} / {sub.plan?.ai_posts || 0}
-                    </TableCell>
+                   <TableCell>
+  {sub.posts_used} / {sub.Plan?.monthly_posts || 0}
+</TableCell>
+
+<TableCell>
+  {sub.ai_posts_used} / {sub.Plan?.ai_posts || 0}
+</TableCell>
+<TableCell>
+   {sub.Plan?.linked_accounts} 
+</TableCell>
                     <TableCell>{new Date(sub.start_date).toLocaleDateString()}</TableCell>
                     <TableCell>
                       {sub.end_date ? new Date(sub.end_date).toLocaleDateString() : "N/A"}

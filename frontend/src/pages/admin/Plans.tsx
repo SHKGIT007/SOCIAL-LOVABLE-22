@@ -113,6 +113,31 @@ const Plans = () => {
     }
   };
 
+  const handleStatusToggle = async (plan: Plan) => {
+    try {
+      await apiService.updatePlan(plan.id, {
+        ...plan,
+        is_active: plan.is_active ? 0 : 1,
+      });
+
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: `Plan is now ${plan.is_active ? "Inactive" : "Active"}`,
+        confirmButtonColor: "#6366f1",
+      });
+
+      fetchPlans();
+    } catch (error: any) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error.message || "Failed to update status.",
+        confirmButtonColor: "#6366f1",
+      });
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -188,16 +213,29 @@ const Plans = () => {
       cancelButtonColor: "#d33",
       confirmButtonText: "Yes, delete it!",
     });
+
     if (!result.isConfirmed) return;
 
     try {
-      await apiService.deletePlan(id);
+      const response = await apiService.deletePlan(id);
+
+      // 🔥 CHECK BACKEND STATUS
+      if (response.status === false) {
+        return Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: response.message || "Failed to delete plan.",
+          confirmButtonColor: "#6366f1",
+        });
+      }
+
       Swal.fire({
         icon: "success",
         title: "Success",
         text: "Plan deleted successfully!",
         confirmButtonColor: "#6366f1",
       });
+
       await fetchPlans();
     } catch (error: any) {
       Swal.fire({
@@ -289,7 +327,7 @@ const Plans = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="price">Price ($)</Label>
+                  <Label htmlFor="price">Price </Label>
                   <Input
                     id="price"
                     type="number"
@@ -344,7 +382,7 @@ const Plans = () => {
                     required
                   />
                 </div>
-                <div className="flex items-center space-x-2">
+                {/* <div className="flex items-center space-x-2">
                   <Switch
                     id="is_active"
                     checked={formData.is_active}
@@ -353,7 +391,7 @@ const Plans = () => {
                     }
                   />
                   <Label htmlFor="is_active">Active</Label>
-                </div>
+                </div> */}
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {editingPlan ? "Update Plan" : "Create Plan"}
                 </Button>
@@ -386,23 +424,21 @@ const Plans = () => {
               <TableBody>
                 {plans?.map((plan) => (
                   <TableRow key={plan.id}>
-                    <TableCell className="font-medium">{plan.name}</TableCell>
-                    <TableCell>{plan.description}</TableCell>
-                    <TableCell>${plan.price}</TableCell>
-                    {/* <TableCell>{plan.monthly_posts}</TableCell> */}
-                    <TableCell>{plan.ai_posts}</TableCell>
-                    <TableCell>{plan.linked_accounts}</TableCell>
-                    <TableCell>
-                      <span
-                        className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-                          plan.is_active
-                            ? "bg-green-100 text-green-700"
-                            : "bg-gray-100 text-gray-700"
-                        }`}
-                      >
-                        {plan.is_active ? "Active" : "Inactive"}
-                      </span>
+                    <TableCell className="font-medium">
+                      {plan.name || "N/A"}
                     </TableCell>
+                    <TableCell>{plan.description || "N/A"}</TableCell>
+                    <TableCell>{plan.price || "N/A"}</TableCell>
+                    {/* <TableCell>{plan.monthly_posts}</TableCell> */}
+                    <TableCell>{plan.ai_posts || "N/A"}</TableCell>
+                    <TableCell>{plan.linked_accounts || "N/A"}</TableCell>
+                    <TableCell>
+                      <Switch
+                        checked={plan.is_active === true}
+                        onCheckedChange={() => handleStatusToggle(plan)}
+                      />
+                    </TableCell>
+
                     <TableCell>
                       <div className="flex gap-2">
                         <Button

@@ -38,7 +38,7 @@ const createPost = asyncHandler(async (req, res) => {
 
     let video_url = null;
 
-    let { title, content, platforms, status, is_ai_generated } = req.body;
+    let { title, content, platforms, status, is_ai_generated, review_status } = req.body;
     // Convert platforms to array if string
     if (typeof platforms === "string") {
       try {
@@ -168,6 +168,7 @@ const createPost = asyncHandler(async (req, res) => {
       image_prompt: req.body.image_prompt || null,
       image_url,
       video_url,
+      review_status: review_status,
     });
 
     // Update subscription usage
@@ -968,8 +969,8 @@ const approvePost = asyncHandler(async (req, res) => {
     });
   }
 
-  console.log('Current post status:', post.status);
-  console.log('Current review_status:', post.review_status);
+  // console.log('Current post status:', post.status);
+  // console.log('Current review_status:', post.review_status);
 
   // ✅ Check scheduled time (only if scheduled_at exists)
   if (post.scheduled_at) {

@@ -39,16 +39,14 @@ const NewPost = () => {
   const [scheduledAt, setScheduledAt] = useState("");
   const [aiPrompt, setAiPrompt] = useState("");
   const [imagePrompt, setImagePrompt] = useState("");
+  const [autoToggle, setAutoToggle] = useState(false);
 
   const [optionalContentPrompt, setOptionalContentPrompt] = useState("");
   const [optionalImagePrompt, setOptionalImagePrompt] = useState("");
   const [optionalTitlePrompt, setOptionalTitlePrompt] = useState("");
 
-
-  console.log("optionalContentPrompt",optionalContentPrompt)
-  console.log("optionalImagePrompt",optionalImagePrompt)
-
-
+  console.log("optionalContentPrompt", optionalContentPrompt);
+  console.log("optionalImagePrompt", optionalImagePrompt);
 
   const [connectedAccounts, setConnectedAccounts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -125,12 +123,18 @@ const NewPost = () => {
       //   ai_prompt: aiPrompt,
       //   image_prompt: imagePrompt,
       // });
-   
+
       const res = await apiService.generateAIPost({
         //title: title || "AI Generated Post",
-        title: ['',null,undefined].includes(optionalTitlePrompt) ?title : optionalTitlePrompt,
-        ai_prompt: ['',null,undefined].includes(optionalContentPrompt) ?aiPrompt : optionalContentPrompt,
-        image_prompt: ['',null,undefined].includes(optionalImagePrompt) ? imagePrompt : optionalImagePrompt,
+        title: ["", null, undefined].includes(optionalTitlePrompt)
+          ? title
+          : optionalTitlePrompt,
+        ai_prompt: ["", null, undefined].includes(optionalContentPrompt)
+          ? aiPrompt
+          : optionalContentPrompt,
+        image_prompt: ["", null, undefined].includes(optionalImagePrompt)
+          ? imagePrompt
+          : optionalImagePrompt,
       });
 
       if (res.status) {
@@ -201,6 +205,7 @@ const NewPost = () => {
       if (imageContent) formData.append("image_url", imageContent);
       if (imageFile) formData.append("image_file", imageFile);
       if (videoFile) formData.append("video_file", videoFile);
+formData.append("review_status", autoToggle ? "pending" : "approved");
 
       const res = await apiService.createPost(formData, true);
       if (res.status) {
@@ -271,11 +276,13 @@ const NewPost = () => {
             <CardContent className="space-y-4">
               {/* Optional Title Prompt */}
               <div className="mb-2">
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Optional Title Prompt</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  Optional Title Prompt
+                </label>
                 <input
                   type="text"
                   value={optionalTitlePrompt}
-                  onChange={e => setOptionalTitlePrompt(e.target.value)}
+                  onChange={(e) => setOptionalTitlePrompt(e.target.value)}
                   className="w-full p-2 rounded border border-indigo-200 focus:border-indigo-400 focus:ring focus:ring-indigo-100 text-sm"
                   placeholder="Add extra instructions for AI title..."
                 />
@@ -291,10 +298,12 @@ const NewPost = () => {
 
               {/* Optional Content Prompt */}
               <div className="mb-2">
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Optional Content Prompt</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  Optional Content Prompt
+                </label>
                 <textarea
                   value={optionalContentPrompt}
-                  onChange={e => setOptionalContentPrompt(e.target.value)}
+                  onChange={(e) => setOptionalContentPrompt(e.target.value)}
                   className="w-full p-2 rounded border border-indigo-200 focus:border-indigo-400 focus:ring focus:ring-indigo-100 text-sm"
                   rows={2}
                   placeholder="Add extra instructions for AI content..."
@@ -302,10 +311,12 @@ const NewPost = () => {
               </div>
               {/* Optional Image Prompt */}
               <div className="mb-2">
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Optional Image Prompt</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  Optional Image Prompt
+                </label>
                 <textarea
                   value={optionalImagePrompt}
-                  onChange={e => setOptionalImagePrompt(e.target.value)}
+                  onChange={(e) => setOptionalImagePrompt(e.target.value)}
                   className="w-full p-2 rounded border border-indigo-200 focus:border-indigo-400 focus:ring focus:ring-indigo-100 text-sm"
                   rows={2}
                   placeholder="Add extra instructions for AI image..."
@@ -313,7 +324,7 @@ const NewPost = () => {
               </div>
               <Button
                 onClick={handleGenerateAI}
-                disabled={isGenerating }
+                disabled={isGenerating}
                 className="w-full h-11 bg-gradient-to-r from-indigo-600 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 text-white font-semibold shadow-md"
               >
                 {isGenerating ? (
@@ -485,10 +496,30 @@ const NewPost = () => {
                   value={scheduledAt}
                   onChange={(e) => setScheduledAt(e.target.value)}
                   className="border-gray-300 focus-visible:ring-indigo-500"
-                  min={new Date().toISOString().slice(0,16)}
+                  min={new Date().toISOString().slice(0, 16)}
                 />
               </div>
             )}
+
+            {/* Toggle Button Under Status */}
+            <div className="flex items-center justify-between p-3 border rounded-lg mt-2">
+              <span className="text-sm font-medium text-gray-700">
+                On Toggle for Review Post Before Publishing
+              </span>
+
+              <button
+                onClick={() => setAutoToggle(!autoToggle)}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  autoToggle ? "bg-indigo-600" : "bg-gray-300"
+                }`}
+              >
+                <span
+                  className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${
+                    autoToggle ? "translate-x-5" : "translate-x-1"
+                  }`}
+                />
+              </button>
+            </div>
 
             <div className="flex justify-end gap-3 pt-4">
               <Button

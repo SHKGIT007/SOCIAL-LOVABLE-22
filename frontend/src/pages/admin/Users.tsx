@@ -28,6 +28,7 @@ import EditUserModal from "./EditUser";
 interface UserData {
   id: string;
   email: string;
+  user_phone: string | null;
   user_name: string | null;
   created_at: string;
   role: string;
@@ -46,6 +47,7 @@ const Users = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
 
   // Define the primary gradient class for theme consistency
   const primaryGradient = "from-indigo-600 to-cyan-500";
@@ -104,7 +106,33 @@ const Users = () => {
   };
   // -------------------------
 
-  const handleUpdateUserStatus = async (userId: string, newStatus: boolean) => {
+  const handleUpdateUserStatus = async (
+    userId: string,
+    newStatus: boolean,
+    oldStatus: boolean
+  ) => {
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: `You are about to mark this user as ${
+        newStatus ? "Active" : "Inactive"
+      }.`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#6366f1",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, update",
+    });
+
+    if (!result.isConfirmed) {
+      // ❗ Toggle ko previous value par wapas set karna
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.id === userId ? { ...u, active_status: oldStatus } : u
+        )
+      );
+      return;
+    }
+
     try {
       const data = await apiService.updateUserStatus(userId, {
         active_status: newStatus,
@@ -113,7 +141,7 @@ const Users = () => {
       if (data.status === true) {
         Swal.fire({
           icon: "success",
-          title: "Success",
+          title: "Updated",
           text: "User status updated successfully.",
           confirmButtonColor: "#6366f1",
         });
@@ -125,6 +153,13 @@ const Users = () => {
           text: data.message || "Failed to update user status.",
           confirmButtonColor: "#6366f1",
         });
+
+        // ❗ API fail → toggle revert back
+        setUsers((prev) =>
+          prev.map((u) =>
+            u.id === userId ? { ...u, active_status: oldStatus } : u
+          )
+        );
       }
     } catch (error: any) {
       Swal.fire({
@@ -133,6 +168,13 @@ const Users = () => {
         text: error.message || "Failed to update user status.",
         confirmButtonColor: "#6366f1",
       });
+
+      // ❗ Error → toggle revert back
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.id === userId ? { ...u, active_status: oldStatus } : u
+        )
+      );
     }
   };
 
@@ -179,6 +221,16 @@ const Users = () => {
     }
   };
 
+  const filteredUsers = users.filter((u) => {
+    const s = search.toLowerCase();
+
+    return (
+      u.user_name?.toLowerCase().includes(s) ||
+      u.email?.toLowerCase().includes(s) ||
+      u.user_phone?.toLowerCase().includes(s)
+    );
+  });
+
   if (isLoading) {
     return (
       <DashboardLayout userRole="admin">
@@ -214,14 +266,14 @@ const Users = () => {
         {/* Users Table Card (Themed) */}
         <Card className="shadow-lg border-2 border-indigo-100/50">
           <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle className="text-xl font-bold text-gray-800">
-                All Users ({users.length})
-              </CardTitle>
-              <CardDescription>
-                Complete list of registered users and their details.
-              </CardDescription>
-            </div>
+            {/* 🔍 Search Input */}
+            <input
+              type="text"
+              placeholder="Search by name, email, phone..."
+              className="border px-3 py-2 rounded-md w-64"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
 
             <Button
               className="bg-indigo-600 hover:bg-indigo-700 shadow-md"
@@ -237,22 +289,24 @@ const Users = () => {
                 <TableRow>
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
-                  <TableHead>Role</TableHead>
+                  <TableHead>Phone</TableHead>
+                  {/* <TableHead>Role</TableHead> */}
                   <TableHead>Plan</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Joined</TableHead>
                   <TableHead>Actions</TableHead>
+                  <TableHead>Joined</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {users &&
-                  users?.map((user) => (
+                {filteredUsers &&
+                  filteredUsers.map((user) => (
                     <TableRow key={user.id}>
                       <TableCell className="font-medium">
                         {user?.user_name || "N/A"}
                       </TableCell>
                       <TableCell>{user.email}</TableCell>
-                      <TableCell>
+                      <TableCell>{user?.user_phone || "N/A"}</TableCell>
+                      {/* <TableCell>
                         <Badge
                           variant={
                             user.role === "admin" ? "default" : "secondary"
@@ -260,7 +314,7 @@ const Users = () => {
                         >
                           {user.role}
                         </Badge>
-                      </TableCell>
+                      </TableCell> */}
                       <TableCell>
                         {user.subscription?.plan ? (
                           <>
@@ -279,7 +333,7 @@ const Users = () => {
                             </Badge>
                           </>
                         ) : (
-                          "No plan"
+                          "N/A"
                         )}
                       </TableCell>
                       <TableCell>
@@ -287,9 +341,14 @@ const Users = () => {
                           <Switch
                             checked={user.active_status}
                             onCheckedChange={(value) =>
-                              handleUpdateUserStatus(user.id, value)
+                              handleUpdateUserStatus(
+                                user.id,
+                                value,
+                                user.active_status
+                              )
                             }
                           />
+
                           <span
                             className={
                               user.active_status
@@ -313,9 +372,6 @@ const Users = () => {
                           {user.subscription?.status || "inactive"}
                         </Badge>
                       </TableCell> */}
-                      <TableCell>
-                        {new Date(user.created_at).toLocaleDateString()}
-                      </TableCell>
 
                       <TableCell className="flex gap-2">
                         <Button
@@ -344,6 +400,9 @@ const Users = () => {
                         >
                           Delete
                         </Button>
+                      </TableCell>
+                      <TableCell>
+                        {new Date(user.created_at).toLocaleDateString()}
                       </TableCell>
                     </TableRow>
                   ))}

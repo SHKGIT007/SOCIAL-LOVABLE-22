@@ -15,13 +15,33 @@ const generateToken = (userId) => {
 const register = asyncHandler(async (req, res) => {
     const { user_name, email, password, user_fname, user_lname, user_phone } = req.body;
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ where: { email } });
-    if (existingUser) {
+    // Check If Email Already Exists
+    const emailExists = await User.findOne({ where: { email } });
+    if (emailExists) {
         return res.status(409).json({
             status: false,
-            message: 'User already exists with this email'
+            message: 'Email is already taken, please choose a different one'
         });
+    }
+
+    // Check If Username Already Exists
+    const usernameExists = await User.findOne({ where: { user_name } });
+    if (usernameExists) {
+        return res.status(409).json({
+            status: false,
+            message: 'Username is already taken, please choose a different one'
+        });
+    }
+
+    // Check If Phone Already Exists (optional)
+    if (user_phone) {
+        const phoneExists = await User.findOne({ where: { user_phone } });
+        if (phoneExists) {
+            return res.status(409).json({
+                status: false,
+                message: 'Phone number is already taken, please use another number'
+            });
+        }
     }
 
     // Hash password
@@ -36,7 +56,7 @@ const register = asyncHandler(async (req, res) => {
         user_lname,
         user_phone,
         user_type: 'client',
-        role_id: 2 // Default client role
+        role_id: 2
     });
 
     // Generate token
@@ -61,9 +81,9 @@ const register = asyncHandler(async (req, res) => {
     });
 });
 
+
 const login = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
-
 
     // Find user
     const user = await User.findOne({
@@ -75,6 +95,14 @@ const login = asyncHandler(async (req, res) => {
         return res.status(401).json({
             status: false,
             message: 'Invalid email or password'
+        });
+    }
+
+    // 🔥 Fix: active_status may be "0" (string) instead of number
+    if (Number(user.active_status) === 0) {
+        return res.status(403).json({
+            status: false,
+            message: "Your account is deactivated. Please contact admin."
         });
     }
 
@@ -109,6 +137,7 @@ const login = asyncHandler(async (req, res) => {
         }
     });
 });
+
 
 const getProfile = asyncHandler(async (req, res) => {
     const user = await User.findByPk(req.user.id, {
