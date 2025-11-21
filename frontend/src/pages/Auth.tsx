@@ -15,6 +15,7 @@ import Swal from "sweetalert2";
 import { Loader2 } from "lucide-react";
 import { apiService } from "@/services/api";
 import { setAuthData, isAuthenticated, getAuthData } from "@/utils/auth";
+import { Eye, EyeOff } from "lucide-react";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -25,6 +26,8 @@ const Auth = () => {
   const [userFname, setUserFname] = useState("");
   const [userLname, setUserLname] = useState("");
   const [userPhone, setUserPhone] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showSignupPassword, setShowSignupPassword] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated()) {
@@ -194,11 +197,11 @@ const Auth = () => {
             <TabsContent value="signin" className="mt-6">
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signin-email">Email</Label>
+                  <Label htmlFor="signin-email">Email*</Label>
                   <Input
                     id="signin-email"
                     type="email"
-                    placeholder="you@example.com"
+                    placeholder="your.email@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -207,17 +210,29 @@ const Auth = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signin-password">Password</Label>
-                  <Input
-                    id="signin-password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    disabled={isLoading}
-                    className="border-gray-300 focus-visible:ring-indigo-500"
-                  />
+                  <Label htmlFor="signin-password">Password*</Label>
+                  <div className="relative">
+                    <Input
+                      id="signin-password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      disabled={isLoading}
+                      className="border-gray-300 focus-visible:ring-indigo-500 pr-10"
+                    />
+
+                    <button
+                      type="button"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
+                  </div>
                 </div>
+
                 <Button
                   type="submit"
                   className="w-full h-10 bg-gradient-to-r from-indigo-600 to-sky-500 hover:from-indigo-500 hover:to-sky-400 text-white shadow-md"
@@ -238,11 +253,11 @@ const Auth = () => {
             <TabsContent value="signup" className="mt-6">
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signup-username">Username</Label>
+                  <Label htmlFor="signup-username">Username*</Label>
                   <Input
                     id="signup-username"
                     type="text"
-                    placeholder="johndoe"
+                    placeholder="Your Username"
                     value={userName}
                     onChange={(e) => setUserName(e.target.value)}
                     required
@@ -253,7 +268,7 @@ const Auth = () => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-fname">First Name</Label>
+                    <Label htmlFor="signup-fname">First Name*</Label>
                     <Input
                       id="signup-fname"
                       type="text"
@@ -266,7 +281,7 @@ const Auth = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-lname">Last Name</Label>
+                    <Label htmlFor="signup-lname">Last Name*</Label>
                     <Input
                       id="signup-lname"
                       type="text"
@@ -281,24 +296,25 @@ const Auth = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="signup-phone">Phone Number</Label>
+                  <Label htmlFor="signup-phone">Phone Number*</Label>
                   <Input
                     id="signup-phone"
                     type="tel"
-                    placeholder="+1234567890"
+                    placeholder="+91 12345 67890"
                     value={userPhone}
                     onChange={(e) => setUserPhone(e.target.value)}
+                      required
                     disabled={isLoading}
                     className="border-gray-300 focus-visible:ring-indigo-500"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
+                  <Label htmlFor="signup-email">Email*</Label>
                   <Input
                     id="signup-email"
                     type="email"
-                    placeholder="you@example.com"
+                    placeholder="your.email@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -306,19 +322,34 @@ const Auth = () => {
                     className="border-gray-300 focus-visible:ring-indigo-500"
                   />
                 </div>
-
                 <div className="space-y-2">
-                  <Label htmlFor="signup-password">Password</Label>
-                  <Input
-                    id="signup-password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    minLength={6}
-                    disabled={isLoading}
-                    className="border-gray-300 focus-visible:ring-indigo-500"
-                  />
+                  <Label htmlFor="signup-password">Password*</Label>
+                  <div className="relative">
+                    <Input
+                      id="signup-password"
+                      type={showSignupPassword ? "text" : "password"}
+                    placeholder="Password"
+                  
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      minLength={6}
+                      disabled={isLoading}
+                      className="border-gray-300 focus-visible:ring-indigo-500 pr-10"
+                    />
+
+                    <button
+                      type="button"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                      onClick={() => setShowSignupPassword(!showSignupPassword)}
+                    >
+                      {showSignupPassword ? (
+                        <EyeOff size={20} />
+                      ) : (
+                        <Eye size={20} />
+                      )}
+                    </button>
+                  </div>
                 </div>
 
                 <Button

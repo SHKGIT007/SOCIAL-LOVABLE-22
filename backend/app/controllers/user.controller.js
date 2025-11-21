@@ -15,6 +15,35 @@ const createUser = asyncHandler(async (req, res) => {
     user_type,
   } = req.body;
 
+  // Check If Email Already Exists
+  const emailExists = await User.findOne({ where: { email } });
+  if (emailExists) {
+    return res.status(409).json({
+      status: false,
+      message: "Email is already taken, please choose a different one",
+    });
+  }
+
+  // Check If Username Already Exists
+  const usernameExists = await User.findOne({ where: { user_name } });
+  if (usernameExists) {
+    return res.status(409).json({
+      status: false,
+      message: "Username is already taken, please choose a different one",
+    });
+  }
+
+  // Check If Phone Already Exists (optional)
+  if (user_phone) {
+    const phoneExists = await User.findOne({ where: { user_phone } });
+    if (phoneExists) {
+      return res.status(409).json({
+        status: false,
+        message: "Phone number is already taken, please use another number",
+      });
+    }
+  }
+
   // Check if user already exists
   const existingUser = await User.findOne({ where: { email } });
   if (existingUser) {
@@ -82,6 +111,8 @@ const getAllUsers = asyncHandler(async (req, res) => {
     whereClause.user_type = user_type;
   }
 
+  whereClause.user_type = { [Op.ne]: "admin" };
+
   const { count, rows: users } = await User.findAndCountAll({
     where: whereClause,
     include: [
@@ -104,11 +135,12 @@ const getAllUsers = asyncHandler(async (req, res) => {
     id: user.id,
     user_name: user.user_name,
     email: user.email,
+    user_phone: user.user_phone,
     user_fname: user.user_fname,
     user_lname: user.user_lname,
     user_type: user.user_type,
     active_status: user.active_status,
-    role: user.Role?.name,
+    // role: user.Role?.name,
     subscription: user.Subscriptions?.[0]
       ? {
           plan: user.Subscriptions[0].Plan?.name,
@@ -135,7 +167,17 @@ const getAllUsers = asyncHandler(async (req, res) => {
 const getUserById = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const user = await User.findByPk(id, {
-    attributes: ["id", "user_name", "email", "user_type", "created_at"],
+    attributes: [
+      "id",
+      "user_name",
+      "email",
+      "user_fname",
+      "user_lname",
+      "user_phone",
+      "user_type",
+      "active_status",
+      "created_at",
+    ],
     include: [
       {
         model: Subscription,
@@ -165,10 +207,47 @@ const getUserById = asyncHandler(async (req, res) => {
   });
 });
 
+// const updateUser = asyncHandler(async (req, res) => {
+//   const { id } = req.params;
+//   const { user_name, user_fname, user_lname, user_phone, email } = req.body;
+
+
+
+//   const user = await User.findByPk(id);
+//   if (!user) {
+//     return res.status(404).json({
+//       status: false,
+//       message: "User not found",
+//     });
+//   }
+
+//   const updateData = {};
+//   if (user_name) updateData.user_name = user_name;
+//   if (user_fname) updateData.user_fname = user_fname;
+//   if (user_lname) updateData.user_lname = user_lname;
+//   if (user_phone) updateData.user_phone = user_phone;
+//   if (email) updateData.email = email;
+
+//   await User.update(updateData, { where: { id } });
+
+//   const updatedUser = await User.findByPk(id, {
+//     include: [{ model: Role, as: "Role" }],
+//     attributes: { exclude: ["password"] },
+//   });
+
+//   logger.info("User updated by admin", { userId: id, updatedBy: req.user.id });
+
+//   res.json({
+//     status: true,
+//     message: "User updated successfully",
+//     data: { user: updatedUser },
+//   });
+// });
+
+
 const updateUser = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const { user_name, user_fname, user_lname, user_phone, email } =
-    req.body;
+  const { user_name, user_fname, user_lname, user_phone, email } = req.body;
 
   const user = await User.findByPk(id);
   if (!user) {
@@ -178,6 +257,48 @@ const updateUser = asyncHandler(async (req, res) => {
     });
   }
 
+  // --- DUPLICATE CHECKS ---
+
+  // Username check
+  if (user_name) {
+    const existUserName = await User.findOne({
+      where: { user_name, id: { [Op.ne]: id } }
+    });
+    if (existUserName) {
+      return res.status(409).json({
+        status: false,
+        message: "Username already exists"
+      });
+    }
+  }
+
+  // Email check
+  if (email) {
+    const existEmail = await User.findOne({
+      where: { email, id: { [Op.ne]: id } }
+    });
+    if (existEmail) {
+      return res.status(409).json({
+        status: false,
+        message: "Email already exists"
+      });
+    }
+  }
+
+  // Phone check
+  if (user_phone) {
+    const existPhone = await User.findOne({
+      where: { user_phone, id: { [Op.ne]: id } }
+    });
+    if (existPhone) {
+      return res.status(409).json({
+        status: false,
+        message: "Phone number already exists"
+      });
+    }
+  }
+
+  // --- UPDATE FIELDS ---
   const updateData = {};
   if (user_name) updateData.user_name = user_name;
   if (user_fname) updateData.user_fname = user_fname;
@@ -192,14 +313,13 @@ const updateUser = asyncHandler(async (req, res) => {
     attributes: { exclude: ["password"] },
   });
 
-  logger.info("User updated by admin", { userId: id, updatedBy: req.user.id });
-
   res.json({
     status: true,
     message: "User updated successfully",
     data: { user: updatedUser },
   });
 });
+
 
 const deleteUser = asyncHandler(async (req, res) => {
   const { id } = req.params;

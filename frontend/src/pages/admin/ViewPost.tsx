@@ -28,7 +28,7 @@ const AdminViewPost = () => {
           icon: "error",
           title: "Error",
           text: data.message || "Post not found.",
-          confirmButtonColor: "#6366f1"
+          confirmButtonColor: "#6366f1",
         });
         navigate("/admin/posts");
       }
@@ -37,7 +37,7 @@ const AdminViewPost = () => {
         icon: "error",
         title: "Error",
         text: error.message || "Failed to fetch post.",
-        confirmButtonColor: "#6366f1"
+        confirmButtonColor: "#6366f1",
       });
       navigate("/admin/posts");
     } finally {
@@ -72,10 +72,16 @@ const AdminViewPost = () => {
   }
 
   // Helper to always return array for platforms
-  const getPlatformsArray = (platforms: string[] | string | undefined): string[] => {
-    if (Array.isArray(platforms)) return platforms;
-    if (typeof platforms === 'string' && platforms) return platforms.split(',').map(p => p.trim()).filter(Boolean);
-    return [];
+  const getPlatformsArray = (platforms) => {
+    try {
+      if (!platforms) return [];
+      if (Array.isArray(platforms)) return platforms;
+
+      return JSON.parse(platforms); // string → array
+    } catch (error) {
+      console.error("Invalid platforms format:", error);
+      return [];
+    }
   };
 
   return (
@@ -97,13 +103,26 @@ const AdminViewPost = () => {
                 <span className="font-semibold">Title:</span> {post.title}
               </div>
               <div>
+                <span className="font-semibold">Image Prompt:</span>{" "}
+                {post.image_prompt}
+              </div>
+              <div>
+                <span className="font-semibold">AI Prompt:</span>{" "}
+                {post.ai_prompt}
+              </div>
+
+              <div>
                 <span className="font-semibold">Content:</span> {post.content}
               </div>
               <div>
                 <span className="font-semibold">Platforms:</span>{" "}
                 <div className="flex flex-wrap gap-1 mt-1">
                   {getPlatformsArray(post.platforms).map((platform) => (
-                    <Badge key={platform} variant="secondary" className="text-xs">
+                    <Badge
+                      key={platform}
+                      variant="secondary"
+                      className="text-xs"
+                    >
                       {platform}
                     </Badge>
                   ))}
@@ -121,6 +140,14 @@ const AdminViewPost = () => {
                   }
                 >
                   {post.status}
+                </Badge>
+              </div>
+              <div>
+                <span className="font-semibold">Scheduled At:</span>{" "}
+                <Badge variant="outline">
+                  {post.scheduled_at
+                    ? new Date(post.scheduled_at).toLocaleString()
+                    : "N/A"}
                 </Badge>
               </div>
               <div>
