@@ -13,13 +13,14 @@ async function publishScheduledPosts() {
   const posts = await Post.findAll({
     where: {
       status: 'scheduled',
-      scheduled_at: { [Op.lte]: now }
+      scheduled_at: { [Op.lte]: now },
+      review_status: 'approved'
     }
   });
 
   for (const post of posts) {
     
-    let published = false;
+    let publishedToPlatform = false;
     let platforms=post.platforms;
     if (typeof post.platforms === "string") {
       try {
@@ -39,7 +40,7 @@ async function publishScheduledPosts() {
       if (fbAccount && fbAccount.access_token) {
         try {
           await facebookPost(fbAccount.access_token, post.content, post.image_url);
-          published = true;
+          publishedToPlatform = true;
           logger.info('Scheduled post published to Facebook', { postId: post.id, userId: post.user_id });
         } catch (err) {
           logger.error('Scheduled Facebook publish error', { postId: post.id, error: err.message });
@@ -55,20 +56,24 @@ async function publishScheduledPosts() {
         try {
 
           await instagramPost(igAccount.access_token, post.content, post.image_url);
-          published = true;
+          publishedToPlatform = true;
           logger.info('Scheduled post published to Instagram', { postId: post.id, userId: post.user_id });
         } catch (err) {
           logger.error('Scheduled Instagram publish error', { postId: post.id, error: err.message });
         }
       }
     }
-    // Mark post as published if any platform succeeded
-    if (published) {
-      await Post.update(
-        { status: 'published', published_at: new Date() },
-        { where: { id: post.id } }
-      );
+    if (!publishedToPlatform) {
+      logger.warn('Scheduled post reached time but was not pushed to any platform', {
+        postId: post.id,
+        userId: post.user_id,
+      });
     }
+
+    await Post.update(
+      { status: 'published', published_at: new Date() },
+      { where: { id: post.id } }
+    );
   }
 }
 

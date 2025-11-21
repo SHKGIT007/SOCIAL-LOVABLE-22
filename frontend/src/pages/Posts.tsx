@@ -8,6 +8,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Edit, Trash2, Calendar, Eye } from "lucide-react";
@@ -34,6 +35,7 @@ interface Post {
   scheduled_at: string | null;
   is_ai_generated: boolean;
   created_at: string;
+  review_status: "pending" | "approved" | "rejected";
 }
 
 // Helper to filter posts by status
@@ -107,6 +109,68 @@ const Posts = () => {
       }
     } finally {
       setDeletePostId(null);
+    }
+  };
+
+  const handleApprove = async (postId) => {
+    console.log("=== APPROVE CLICKED ===");
+    console.log("Post ID:", postId);
+
+    try {
+      const response = await apiService.approvePost(postId, "approved");
+
+      console.log("API Response:", response);
+
+      if (response.status) {
+        Swal.fire({
+          icon: "success",
+          title: "Post Approved ✅",
+          text: "This post is now approved and ready for publishing.",
+          confirmButtonColor: "#6366f1",
+        });
+        fetchPosts(); // Refresh list
+      } else {
+        throw new Error(response.message || "Failed to approve post");
+      }
+    } catch (error) {
+      console.error("Approve Error:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error.message || "Failed to approve post",
+        confirmButtonColor: "#6366f1",
+      });
+    }
+  };
+
+  const handleReject = async (postId) => {
+    console.log("=== REJECT CLICKED ===");
+    console.log("Post ID:", postId);
+
+    try {
+      const response = await apiService.approvePost(postId, "rejected");
+
+      console.log("API Response:", response);
+
+      if (response.status) {
+        Swal.fire({
+          icon: "success",
+          title: "Post Rejected ❌",
+          text: "This post has been marked as rejected.",
+          confirmButtonColor: "#6366f1",
+        });
+        fetchPosts();
+      } else {
+        throw new Error(response.message || "Failed to reject post");
+      }
+    } catch (error) {
+      console.error("Reject Error:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error.message || "Failed to reject post",
+        confirmButtonColor: "#6366f1",
+      });
     }
   };
 
@@ -230,91 +294,149 @@ const Posts = () => {
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
             {filteredPosts(posts, statusFilter, generationFilter).map(
-              (post) => (
-                <Card
-                  key={post.id}
-                  className="border border-indigo-100/60 hover:border-indigo-200 hover:shadow-lg transition-all"
-                >
-                  <CardHeader className="pb-3">
-                    <div className="space-y-2">
-                      <CardTitle className="text-lg line-clamp-1">
-                        {post.title}
-                      </CardTitle>
-                      <CardDescription className="line-clamp-2">
-                        {post.content}
-                      </CardDescription>
-                    </div>
+              (post) => {
+                const isPastSchedule = post.scheduled_at
+                  ? new Date(post.scheduled_at) <= new Date()
+                  : false;
+                const showViewOnly =
+                  post.status === "published" ||
+                  post.review_status === "rejected" ||
+                  (post.review_status === "pending" && !!isPastSchedule);
+                const canApproveReject =
+                  post.status === "scheduled" &&
+                  post.review_status === "pending" &&
+                  !isPastSchedule;
 
-                    <div className="flex flex-wrap gap-2 mt-3">
-                      <Badge className={statusClasses(post.status)}>
-                        {post.status}
-                      </Badge>
-                      {post.is_ai_generated ? (
-                        <Badge variant="outline">AI Generated</Badge>
-                      ) : (
-                        <Badge variant="outline">Manually Generated</Badge>
-                      )}
-                    </div>
-                  </CardHeader>
-
-                  <CardContent className="space-y-4 pt-0">
-                    {/* Platforms */}
-                    <div className="flex flex-wrap gap-1">
-                      {getPlatformsArray(post.platforms).map((platform) => (
-                        <Badge
-                          key={platform}
-                          variant="secondary"
-                          className="capitalize"
-                        >
-                          {platform}
-                        </Badge>
-                      ))}
-                    </div>
-
-                    {/* Schedule */}
-                    {post.scheduled_at && (
-                      <div className="flex items-center text-sm text-muted-foreground">
-                        <Calendar className="mr-2 h-4 w-4" />
-                        {new Date(post.scheduled_at).toLocaleString()}
+                return (
+                  <Card
+                    key={post.id}
+                    className="border border-indigo-100/60 hover:border-indigo-200 hover:shadow-lg transition-all"
+                  >
+                    <CardHeader className="pb-3">
+                      <div className="space-y-2">
+                        <CardTitle className="text-lg line-clamp-1">
+                          {post.title}
+                        </CardTitle>
+                        <CardDescription className="line-clamp-2">
+                          {post.content}
+                        </CardDescription>
                       </div>
-                    )}
 
-                    {/* Actions */}
-                    <div className="flex gap-2">
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        <Badge className={statusClasses(post.status)}>
+                          {post.status}
+                        </Badge>
+
+                        {post.is_ai_generated ? (
+                          <Badge variant="outline">AI Generated</Badge>
+                        ) : (
+                          <Badge variant="outline">Manually Generated</Badge>
+                        )}
+
+                        {post.review_status === "approved" && (
+                          <Badge className="bg-emerald-100 text-emerald-700 border border-emerald-200">
+                            Approved
+                          </Badge>
+                        )}
+
+                        {post.review_status === "pending" && (
+                          <Badge className="bg-yellow-100 text-yellow-700 border border-yellow-200">
+                            Pending Review
+                          </Badge>
+                        )}
+
+                        {post.review_status === "rejected" && (
+                          <Badge className="bg-red-100 text-red-700 border border-red-200">
+                            Rejected
+                          </Badge>
+                        )}
+                      </div>
+                    </CardHeader>
+
+                    <CardContent className="space-y-4 pt-0">
+                      {/* Platforms */}
+                      <div className="flex flex-wrap gap-1">
+                        {getPlatformsArray(post.platforms).map((platform) => (
+                          <Badge
+                            key={platform}
+                            variant="secondary"
+                            className="capitalize"
+                          >
+                            {platform}
+                          </Badge>
+                        ))}
+                      </div>
+
+                      {/* Schedule */}
+                      {post.scheduled_at && (
+                        <div className="flex items-center text-sm text-muted-foreground">
+                          <Calendar className="mr-2 h-4 w-4" />
+                          {new Date(post.scheduled_at).toLocaleString()}
+                        </div>
+                      )}
+                    </CardContent>
+
+                    {/* ------- BUTTONS HERE ------- */}
+                    <CardFooter className="mt-2 pt-4 flex items-center gap-2 flex-wrap border-t">
                       <Button
                         size="sm"
                         variant="outline"
-                        className="hover:bg-indigo-50"
+                        className="h-9 px-3 flex items-center gap-1"
                         onClick={() => navigate(`/posts/${post.id}`)}
-                        title="View"
                       >
                         <Eye className="h-4 w-4" />
+                        View
                       </Button>
-                      {post.status !== "published" && (
+
+                      {!showViewOnly && (
                         <>
+                          {canApproveReject && (
+                            <>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-9 px-3 flex items-center gap-1 text-emerald-700 border-emerald-300 hover:bg-emerald-50"
+                                onClick={() => handleApprove(post.id)}
+                              >
+                                ✓ Approve
+                              </Button>
+
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-9 px-3 flex items-center gap-1 text-red-700 border-red-300 hover:bg-red-50"
+                                onClick={() => handleReject(post.id)}
+                              >
+                                ✗ Reject
+                              </Button>
+                            </>
+                          )}
+
                           <Button
                             size="sm"
                             variant="outline"
-                            className="hover:bg-indigo-50"
+                            className="h-9 px-3 flex items-center gap-1"
                             onClick={() => navigate(`/posts/edit/${post.id}`)}
-                            title="Edit"
                           >
                             <Edit className="h-4 w-4" />
+                            Edit
                           </Button>
+
                           <Button
                             size="sm"
                             variant="destructive"
+                            className="h-9 px-3 flex items-center gap-1"
                             onClick={() => setDeletePostId(post.id)}
-                            title="Delete"
                           >
                             <Trash2 className="h-4 w-4" />
+                            Delete
                           </Button>
                         </>
                       )}
-                    </div>
-                  </CardContent>
-                </Card>
-              )
+                    </CardFooter>
+                  </Card>
+                );
+              }
             )}
           </div>
         )}
