@@ -848,3 +848,5 @@
 {"email":"shaktijatpnp09@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-21T13:09:01.728Z","userId":17}
 {"email":"shaktijatpnp09@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-21T13:09:26.696Z","userId":17}
 {"email":"shaktijatpnp09@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-21T13:10:03.618Z","userId":17}
+{"level":"info","message":"User status updated Successfully","service":"social-lovable-api","timestamp":"2025-11-21T13:12:02.394Z","updatedBy":1,"userId":"17"}
+{"email":"shaktijatpnp09@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-21T13:12:07.131Z","userId":17}
