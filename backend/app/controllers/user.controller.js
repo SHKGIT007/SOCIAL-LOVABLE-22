@@ -320,7 +320,6 @@ const updateUser = asyncHandler(async (req, res) => {
   });
 });
 
-
 const deleteUser = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
@@ -375,34 +374,56 @@ const getUserStats = asyncHandler(async (req, res) => {
 });
 
 const getAdminStats = asyncHandler(async (req, res) => {
-  const [totalUsers, totalPosts, activeSubscriptions] = await Promise.all([
-    User.count(),
+  const [
+    totalClients,
+    totalPosts,
+    totalPlans,
+    activeSubscriptions,
+    successfulPayments
+  ] = await Promise.all([
+    User.count({ where: { user_type: "client" } }),
     Post.count(),
+    Plan.count(),
     Subscription.count({ where: { status: "active" } }),
+
+    Subscription.findAll({
+      where: { payment_status: "success" },
+      attributes: ["amount_paid"]
+    })
   ]);
 
-  // Calculate total revenue (simplified)
-  const subscriptions = await Subscription.findAll({
+  const activeSubs = await Subscription.findAll({
     where: { status: "active" },
-    include: [{ model: Plan, as: "Plan" }],
+    include: [{ model: Plan, as: "Plan" }]
   });
 
-  const totalRevenue = subscriptions.reduce((sum, sub) => {
-    return sum + (sub.Plan?.price || 0);
-  }, 0);
+  const totalRevenue = activeSubs.reduce(
+    (sum, s) => sum + Number(s?.Plan?.price || 0),
+    0
+  );
+
+  // 🔥 FIXED: Convert DECIMAL string → Number
+  const totalSuccessAmount = successfulPayments.reduce(
+    (sum, s) => sum + Number(s.amount_paid || 0),
+    0
+  );
 
   res.json({
     status: true,
     data: {
       stats: {
-        totalUsers,
+        totalClients,
         totalPosts,
+        totalPlans,
         activeSubscriptions,
         totalRevenue,
+        totalSuccessAmount,
       },
     },
   });
 });
+
+
 
 const updateUserStatus = asyncHandler(async (req, res) => {
   const { id } = req.params;

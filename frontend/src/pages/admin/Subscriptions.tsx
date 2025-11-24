@@ -16,6 +16,7 @@ interface SubscriptionData {
   end_date: string | null;
   posts_used: number;
   ai_posts_used: number;
+  payment_status: string;
   User?: {
     email: string;
     user_name: string | null;
@@ -116,11 +117,11 @@ const Subscriptions = () => {
                   <TableHead>User</TableHead>
                   <TableHead>Plan</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Posts Used</TableHead>
+                  {/* <TableHead>Posts Used</TableHead> */}
                   <TableHead>AI Posts Used</TableHead>
                   <TableHead>Linked Accounts</TableHead>
                   <TableHead>Start Date</TableHead>
-                  <TableHead>End Date</TableHead>
+                  {/* <TableHead>End Date</TableHead> */}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -142,20 +143,14 @@ const Subscriptions = () => {
                     </TableCell>
                     <TableCell>
                       <Badge
-                        variant={
-                          sub.status === "active"
-                            ? "default"
-                            : sub.status === "cancelled"
-                            ? "destructive"
-                            : "secondary"
-                        }
+                        
                       >
-                        {sub.status}
+                        {sub.payment_status}
                       </Badge>
                     </TableCell>
-                   <TableCell>
+                   {/* <TableCell>
   {sub.posts_used} / {sub.Plan?.monthly_posts || 0}
-</TableCell>
+</TableCell> */}
 
 <TableCell>
   {sub.ai_posts_used} / {sub.Plan?.ai_posts || 0}
@@ -164,9 +159,9 @@ const Subscriptions = () => {
    {sub.Plan?.linked_accounts} 
 </TableCell>
                     <TableCell>{new Date(sub.start_date).toLocaleDateString()}</TableCell>
-                    <TableCell>
+                    {/* <TableCell>
                       {sub.end_date ? new Date(sub.end_date).toLocaleDateString() : "N/A"}
-                    </TableCell>
+                    </TableCell> */}
                   </TableRow>
                 ))}
               </TableBody>

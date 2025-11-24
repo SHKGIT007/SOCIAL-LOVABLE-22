@@ -378,6 +378,20 @@ class ApiService {
       body: subscriptionData,
     });
   }
+  
+  async createRazorpayOrder(data) {
+    return this.request(API_CONFIG.ENDPOINTS.SUBSCRIPTIONS.CREATE_ORDER, {
+      method: "POST",
+      body: data,
+    });
+  }
+
+  async verifyRazorpayPayment(data) {
+    return this.request(API_CONFIG.ENDPOINTS.SUBSCRIPTIONS.VERIFY_PAYMENT, {
+      method: "POST",
+      body: data,
+    });
+  }
 
   async updateSubscription(id, subscriptionData) {
     return this.request(`${API_CONFIG.ENDPOINTS.SUBSCRIPTIONS.UPDATE}/${id}`, {
@@ -404,19 +418,6 @@ class ApiService {
     );
   }
 
-  async createRazorpayOrder(data) {
-    return this.request(API_CONFIG.ENDPOINTS.SUBSCRIPTIONS.CREATE_ORDER, {
-      method: "POST",
-      body: data,
-    });
-  }
-
-  async verifyRazorpayPayment(data) {
-    return this.request(API_CONFIG.ENDPOINTS.SUBSCRIPTIONS.VERIFY_PAYMENT, {
-      method: "POST",
-      body: data,
-    });
-  }
 
   // Social Account API methods
   async getMySocialAccounts() {

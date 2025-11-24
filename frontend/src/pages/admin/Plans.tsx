@@ -43,6 +43,7 @@ interface Plan {
   is_active: boolean;
   features: any;
   description: string;
+  duration_months: number;
 }
 
 const Plans = () => {
@@ -57,8 +58,9 @@ const Plans = () => {
     monthly_posts: 0,
     ai_posts: 0,
     linked_accounts: 0,
-    is_active: true,
+    is_active: false,
     description: "",
+    duration_months: 0,
   });
 
   useEffect(() => {
@@ -173,8 +175,9 @@ const Plans = () => {
         monthly_posts: 0,
         ai_posts: 0,
         linked_accounts: 0,
-        is_active: true,
+        is_active: false,
         description: "",
+        duration_months: 0,
       });
       await fetchPlans();
     } catch (error: any) {
@@ -199,6 +202,7 @@ const Plans = () => {
       linked_accounts: plan.linked_accounts,
       is_active: plan.is_active,
       description: plan.description || "",
+      duration_months: plan.duration_months,
     });
     setIsDialogOpen(true);
   };
@@ -282,8 +286,9 @@ const Plans = () => {
                     monthly_posts: 0,
                     ai_posts: 0,
                     linked_accounts: 0,
-                    is_active: true,
+                    is_active: false,
                     description: "",
+                    duration_months: 0,
                   });
                 }}
               >
@@ -321,6 +326,22 @@ const Plans = () => {
                     value={formData.description}
                     onChange={(e) =>
                       setFormData({ ...formData, description: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="duration_months">Duration (Months)</Label>
+                  <Input
+                    id="duration_months"
+                    type="number"
+                    value={formData.duration_months}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        duration_months: parseInt(e.target.value),
+                      })
                     }
                     required
                   />
@@ -414,7 +435,7 @@ const Plans = () => {
                   <TableHead>Name</TableHead>
                   <TableHead>Description</TableHead>
                   <TableHead>Price</TableHead>
-                  {/* <TableHead>Posts/Month</TableHead> */}
+                  <TableHead>Duration (Months)</TableHead>
                   <TableHead>AI Posts</TableHead>
                   <TableHead>Accounts</TableHead>
                   <TableHead>Status</TableHead>
@@ -429,7 +450,7 @@ const Plans = () => {
                     </TableCell>
                     <TableCell>{plan.description || "N/A"}</TableCell>
                     <TableCell>{plan.price || "N/A"}</TableCell>
-                    {/* <TableCell>{plan.monthly_posts}</TableCell> */}
+                    <TableCell>{plan.duration_months || "N/A"}</TableCell>
                     <TableCell>{plan.ai_posts || "N/A"}</TableCell>
                     <TableCell>{plan.linked_accounts || "N/A"}</TableCell>
                     <TableCell>
