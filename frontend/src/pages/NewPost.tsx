@@ -148,14 +148,18 @@ const NewPost = () => {
         });
       }
     } catch (err: any) {
-      if (err.message === "Authentication failed") logout();
-      else
-        Swal.fire({
-          icon: "error",
-          title: "Error",
-          text: err.message || "Failed to generate post",
-          confirmButtonColor: "#6366f1",
-        });
+      const message =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err?.message ||
+        "Failed to generate post";
+
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: message,
+        confirmButtonColor: "#6366f1",
+      });
     } finally {
       setIsGenerating(false);
     }
@@ -205,7 +209,7 @@ const NewPost = () => {
       if (imageContent) formData.append("image_url", imageContent);
       if (imageFile) formData.append("image_file", imageFile);
       if (videoFile) formData.append("video_file", videoFile);
-formData.append("review_status", autoToggle ? "pending" : "approved");
+      formData.append("review_status", autoToggle ? "pending" : "approved");
 
       const res = await apiService.createPost(formData, true);
       if (res.status) {
@@ -218,10 +222,16 @@ formData.append("review_status", autoToggle ? "pending" : "approved");
         navigate("/posts");
       }
     } catch (err: any) {
+      const message =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err?.message ||
+        "Failed to create post";
+
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: err.message || "Failed to create post",
+        text: message,
         confirmButtonColor: "#6366f1",
       });
     } finally {

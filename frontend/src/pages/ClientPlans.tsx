@@ -249,9 +249,11 @@ const ClientPlans = () => {
                 <div className="flex justify-between">
                   <span className="font-medium">End Date:</span>
                   <span>
-                    {new Date(currentSubscription.end_date).toLocaleDateString(
-                      "en-IN"
-                    )}
+                    {currentSubscription.end_date
+                      ? new Date(
+                          currentSubscription.end_date
+                        ).toLocaleDateString("en-IN")
+                      : "No End Date"}
                   </span>
                 </div>
 

@@ -21,6 +21,7 @@ const createSubscriptionRecord = async ({
 
   if (
     existingSubscription &&
+    existingSubscription.end_date &&
     currentDate.isBetween(
       moment(existingSubscription.start_date).tz("Asia/Kolkata").startOf("day"),
       moment(existingSubscription.end_date).tz("Asia/Kolkata").endOf("day"),
@@ -36,17 +37,20 @@ const createSubscriptionRecord = async ({
     startDate = currentDate.clone();
   }
 
-  const durationDays = plan.duration_days || 30;
-  const endDateMoment = startDate
-    .clone()
-    .add(durationDays, "days")
-    .endOf("day");
+  // ✅ Calculate end_date only if duration_months exists
+  let endDateMoment = null;
+  if (plan.duration_months && plan.duration_months > 0) {
+    const durationDays = plan.duration_months * 30;
+    endDateMoment = startDate.clone().add(durationDays, "days").endOf("day");
+  }
 
   const subscription = await Subscription.create({
     user_id: userId,
     plan_id: plan.id,
     start_date: startDate.format("YYYY-MM-DD HH:mm:ss"),
-    end_date: endDateMoment.format("YYYY-MM-DD HH:mm:ss"),
+    end_date: endDateMoment
+      ? endDateMoment.format("YYYY-MM-DD HH:mm:ss")
+      : null,
     status: "active",
     posts_used: 0,
     ai_posts_used: 0,
@@ -65,6 +69,7 @@ const createSubscriptionRecord = async ({
     subscriptionId: subscription.id,
     userId,
     planId: plan.id,
+    hasEndDate: !!endDateMoment,
     paymentStatus: subscription.payment_status,
     amountPaid: subscription.amount_paid,
   });
@@ -156,16 +161,20 @@ const createRazorpayOrder = asyncHandler(async (req, res) => {
     },
   });
 
-  // 🔥 Calculate end_date properly
   const startDate = moment().tz("Asia/Kolkata").startOf("day");
-  const durationDays = (plan.duration_months || 1) * 30;
-  const endDate = startDate.clone().add(durationDays, "days").endOf("day");
+
+  // ✅ Calculate end_date only if duration_months exists
+  let endDate = null;
+  if (plan.duration_months && plan.duration_months > 0) {
+    const durationDays = plan.duration_months * 30;
+    endDate = startDate.clone().add(durationDays, "days").endOf("day");
+  }
 
   const pendingSubscription = await Subscription.create({
     user_id: userId,
     plan_id: plan.id,
     start_date: startDate.format("YYYY-MM-DD HH:mm:ss"),
-    end_date: endDate.format("YYYY-MM-DD HH:mm:ss"), // 🔥 SET END_DATE
+    end_date: endDate ? endDate.format("YYYY-MM-DD HH:mm:ss") : null,
     status: "pending",
     posts_used: 0,
     ai_posts_used: 0,
@@ -181,6 +190,7 @@ const createRazorpayOrder = asyncHandler(async (req, res) => {
     userId,
     planId: plan.id,
     subscriptionId: pendingSubscription.id,
+    hasEndDate: !!endDate,
   });
 
   res.status(201).json({
@@ -244,26 +254,33 @@ const verifyRazorpayPayment = asyncHandler(async (req, res) => {
     });
   }
 
-  // 🔥 Calculate proper end_date based on duration_months
   const startDate = moment().tz("Asia/Kolkata").startOf("day");
-  const durationDays = plan.duration_months * 30; // 30 days per month
-  const endDate = startDate.clone().add(durationDays, "days").endOf("day");
 
-  const [updatedCount] = await Subscription.update(
-    {
-      status: "active",
-      payment_status: "success",
-      payment_id: razorpay_payment_id,
-      end_date: endDate.format("YYYY-MM-DD HH:mm:ss"), // 🔥 SET END_DATE
+  // ✅ Calculate end_date only if duration_months exists
+  let endDate = null;
+  if (plan.duration_months && plan.duration_months > 0) {
+    const durationDays = plan.duration_months * 30;
+    endDate = startDate.clone().add(durationDays, "days").endOf("day");
+  }
+
+  const updateData = {
+    status: "active",
+    payment_status: "success",
+    payment_id: razorpay_payment_id,
+  };
+
+  // Only set end_date if it exists
+  if (endDate) {
+    updateData.end_date = endDate.format("YYYY-MM-DD HH:mm:ss");
+  }
+
+  const [updatedCount] = await Subscription.update(updateData, {
+    where: {
+      user_id: userId,
+      order_id: razorpay_order_id,
+      payment_status: "pending",
     },
-    {
-      where: {
-        user_id: userId,
-        order_id: razorpay_order_id,
-        payment_status: "pending",
-      },
-    }
-  );
+  });
 
   if (updatedCount === 0) {
     const subscription = await createSubscriptionRecord({
@@ -354,6 +371,7 @@ const getAllSubscriptions = asyncHandler(async (req, res) => {
           "monthly_posts",
           "ai_posts",
           "linked_accounts",
+          "duration_months",
         ],
       },
     ],
@@ -436,13 +454,40 @@ const getUserSubscription = asyncHandler(async (req, res) => {
     });
   }
 
-  // 🔥 Check if AI posts limit reached
+  const currentDate = moment().tz("Asia/Kolkata");
+  let shouldExpire = false;
+  let expiryReason = null;
+
+  // ✅ Check 1: AI posts limit reached
   if (subscription.ai_posts_used >= subscription.Plan.ai_posts) {
+    shouldExpire = true;
+    expiryReason = "AI posts limit reached";
+  }
+
+  // ✅ Check 2: Time limit reached (only if end_date exists)
+  if (subscription.end_date) {
+    const endDate = moment(subscription.end_date).tz("Asia/Kolkata");
+    if (currentDate.isAfter(endDate)) {
+      shouldExpire = true;
+      expiryReason = expiryReason
+        ? `${expiryReason} and time expired`
+        : "Time expired";
+    }
+  }
+
+  // ✅ Expire the subscription if any condition is met
+  if (shouldExpire) {
     await Subscription.update(
-      { status: "inactive" },
+      { status: "expired" },
       { where: { id: subscription.id } }
     );
-    subscription.status = "inactive";
+    subscription.status = "expired";
+
+    logger.info("Subscription expired", {
+      subscriptionId: subscription.id,
+      userId,
+      reason: expiryReason,
+    });
   }
 
   res.json({
@@ -562,24 +607,34 @@ const renewSubscription = asyncHandler(async (req, res) => {
     });
   }
 
-  if (subscription.status !== "active") {
+  if (subscription.status !== "active" && subscription.status !== "expired") {
     return res.status(400).json({
       status: false,
-      message: "Only active subscriptions can be renewed",
+      message: "Only active or expired subscriptions can be renewed",
     });
   }
 
-  const newEndDate = new Date();
-  newEndDate.setMonth(newEndDate.getMonth() + 1);
+  const updateData = {
+    status: "active",
+    posts_used: 0,
+    ai_posts_used: 0,
+  };
 
-  await Subscription.update(
-    {
-      end_date: newEndDate,
-      posts_used: 0,
-      ai_posts_used: 0,
-    },
-    { where: { id } }
-  );
+  // ✅ Only update end_date if plan has duration_months
+  if (
+    subscription.Plan.duration_months &&
+    subscription.Plan.duration_months > 0
+  ) {
+    const currentDate = moment().tz("Asia/Kolkata").startOf("day");
+    const durationDays = subscription.Plan.duration_months * 30;
+    const newEndDate = currentDate
+      .clone()
+      .add(durationDays, "days")
+      .endOf("day");
+    updateData.end_date = newEndDate.format("YYYY-MM-DD HH:mm:ss");
+  }
+
+  await Subscription.update(updateData, { where: { id } });
 
   logger.info("Subscription renewed", { subscriptionId: id, userId });
 

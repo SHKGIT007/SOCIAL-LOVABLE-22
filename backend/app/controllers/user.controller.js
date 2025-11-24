@@ -395,9 +395,16 @@ const getAdminStats = asyncHandler(async (req, res) => {
     activeSubscriptions,
     successfulPayments,
   ] = await Promise.all([
-    User.count({ where: { user_type: "client" } }),
+    User.count({ 
+      where: { 
+        user_type: "client",
+        is_deleted: 0  // 🚀 Soft-deleted users excluded
+      } 
+    }),
+
     Post.count(),
     Plan.count(),
+
     Subscription.count({ where: { status: "active" } }),
 
     Subscription.findAll({
@@ -416,7 +423,6 @@ const getAdminStats = asyncHandler(async (req, res) => {
     0
   );
 
-  // 🔥 FIXED: Convert DECIMAL string → Number
   const totalSuccessAmount = successfulPayments.reduce(
     (sum, s) => sum + Number(s.amount_paid || 0),
     0
@@ -436,6 +442,7 @@ const getAdminStats = asyncHandler(async (req, res) => {
     },
   });
 });
+
 
 const updateUserStatus = asyncHandler(async (req, res) => {
   const { id } = req.params;
