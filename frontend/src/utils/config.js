@@ -24,7 +24,8 @@ export const API_CONFIG = {
       GET_BY_ID: '/users',
       UPDATE: '/users',
       DELETE: '/users',
-      UPDATE_STATUS: '/users/:id/status'
+      UPDATE_STATUS: '/users/:id/status',
+      DELETED_LIST: '/users/deleted/list'
     },
     // Post endpoints
     POSTS: {

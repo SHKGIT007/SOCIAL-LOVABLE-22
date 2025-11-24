@@ -918,3 +918,35 @@
 {"level":"info","message":"Razorpay payment verified and subscription activated","orderId":"order_Rim0xLzF9ttk72","paymentId":"pay_Rim10LPVrNxrpu","service":"social-lovable-api","subscriptionId":32,"timestamp":"2025-11-22T11:43:32.334Z"}
 {"amountPaid":0,"level":"info","message":"Subscription created","paymentStatus":"success","planId":1,"service":"social-lovable-api","subscriptionId":33,"timestamp":"2025-11-22T12:23:19.999Z","userId":17}
 {"amountPaid":0,"level":"info","message":"Subscription created","paymentStatus":"success","planId":1,"service":"social-lovable-api","subscriptionId":34,"timestamp":"2025-11-22T12:33:16.675Z","userId":17}
+{"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-24T05:04:33.290Z","userId":1}
+{"createdBy":1,"level":"info","message":"Plan created","planId":19,"service":"social-lovable-api","timestamp":"2025-11-24T05:06:05.595Z"}
+{"level":"info","message":"Plan updated","planId":"19","service":"social-lovable-api","timestamp":"2025-11-24T05:07:36.419Z","updatedBy":1}
+{"deletedBy":1,"level":"info","message":"Plan deleted","planId":"19","service":"social-lovable-api","timestamp":"2025-11-24T05:10:12.227Z"}
+{"deletedBy":1,"level":"info","message":"Plan deleted","planId":"3","service":"social-lovable-api","timestamp":"2025-11-24T05:10:15.749Z"}
+{"deletedBy":1,"level":"info","message":"Plan deleted","planId":"15","service":"social-lovable-api","timestamp":"2025-11-24T05:10:18.527Z"}
+{"level":"info","message":"Plan updated","planId":"1","service":"social-lovable-api","timestamp":"2025-11-24T05:14:53.653Z","updatedBy":1}
+{"level":"info","message":"Plan updated","planId":"1","service":"social-lovable-api","timestamp":"2025-11-24T05:14:56.268Z","updatedBy":1}
+{"createdBy":1,"level":"info","message":"Plan created","planId":20,"service":"social-lovable-api","timestamp":"2025-11-24T05:16:24.885Z"}
+{"level":"info","message":"Plan updated","planId":"20","service":"social-lovable-api","timestamp":"2025-11-24T05:16:27.723Z","updatedBy":1}
+{"level":"info","message":"Plan updated","planId":"20","service":"social-lovable-api","timestamp":"2025-11-24T05:17:08.554Z","updatedBy":1}
+{"level":"info","message":"Plan updated","planId":"1","service":"social-lovable-api","timestamp":"2025-11-24T05:20:27.667Z","updatedBy":1}
+{"level":"info","message":"Plan updated","planId":"1","service":"social-lovable-api","timestamp":"2025-11-24T05:20:30.308Z","updatedBy":1}
+{"level":"info","message":"Plan updated","planId":"1","service":"social-lovable-api","timestamp":"2025-11-24T05:20:34.809Z","updatedBy":1}
+{"level":"info","message":"Plan updated","planId":"1","service":"social-lovable-api","timestamp":"2025-11-24T05:22:36.014Z","updatedBy":1}
+{"level":"info","message":"Plan updated","planId":"20","service":"social-lovable-api","timestamp":"2025-11-24T05:22:49.230Z","updatedBy":1}
+{"createdBy":1,"level":"info","message":"Plan created","planId":21,"service":"social-lovable-api","timestamp":"2025-11-24T05:23:21.630Z"}
+{"level":"info","message":"Plan updated","planId":"21","service":"social-lovable-api","timestamp":"2025-11-24T05:23:24.427Z","updatedBy":1}
+{"email":"shaktijatpnp09@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-24T05:24:31.575Z","userId":17}
+{"createdBy":1,"email":"shaktijatpnp009@gmail.com","level":"info","message":"User created by admin","service":"social-lovable-api","timestamp":"2025-11-24T05:27:42.082Z","userId":21}
+{"level":"info","message":"User status updated Successfully","service":"social-lovable-api","timestamp":"2025-11-24T05:28:33.166Z","updatedBy":1,"userId":"21"}
+{"createdBy":1,"email":"gaurank@gmail.com","level":"info","message":"User created by admin","service":"social-lovable-api","timestamp":"2025-11-24T05:34:00.080Z","userId":22}
+{"level":"info","message":"User status updated Successfully","service":"social-lovable-api","timestamp":"2025-11-24T05:34:04.322Z","updatedBy":1,"userId":"22"}
+{"level":"info","message":"User status updated Successfully","service":"social-lovable-api","timestamp":"2025-11-24T05:40:39.557Z","updatedBy":1,"userId":"17"}
+{"level":"info","message":"User status updated Successfully","service":"social-lovable-api","timestamp":"2025-11-24T05:40:42.048Z","updatedBy":1,"userId":"17"}
+{"level":"info","message":"User status updated Successfully","service":"social-lovable-api","timestamp":"2025-11-24T05:44:57.789Z","updatedBy":1,"userId":"22"}
+{"level":"info","message":"User status updated Successfully","service":"social-lovable-api","timestamp":"2025-11-24T05:45:00.486Z","updatedBy":1,"userId":"22"}
+{"deletedBy":1,"level":"info","message":"User soft-deleted by admin","service":"social-lovable-api","timestamp":"2025-11-24T05:54:26.467Z","userId":"22"}
+{"deletedBy":1,"level":"info","message":"User soft-deleted by admin","service":"social-lovable-api","timestamp":"2025-11-24T05:56:47.430Z","userId":"22"}
+{"deletedBy":1,"level":"info","message":"User soft-deleted by admin","service":"social-lovable-api","timestamp":"2025-11-24T06:03:11.390Z","userId":"22"}
+{"deletedBy":1,"level":"info","message":"User soft-deleted by admin","service":"social-lovable-api","timestamp":"2025-11-24T06:07:22.801Z","userId":"21"}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-24T06:19:53.911Z","userId":2}

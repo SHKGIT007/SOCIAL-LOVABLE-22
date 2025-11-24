@@ -85,6 +85,7 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
       ? [
           { icon: LayoutDashboard, label: "Dashboard", path: "/admin" },
           { icon: Users, label: "Users", path: "/admin/users" },
+          { icon: Users, label: "Deleted Users", path: "/admin/deleted-users" },
           { icon: FileText, label: "Posts", path: "/admin/posts" },
           { icon: Settings, label: "Plans", path: "/admin/plans" },
           {
@@ -108,7 +109,8 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
             label: "Social Accounts",
             path: "/social-accounts",
           },
-          { icon: Settings, label: "Profile", path: "/profile" },
+          { icon: Settings, label: "Post Setting", path: "/profile" },
+          // { icon: Settings, label: "Update Profile", path: "/update-profile" },
         ];
 
   return (

@@ -25,6 +25,8 @@ import Profile from "./pages/Profile";
 import UserSchedules from "./pages/UserSchedules";
 import { getAuthData, isAuthenticated } from "@/utils/auth";
 import CreateUser from "./pages/admin/CreateUser";
+import DeletedUsers from "./pages/admin/DeletedUsers";
+import UpdateProfile from "./pages/UpdateProfile";
 
 const queryClient = new QueryClient();
 
@@ -81,6 +83,7 @@ function App() {
             <Route path="/plans" element={<ClientRoute><ClientPlans /></ClientRoute>} />
             <Route path="/profile" element={<ClientRoute><Profile /></ClientRoute>} />
             <Route path="/schedules" element={<ClientRoute><UserSchedules /></ClientRoute>} />
+            <Route path="/update-profile" element={<ClientRoute><UpdateProfile /></ClientRoute>} />
             
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
@@ -92,6 +95,7 @@ function App() {
             <Route path="/admin/posts/:id" element={<AdminRoute><AdminViewPost /></AdminRoute>} />
             <Route path="/admin/system-settings" element={<AdminRoute><SystemSettings /></AdminRoute>} />
             <Route path="/admin/create-user" element={<AdminRoute><CreateUser/></AdminRoute>} />
+            <Route path="/admin/deleted-users" element={<AdminRoute><DeletedUsers /></AdminRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

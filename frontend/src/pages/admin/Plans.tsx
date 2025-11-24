@@ -116,6 +116,20 @@ const Plans = () => {
   };
 
   const handleStatusToggle = async (plan: Plan) => {
+    const newStatus = plan.is_active ? "Inactive" : "Active";
+
+    const result = await Swal.fire({
+      icon: "warning",
+      title: "Are you sure?",
+      text: `Do you want to set this plan as ${newStatus}?`,
+      showCancelButton: true,
+      confirmButtonColor: "#6366f1",
+      cancelButtonColor: "#d33",
+      confirmButtonText: `Yes, make it ${newStatus}`,
+    });
+
+    if (!result.isConfirmed) return;
+
     try {
       await apiService.updatePlan(plan.id, {
         ...plan,
@@ -125,7 +139,7 @@ const Plans = () => {
       Swal.fire({
         icon: "success",
         title: "Success",
-        text: `Plan is now ${plan.is_active ? "Inactive" : "Active"}`,
+        text: `Plan is now ${newStatus}`,
         confirmButtonColor: "#6366f1",
       });
 
@@ -146,20 +160,44 @@ const Plans = () => {
 
     const payload = {
       ...formData,
-      is_active: formData.is_active ? 1 : 0, // convert boolean → 0/1
+      is_active: formData.is_active ? 1 : 0,
     };
 
     try {
+      let actionText = editingPlan ? "update" : "create";
+
+      // 🔥 Confirmation Before Create & Update BOTH
+      const result = await Swal.fire({
+        icon: "warning",
+        title: "Are you sure?",
+        text: `Do you want to ${actionText} this plan?`,
+        showCancelButton: true,
+        confirmButtonColor: "#6366f1",
+        cancelButtonColor: "#d33",
+        confirmButtonText: `Yes, ${actionText} it!`,
+      });
+
+      if (!result.isConfirmed) {
+        setIsLoading(false);
+        return;
+      }
+
+      // 🔵 UPDATE PLAN
       if (editingPlan) {
-        await apiService.updatePlan(editingPlan.id, formData);
+        await apiService.updatePlan(editingPlan.id, payload);
+
         Swal.fire({
           icon: "success",
           title: "Success",
           text: "Plan updated successfully!",
           confirmButtonColor: "#6366f1",
         });
-      } else {
-        await apiService.createPlan(formData);
+      }
+
+      // 🟢 CREATE PLAN
+      else {
+        await apiService.createPlan(payload);
+
         Swal.fire({
           icon: "success",
           title: "Success",
@@ -167,8 +205,10 @@ const Plans = () => {
           confirmButtonColor: "#6366f1",
         });
       }
+
       setIsDialogOpen(false);
       setEditingPlan(null);
+
       setFormData({
         name: "",
         price: 0,
@@ -179,6 +219,7 @@ const Plans = () => {
         description: "",
         duration_months: 0,
       });
+
       await fetchPlans();
     } catch (error: any) {
       Swal.fire({

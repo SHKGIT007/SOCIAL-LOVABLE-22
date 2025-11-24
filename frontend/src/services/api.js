@@ -511,6 +511,12 @@ class ApiService {
       }
     );
   }
+
+  async getDeletedUsers(queryParams = {}) {
+    return this.request(API_CONFIG.ENDPOINTS.USERS.DELETED_LIST, {
+      queryParams,
+    });
+  }
 }
 
 // Export singleton instance
