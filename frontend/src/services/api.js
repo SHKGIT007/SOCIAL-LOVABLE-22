@@ -378,7 +378,7 @@ class ApiService {
       body: subscriptionData,
     });
   }
-  
+
   async createRazorpayOrder(data) {
     return this.request(API_CONFIG.ENDPOINTS.SUBSCRIPTIONS.CREATE_ORDER, {
       method: "POST",
@@ -417,7 +417,6 @@ class ApiService {
       }
     );
   }
-
 
   // Social Account API methods
   async getMySocialAccounts() {
@@ -517,6 +516,7 @@ class ApiService {
       queryParams,
     });
   }
+
 }
 
 // Export singleton instance

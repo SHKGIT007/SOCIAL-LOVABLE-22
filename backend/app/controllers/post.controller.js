@@ -359,6 +359,7 @@ const updatePost = asyncHandler(async (req, res) => {
     tags,
     media_urls,
     image_url,
+    review_status
   } = req.body;
   const userId = req.user.id;
   const userType = req.user.user_type;
@@ -396,6 +397,7 @@ const updatePost = asyncHandler(async (req, res) => {
   if (category) updateData.category = category;
   if (tags) updateData.tags = tags;
   if (media_urls) updateData.media_urls = media_urls;
+  if (review_status) updateData.review_status = review_status;
 
   await Post.update(updateData, { where: { id } });
 

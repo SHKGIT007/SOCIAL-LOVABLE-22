@@ -143,20 +143,23 @@ const Auth = () => {
         Swal.fire({
           icon: "error",
           title: "Registration Failed",
-          text: response?.message || "Unable to create account",
+          text:
+            response?.errors?.[0]?.msg ||
+            response?.message ||
+            "Unable to create account",
           confirmButtonColor: "#ef4444",
         });
       }
     } catch (error: any) {
-      console.error("Registration error:", error); // Debug log
+      console.error("Registration error:", error);
       setIsLoading(false);
 
       Swal.fire({
         icon: "error",
         title: "Registration Failed",
         text:
+          error?.response?.data?.errors?.[0]?.msg ||
           error?.response?.data?.message ||
-          error?.message ||
           "Unable to create account. Please try again.",
         confirmButtonColor: "#ef4444",
       });
@@ -303,7 +306,7 @@ const Auth = () => {
                     placeholder="+91 12345 67890"
                     value={userPhone}
                     onChange={(e) => setUserPhone(e.target.value)}
-                      required
+                    required
                     disabled={isLoading}
                     className="border-gray-300 focus-visible:ring-indigo-500"
                   />
@@ -328,8 +331,7 @@ const Auth = () => {
                     <Input
                       id="signup-password"
                       type={showSignupPassword ? "text" : "password"}
-                    placeholder="Password"
-                  
+                      placeholder="Password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required

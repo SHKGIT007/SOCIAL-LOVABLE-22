@@ -481,6 +481,7 @@ const Plans = () => {
                   <TableHead>Accounts</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Actions</TableHead>
+                  <TableHead>Created At</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -518,6 +519,11 @@ const Plans = () => {
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
+                    </TableCell>  
+                    <TableCell>
+                      {new Date(
+                        (plan as any).created_at || Date.now()
+                      ).toLocaleDateString()}
                     </TableCell>
                   </TableRow>
                 ))}

@@ -266,7 +266,7 @@ const Users = () => {
         {/* Users Table Card (Themed) */}
         <Card className="shadow-lg border-2 border-indigo-100/50">
           <CardHeader className="flex flex-row items-center justify-between">
-            {/* 🔍 Search Input */}
+            {/* 🔍 Search Input (LEFT) */}
             <input
               type="text"
               placeholder="Search by name, email, phone..."
@@ -275,12 +275,22 @@ const Users = () => {
               onChange={(e) => setSearch(e.target.value)}
             />
 
-            <Button
-              className="bg-indigo-600 hover:bg-indigo-700 shadow-md"
-              onClick={() => navigate("/admin/create-user")}
-            >
-              <User className="mr-2 h-4 w-4" /> Create User
-            </Button>
+            {/* Buttons (RIGHT) */}
+            <div className="flex gap-3">
+              <Button
+                className="bg-indigo-600 hover:bg-indigo-700 shadow-md"
+                onClick={() => navigate("/admin/deleted-users")}
+              >
+                <User className="mr-2 h-4 w-4" /> Deleted User
+              </Button>
+
+              <Button
+                className="bg-indigo-600 hover:bg-indigo-700 shadow-md"
+                onClick={() => navigate("/admin/create-user")}
+              >
+                <User className="mr-2 h-4 w-4" /> Create User
+              </Button>
+            </div>
           </CardHeader>
 
           <CardContent>

@@ -5,7 +5,8 @@ const { authenticateToken } = require('../middleware/auth.middleware');
 const { 
     validateUserRegistration, 
     validateUserLogin, 
-    validateUserUpdate 
+    validateUserUpdate,
+    validateChangePassword
 } = require('../middleware/validation.middleware');
 
 // Public routes
@@ -15,6 +16,6 @@ router.post('/login', validateUserLogin, authController.login);
 // Protected routes
 router.get('/profile', authenticateToken, authController.getProfile);
 router.put('/profile', authenticateToken, validateUserUpdate, authController.updateProfile);
-router.put('/change-password', authenticateToken, authController.changePassword);
+router.put('/change-password', authenticateToken, validateChangePassword, authController.changePassword);
 
 module.exports = router;

@@ -395,11 +395,11 @@ const getAdminStats = asyncHandler(async (req, res) => {
     activeSubscriptions,
     successfulPayments,
   ] = await Promise.all([
-    User.count({ 
-      where: { 
+    User.count({
+      where: {
         user_type: "client",
-        is_deleted: 0  // 🚀 Soft-deleted users excluded
-      } 
+        is_deleted: 0, // 🚀 Soft-deleted users excluded
+      },
     }),
 
     Post.count(),
@@ -443,7 +443,6 @@ const getAdminStats = asyncHandler(async (req, res) => {
   });
 });
 
-
 const updateUserStatus = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { active_status } = req.body;
@@ -472,7 +471,7 @@ const updateUserStatus = asyncHandler(async (req, res) => {
 
 const getDeletedUsers = asyncHandler(async (req, res) => {
   const deletedUsers = await User.findAll({
-    where: { is_deleted: true },  
+    where: { is_deleted: true },
     attributes: [
       "id",
       "user_name",
@@ -496,6 +495,8 @@ const getDeletedUsers = asyncHandler(async (req, res) => {
     data: { users: deletedUsers },
   });
 });
+
+
 
 module.exports = {
   createUser,

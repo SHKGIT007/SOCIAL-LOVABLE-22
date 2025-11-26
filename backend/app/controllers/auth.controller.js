@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const { User, Role } = require('../models');
 const { asyncHandler } = require('../middleware/error.middleware');
 const logger = require('../config/logger');
+const { Op } = require("sequelize");
 
 const generateToken = (userId) => {
     return jwt.sign(
@@ -166,31 +167,56 @@ const getProfile = asyncHandler(async (req, res) => {
 });
 
 const updateProfile = asyncHandler(async (req, res) => {
-    const { user_name, user_fname, user_lname, user_phone, full_name } = req.body;
+    const { user_name, user_fname, user_lname, user_phone, full_name, email } = req.body;
     const userId = req.user.id;
+
+    // 🔍 DUPLICATE CHECK
+    if (user_name || email || user_phone) {
+        const duplicateUser = await User.findOne({
+            where: {
+                [Op.or]: [
+                    user_name ? { user_name } : null,
+                    email ? { email } : null,
+                    user_phone ? { user_phone } : null,
+                ],
+                id: { [Op.ne]: userId } // 👈 exclude current user
+            }
+        });
+
+        if (duplicateUser) {
+            let message = "Already exists";
+
+            if (duplicateUser.user_name === user_name) message = "Username already taken";
+            if (duplicateUser.email === email) message = "Email already registered";
+            if (duplicateUser.user_phone === user_phone) message = "Phone number already registered";
+
+            return res.status(400).json({
+                status: false,
+                message
+            });
+        }
+    }
 
     const updateData = {};
     if (user_name) updateData.user_name = user_name;
+    if (email) updateData.email = email;
     if (user_fname) updateData.user_fname = user_fname;
     if (user_lname) updateData.user_lname = user_lname;
     if (user_phone) updateData.user_phone = user_phone;
     if (full_name) updateData.full_name = full_name;
 
-    const user = await User.update(updateData, {
-        where: { id: userId },
-        returning: true
+    await User.update(updateData, {
+        where: { id: userId }
     });
 
     const updatedUser = await User.findByPk(userId, {
-        include: [{ model: Role, as: 'Role' }],
-        attributes: { exclude: ['password'] }
+        include: [{ model: Role, as: "Role" }],
+        attributes: { exclude: ["password"] }
     });
-
-    logger.info('User profile updated', { userId });
 
     res.json({
         status: true,
-        message: 'Profile updated successfully',
+        message: "Profile updated successfully",
         data: {
             user: {
                 id: updatedUser.id,
@@ -209,10 +235,10 @@ const updateProfile = asyncHandler(async (req, res) => {
 });
 
 const changePassword = asyncHandler(async (req, res) => {
-    const { currentPassword, newPassword } = req.body;
+
+    const { old_password, new_password } = req.body;
     const userId = req.user.id;
 
-    // Get user with password
     const user = await User.findByPk(userId);
     if (!user) {
         return res.status(404).json({
@@ -222,7 +248,7 @@ const changePassword = asyncHandler(async (req, res) => {
     }
 
     // Verify current password
-    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    const isCurrentPasswordValid = await bcrypt.compare(old_password, user.password);
     if (!isCurrentPasswordValid) {
         return res.status(400).json({
             status: false,
@@ -231,7 +257,7 @@ const changePassword = asyncHandler(async (req, res) => {
     }
 
     // Hash new password
-    const hashedNewPassword = await bcrypt.hash(newPassword, 12);
+    const hashedNewPassword = await bcrypt.hash(new_password, 12);
 
     // Update password
     await User.update(

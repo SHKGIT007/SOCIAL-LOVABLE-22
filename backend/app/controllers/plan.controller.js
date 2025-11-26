@@ -58,7 +58,7 @@ const getAllPlans = asyncHandler(async (req, res) => {
     where: whereClause,
     limit: parseInt(limit),
     offset: parseInt(offset),
-    order: [["price", "ASC"]],
+    order: [["created_at", "DESC"]],  // 👈 LATEST FIRST
   });
 
   res.json({

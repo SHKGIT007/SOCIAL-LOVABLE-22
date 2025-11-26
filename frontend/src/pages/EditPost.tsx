@@ -3,17 +3,23 @@ function toLocalDatetimeLocal(isoString: string) {
   if (!isoString) return "";
   const date = new Date(isoString);
   const pad = (n: number) => n.toString().padStart(2, "0");
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
+    date.getDate()
+  )}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 // Helper to convert UTC/ISO to Asia/Kolkata local datetime-local format
 function toKolkataDatetimeLocal(isoString: string) {
   if (!isoString) return "";
   const date = new Date(isoString);
   // Convert to Asia/Kolkata time
-  const kolkataDate = new Date(date.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+  const kolkataDate = new Date(
+    date.toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
+  );
   // Format as YYYY-MM-DDTHH:mm
   const pad = (n: number) => n.toString().padStart(2, "0");
-  return `${kolkataDate.getFullYear()}-${pad(kolkataDate.getMonth() + 1)}-${pad(kolkataDate.getDate())}T${pad(kolkataDate.getHours())}:${pad(kolkataDate.getMinutes())}`;
+  return `${kolkataDate.getFullYear()}-${pad(kolkataDate.getMonth() + 1)}-${pad(
+    kolkataDate.getDate()
+  )}T${pad(kolkataDate.getHours())}:${pad(kolkataDate.getMinutes())}`;
 }
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -21,7 +27,13 @@ import { apiService } from "@/services/api";
 import { isAuthenticated } from "@/utils/auth";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -38,7 +50,9 @@ import {
 
 const statuses = ["draft", "scheduled", "published"];
 
-const normalizePlatforms = (platforms: string[] | string | null | undefined): string[] => {
+const normalizePlatforms = (
+  platforms: string[] | string | null | undefined
+): string[] => {
   if (!platforms) return [];
   if (Array.isArray(platforms)) return platforms;
   try {
@@ -53,7 +67,9 @@ const normalizePlatforms = (platforms: string[] | string | null | undefined): st
   return [];
 };
 
-const normalizeTags = (tags: string[] | string | null | undefined): string[] => {
+const normalizeTags = (
+  tags: string[] | string | null | undefined
+): string[] => {
   if (!tags) return [];
   if (Array.isArray(tags)) return tags;
   try {
@@ -85,6 +101,7 @@ const EditPost = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [autoToggle, setAutoToggle] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     title: "",
     content: "",
@@ -132,7 +149,7 @@ const EditPost = () => {
           icon: "error",
           title: "Error",
           text: data.message || "Failed to fetch post.",
-          confirmButtonColor: "#6366f1"
+          confirmButtonColor: "#6366f1",
         });
         navigate("/posts");
         return;
@@ -141,7 +158,7 @@ const EditPost = () => {
           icon: "error",
           title: "Error",
           text: "Post not found.",
-          confirmButtonColor: "#6366f1"
+          confirmButtonColor: "#6366f1",
         });
         navigate("/posts");
         return;
@@ -160,14 +177,14 @@ const EditPost = () => {
         category: dataPost.category || "",
         tags: normalizedTags.join(", "),
         image_prompt: dataPost.image_prompt || null,
-        image_url: dataPost.image_url || null
+        image_url: dataPost.image_url || null,
       });
     } catch (error: any) {
       Swal.fire({
         icon: "error",
         title: "Error",
         text: error.message || "Failed to fetch post.",
-        confirmButtonColor: "#6366f1"
+        confirmButtonColor: "#6366f1",
       });
     } finally {
       setIsLoading(false);
@@ -193,10 +210,21 @@ const EditPost = () => {
           icon: "error",
           title: "Error",
           text: "Please select at least one platform.",
-          confirmButtonColor: "#6366f1"
+          confirmButtonColor: "#6366f1",
         });
         setIsSaving(false);
         return;
+      }
+
+      let reviewStatus = "approved";
+      if (formData.status === "draft") {
+        reviewStatus = "pending";
+      }
+      if (formData.status === "scheduled") {
+        reviewStatus = autoToggle ? "pending" : "approved";
+      }
+      if (formData.status === "published") {
+        reviewStatus = "approved";
       }
 
       const updateData = {
@@ -206,7 +234,8 @@ const EditPost = () => {
         status: formData.status,
         scheduled_at: formData.scheduled_at || null,
         image_prompt: formData.image_prompt || null,
-        image_url: formData.image_url
+        image_url: formData.image_url,
+        review_status: reviewStatus,
       };
 
       await apiService.updatePost(id, updateData);
@@ -215,7 +244,7 @@ const EditPost = () => {
         icon: "success",
         title: "Success",
         text: "Post updated successfully!",
-        confirmButtonColor: "#6366f1"
+        confirmButtonColor: "#6366f1",
       });
 
       navigate("/posts");
@@ -224,7 +253,7 @@ const EditPost = () => {
         icon: "error",
         title: "Error",
         text: error.message || "Failed to update post.",
-        confirmButtonColor: "#6366f1"
+        confirmButtonColor: "#6366f1",
       });
     } finally {
       setIsSaving(false);
@@ -246,7 +275,11 @@ const EditPost = () => {
       <div className=" space-y-8">
         {/* Sticky translucent action bar */}
         <div className="sticky top-0 z-20 -mx-2 px-2 py-3 bg-gradient-to-b from-white/85 to-white/60 backdrop-blur supports-[backdrop-filter]:backdrop-blur border-b border-indigo-50 rounded-b-xl flex items-center justify-between">
-          <Button variant="ghost" onClick={() => navigate("/posts")} className="hover:bg-indigo-50">
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/posts")}
+            className="hover:bg-indigo-50"
+          >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Posts
           </Button>
@@ -257,7 +290,9 @@ const EditPost = () => {
             disabled={isSaving}
             className="bg-gradient-to-r from-indigo-600 to-sky-500 hover:from-indigo-500 hover:to-sky-400 text-white shadow-md"
           >
-            {isSaving ? "Saving..." : (
+            {isSaving ? (
+              "Saving..."
+            ) : (
               <>
                 <Save className="mr-2 h-4 w-4" />
                 Save Changes
@@ -274,7 +309,11 @@ const EditPost = () => {
 
           <CardContent>
             {/* Give the form an id so the top Save button can submit it */}
-            <form id="edit-post-form" onSubmit={handleSubmit} className="space-y-8">
+            <form
+              id="edit-post-form"
+              onSubmit={handleSubmit}
+              className="space-y-8"
+            >
               {/* Title + Status (two columns) */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
@@ -282,13 +321,14 @@ const EditPost = () => {
                   <Input
                     id="title"
                     value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, title: e.target.value })
+                    }
                     placeholder="Enter post title"
                     required
                     className="border-gray-300 focus-visible:ring-indigo-500"
                   />
                 </div>
-
               </div>
 
               {/* Content + Preview image */}
@@ -297,7 +337,9 @@ const EditPost = () => {
                 <Textarea
                   id="content"
                   value={formData.content}
-                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, content: e.target.value })
+                  }
                   placeholder="Write your post content..."
                   className="min-h-[200px] border-gray-300 focus-visible:ring-indigo-500"
                   required
@@ -332,16 +374,22 @@ const EditPost = () => {
                         <label
                           key={acc.id}
                           htmlFor={`pf-${acc.platform}`}
-                          className={`flex items-center gap-2 rounded-xl border p-3 cursor-pointer transition ${checked ? "border-indigo-300 bg-indigo-50" : "border-gray-200 hover:bg-gray-50"
-                            }`}
+                          className={`flex items-center gap-2 rounded-xl border p-3 cursor-pointer transition ${
+                            checked
+                              ? "border-indigo-300 bg-indigo-50"
+                              : "border-gray-200 hover:bg-gray-50"
+                          }`}
                         >
                           <Checkbox
                             id={`pf-${acc.platform}`}
                             checked={checked}
-                            onCheckedChange={() => handlePlatformToggle(acc.platform)}
+                            onCheckedChange={() =>
+                              handlePlatformToggle(acc.platform)
+                            }
                           />
                           <span className="text-sm">
-                            {acc.platform} {acc.account_name ? `(${acc.account_name})` : ""}
+                            {acc.platform}{" "}
+                            {acc.account_name ? `(${acc.account_name})` : ""}
                           </span>
                         </label>
                       );
@@ -350,12 +398,14 @@ const EditPost = () => {
                 </div>
               </div>
 
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
                   <Label htmlFor="status">Status</Label>
                   <Select
                     value={formData.status}
-                    onValueChange={(value) => setFormData({ ...formData, status: value })}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, status: value })
+                    }
                   >
                     <SelectTrigger className="border-gray-300 focus-visible:ring-indigo-500">
                       <SelectValue placeholder="Select status" />
@@ -378,23 +428,33 @@ const EditPost = () => {
                       type="datetime-local"
                       value={formData.scheduled_at}
                       onChange={(e) =>
-                        setFormData({ ...formData, scheduled_at: e.target.value })
+                        setFormData({
+                          ...formData,
+                          scheduled_at: e.target.value,
+                        })
                       }
                       required
                       className="border-gray-300 focus-visible:ring-indigo-500 block"
-                      min={new Date().toISOString().slice(0,16)}
+                      min={new Date().toISOString().slice(0, 16)}
                     />
                     {formData.scheduled_at && (
                       <div className="text-xs text-gray-500 mt-1">
-                        India Time: {new Date(formData.scheduled_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
+                        India Time:{" "}
+                        {new Date(formData.scheduled_at).toLocaleString(
+                          "en-IN",
+                          { timeZone: "Asia/Kolkata" }
+                        )}
                       </div>
                     )}
                   </div>
                 )}
 
                 <div
-                  className={`space-y-2 ${formData.status === "scheduled" ? "md:col-span-8" : "md:col-span-12"
-                    }`}
+                  className={`space-y-2 ${
+                    formData.status === "scheduled"
+                      ? "md:col-span-8"
+                      : "md:col-span-12"
+                  }`}
                 >
                   <Label htmlFor="image_prompt">Image Title / Prompt</Label>
                   <Input
@@ -408,11 +468,31 @@ const EditPost = () => {
                     disabled
                   />
                 </div>
-            
-                </div>
+              </div>
               {/* Schedule (conditional) + Image Prompt (2 columns) */}
-              
 
+              {/* Toggle Button - Only show when status is scheduled */}
+              {formData.status === "scheduled" && (
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <span className="text-sm font-medium text-gray-700">
+                    On Toggle for Review Post Before Publishing
+                  </span>
+
+                  <button
+                    type="button"
+                    onClick={() => setAutoToggle(!autoToggle)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      autoToggle ? "bg-indigo-600" : "bg-gray-300"
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${
+                        autoToggle ? "translate-x-5" : "translate-x-1"
+                      }`}
+                    />
+                  </button>
+                </div>
+              )}
 
               {/* Image URL (full width) */}
               <div className="space-y-2">
@@ -420,7 +500,9 @@ const EditPost = () => {
                 <Input
                   id="image_url"
                   value={formData.image_url || ""}
-                  onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, image_url: e.target.value })
+                  }
                   placeholder="https://..."
                   className="border-gray-300 focus-visible:ring-indigo-500"
                   disabled
@@ -442,7 +524,9 @@ const EditPost = () => {
                   disabled={isSaving}
                   className="flex-1 sm:flex-none sm:w-48 bg-gradient-to-r from-indigo-600 to-sky-500 hover:from-indigo-500 hover:to-sky-400 text-white shadow-md"
                 >
-                  {isSaving ? "Saving..." : (
+                  {isSaving ? (
+                    "Saving..."
+                  ) : (
                     <>
                       <Save className="mr-2 h-4 w-4" />
                       Save Changes

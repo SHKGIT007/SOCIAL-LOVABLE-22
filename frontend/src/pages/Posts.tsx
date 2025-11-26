@@ -112,14 +112,21 @@ const Posts = () => {
     }
   };
 
-  const handleApprove = async (postId) => {
-    console.log("=== APPROVE CLICKED ===");
-    console.log("Post ID:", postId);
+  const handleApprove = async (postId: number) => {
+    const result = await Swal.fire({
+      title: "Approve Post?",
+      text: "Are you sure you want to approve this post?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Yes, Approve",
+      cancelButtonText: "Cancel",
+      confirmButtonColor: "#10b981",
+    });
+
+    if (!result.isConfirmed) return;
 
     try {
       const response = await apiService.approvePost(postId, "approved");
-
-      console.log("API Response:", response);
 
       if (response.status) {
         Swal.fire({
@@ -128,12 +135,11 @@ const Posts = () => {
           text: "This post is now approved and ready for publishing.",
           confirmButtonColor: "#6366f1",
         });
-        fetchPosts(); // Refresh list
+        fetchPosts();
       } else {
         throw new Error(response.message || "Failed to approve post");
       }
-    } catch (error) {
-      console.error("Approve Error:", error);
+    } catch (error: any) {
       Swal.fire({
         icon: "error",
         title: "Error",
@@ -143,14 +149,21 @@ const Posts = () => {
     }
   };
 
-  const handleReject = async (postId) => {
-    console.log("=== REJECT CLICKED ===");
-    console.log("Post ID:", postId);
+  const handleReject = async (postId: number) => {
+    const result = await Swal.fire({
+      title: "Reject Post?",
+      text: "Are you sure you want to reject this post?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, Reject",
+      cancelButtonText: "Cancel",
+      confirmButtonColor: "#ef4444",
+    });
+
+    if (!result.isConfirmed) return;
 
     try {
       const response = await apiService.approvePost(postId, "rejected");
-
-      console.log("API Response:", response);
 
       if (response.status) {
         Swal.fire({
@@ -163,8 +176,7 @@ const Posts = () => {
       } else {
         throw new Error(response.message || "Failed to reject post");
       }
-    } catch (error) {
-      console.error("Reject Error:", error);
+    } catch (error: any) {
       Swal.fire({
         icon: "error",
         title: "Error",
@@ -333,7 +345,7 @@ const Posts = () => {
                           <Badge variant="outline">Manually Generated</Badge>
                         )}
 
-                        {post.review_status === "approved" && (
+                        {/* {post.review_status === "approved" && (
                           <Badge className="bg-emerald-100 text-emerald-700 border border-emerald-200">
                             Approved
                           </Badge>
@@ -349,7 +361,7 @@ const Posts = () => {
                           <Badge className="bg-red-100 text-red-700 border border-red-200">
                             Rejected
                           </Badge>
-                        )}
+                        )} */}
                       </div>
                     </CardHeader>
 
