@@ -17,5 +17,7 @@ router.post('/login', validateUserLogin, authController.login);
 router.get('/profile', authenticateToken, authController.getProfile);
 router.put('/profile', authenticateToken, validateUserUpdate, authController.updateProfile);
 router.put('/change-password', authenticateToken, validateChangePassword, authController.changePassword);
+router.post('/send-otp', authController.sendOTP);
+router.post('/verify-otp', authController.verifyOTP);
 
 module.exports = router;

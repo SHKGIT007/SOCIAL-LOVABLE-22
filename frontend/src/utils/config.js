@@ -17,6 +17,8 @@ export const API_CONFIG = {
       PROFILE: "/auth/profile",
       UPDATE_PROFILE: "/auth/profile",
       CHANGE_PASSWORD: "/auth/change-password",
+      SEND_OTP: "/auth/send-otp",
+      VERIFY_OTP: "/auth/verify-otp",
     },
     // User endpoints
     USERS: {

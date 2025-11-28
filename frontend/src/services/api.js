@@ -517,6 +517,23 @@ class ApiService {
     });
   }
 
+  async sendOTP(data) {
+    return this.request("/auth/send-otp", {
+      method: "POST",
+      body: data,
+      includeAuth: false,
+      skipAuthLogout: true,
+    });
+  }
+
+  async verifyOTP(data) {
+    return this.request("/auth/verify-otp", {
+      method: "POST",
+      body: data,
+      includeAuth: false,
+      skipAuthLogout: true,
+    });
+  }
 }
 
 // Export singleton instance

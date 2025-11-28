@@ -1069,3 +1069,25 @@
 {"level":"info","message":"Post approved","postId":"124","service":"social-lovable-api","timestamp":"2025-11-25T10:55:10.914Z","userId":2}
 {"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-25T10:55:59.694Z","userId":1}
 {"level":"warn","message":"Scheduled post reached time but was not pushed to any platform","postId":124,"service":"social-lovable-api","timestamp":"2025-11-25T12:52:00.067Z","userId":2}
+{"email":"ershaktijat@gmail.com","level":"info","message":"User registered successfully","service":"social-lovable-api","timestamp":"2025-11-28T05:08:31.903Z","userId":24}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-28T05:10:58.174Z","userId":2}
+{"ai_prompt":"Title: jewelery\nDetails: Business/Creator: jewelery\nDescription: Jewelry is a form of personal adornment made from precious metals, gemstones, and other decorative materials. It includes items such as necklaces, earrings, rings, bracelets, bangles, and anklets. Jewelry is not only worn for beauty but also symbolizes love, tradition, culture, and status. From ancient times to modern fashion, jewelry has always been an expression of personality and elegance.\nPlatforms: instagaram\nBrand Voice: tanishq\nHashtags: dp punjab\nFestival/Event: holi","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-11-28T05:33:59.382Z","userId":2}
+{"ai_prompt":"Title: thor\nDetails: thor","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-11-28T05:35:14.970Z","userId":2}
+{"ai_prompt":"Title: shiv\nDetails: shiv","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-11-28T05:35:43.406Z","userId":2}
+{"email":"shaktijatpnp09@gmail.com","level":"info","message":"OTP sent","service":"social-lovable-api","timestamp":"2025-11-28T07:19:12.813Z"}
+{"email":"shaktijatpnp09@gmail.com","level":"info","message":"OTP verified successfully","service":"social-lovable-api","timestamp":"2025-11-28T07:19:32.791Z"}
+{"email":"shaktijatpnp09@gmail.com","level":"info","message":"OTP sent","service":"social-lovable-api","timestamp":"2025-11-28T07:22:31.243Z"}
+{"email":"shaktijatpnp09@gmail.com","level":"info","message":"OTP verified successfully","service":"social-lovable-api","timestamp":"2025-11-28T07:23:20.242Z"}
+{"level":"info","message":"User registered","service":"social-lovable-api","timestamp":"2025-11-28T07:23:27.820Z","userId":25}
+{"email":"shaktijatpnp09@gmail.com","level":"info","message":"OTP sent","service":"social-lovable-api","timestamp":"2025-11-28T08:31:18.626Z"}
+{"email":"shaktijatpnp09@gmail.com","level":"info","message":"OTP verified successfully","service":"social-lovable-api","timestamp":"2025-11-28T08:32:09.813Z"}
+{"level":"info","message":"User registered","service":"social-lovable-api","timestamp":"2025-11-28T08:32:24.604Z","userId":26}
+{"email":"shaktijatpnp09@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-28T08:33:48.813Z","userId":26}
+{"email":"shaktijatpnp09@gmail.com","level":"info","message":"OTP sent","service":"social-lovable-api","timestamp":"2025-11-28T08:44:16.949Z"}
+{"email":"shaktijatpnp09@gmail.com","level":"info","message":"OTP sent","service":"social-lovable-api","timestamp":"2025-11-28T08:45:52.914Z"}
+{"email":"shaktijatpnp09@gmail.com","level":"info","message":"OTP verified successfully","service":"social-lovable-api","timestamp":"2025-11-28T08:46:40.410Z"}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-28T09:14:28.638Z","userId":2}
+{"email":"shaktijatpnp09@gmail.com","level":"info","message":"OTP sent","service":"social-lovable-api","timestamp":"2025-11-28T09:14:56.844Z"}
+{"email":"shaktijatpnp09@gmail.com","level":"info","message":"OTP sent","service":"social-lovable-api","timestamp":"2025-11-28T09:17:20.807Z"}
+{"email":"shaktijatpnp09@gmail.com","level":"info","message":"OTP verified successfully","service":"social-lovable-api","timestamp":"2025-11-28T09:17:48.321Z"}
+{"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-28T09:21:12.279Z","userId":1}
