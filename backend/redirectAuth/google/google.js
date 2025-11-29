@@ -16,7 +16,16 @@ module.exports = function (app) {
 
     const client_id = (settings && settings.google_client_id) || process.env.GOOGLE_CLIENT_ID;
     const redirect_uri = (settings && settings.google_redirect_uri) || process.env.GOOGLE_REDIRECT_URI || `${req.protocol}://${req.get('host')}/auth/google/callback`;
-    const redirect_dashboard = req.query.redirect_dashboard || process.env.FRONTEND_URL || 'http://localhost:9999/dashboard';
+    // Auto-detect frontend origin from request referer or use query param, fallback to FRONTEND_URL env
+    let redirect_dashboard = process.env.FRONTEND_URL || `${req.protocol}://${req.get('host')}`;
+    if (req.query.redirect_dashboard) {
+      redirect_dashboard = req.query.redirect_dashboard;
+    } else if (req.get('referer')) {
+      // Extract origin from referer header (where the request came from)
+      try {
+        redirect_dashboard = new URL(req.get('referer')).origin;
+      } catch (e) {}
+    }
     const action = req.query.action || 'signin';
 
     const state = encodeURIComponent(JSON.stringify({ redirect_dashboard, action }));
@@ -87,13 +96,8 @@ module.exports = function (app) {
       if (flowAction === 'signup') {
         if (user) {
           // Email already registered -> send user back to auth page with error
-          let frontendOrigin = process.env.FRONTEND_URL || 'http://localhost:5173';
-          if (state.redirect_dashboard) {
-            try {
-              frontendOrigin = new URL(state.redirect_dashboard).origin;
-            } catch (e) {}
-          }
-          return res.redirect(`${frontendOrigin}/auth?social_error=email_exists`);
+          const redirectDashboardOrigin = state.redirect_dashboard ? new URL(state.redirect_dashboard).origin : (process.env.FRONTEND_URL || `${req.protocol}://${req.get('host')}`);
+          return res.redirect(`${redirectDashboardOrigin}/auth?social_error=email_exists`);
         }
 
         // Create new user for signup
@@ -121,13 +125,7 @@ module.exports = function (app) {
         });
 
         // Compute frontend origin (use origin if redirect_dashboard includes path)
-        let frontendOrigin = process.env.FRONTEND_URL || 'http://localhost:5173';
-        if (state.redirect_dashboard) {
-          try {
-            frontendOrigin = new URL(state.redirect_dashboard).origin;
-          } catch (e) {}
-        }
-
+        const frontendOrigin = state.redirect_dashboard ? new URL(state.redirect_dashboard).origin : (process.env.FRONTEND_URL || `${req.protocol}://${req.get('host')}`);
         const redirectUrl = `${frontendOrigin}/complete-social-signup?social_token=${encodeURIComponent(socialToken)}&email=${encodeURIComponent(user.email)}`;
         return res.redirect(redirectUrl);
       } else {
@@ -166,14 +164,20 @@ module.exports = function (app) {
         expiresIn: process.env.JWT_EXPIRES_IN || '7d',
       });
 
-      const redirect_dashboard = state.redirect_dashboard || process.env.FRONTEND_URL || 'http://localhost:5173/dashboard';
+      // Use dashboard from state or detect from incoming request
+      let redirect_dashboard = state.redirect_dashboard || process.env.FRONTEND_URL || `${req.protocol}://${req.get('host')}/dashboard`;
+      if (!redirect_dashboard.includes('/')) {
+        // If it's just a domain, add /dashboard path
+        redirect_dashboard = redirect_dashboard + (redirect_dashboard.endsWith('/') ? '' : '/') + 'dashboard';
+      }
 
       // Redirect back to frontend with token
       const redirectUrl = `${redirect_dashboard}${redirect_dashboard.includes('?') ? '&' : '?'}token=${encodeURIComponent(token)}&success=true`;
       return res.redirect(redirectUrl);
     } catch (err) {
       console.error('Google OAuth error:', err.response?.data || err.message || err);
-      let frontendOrigin = process.env.FRONTEND_URL || 'http://localhost:5173';
+      // Detect frontend origin for error redirect
+      let frontendOrigin = process.env.FRONTEND_URL || `${req.protocol}://${req.get('host')}`;
       if (req.query && req.query.redirect_dashboard) {
         try {
           frontendOrigin = new URL(req.query.redirect_dashboard).origin;
