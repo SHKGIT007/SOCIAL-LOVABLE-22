@@ -68,9 +68,14 @@ module.exports = function (app) {
 
       if (flowAction === 'signup') {
         if (user) {
-          // Email already registered
-          const redirect_dashboard = state.redirect_dashboard || process.env.FRONTEND_URL || 'http://localhost:5173';
-          return res.redirect(`${redirect_dashboard}?success=false&error=email_exists`);
+          // Email already registered -> send user back to auth page with error
+          let frontendOrigin = process.env.FRONTEND_URL || 'http://localhost:5173';
+          if (state.redirect_dashboard) {
+            try {
+              frontendOrigin = new URL(state.redirect_dashboard).origin;
+            } catch (e) {}
+          }
+          return res.redirect(`${frontendOrigin}/auth?social_error=email_exists`);
         }
 
         // Create new user for signup
@@ -88,9 +93,25 @@ module.exports = function (app) {
           avatar_url: profile.picture || null,
           full_name: profile.name || null,
           is_email_verified: true,
-          active_status: true,
+          active_status: false, // keep inactive until password set
           role_id: 2,
         });
+
+        // Create a short-lived token for completing signup
+        const socialToken = jwt.sign({ userId: user.id, social_signup: true }, process.env.JWT_SECRET, {
+          expiresIn: '15m',
+        });
+
+        // Compute frontend origin (use origin if redirect_dashboard includes path)
+        let frontendOrigin = process.env.FRONTEND_URL || 'http://localhost:5173';
+        if (state.redirect_dashboard) {
+          try {
+            frontendOrigin = new URL(state.redirect_dashboard).origin;
+          } catch (e) {}
+        }
+
+        const redirectUrl = `${frontendOrigin}/complete-social-signup?social_token=${encodeURIComponent(socialToken)}&email=${encodeURIComponent(user.email)}`;
+        return res.redirect(redirectUrl);
       } else {
         // signin/default flow: create or update user
         if (user) {
@@ -134,8 +155,13 @@ module.exports = function (app) {
       return res.redirect(redirectUrl);
     } catch (err) {
       console.error('Google OAuth error:', err.response?.data || err.message || err);
-      const redirect_dashboard = req.query.redirect_dashboard || process.env.FRONTEND_URL || 'http://localhost:5173';
-      return res.redirect(`${redirect_dashboard}?success=false&error=auth_failed`);
+      let frontendOrigin = process.env.FRONTEND_URL || 'http://localhost:5173';
+      if (req.query && req.query.redirect_dashboard) {
+        try {
+          frontendOrigin = new URL(req.query.redirect_dashboard).origin;
+        } catch (e) {}
+      }
+      return res.redirect(`${frontendOrigin}/auth?social_error=auth_failed`);
     }
   });
 };

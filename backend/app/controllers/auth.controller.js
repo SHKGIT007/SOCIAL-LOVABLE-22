@@ -521,3 +521,47 @@ module.exports = {
   updateProfile,
   changePassword,
 };
+
+// Complete social signup (set password after OAuth signup)
+const completeSocialSignup = asyncHandler(async (req, res) => {
+  const { social_token, password, confirm_password } = req.body;
+
+  if (!social_token) {
+    return res.status(400).json({ status: false, message: 'social_token is required' });
+  }
+
+  if (!password || password.length < 6) {
+    return res.status(400).json({ status: false, message: 'Password must be at least 6 characters' });
+  }
+
+  if (password !== confirm_password) {
+    return res.status(400).json({ status: false, message: 'Passwords do not match' });
+  }
+
+  let payload;
+  try {
+    payload = jwt.verify(social_token, process.env.JWT_SECRET);
+  } catch (err) {
+    return res.status(400).json({ status: false, message: 'Invalid or expired token' });
+  }
+
+  if (!payload || !payload.social_signup || !payload.userId) {
+    return res.status(400).json({ status: false, message: 'Invalid token payload' });
+  }
+
+  const user = await User.findByPk(payload.userId);
+  if (!user) {
+    return res.status(404).json({ status: false, message: 'User not found' });
+  }
+
+  // Hash password and activate user
+  const hashed = await bcrypt.hash(password, 12);
+  await User.update({ password: hashed, active_status: true, is_email_verified: true }, { where: { id: user.id } });
+
+  const updatedUser = await User.findByPk(user.id, { attributes: { exclude: ['password'] } });
+  const token = generateToken(updatedUser.id);
+
+  res.json({ status: true, message: 'Account completed', data: { user: { id: updatedUser.id, user_name: updatedUser.user_name, email: updatedUser.email, user_fname: updatedUser.user_fname, user_lname: updatedUser.user_lname, user_type: updatedUser.user_type }, token } });
+});
+
+module.exports.completeSocialSignup = completeSocialSignup;

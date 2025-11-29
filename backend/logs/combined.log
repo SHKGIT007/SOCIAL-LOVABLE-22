@@ -1092,3 +1092,8 @@
 {"email":"shaktijatpnp09@gmail.com","level":"info","message":"OTP verified successfully","service":"social-lovable-api","timestamp":"2025-11-28T09:17:48.321Z"}
 {"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-28T09:21:12.279Z","userId":1}
 {"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-28T13:02:34.032Z","userId":1}
+{"email":"shaktijatpnp09@gmail.com","level":"info","message":"OTP sent","service":"social-lovable-api","timestamp":"2025-11-29T04:52:18.895Z"}
+{"email":"shaktijatpnp09@gmail.com","level":"info","message":"OTP verified successfully","service":"social-lovable-api","timestamp":"2025-11-29T04:52:51.083Z"}
+{"email":"shaktijatpnp09@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-29T04:56:28.681Z","userId":34}
+{"email":"shaktijatpnp09@gmail.com","level":"info","message":"OTP sent","service":"social-lovable-api","timestamp":"2025-11-29T05:05:18.126Z"}
+{"email":"shaktijatpnp09@gmail.com","level":"info","message":"OTP verified successfully","service":"social-lovable-api","timestamp":"2025-11-29T05:05:36.540Z"}

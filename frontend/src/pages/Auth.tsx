@@ -57,6 +57,24 @@ const Auth = () => {
     const params = new URLSearchParams(window.location.search);
     const tokenFromUrl = params.get('token');
     const success = params.get('success');
+    const socialError = params.get('social_error') || params.get('error');
+
+    // If Google redirected back with an error (e.g., email already registered), show a popup
+    if (socialError) {
+      let message = 'Authentication failed';
+      if (socialError === 'email_exists') message = 'Email is already registered. Please login.';
+      if (socialError === 'auth_failed') message = 'Authentication failed. Please try again.';
+
+      Swal.fire({ icon: 'error', title: 'Error', text: message, confirmButtonColor: '#ef4444' });
+
+      // Clean the URL params
+      const url = new URL(window.location.href);
+      url.searchParams.delete('social_error');
+      url.searchParams.delete('error');
+      url.searchParams.delete('success');
+      window.history.replaceState({}, document.title, url.toString());
+      return;
+    }
 
     if (tokenFromUrl && success === 'true') {
       (async () => {
@@ -143,6 +161,14 @@ const Auth = () => {
           timer: 2000,
           showConfirmButton: false,
         });
+      } else {
+        // show backend error message when sendOTP returns failure
+        Swal.fire({
+          icon: "error",
+          title: "Failed to send OTP",
+          text: response?.message || response?.errors?.[0]?.msg || "Failed to send OTP. Please try again.",
+          confirmButtonColor: "#ef4444",
+        });
       }
     } catch (error: any) {
       Swal.fire({
@@ -205,6 +231,17 @@ const Auth = () => {
     e.preventDefault();
 
     if (isLoading) return;
+
+    // Basic client-side validation for password
+    if (!loginPassword || loginPassword.length < 6) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Invalid Password',
+        text: 'Password must be at least 6 characters',
+        confirmButtonColor: '#ef4444',
+      });
+      return;
+    }
 
     setIsLoading(true);
 
@@ -330,10 +367,12 @@ const Auth = () => {
         // Handle case where response.status is false
         setIsLoading(false);
         
+        const errText = response?.message || response?.errors?.[0]?.msg || "Unable to create account. Please try again.";
+
         Swal.fire({
           icon: "error",
           title: "Registration Failed",
-          text: response?.errors?.[0]?.msg || "Unable to create account. Please try again.",
+          text: errText,
           confirmButtonColor: "#ef4444",
         });
       }

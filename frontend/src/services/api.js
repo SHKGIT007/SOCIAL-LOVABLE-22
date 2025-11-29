@@ -534,6 +534,15 @@ class ApiService {
       skipAuthLogout: true,
     });
   }
+
+  async completeSocialSignup(data) {
+    return this.request('/auth/social-complete', {
+      method: 'POST',
+      body: data,
+      includeAuth: false,
+      skipAuthLogout: true,
+    });
+  }
 }
 
 // Export singleton instance

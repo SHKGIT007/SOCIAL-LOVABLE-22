@@ -12,6 +12,7 @@ const {
 // Public routes
 router.post('/register', validateUserRegistration, authController.register);
 router.post('/login', validateUserLogin, authController.login);
+router.post('/social-complete', authController.completeSocialSignup);
 
 // Protected routes
 router.get('/profile', authenticateToken, authController.getProfile);

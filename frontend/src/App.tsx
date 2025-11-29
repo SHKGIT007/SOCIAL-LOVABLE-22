@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import CompleteSocialSignup from "./pages/CompleteSocialSignup";
 import Dashboard from "./pages/Dashboard";
 import Posts from "./pages/Posts";
 import NewPost from "./pages/NewPost";
@@ -72,6 +73,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/complete-social-signup" element={<CompleteSocialSignup />} />
             
             {/* Client Routes */}
             <Route path="/dashboard" element={<ClientRoute><Dashboard /></ClientRoute>} />
