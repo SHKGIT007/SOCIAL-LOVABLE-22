@@ -1,13 +1,21 @@
 const axios = require('axios');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { User } = require('../../app/models');
+const { User, SystemSetting } = require('../../app/models');
 
 module.exports = function (app) {
   // Start Google OAuth flow
-  app.get('/auth/google', (req, res) => {
-    const client_id = process.env.GOOGLE_CLIENT_ID;
-    const redirect_uri = process.env.GOOGLE_REDIRECT_URI ;
+  app.get('/auth/google', async (req, res) => {
+    // Load system settings from DB if available, fallback to env
+    let settings;
+    try {
+      settings = await SystemSetting.findByPk(1);
+    } catch (e) {
+      settings = null;
+    }
+
+    const client_id = (settings && settings.google_client_id) || process.env.GOOGLE_CLIENT_ID;
+    const redirect_uri = (settings && settings.google_redirect_uri) || process.env.GOOGLE_REDIRECT_URI || `${req.protocol}://${req.get('host')}/auth/google/callback`;
     const redirect_dashboard = req.query.redirect_dashboard || process.env.FRONTEND_URL || 'http://localhost:9999/dashboard';
     const action = req.query.action || 'signin';
 
@@ -17,7 +25,9 @@ module.exports = function (app) {
     // Debug logs to help diagnose redirect_uri_mismatch errors
     try {
       console.log('--- Google OAuth Start ---');
-      console.log('GOOGLE_CLIENT_ID set:', !!client_id);
+      console.log('GOOGLE_CLIENT_ID source:', settings && settings.google_client_id ? 'db' : 'env');
+      console.log('GOOGLE_CLIENT_ID present:', !!client_id);
+      console.log('Using redirect_uri (source):', settings && settings.google_redirect_uri ? 'db' : 'env');
       console.log('Using GOOGLE_REDIRECT_URI:', redirect_uri);
       console.log('Action:', action);
       console.log('OAuth URL (preview):', oauthUrl.substring(0, 200));
@@ -36,9 +46,17 @@ module.exports = function (app) {
       const rawState = req.query.state;
       const state = rawState ? JSON.parse(decodeURIComponent(rawState)) : {};
 
-      const client_id = process.env.GOOGLE_CLIENT_ID;
-      const client_secret = process.env.GOOGLE_CLIENT_SECRET;
-      const redirect_uri = process.env.GOOGLE_REDIRECT_URI || `${req.protocol}://${req.get('host')}/auth/google/callback`;
+      // Load system settings from DB (if any) to use google credentials stored in DB
+      let settings;
+      try {
+        settings = await SystemSetting.findByPk(1);
+      } catch (e) {
+        settings = null;
+      }
+
+      const client_id = (settings && settings.google_client_id) || process.env.GOOGLE_CLIENT_ID;
+      const client_secret = (settings && settings.google_client_secret) || process.env.GOOGLE_CLIENT_SECRET;
+      const redirect_uri = (settings && settings.google_redirect_uri) || process.env.GOOGLE_REDIRECT_URI || `${req.protocol}://${req.get('host')}/auth/google/callback`;
 
       // Exchange code for tokens
       const tokenRes = await axios.post('https://oauth2.googleapis.com/token', new URLSearchParams({

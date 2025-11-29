@@ -55,28 +55,35 @@ const Auth = () => {
   // Handle redirect from Google OAuth (token present in URL)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const tokenFromUrl = params.get('token');
-    const success = params.get('success');
-    const socialError = params.get('social_error') || params.get('error');
+    const tokenFromUrl = params.get("token");
+    const success = params.get("success");
+    const socialError = params.get("social_error") || params.get("error");
 
     // If Google redirected back with an error (e.g., email already registered), show a popup
     if (socialError) {
-      let message = 'Authentication failed';
-      if (socialError === 'email_exists') message = 'Email is already registered. Please login.';
-      if (socialError === 'auth_failed') message = 'Authentication failed. Please try again.';
+      let message = "Authentication failed";
+      if (socialError === "email_exists")
+        message = "Email is already registered. Please login.";
+      if (socialError === "auth_failed")
+        message = "Authentication failed. Please try again.";
 
-      Swal.fire({ icon: 'error', title: 'Error', text: message, confirmButtonColor: '#ef4444' });
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: message,
+        confirmButtonColor: "#ef4444",
+      });
 
       // Clean the URL params
       const url = new URL(window.location.href);
-      url.searchParams.delete('social_error');
-      url.searchParams.delete('error');
-      url.searchParams.delete('success');
+      url.searchParams.delete("social_error");
+      url.searchParams.delete("error");
+      url.searchParams.delete("success");
       window.history.replaceState({}, document.title, url.toString());
       return;
     }
 
-    if (tokenFromUrl && success === 'true') {
+    if (tokenFromUrl && success === "true") {
       (async () => {
         try {
           // Fetch profile using token
@@ -89,25 +96,25 @@ const Auth = () => {
             }
           );
 
-          if (!profileRes.ok) throw new Error('Failed to fetch profile');
+          if (!profileRes.ok) throw new Error("Failed to fetch profile");
 
           const json = await profileRes.json();
           if (json && json.status) {
             const authPayload = { token: tokenFromUrl, user: json.data.user };
             setAuthData(authPayload);
-            if (authPayload.user?.user_type === 'admin') {
-              navigate('/admin', { replace: true });
+            if (authPayload.user?.user_type === "admin") {
+              navigate("/admin", { replace: true });
             } else {
-              navigate('/dashboard', { replace: true });
+              navigate("/dashboard", { replace: true });
             }
           }
         } catch (err) {
-          console.error('Google login handling failed', err);
+          console.error("Google login handling failed", err);
         } finally {
           // Clean URL to remove token
           const url = new URL(window.location.href);
-          url.searchParams.delete('token');
-          url.searchParams.delete('success');
+          url.searchParams.delete("token");
+          url.searchParams.delete("success");
           window.history.replaceState({}, document.title, url.toString());
         }
       })();
@@ -166,7 +173,10 @@ const Auth = () => {
         Swal.fire({
           icon: "error",
           title: "Failed to send OTP",
-          text: response?.message || response?.errors?.[0]?.msg || "Failed to send OTP. Please try again.",
+          text:
+            response?.message ||
+            response?.errors?.[0]?.msg ||
+            "Failed to send OTP. Please try again.",
           confirmButtonColor: "#ef4444",
         });
       }
@@ -212,14 +222,57 @@ const Auth = () => {
           timer: 2000,
           showConfirmButton: false,
         });
+      } else {
+        // Handle case where response.status is false
+        let errorMessage = "Invalid or expired OTP. Please try again.";
+
+        if (response?.message) {
+          errorMessage = response.message;
+        } else if (
+          response?.errors &&
+          Array.isArray(response.errors) &&
+          response.errors.length > 0
+        ) {
+          errorMessage =
+            response.errors[0].msg ||
+            response.errors[0].message ||
+            errorMessage;
+        }
+
+        Swal.fire({
+          icon: "error",
+          title: "Verification Failed",
+          text: errorMessage,
+          confirmButtonColor: "#ef4444",
+        });
       }
     } catch (error: any) {
+      let errorMessage = "Invalid or expired OTP. Please try again.";
+
+      if (error?.response?.data) {
+        const data = error.response.data;
+
+        // Check for validation errors array
+        if (
+          data.errors &&
+          Array.isArray(data.errors) &&
+          data.errors.length > 0
+        ) {
+          errorMessage =
+            data.errors[0].msg || data.errors[0].message || errorMessage;
+        }
+        // Check for general message
+        else if (data.message) {
+          errorMessage = data.message;
+        }
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+
       Swal.fire({
         icon: "error",
         title: "Verification Failed",
-        text:
-          error?.response?.data?.message ||
-          "Invalid or expired OTP. Please try again.",
+        text: errorMessage,
         confirmButtonColor: "#ef4444",
       });
     } finally {
@@ -235,10 +288,10 @@ const Auth = () => {
     // Basic client-side validation for password
     if (!loginPassword || loginPassword.length < 6) {
       Swal.fire({
-        icon: 'warning',
-        title: 'Invalid Password',
-        text: 'Password must be at least 6 characters',
-        confirmButtonColor: '#ef4444',
+        icon: "warning",
+        title: "Invalid Password",
+        text: "Password must be at least 6 characters",
+        confirmButtonColor: "#ef4444",
       });
       return;
     }
@@ -366,8 +419,10 @@ const Auth = () => {
       } else {
         // Handle case where response.status is false
         setIsLoading(false);
-        
-        const errText = response?.message || response?.errors?.[0]?.msg || "Unable to create account. Please try again.";
+
+        const errText =
+          response?.errors?.[0]?.msg ||
+          "Unable to create account. Please try again.";
 
         Swal.fire({
           icon: "error",
@@ -381,15 +436,20 @@ const Auth = () => {
 
       // Get the error message from various possible locations
       let errorMessage = "Unable to create account. Please try again.";
-      
+
       if (error?.response?.data) {
         const data = error.response.data;
-        
+
         // First priority: Check for validation errors array with detailed message
-        if (data.errors && Array.isArray(data.errors) && data.errors.length > 0) {
+        if (
+          data.errors &&
+          Array.isArray(data.errors) &&
+          data.errors.length > 0
+        ) {
           // Get the first error's message
-          errorMessage = data.errors[0].msg || data.errors[0].message || errorMessage;
-        } 
+          errorMessage =
+            data.errors[0].msg || data.errors[0].message || errorMessage;
+        }
         // Second priority: Check for general message
         else if (data.message) {
           errorMessage = data.message;
@@ -714,8 +774,12 @@ const Auth = () => {
                     type="button"
                     className="w-full h-10 bg-white border border-gray-200 text-gray-700"
                     onClick={() => {
-                      const backendBase = API_CONFIG.BASE_URL.replace('/api', '');
-                      const redirectDashboard = window.location.origin + '/dashboard';
+                      const backendBase = API_CONFIG.BASE_URL.replace(
+                        "/api",
+                        ""
+                      );
+                      const redirectDashboard =
+                        window.location.origin + "/dashboard";
                       window.location.href = `${backendBase}/auth/google?redirect_dashboard=${encodeURIComponent(
                         redirectDashboard
                       )}&action=signup`;
