@@ -13,6 +13,9 @@ const SystemSettings = () => {
     cloudinary_cloud_name?: string;
     cloudinary_api_key?: string;
     cloudinary_api_secret?: string;
+    google_client_id?: string;
+    google_client_secret?: string;
+    google_redirect_uri?: string;
   }>({});
   const [loading, setLoading] = useState(false);
 
@@ -33,6 +36,9 @@ const SystemSettings = () => {
         cloudinary_cloud_name: s.cloudinary_cloud_name || '',
         cloudinary_api_key: s.cloudinary_api_key || '',
         cloudinary_api_secret: s.cloudinary_api_secret || '',
+        google_client_id: s.google_client_id || '',
+        google_client_secret: s.google_client_secret || '',
+        google_redirect_uri: s.google_redirect_uri || '',
       };
       setForm(newForm);
     } else {
@@ -54,6 +60,9 @@ const SystemSettings = () => {
       cloudinary_cloud_name: form.cloudinary_cloud_name || '',
       cloudinary_api_key: form.cloudinary_api_key || '',
       cloudinary_api_secret: form.cloudinary_api_secret || '',
+      google_client_id: form.google_client_id || '',
+      google_client_secret: form.google_client_secret || '',
+      google_redirect_uri: form.google_redirect_uri || '',
     };
     const updateData = await apiService.updateSystemSettings({ settings: updates });
 
@@ -136,6 +145,30 @@ const SystemSettings = () => {
             placeholder="API Secret"
             value={form.cloudinary_api_secret ?? ''}
             onChange={e => handleChange('cloudinary_api_secret', e.target.value)}
+          />
+        </div>
+        <div className="mb-8">
+          <h3 className="text-lg font-semibold text-gray-800 mb-2">Google OAuth</h3>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Client ID</label>
+          <input
+            className="w-full mb-2 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all"
+            placeholder="Client ID"
+            value={form.google_client_id ?? ''}
+            onChange={e => handleChange('google_client_id', e.target.value)}
+          />
+          <label className="block text-sm font-medium text-gray-700 mb-1">Client Secret</label>
+          <input
+            className="w-full mb-2 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all"
+            placeholder="Client Secret"
+            value={form.google_client_secret ?? ''}
+            onChange={e => handleChange('google_client_secret', e.target.value)}
+          />
+          <label className="block text-sm font-medium text-gray-700 mb-1">Redirect URI</label>
+          <input
+            className="w-full mb-2 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all"
+            placeholder="Redirect URI"
+            value={form.google_redirect_uri ?? ''}
+            onChange={e => handleChange('google_redirect_uri', e.target.value)}
           />
         </div>
         <button

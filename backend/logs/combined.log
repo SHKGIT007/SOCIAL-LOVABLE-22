@@ -1097,3 +1097,4 @@
 {"email":"shaktijatpnp09@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-29T04:56:28.681Z","userId":34}
 {"email":"shaktijatpnp09@gmail.com","level":"info","message":"OTP sent","service":"social-lovable-api","timestamp":"2025-11-29T05:05:18.126Z"}
 {"email":"shaktijatpnp09@gmail.com","level":"info","message":"OTP verified successfully","service":"social-lovable-api","timestamp":"2025-11-29T05:05:36.540Z"}
+{"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-29T05:33:54.177Z","userId":1}
