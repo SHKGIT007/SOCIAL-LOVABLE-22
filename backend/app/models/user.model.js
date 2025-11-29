@@ -68,6 +68,27 @@ const User = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    is_deleted: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+    deleted_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    }, otp: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    otp_expiry: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    is_email_verified: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
   },
   {
     tableName: "users",

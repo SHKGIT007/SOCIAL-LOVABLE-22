@@ -379,6 +379,20 @@ class ApiService {
     });
   }
 
+  async createRazorpayOrder(data) {
+    return this.request(API_CONFIG.ENDPOINTS.SUBSCRIPTIONS.CREATE_ORDER, {
+      method: "POST",
+      body: data,
+    });
+  }
+
+  async verifyRazorpayPayment(data) {
+    return this.request(API_CONFIG.ENDPOINTS.SUBSCRIPTIONS.VERIFY_PAYMENT, {
+      method: "POST",
+      body: data,
+    });
+  }
+
   async updateSubscription(id, subscriptionData) {
     return this.request(`${API_CONFIG.ENDPOINTS.SUBSCRIPTIONS.UPDATE}/${id}`, {
       method: "PUT",
@@ -402,20 +416,6 @@ class ApiService {
         method: "PUT",
       }
     );
-  }
-
-  async createRazorpayOrder(data) {
-    return this.request(API_CONFIG.ENDPOINTS.SUBSCRIPTIONS.CREATE_ORDER, {
-      method: "POST",
-      body: data,
-    });
-  }
-
-  async verifyRazorpayPayment(data) {
-    return this.request(API_CONFIG.ENDPOINTS.SUBSCRIPTIONS.VERIFY_PAYMENT, {
-      method: "POST",
-      body: data,
-    });
   }
 
   // Social Account API methods
@@ -509,6 +509,39 @@ class ApiService {
         body: statusData,
       }
     );
+  }
+
+  async getDeletedUsers(queryParams = {}) {
+    return this.request(API_CONFIG.ENDPOINTS.USERS.DELETED_LIST, {
+      queryParams,
+    });
+  }
+
+  async sendOTP(data) {
+    return this.request("/auth/send-otp", {
+      method: "POST",
+      body: data,
+      includeAuth: false,
+      skipAuthLogout: true,
+    });
+  }
+
+  async verifyOTP(data) {
+    return this.request("/auth/verify-otp", {
+      method: "POST",
+      body: data,
+      includeAuth: false,
+      skipAuthLogout: true,
+    });
+  }
+
+  async completeSocialSignup(data) {
+    return this.request('/auth/social-complete', {
+      method: 'POST',
+      body: data,
+      includeAuth: false,
+      skipAuthLogout: true,
+    });
   }
 }
 

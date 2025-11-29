@@ -38,7 +38,8 @@ const createPost = asyncHandler(async (req, res) => {
 
     let video_url = null;
 
-    let { title, content, platforms, status, is_ai_generated, review_status } = req.body;
+    let { title, content, platforms, status, is_ai_generated, review_status } =
+      req.body;
     // Convert platforms to array if string
     if (typeof platforms === "string") {
       try {
@@ -358,6 +359,7 @@ const updatePost = asyncHandler(async (req, res) => {
     tags,
     media_urls,
     image_url,
+    review_status
   } = req.body;
   const userId = req.user.id;
   const userType = req.user.user_type;
@@ -395,6 +397,7 @@ const updatePost = asyncHandler(async (req, res) => {
   if (category) updateData.category = category;
   if (tags) updateData.tags = tags;
   if (media_urls) updateData.media_urls = media_urls;
+  if (review_status) updateData.review_status = review_status;
 
   await Post.update(updateData, { where: { id } });
 
@@ -489,35 +492,18 @@ const generateAIPost = asyncHandler(async (req, res) => {
 
   ai_prompt = title ? `Title: ${title}\nDetails: ${ai_prompt}` : ai_prompt;
 
-  // ✅ Get current IST date for comparison
-  const currentIST = moment().tz("Asia/Kolkata");
-
-  // ✅ Find active subscription based on status and date range
+  // ✅ Find active subscription
   const subscription = await Subscription.findOne({
     where: {
       user_id: userId,
       status: "active",
     },
     include: [{ model: Plan, as: "Plan" }],
-    order: [["end_date", "DESC"]],
+    order: [["created_at", "DESC"]],
   });
 
-  // console.log("subscription start date", subscription.start_date);
-  // console.log("hghghgh",moment(subscription.start_date).tz('Asia/Kolkata').startOf('day'));
-  // console.log("hghghgh",moment(subscription.end_date).tz('Asia/Kolkata').endOf('day'));
-  // console.log("currentIST",currentIST);
-
-  // ✅ Check if user has an active subscription valid for current date
-  if (
-    !subscription ||
-    !subscription.Plan ||
-    !currentIST.isBetween(
-      moment(subscription.start_date).tz("Asia/Kolkata").startOf("day"),
-      moment(subscription.end_date).tz("Asia/Kolkata").endOf("day"),
-      null,
-      "[]"
-    )
-  ) {
+  // ✅ Check if user has an active subscription
+  if (!subscription || !subscription.Plan) {
     return res.status(400).json({
       status: false,
       message:
@@ -525,12 +511,18 @@ const generateAIPost = asyncHandler(async (req, res) => {
     });
   }
 
-  // ✅ Check AI post limit
+  // 🔥 Check AI post limit (AI posts used >= Plan limit)
   if (subscription.ai_posts_used >= subscription.Plan.ai_posts) {
+    // 🔥 Automatically mark subscription as inactive
+    await Subscription.update(
+      { status: "inactive" },
+      { where: { id: subscription.id } }
+    );
+
     return res.status(400).json({
       status: false,
       message:
-        "Monthly AI post limit reached. Upgrade your plan or wait for renewal.",
+        "AI post limit reached. Please subscribe to a new plan to continue.",
     });
   }
 
@@ -555,13 +547,26 @@ const generateAIPost = asyncHandler(async (req, res) => {
   // ✅ Log and respond
   logger.info("AI post generated", { userId, ai_prompt });
 
+  // 🔥 Increment AI posts used count
   await Subscription.update(
     {
-      //posts_used: subscription.posts_used + 1,
       ai_posts_used: subscription.ai_posts_used + 1,
     },
     { where: { id: subscription.id } }
   );
+
+  // 🔥 Check if limit reached after increment and mark as inactive
+  if (subscription.ai_posts_used + 1 >= subscription.Plan.ai_posts) {
+    await Subscription.update(
+      { status: "inactive" },
+      { where: { id: subscription.id } }
+    );
+
+    logger.info("Subscription marked as inactive - AI post limit reached", {
+      subscriptionId: subscription.id,
+      userId,
+    });
+  }
 
   return res.json({
     status: true,
@@ -946,10 +951,10 @@ const approvePost = asyncHandler(async (req, res) => {
   const userId = req.user.id;
   const userType = req.user.user_type;
 
-  console.log('=== APPROVE POST CALLED ===');
-  console.log('Post ID:', id);
-  console.log('Review Status:', review_status);
-  console.log('User Type:', userType);
+  console.log("=== APPROVE POST CALLED ===");
+  console.log("Post ID:", id);
+  console.log("Review Status:", review_status);
+  console.log("User Type:", userType);
 
   // ✅ Validate review_status
   if (!review_status || !["approved", "rejected"].includes(review_status)) {
@@ -976,10 +981,10 @@ const approvePost = asyncHandler(async (req, res) => {
   if (post.scheduled_at) {
     const now = moment().tz("Asia/Kolkata");
     const scheduledTime = moment(post.scheduled_at).tz("Asia/Kolkata");
-    
-    console.log('Now:', now.format());
-    console.log('Scheduled:', scheduledTime.format());
-    
+
+    console.log("Now:", now.format());
+    console.log("Scheduled:", scheduledTime.format());
+
     if (now.isAfter(scheduledTime)) {
       return res.status(400).json({
         status: false,
@@ -989,17 +994,14 @@ const approvePost = asyncHandler(async (req, res) => {
   }
 
   // ✅ Update review_status in database
-  const [updatedRows] = await Post.update(
-    { review_status },
-    { where: { id } }
-  );
+  const [updatedRows] = await Post.update({ review_status }, { where: { id } });
 
-  console.log('Updated rows:', updatedRows);
+  console.log("Updated rows:", updatedRows);
 
   if (updatedRows === 0) {
     return res.status(500).json({
       status: false,
-      message: "Failed to update post review status"
+      message: "Failed to update post review status",
     });
   }
 
@@ -1014,14 +1016,14 @@ const approvePost = asyncHandler(async (req, res) => {
     ],
   });
 
-  console.log('Updated post review_status:', updatedPost.review_status);
+  console.log("Updated post review_status:", updatedPost.review_status);
 
   logger.info(`Post ${review_status}`, { postId: id, userId });
 
   return res.json({
     status: true,
     message: `Post ${review_status} successfully`,
-    data: { post: updatedPost }
+    data: { post: updatedPost },
   });
 });
 

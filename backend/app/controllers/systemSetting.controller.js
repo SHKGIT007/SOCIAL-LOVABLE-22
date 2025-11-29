@@ -16,6 +16,9 @@ exports.updateSystemSettings = async (req, res) => {
   let cloudinary_cloud_name = updates.settings.cloudinary_cloud_name;
   let cloudinary_api_key = updates.settings.cloudinary_api_key;
   let cloudinary_api_secret = updates.settings.cloudinary_api_secret;
+  let google_client_id = updates.settings.google_client_id;
+  let google_client_secret = updates.settings.google_client_secret;
+  let google_redirect_uri = updates.settings.google_redirect_uri;
 
   // Only single record exists for system settings
   const [affectedRows] = await SystemSetting.update(
@@ -26,7 +29,10 @@ exports.updateSystemSettings = async (req, res) => {
       api_key,
       cloudinary_cloud_name,
       cloudinary_api_key,
-      cloudinary_api_secret
+      cloudinary_api_secret,
+      google_client_id,
+      google_client_secret,
+      google_redirect_uri
     },
     { where: { id: 1 } }
   );
@@ -41,7 +47,10 @@ exports.updateSystemSettings = async (req, res) => {
       api_key,
       cloudinary_cloud_name,
       cloudinary_api_key,
-      cloudinary_api_secret
+      cloudinary_api_secret,
+      google_client_id,
+      google_client_secret,
+      google_redirect_uri
     });
   }
   res.json({ status: true, message: 'Settings updated successfully' });

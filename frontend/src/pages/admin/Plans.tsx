@@ -43,6 +43,7 @@ interface Plan {
   is_active: boolean;
   features: any;
   description: string;
+  duration_months: number;
 }
 
 const Plans = () => {
@@ -57,8 +58,9 @@ const Plans = () => {
     monthly_posts: 0,
     ai_posts: 0,
     linked_accounts: 0,
-    is_active: true,
+    is_active: false,
     description: "",
+    duration_months: 0,
   });
 
   useEffect(() => {
@@ -114,6 +116,20 @@ const Plans = () => {
   };
 
   const handleStatusToggle = async (plan: Plan) => {
+    const newStatus = plan.is_active ? "Inactive" : "Active";
+
+    const result = await Swal.fire({
+      icon: "warning",
+      title: "Are you sure?",
+      text: `Do you want to set this plan as ${newStatus}?`,
+      showCancelButton: true,
+      confirmButtonColor: "#6366f1",
+      cancelButtonColor: "#d33",
+      confirmButtonText: `Yes, make it ${newStatus}`,
+    });
+
+    if (!result.isConfirmed) return;
+
     try {
       await apiService.updatePlan(plan.id, {
         ...plan,
@@ -123,7 +139,7 @@ const Plans = () => {
       Swal.fire({
         icon: "success",
         title: "Success",
-        text: `Plan is now ${plan.is_active ? "Inactive" : "Active"}`,
+        text: `Plan is now ${newStatus}`,
         confirmButtonColor: "#6366f1",
       });
 
@@ -144,20 +160,44 @@ const Plans = () => {
 
     const payload = {
       ...formData,
-      is_active: formData.is_active ? 1 : 0, // convert boolean → 0/1
+      is_active: formData.is_active ? 1 : 0,
     };
 
     try {
+      let actionText = editingPlan ? "update" : "create";
+
+      // 🔥 Confirmation Before Create & Update BOTH
+      const result = await Swal.fire({
+        icon: "warning",
+        title: "Are you sure?",
+        text: `Do you want to ${actionText} this plan?`,
+        showCancelButton: true,
+        confirmButtonColor: "#6366f1",
+        cancelButtonColor: "#d33",
+        confirmButtonText: `Yes, ${actionText} it!`,
+      });
+
+      if (!result.isConfirmed) {
+        setIsLoading(false);
+        return;
+      }
+
+      // 🔵 UPDATE PLAN
       if (editingPlan) {
-        await apiService.updatePlan(editingPlan.id, formData);
+        await apiService.updatePlan(editingPlan.id, payload);
+
         Swal.fire({
           icon: "success",
           title: "Success",
           text: "Plan updated successfully!",
           confirmButtonColor: "#6366f1",
         });
-      } else {
-        await apiService.createPlan(formData);
+      }
+
+      // 🟢 CREATE PLAN
+      else {
+        await apiService.createPlan(payload);
+
         Swal.fire({
           icon: "success",
           title: "Success",
@@ -165,17 +205,21 @@ const Plans = () => {
           confirmButtonColor: "#6366f1",
         });
       }
+
       setIsDialogOpen(false);
       setEditingPlan(null);
+
       setFormData({
         name: "",
         price: 0,
         monthly_posts: 0,
         ai_posts: 0,
         linked_accounts: 0,
-        is_active: true,
+        is_active: false,
         description: "",
+        duration_months: 0,
       });
+
       await fetchPlans();
     } catch (error: any) {
       Swal.fire({
@@ -199,6 +243,7 @@ const Plans = () => {
       linked_accounts: plan.linked_accounts,
       is_active: plan.is_active,
       description: plan.description || "",
+      duration_months: plan.duration_months,
     });
     setIsDialogOpen(true);
   };
@@ -282,8 +327,9 @@ const Plans = () => {
                     monthly_posts: 0,
                     ai_posts: 0,
                     linked_accounts: 0,
-                    is_active: true,
+                    is_active: false,
                     description: "",
+                    duration_months: 0,
                   });
                 }}
               >
@@ -321,6 +367,22 @@ const Plans = () => {
                     value={formData.description}
                     onChange={(e) =>
                       setFormData({ ...formData, description: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="duration_months">Duration (Months)</Label>
+                  <Input
+                    id="duration_months"
+                    type="number"
+                    value={formData.duration_months}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        duration_months: parseInt(e.target.value),
+                      })
                     }
                     required
                   />
@@ -414,11 +476,12 @@ const Plans = () => {
                   <TableHead>Name</TableHead>
                   <TableHead>Description</TableHead>
                   <TableHead>Price</TableHead>
-                  {/* <TableHead>Posts/Month</TableHead> */}
+                  <TableHead>Duration (Months)</TableHead>
                   <TableHead>AI Posts</TableHead>
                   <TableHead>Accounts</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Actions</TableHead>
+                  <TableHead>Created At</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -429,7 +492,7 @@ const Plans = () => {
                     </TableCell>
                     <TableCell>{plan.description || "N/A"}</TableCell>
                     <TableCell>{plan.price || "N/A"}</TableCell>
-                    {/* <TableCell>{plan.monthly_posts}</TableCell> */}
+                    <TableCell>{plan.duration_months || "N/A"}</TableCell>
                     <TableCell>{plan.ai_posts || "N/A"}</TableCell>
                     <TableCell>{plan.linked_accounts || "N/A"}</TableCell>
                     <TableCell>
@@ -456,6 +519,11 @@ const Plans = () => {
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
+                    </TableCell>  
+                    <TableCell>
+                      {new Date(
+                        (plan as any).created_at || Date.now()
+                      ).toLocaleDateString()}
                     </TableCell>
                   </TableRow>
                 ))}

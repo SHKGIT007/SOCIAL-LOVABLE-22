@@ -31,6 +31,7 @@ interface Plan {
   linked_accounts: number;
   features?: any;
   description: string;
+  duration_months: number;
 }
 
 const ClientPlans = () => {
@@ -39,16 +40,12 @@ const ClientPlans = () => {
   const [currentSubscription, setCurrentSubscription] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // ----------------------------
-  // Razorpay + Fetch Data Fix
-  // ----------------------------
   useEffect(() => {
     const script = document.createElement("script");
     script.src = "https://checkout.razorpay.com/v1/checkout.js";
     script.async = true;
     document.body.appendChild(script);
 
-    // 🌟 FIXED: calling function BEFORE return
     checkAuthAndFetchData();
 
     return () => {
@@ -85,9 +82,6 @@ const ClientPlans = () => {
     }
   };
 
-  // ---------------------------------------------------
-  // Start Razorpay Payment
-  // ---------------------------------------------------
   const startRazorpayPayment = async (plan: Plan) => {
     try {
       const orderResponse = await apiService.createRazorpayOrder({
@@ -138,20 +132,15 @@ const ClientPlans = () => {
     }
   };
 
-  // ---------------------------------------------------
-  // Subscribe Button
-  // ---------------------------------------------------
-  const subscriptionEndDate = currentSubscription?.end_date
-    ? new Date(currentSubscription.end_date)
-    : null;
-  const isSubscriptionExpired =
+  // 🔥 Check if AI posts limit reached
+  const isPostLimitReached =
     currentSubscription &&
-    subscriptionEndDate !== null &&
-    subscriptionEndDate < new Date();
+    currentSubscription.ai_posts_used >= currentSubscription.Plan?.ai_posts;
+
   const hasActiveSubscription =
     currentSubscription &&
     currentSubscription.status === "active" &&
-    !isSubscriptionExpired;
+    !isPostLimitReached;
 
   const handleSubscribe = async (planId: number) => {
     try {
@@ -167,10 +156,9 @@ const ClientPlans = () => {
       const plan = plans.find((p) => p.id === planId);
       if (!plan) return;
 
-      // 🔥 Confirmation Popup BEFORE starting payment
       const result = await Swal.fire({
         title: "Confirm Subscription",
-        html: `Are you sure you want to subscribe to <b>${plan.name}</b> for <b>$${plan.price}/month</b>?`,
+        html: `Are you sure you want to subscribe to <b>${plan.name}</b> for <b>₹${plan.price}</b>?`,
         icon: "question",
         showCancelButton: true,
         confirmButtonText: "Yes, Continue",
@@ -178,7 +166,6 @@ const ClientPlans = () => {
         confirmButtonColor: "#6366f1",
       });
 
-      // ❌ If cancelled, stop here
       if (!result.isConfirmed) return;
 
       const planPrice = Number(plan.price) || 0;
@@ -199,7 +186,6 @@ const ClientPlans = () => {
         return;
       }
 
-      // ✅ If confirmed → Start Razorpay
       startRazorpayPayment(plan);
     } catch (e: any) {
       Swal.fire("Error", e.message || "Failed to subscribe", "error");
@@ -230,7 +216,6 @@ const ClientPlans = () => {
             Choose a plan that fits your needs
           </p>
         </div>
-
         {/* Current Subscription */}
         {currentSubscription && (
           <Card className="border-indigo-200 shadow-sm">
@@ -240,41 +225,97 @@ const ClientPlans = () => {
             <CardContent>
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span className="font-medium">Plan:</span>
+                  <span className="font-medium">Plan Name:</span>
                   <Badge>{currentSubscription.Plan?.name}</Badge>
                 </div>
 
                 <div className="flex justify-between">
-                  <span className="font-medium">AI Posts Used:</span>
+                  <span className="font-medium">Amount Paid:</span>
+                  <span className="font-semibold">
+                    ₹{currentSubscription.amount_paid}
+                  </span>
+                </div>
+
+                {/* 🔥 Display Start & End Date */}
+                <div className="flex justify-between">
+                  <span className="font-medium">Start Date:</span>
                   <span>
-                    {currentSubscription.ai_posts_used} /{" "}
-                    {currentSubscription.Plan?.ai_posts}
+                    {new Date(
+                      currentSubscription.start_date
+                    ).toLocaleDateString("en-IN")}
                   </span>
                 </div>
 
                 <div className="flex justify-between">
+                  <span className="font-medium">End Date:</span>
+                  <span>
+                    {currentSubscription.end_date
+                      ? new Date(
+                          currentSubscription.end_date
+                        ).toLocaleDateString("en-IN")
+                      : "No End Date"}
+                  </span>
+                </div>
+
+                {/* 🔥 AI Posts with Progress Bar */}
+                <div className="space-y-1">
+                  <div className="flex justify-between">
+                    <span className="font-medium">AI Posts Used:</span>
+                    <span>
+                      {currentSubscription.ai_posts_used} /{" "}
+                      {currentSubscription.Plan?.ai_posts}
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className={`h-2 rounded-full transition-all ${
+                        isPostLimitReached ? "bg-red-500" : "bg-indigo-600"
+                      }`}
+                      style={{
+                        width: `${Math.min(
+                          (currentSubscription.ai_posts_used /
+                            currentSubscription.Plan?.ai_posts) *
+                            100,
+                          100
+                        )}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Status */}
+                <div className="flex justify-between">
                   <span className="font-medium">Status:</span>
                   <Badge
                     style={{
-                      backgroundColor: hasActiveSubscription ? "green" : "gray",
+                      backgroundColor: isPostLimitReached
+                        ? "red"
+                        : hasActiveSubscription
+                        ? "green"
+                        : "gray",
                     }}
                   >
-                    {hasActiveSubscription ? "Active" : "Expired"}
+                    {isPostLimitReached
+                      ? "Limit Reached"
+                      : hasActiveSubscription
+                      ? "Active"
+                      : "Inactive"}
                   </Badge>
                 </div>
-                {currentSubscription.end_date && (
-                  <div className="flex justify-between">
-                    <span className="font-medium">Ends:</span>
-                    <span>
-                      {new Date(currentSubscription.end_date).toLocaleString()}
-                    </span>
+
+                {/* Warning when limit reached */}
+                {isPostLimitReached && (
+                  <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                    <p className="text-sm text-red-700">
+                      ⚠️ Your AI post limit has been reached. Please subscribe
+                      to a new plan to continue creating AI posts.
+                    </p>
                   </div>
                 )}
               </div>
             </CardContent>
           </Card>
         )}
-
         {/* Plans */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {plans.map((plan) => {
@@ -283,7 +324,7 @@ const ClientPlans = () => {
             const buttonLabel = (() => {
               if (isCurrent && hasActiveSubscription) return "Current Plan";
               if (hasActiveSubscription) return "Cancel current plan first";
-              if (isCurrent && !hasActiveSubscription) return "Renew Plan";
+              if (isCurrent && isPostLimitReached) return "Renew Plan";
               return "Subscribe";
             })();
 
@@ -308,25 +349,24 @@ const ClientPlans = () => {
                   <CardTitle className="text-xl">{plan.name}</CardTitle>
                   <CardDescription>
                     <span className="text-3xl font-extrabold text-gray-900">
-                      ${plan.price}
+                      ₹{plan.price}
                     </span>
-                    {/* <span className="text-muted-foreground"> / month</span> */}
                   </CardDescription>
                   <CardDescription>
                     <span className="text-l font-bold text-gray-900">
                       {plan.description}
                     </span>
-                    {/* <span className="text-muted-foreground"> / month</span> */}
                   </CardDescription>
                 </CardHeader>
 
+                <CardDescription className="px-6">
+                  <span className="text-sm text-gray-600">
+                    {plan.duration_months} months duration
+                  </span>
+                </CardDescription>
+
                 <CardContent>
                   <div className="space-y-2 text-gray-800">
-                    <div className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-indigo-600" />
-                      <span>{plan.monthly_posts} posts per month</span>
-                    </div>
-
                     <div className="flex items-center gap-2">
                       <Check className="h-4 w-4 text-indigo-600" />
                       <span>{plan.ai_posts} AI-generated posts</span>

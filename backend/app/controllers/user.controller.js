@@ -99,6 +99,11 @@ const getAllUsers = asyncHandler(async (req, res) => {
   const offset = (page - 1) * limit;
 
   const whereClause = {};
+
+  // Hide deleted users
+  whereClause.is_deleted = false;
+
+  // Search filters
   if (search) {
     whereClause[Op.or] = [
       { user_name: { [Op.like]: `%${search}%` } },
@@ -107,10 +112,13 @@ const getAllUsers = asyncHandler(async (req, res) => {
       { user_lname: { [Op.like]: `%${search}%` } },
     ];
   }
+
+  // Filter by user type if provided
   if (user_type) {
     whereClause.user_type = user_type;
   }
 
+  // Exclude admin always
   whereClause.user_type = { [Op.ne]: "admin" };
 
   const { count, rows: users } = await User.findAndCountAll({
@@ -140,7 +148,6 @@ const getAllUsers = asyncHandler(async (req, res) => {
     user_lname: user.user_lname,
     user_type: user.user_type,
     active_status: user.active_status,
-    // role: user.Role?.name,
     subscription: user.Subscriptions?.[0]
       ? {
           plan: user.Subscriptions[0].Plan?.name,
@@ -211,8 +218,6 @@ const getUserById = asyncHandler(async (req, res) => {
 //   const { id } = req.params;
 //   const { user_name, user_fname, user_lname, user_phone, email } = req.body;
 
-
-
 //   const user = await User.findByPk(id);
 //   if (!user) {
 //     return res.status(404).json({
@@ -244,7 +249,6 @@ const getUserById = asyncHandler(async (req, res) => {
 //   });
 // });
 
-
 const updateUser = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { user_name, user_fname, user_lname, user_phone, email } = req.body;
@@ -262,12 +266,12 @@ const updateUser = asyncHandler(async (req, res) => {
   // Username check
   if (user_name) {
     const existUserName = await User.findOne({
-      where: { user_name, id: { [Op.ne]: id } }
+      where: { user_name, id: { [Op.ne]: id } },
     });
     if (existUserName) {
       return res.status(409).json({
         status: false,
-        message: "Username already exists"
+        message: "Username already exists",
       });
     }
   }
@@ -275,12 +279,12 @@ const updateUser = asyncHandler(async (req, res) => {
   // Email check
   if (email) {
     const existEmail = await User.findOne({
-      where: { email, id: { [Op.ne]: id } }
+      where: { email, id: { [Op.ne]: id } },
     });
     if (existEmail) {
       return res.status(409).json({
         status: false,
-        message: "Email already exists"
+        message: "Email already exists",
       });
     }
   }
@@ -288,12 +292,12 @@ const updateUser = asyncHandler(async (req, res) => {
   // Phone check
   if (user_phone) {
     const existPhone = await User.findOne({
-      where: { user_phone, id: { [Op.ne]: id } }
+      where: { user_phone, id: { [Op.ne]: id } },
     });
     if (existPhone) {
       return res.status(409).json({
         status: false,
-        message: "Phone number already exists"
+        message: "Phone number already exists",
       });
     }
   }
@@ -320,7 +324,6 @@ const updateUser = asyncHandler(async (req, res) => {
   });
 });
 
-
 const deleteUser = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
@@ -332,17 +335,27 @@ const deleteUser = asyncHandler(async (req, res) => {
     });
   }
 
-  // Check if user is trying to delete themselves
-  if (id === req.user.id) {
+  // Prevent deleting own account
+  if (id == req.user.id) {
     return res.status(400).json({
       status: false,
       message: "Cannot delete your own account",
     });
   }
 
-  await User.destroy({ where: { id } });
+  // Soft delete → set is_deleted = true and deleted_at timestamp
+  await User.update(
+    {
+      is_deleted: true,
+      deleted_at: new Date(), // store deletion timestamp
+    },
+    { where: { id } }
+  );
 
-  logger.info("User deleted by admin", { userId: id, deletedBy: req.user.id });
+  logger.info("User soft-deleted by admin", {
+    userId: id,
+    deletedBy: req.user.id,
+  });
 
   res.json({
     status: true,
@@ -375,30 +388,56 @@ const getUserStats = asyncHandler(async (req, res) => {
 });
 
 const getAdminStats = asyncHandler(async (req, res) => {
-  const [totalUsers, totalPosts, activeSubscriptions] = await Promise.all([
-    User.count(),
+  const [
+    totalClients,
+    totalPosts,
+    totalPlans,
+    activeSubscriptions,
+    successfulPayments,
+  ] = await Promise.all([
+    User.count({
+      where: {
+        user_type: "client",
+        is_deleted: 0, // 🚀 Soft-deleted users excluded
+      },
+    }),
+
     Post.count(),
+    Plan.count(),
+
     Subscription.count({ where: { status: "active" } }),
+
+    Subscription.findAll({
+      where: { payment_status: "success" },
+      attributes: ["amount_paid"],
+    }),
   ]);
 
-  // Calculate total revenue (simplified)
-  const subscriptions = await Subscription.findAll({
+  const activeSubs = await Subscription.findAll({
     where: { status: "active" },
     include: [{ model: Plan, as: "Plan" }],
   });
 
-  const totalRevenue = subscriptions.reduce((sum, sub) => {
-    return sum + (sub.Plan?.price || 0);
-  }, 0);
+  const totalRevenue = activeSubs.reduce(
+    (sum, s) => sum + Number(s?.Plan?.price || 0),
+    0
+  );
+
+  const totalSuccessAmount = successfulPayments.reduce(
+    (sum, s) => sum + Number(s.amount_paid || 0),
+    0
+  );
 
   res.json({
     status: true,
     data: {
       stats: {
-        totalUsers,
+        totalClients,
         totalPosts,
+        totalPlans,
         activeSubscriptions,
         totalRevenue,
+        totalSuccessAmount,
       },
     },
   });
@@ -430,6 +469,35 @@ const updateUserStatus = asyncHandler(async (req, res) => {
   });
 });
 
+const getDeletedUsers = asyncHandler(async (req, res) => {
+  const deletedUsers = await User.findAll({
+    where: { is_deleted: true },
+    attributes: [
+      "id",
+      "user_name",
+      "user_fname",
+      "user_lname",
+      "email",
+      "user_phone",
+      "user_type",
+      "active_status",
+      "role_id",
+      "avatar_url",
+      "full_name",
+      "is_deleted",
+      "deleted_at",
+    ],
+  });
+
+  res.json({
+    status: true,
+    message: "Deleted users fetched successfully",
+    data: { users: deletedUsers },
+  });
+});
+
+
+
 module.exports = {
   createUser,
   getAllUsers,
@@ -439,4 +507,5 @@ module.exports = {
   getUserStats,
   getAdminStats,
   updateUserStatus,
+  getDeletedUsers,
 };

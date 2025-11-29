@@ -149,13 +149,17 @@ const ViewPost = () => {
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Posts
           </Button>
-          <Button
-            onClick={() => navigate(`/posts/edit/${post.id}`)}
-            className="bg-gradient-to-r from-indigo-600 to-sky-500 hover:from-indigo-500 hover:to-sky-400 text-white shadow-md"
-          >
-            <Edit className="mr-2 h-4 w-4" />
-            Edit Post
-          </Button>
+          {post.status !== "published" &&
+            (!post.scheduled_at ||
+              new Date(post.scheduled_at) > new Date()) && (
+              <Button
+                onClick={() => navigate(`/posts/edit/${post.id}`)}
+                className="bg-gradient-to-r from-indigo-600 to-sky-500 hover:from-indigo-500 hover:to-sky-400 text-white shadow-md"
+              >
+                <Edit className="mr-2 h-4 w-4" />
+                Edit Post
+              </Button>
+            )}
         </div>
 
         {/* Hero header card */}

@@ -80,31 +80,6 @@ const NewPost = () => {
         : [...prev, platform]
     );
 
-  // const handleGenerateAI = async () => {
-  //   if (!aiPrompt) {
-  //     Swal.fire({ icon: "error", title: "Error", text: "Please enter your post prompt", confirmButtonColor: "#6366f1" });
-  //     return;
-  //   }
-  //   setIsGenerating(true);
-  //   try {
-  //     const res = await apiService.generateAIPost({
-  //       title: title || "AI Generated Post",
-  //       ai_prompt: aiPrompt,
-  //       image_prompt: imagePrompt,
-  //     });
-  //     if (res.status) {
-  //       setContent(res.data.content);
-  //       setImageContent(res.data.imageUrl);
-  //       Swal.fire({ icon: "success", title: "Success", text: "AI post generated successfully!", confirmButtonColor: "#6366f1" });
-  //     }
-  //   } catch (err: any) {
-  //     if (err.message === "Authentication failed") logout();
-  //     else Swal.fire({ icon: "error", title: "Error", text: err.message || "Failed to generate post", confirmButtonColor: "#6366f1" });
-  //   } finally {
-  //     setIsGenerating(false);
-  //   }
-  // };
-
   const handleGenerateAI = async () => {
     if (!aiPrompt.trim()) {
       Swal.fire({
@@ -118,14 +93,7 @@ const NewPost = () => {
 
     setIsGenerating(true);
     try {
-      // const res = await apiService.generateAIPost({
-      //   title: title || "AI Generated Post",
-      //   ai_prompt: aiPrompt,
-      //   image_prompt: imagePrompt,
-      // });
-
       const res = await apiService.generateAIPost({
-        //title: title || "AI Generated Post",
         title: ["", null, undefined].includes(optionalTitlePrompt)
           ? title
           : optionalTitlePrompt,
@@ -148,14 +116,18 @@ const NewPost = () => {
         });
       }
     } catch (err: any) {
-      if (err.message === "Authentication failed") logout();
-      else
-        Swal.fire({
-          icon: "error",
-          title: "Error",
-          text: err.message || "Failed to generate post",
-          confirmButtonColor: "#6366f1",
-        });
+      const message =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err?.message ||
+        "Failed to generate post";
+
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: message,
+        confirmButtonColor: "#6366f1",
+      });
     } finally {
       setIsGenerating(false);
     }
@@ -205,7 +177,16 @@ const NewPost = () => {
       if (imageContent) formData.append("image_url", imageContent);
       if (imageFile) formData.append("image_file", imageFile);
       if (videoFile) formData.append("video_file", videoFile);
-formData.append("review_status", autoToggle ? "pending" : "approved");
+
+      // Set review_status based on status
+      let reviewStatus = "pending"; // Default for draft
+      if (status === "scheduled") {
+        reviewStatus = autoToggle ? "pending" : "approved";
+      } else if (status === "published") {
+        reviewStatus = "approved";
+      }
+
+      formData.append("review_status", reviewStatus);
 
       const res = await apiService.createPost(formData, true);
       if (res.status) {
@@ -218,10 +199,16 @@ formData.append("review_status", autoToggle ? "pending" : "approved");
         navigate("/posts");
       }
     } catch (err: any) {
+      const message =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err?.message ||
+        "Failed to create post";
+
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: err.message || "Failed to create post",
+        text: message,
         confirmButtonColor: "#6366f1",
       });
     } finally {
@@ -267,12 +254,6 @@ formData.append("review_status", autoToggle ? "pending" : "approved");
         {/* AI Section */}
         {mode === "ai" && (
           <Card className="border-indigo-100">
-            {/* <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-indigo-600" /> Generate Post with AI
-              </CardTitle>
-              <CardDescription>Use your brand profile and prompt to generate a post.</CardDescription>
-            </CardHeader> */}
             <CardContent className="space-y-4">
               {/* Optional Title Prompt */}
               <div className="mb-2">
@@ -287,14 +268,6 @@ formData.append("review_status", autoToggle ? "pending" : "approved");
                   placeholder="Add extra instructions for AI title..."
                 />
               </div>
-              {/* {aiPrompt && (
-                <div className="space-y-1">
-                  <Label>Context/Profile</Label>
-                  <div className="rounded-md border bg-muted/30 p-3 text-sm whitespace-pre-wrap leading-relaxed">
-                    {aiPrompt}
-                  </div>
-                </div>
-              )} */}
 
               {/* Optional Content Prompt */}
               <div className="mb-2">
@@ -309,6 +282,7 @@ formData.append("review_status", autoToggle ? "pending" : "approved");
                   placeholder="Add extra instructions for AI content..."
                 />
               </div>
+
               {/* Optional Image Prompt */}
               <div className="mb-2">
                 <label className="block text-sm font-semibold text-gray-700 mb-1">
@@ -322,6 +296,7 @@ formData.append("review_status", autoToggle ? "pending" : "approved");
                   placeholder="Add extra instructions for AI image..."
                 />
               </div>
+
               <Button
                 onClick={handleGenerateAI}
                 disabled={isGenerating}
@@ -418,28 +393,6 @@ formData.append("review_status", autoToggle ? "pending" : "approved");
                     />
                   )}
                 </div>
-
-                {/* <div>
-                  <Label className="flex items-center gap-2">
-                    <Film className="h-4 w-4 text-indigo-600" /> Video Upload
-                  </Label>
-                  <Input
-                    type="file"
-                    accept="video/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      setVideoFile(file || null);
-                      setVideoPreview(file ? URL.createObjectURL(file) : "");
-                    }}
-                  />
-                  {videoPreview && (
-                    <video
-                      src={videoPreview}
-                      controls
-                      className="mt-2 rounded-md border max-w-xs"
-                    />
-                  )}
-                </div> */}
               </div>
             </CardContent>
           </Card>
@@ -489,37 +442,40 @@ formData.append("review_status", autoToggle ? "pending" : "approved");
             </div>
 
             {status === "scheduled" && (
-              <div>
-                <Label className="text-gray-700">Schedule Date & Time</Label>
-                <Input
-                  type="datetime-local"
-                  value={scheduledAt}
-                  onChange={(e) => setScheduledAt(e.target.value)}
-                  className="border-gray-300 focus-visible:ring-indigo-500"
-                  min={new Date().toISOString().slice(0, 16)}
-                />
-              </div>
+              <>
+                <div>
+                  <Label className="text-gray-700">Schedule Date & Time</Label>
+                  <Input
+                    type="datetime-local"
+                    value={scheduledAt}
+                    onChange={(e) => setScheduledAt(e.target.value)}
+                    className="border-gray-300 focus-visible:ring-indigo-500"
+                    min={new Date().toISOString().slice(0, 16)}
+                  />
+                </div>
+
+                {/* Toggle Button - Only show when status is scheduled */}
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <span className="text-sm font-medium text-gray-700">
+                    On Toggle for Review Post Before Publishing
+                  </span>
+
+                  <button
+                    type="button"
+                    onClick={() => setAutoToggle(!autoToggle)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      autoToggle ? "bg-indigo-600" : "bg-gray-300"
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${
+                        autoToggle ? "translate-x-5" : "translate-x-1"
+                      }`}
+                    />
+                  </button>
+                </div>
+              </>
             )}
-
-            {/* Toggle Button Under Status */}
-            <div className="flex items-center justify-between p-3 border rounded-lg mt-2">
-              <span className="text-sm font-medium text-gray-700">
-                On Toggle for Review Post Before Publishing
-              </span>
-
-              <button
-                onClick={() => setAutoToggle(!autoToggle)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  autoToggle ? "bg-indigo-600" : "bg-gray-300"
-                }`}
-              >
-                <span
-                  className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${
-                    autoToggle ? "translate-x-5" : "translate-x-1"
-                  }`}
-                />
-              </button>
-            </div>
 
             <div className="flex justify-end gap-3 pt-4">
               <Button

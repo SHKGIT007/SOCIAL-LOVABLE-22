@@ -113,6 +113,19 @@ const EditUserModal = ({
       return;
     }
 
+    // 🔥 Confirmation Popup
+    const confirm = await Swal.fire({
+      icon: "warning",
+      title: "Are you sure?",
+      text: "Do you want to update this user?",
+      showCancelButton: true,
+      confirmButtonText: "Yes, Update",
+      cancelButtonText: "Cancel",
+    });
+
+    if (!confirm.isConfirmed) return;
+
+    // --- Proceed with update ---
     try {
       const res = await apiService.updateUser(userId, form);
 

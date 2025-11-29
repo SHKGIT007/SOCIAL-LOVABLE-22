@@ -140,7 +140,7 @@ const Profile = () => {
         <div>
           <h1 className="flex items-baseline gap-2 text-3xl font-extrabold">
             <span className="bg-gradient-to-r from-indigo-600 to-sky-400 bg-clip-text text-transparent">
-              Profile
+              Post
             </span>
             <span className="text-gray-900"> Settings</span>
           </h1>

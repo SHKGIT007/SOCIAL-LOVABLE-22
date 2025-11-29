@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import CompleteSocialSignup from "./pages/CompleteSocialSignup";
 import Dashboard from "./pages/Dashboard";
 import Posts from "./pages/Posts";
 import NewPost from "./pages/NewPost";
@@ -25,6 +26,8 @@ import Profile from "./pages/Profile";
 import UserSchedules from "./pages/UserSchedules";
 import { getAuthData, isAuthenticated } from "@/utils/auth";
 import CreateUser from "./pages/admin/CreateUser";
+import DeletedUsers from "./pages/admin/DeletedUsers";
+import UpdateProfile from "./pages/UpdateProfile";
 
 const queryClient = new QueryClient();
 
@@ -70,6 +73,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/complete-social-signup" element={<CompleteSocialSignup />} />
             
             {/* Client Routes */}
             <Route path="/dashboard" element={<ClientRoute><Dashboard /></ClientRoute>} />
@@ -81,6 +85,7 @@ function App() {
             <Route path="/plans" element={<ClientRoute><ClientPlans /></ClientRoute>} />
             <Route path="/profile" element={<ClientRoute><Profile /></ClientRoute>} />
             <Route path="/schedules" element={<ClientRoute><UserSchedules /></ClientRoute>} />
+            <Route path="/update-profile" element={<ClientRoute><UpdateProfile /></ClientRoute>} />
             
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
@@ -92,6 +97,7 @@ function App() {
             <Route path="/admin/posts/:id" element={<AdminRoute><AdminViewPost /></AdminRoute>} />
             <Route path="/admin/system-settings" element={<AdminRoute><SystemSettings /></AdminRoute>} />
             <Route path="/admin/create-user" element={<AdminRoute><CreateUser/></AdminRoute>} />
+            <Route path="/admin/deleted-users" element={<AdminRoute><DeletedUsers /></AdminRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

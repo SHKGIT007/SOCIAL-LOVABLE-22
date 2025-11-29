@@ -73,6 +73,17 @@ const CreateUser = () => {
       return;
     }
 
+    const confirm = await Swal.fire({
+      icon: "warning",
+      title: "Are you sure?",
+      text: "Do you want to create this user?",
+      showCancelButton: true,
+      confirmButtonText: "Yes, Create",
+      cancelButtonText: "Cancel",
+    });
+
+    if (!confirm.isConfirmed) return;
+
     setIsLoading(true);
 
     try {

@@ -19,5 +19,6 @@ router.get('/:id', requireAdmin, userController.getUserById);
 router.put('/:id', requireAdmin, validateId, userController.updateUser);
 router.delete('/:id', requireAdmin, validateId, userController.deleteUser);
 router.put('/:id/status', requireAdmin, validateId, userController.updateUserStatus);
+router.get('/deleted/list', requireAdmin, validatePagination, userController.getDeletedUsers);
 
 module.exports = router;

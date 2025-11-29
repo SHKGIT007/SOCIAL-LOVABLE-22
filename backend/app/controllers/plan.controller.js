@@ -2,6 +2,7 @@ const { Plan, Subscription } = require("../models");
 const { Op } = require("sequelize");
 const { asyncHandler } = require("../middleware/error.middleware");
 const logger = require("../config/logger");
+const moment = require("moment-timezone");
 
 const createPlan = asyncHandler(async (req, res) => {
   const {
@@ -12,7 +13,9 @@ const createPlan = asyncHandler(async (req, res) => {
     features,
     description,
     is_active,
+    duration_months,
   } = req.body;
+
 
   const plan = await Plan.create({
     name,
@@ -21,7 +24,8 @@ const createPlan = asyncHandler(async (req, res) => {
     linked_accounts,
     features,
     description,
-    is_active: is_active == 0 || is_active === false ? 0 : 1, // convert boolean/number
+    duration_months,
+    is_active: is_active == 0 || is_active === false ? 0 : 1,
   });
 
   logger.info("Plan created", { planId: plan.id, createdBy: req.user.id });
@@ -54,7 +58,7 @@ const getAllPlans = asyncHandler(async (req, res) => {
     where: whereClause,
     limit: parseInt(limit),
     offset: parseInt(offset),
-    order: [["price", "ASC"]],
+    order: [["created_at", "DESC"]],  // 👈 LATEST FIRST
   });
 
   res.json({
@@ -115,12 +119,12 @@ const updatePlan = asyncHandler(async (req, res) => {
   const {
     name,
     price,
-    monthly_posts,
     ai_posts,
     linked_accounts,
     features,
     description,
     is_active,
+    duration_months,
   } = req.body;
 
   const plan = await Plan.findByPk(id);
@@ -132,15 +136,21 @@ const updatePlan = asyncHandler(async (req, res) => {
   }
 
   const updateData = {};
-  if (name) updateData.name = name;
+
+  if (name !== undefined) updateData.name = name;
   if (price !== undefined) updateData.price = price;
-  if (monthly_posts !== undefined) updateData.monthly_posts = monthly_posts;
   if (ai_posts !== undefined) updateData.ai_posts = ai_posts;
   if (linked_accounts !== undefined)
     updateData.linked_accounts = linked_accounts;
-  if (features) updateData.features = features;
-  if (description) updateData.description = description;
-  if (is_active !== undefined) updateData.is_active = is_active;
+  if (features !== undefined) updateData.features = features;
+  if (description !== undefined) updateData.description = description;
+
+  // Normalize boolean for is_active (same as createPlan)
+  if (is_active !== undefined)
+    updateData.is_active = is_active == 0 || is_active === false ? 0 : 1;
+
+  if (duration_months !== undefined)
+    updateData.duration_months = duration_months;
 
   await Plan.update(updateData, { where: { id } });
 
@@ -154,6 +164,7 @@ const updatePlan = asyncHandler(async (req, res) => {
     data: { plan: updatedPlan },
   });
 });
+
 
 const deletePlan = asyncHandler(async (req, res) => {
   const { id } = req.params;
