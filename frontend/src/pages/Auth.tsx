@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Swal from "sweetalert2";
 import { Loader2, Eye, EyeOff, Mail, CheckCircle } from "lucide-react";
 import { apiService } from "@/services/api";
+import { API_CONFIG } from "@/utils/config";
 import { setAuthData, isAuthenticated, getAuthData } from "@/utils/auth";
 
 const Auth = () => {
@@ -48,6 +49,50 @@ const Auth = () => {
       } else {
         navigate("/dashboard", { replace: true });
       }
+    }
+  }, [navigate]);
+
+  // Handle redirect from Google OAuth (token present in URL)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tokenFromUrl = params.get('token');
+    const success = params.get('success');
+
+    if (tokenFromUrl && success === 'true') {
+      (async () => {
+        try {
+          // Fetch profile using token
+          const profileRes = await fetch(
+            `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AUTH.PROFILE}`,
+            {
+              headers: {
+                Authorization: `Bearer ${tokenFromUrl}`,
+              },
+            }
+          );
+
+          if (!profileRes.ok) throw new Error('Failed to fetch profile');
+
+          const json = await profileRes.json();
+          if (json && json.status) {
+            const authPayload = { token: tokenFromUrl, user: json.data.user };
+            setAuthData(authPayload);
+            if (authPayload.user?.user_type === 'admin') {
+              navigate('/admin', { replace: true });
+            } else {
+              navigate('/dashboard', { replace: true });
+            }
+          }
+        } catch (err) {
+          console.error('Google login handling failed', err);
+        } finally {
+          // Clean URL to remove token
+          const url = new URL(window.location.href);
+          url.searchParams.delete('token');
+          url.searchParams.delete('success');
+          window.history.replaceState({}, document.title, url.toString());
+        }
+      })();
     }
   }, [navigate]);
 
@@ -411,6 +456,8 @@ const Auth = () => {
                     "Sign In"
                   )}
                 </Button>
+
+                {/* removed Google button from Sign In - Sign Up flow is preferred */}
               </form>
             </TabsContent>
 
@@ -623,6 +670,21 @@ const Auth = () => {
                     "Sign Up"
                   )}
                 </Button>
+                <div className="mt-3">
+                  <Button
+                    type="button"
+                    className="w-full h-10 bg-white border border-gray-200 text-gray-700"
+                    onClick={() => {
+                      const backendBase = API_CONFIG.BASE_URL.replace('/api', '');
+                      const redirectDashboard = window.location.origin + '/dashboard';
+                      window.location.href = `${backendBase}/auth/google?redirect_dashboard=${encodeURIComponent(
+                        redirectDashboard
+                      )}&action=signup`;
+                    }}
+                  >
+                    Sign up with Google
+                  </Button>
+                </div>
               </form>
             </TabsContent>
           </Tabs>

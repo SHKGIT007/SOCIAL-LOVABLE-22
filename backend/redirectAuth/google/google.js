@@ -1,0 +1,141 @@
+const axios = require('axios');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const { User } = require('../../app/models');
+
+module.exports = function (app) {
+  // Start Google OAuth flow
+  app.get('/auth/google', (req, res) => {
+    const client_id = process.env.GOOGLE_CLIENT_ID;
+    const redirect_uri = process.env.GOOGLE_REDIRECT_URI ;
+    const redirect_dashboard = req.query.redirect_dashboard || process.env.FRONTEND_URL || 'http://localhost:9999/dashboard';
+    const action = req.query.action || 'signin';
+
+    const state = encodeURIComponent(JSON.stringify({ redirect_dashboard, action }));
+    const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(client_id)}&redirect_uri=${encodeURIComponent(redirect_uri)}&response_type=code&scope=${encodeURIComponent('openid email profile')}&state=${state}&access_type=offline&prompt=consent`;
+
+    // Debug logs to help diagnose redirect_uri_mismatch errors
+    try {
+      console.log('--- Google OAuth Start ---');
+      console.log('GOOGLE_CLIENT_ID set:', !!client_id);
+      console.log('Using GOOGLE_REDIRECT_URI:', redirect_uri);
+      console.log('Action:', action);
+      console.log('OAuth URL (preview):', oauthUrl.substring(0, 200));
+      console.log('--- /Google OAuth Start ---');
+    } catch (e) {
+      // ignore logging errors
+    }
+
+    return res.redirect(oauthUrl);
+  });
+
+  // OAuth callback
+  app.get('/auth/google/callback', async (req, res) => {
+    try {
+      const code = req.query.code;
+      const rawState = req.query.state;
+      const state = rawState ? JSON.parse(decodeURIComponent(rawState)) : {};
+
+      const client_id = process.env.GOOGLE_CLIENT_ID;
+      const client_secret = process.env.GOOGLE_CLIENT_SECRET;
+      const redirect_uri = process.env.GOOGLE_REDIRECT_URI || `${req.protocol}://${req.get('host')}/auth/google/callback`;
+
+      // Exchange code for tokens
+      const tokenRes = await axios.post('https://oauth2.googleapis.com/token', new URLSearchParams({
+        code,
+        client_id,
+        client_secret,
+        redirect_uri,
+        grant_type: 'authorization_code',
+      }).toString(), {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      });
+
+      const access_token = tokenRes.data.access_token;
+
+      // Get user info
+      const userInfoRes = await axios.get('https://openidconnect.googleapis.com/v1/userinfo', {
+        headers: { Authorization: `Bearer ${access_token}` },
+      });
+
+      const profile = userInfoRes.data;
+
+      // Find existing user
+      let user = await User.findOne({ where: { email: profile.email } });
+
+      // If the flow was started for signup explicitly and user already exists -> error
+      const flowAction = state.action || 'signin';
+
+      if (flowAction === 'signup') {
+        if (user) {
+          // Email already registered
+          const redirect_dashboard = state.redirect_dashboard || process.env.FRONTEND_URL || 'http://localhost:5173';
+          return res.redirect(`${redirect_dashboard}?success=false&error=email_exists`);
+        }
+
+        // Create new user for signup
+        const randomPassword = Math.random().toString(36).slice(-12);
+        const hashed = await bcrypt.hash(randomPassword, 12);
+
+        const usernameBase = (profile.email || 'user').split('@')[0];
+
+        user = await User.create({
+          user_name: `${usernameBase}_${Date.now()}`,
+          email: profile.email,
+          password: hashed,
+          user_fname: profile.given_name || null,
+          user_lname: profile.family_name || null,
+          avatar_url: profile.picture || null,
+          full_name: profile.name || null,
+          is_email_verified: true,
+          active_status: true,
+          role_id: 2,
+        });
+      } else {
+        // signin/default flow: create or update user
+        if (user) {
+          user.avatar_url = profile.picture || user.avatar_url;
+          user.full_name = profile.name || user.full_name;
+          user.user_fname = profile.given_name || user.user_fname;
+          user.user_lname = profile.family_name || user.user_lname;
+          user.is_email_verified = true;
+          user.active_status = true;
+          await user.save();
+        } else {
+          const randomPassword = Math.random().toString(36).slice(-12);
+          const hashed = await bcrypt.hash(randomPassword, 12);
+
+          const usernameBase = (profile.email || 'user').split('@')[0];
+
+          user = await User.create({
+            user_name: `${usernameBase}_${Date.now()}`,
+            email: profile.email,
+            password: hashed,
+            user_fname: profile.given_name || null,
+            user_lname: profile.family_name || null,
+            avatar_url: profile.picture || null,
+            full_name: profile.name || null,
+            is_email_verified: true,
+            active_status: true,
+            role_id: 2,
+          });
+        }
+      }
+
+      // Generate JWT token
+      const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
+        expiresIn: process.env.JWT_EXPIRES_IN || '7d',
+      });
+
+      const redirect_dashboard = state.redirect_dashboard || process.env.FRONTEND_URL || 'http://localhost:5173/dashboard';
+
+      // Redirect back to frontend with token
+      const redirectUrl = `${redirect_dashboard}${redirect_dashboard.includes('?') ? '&' : '?'}token=${encodeURIComponent(token)}&success=true`;
+      return res.redirect(redirectUrl);
+    } catch (err) {
+      console.error('Google OAuth error:', err.response?.data || err.message || err);
+      const redirect_dashboard = req.query.redirect_dashboard || process.env.FRONTEND_URL || 'http://localhost:5173';
+      return res.redirect(`${redirect_dashboard}?success=false&error=auth_failed`);
+    }
+  });
+};
