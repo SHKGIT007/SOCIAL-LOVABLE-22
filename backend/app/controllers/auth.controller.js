@@ -96,6 +96,14 @@ const login = asyncHandler(async (req, res) => {
       message: "Invalid email or password",
     });
   }
+  
+  // If user is marked deleted/blocked, prevent login
+  if (user.is_deleted) {
+    return res.status(403).json({
+      status: false,
+      message: "Your account is blocked by admin please try to reach admin",
+    });
+  }
 
   // 🔥 Fix: active_status may be "0" (string) instead of number
   if (Number(user.active_status) === 0) {
