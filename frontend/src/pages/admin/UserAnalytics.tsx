@@ -39,6 +39,21 @@ interface SubscriptionData {
   };
 }
 
+interface PostData {
+  id: number;
+  title: string;
+  content: string;
+  status: string;
+  is_ai_generated: boolean;
+  ai_prompt?: string | null;
+  scheduled_at?: string | null;
+  published_at?: string | null;
+  media_urls?: any;
+  image_url?: string | null;
+  video_url?: string | null;
+  created_at: string;
+}
+
 interface UserAnalyticsData {
   id: string;
   user_name: string;
@@ -50,6 +65,7 @@ interface UserAnalyticsData {
   active_status: boolean;
   created_at: string;
   Subscriptions: SubscriptionData[];
+  Posts?: PostData[];
 }
 
 const UserAnalytics = () => {
@@ -57,6 +73,8 @@ const UserAnalytics = () => {
   const navigate = useNavigate();
   const [userData, setUserData] = useState<UserAnalyticsData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedPost, setSelectedPost] = useState<PostData | null>(null);
+  const [showPostModal, setShowPostModal] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated() || !isAdmin()) {
@@ -114,11 +132,13 @@ const UserAnalytics = () => {
     );
   }
 
-  const activeSubscription = userData.Subscriptions?.find(sub => sub.status === "active");
-  const allSubscriptions = userData.Subscriptions || [];
+  // Get all subscriptions and active one
+  const allSubscriptions = Array.isArray(userData.Subscriptions) ? userData.Subscriptions : [];
+  const activeSubscription = allSubscriptions?.find(sub => sub.status === "active");
   
+  // Calculate subscription counts
   const activeCount = allSubscriptions.filter(s => s.status === "active").length;
-  const inactiveCount = allSubscriptions.filter(s => s.status === "inactive").length;
+  const inactiveCount = allSubscriptions.filter(s => s.status === "inactive" || s.status === "pending").length;
   const cancelledCount = allSubscriptions.filter(s => s.status === "cancelled").length;
   const totalSubscriptions = allSubscriptions.length;
   
@@ -126,10 +146,30 @@ const UserAnalytics = () => {
     ? ((activeCount / totalSubscriptions) * 100).toFixed(1) 
     : "0";
 
-  const aiPostsUsed = activeSubscription?.ai_posts_used || 0;
-  const totalAiPosts = activeSubscription?.Plan?.ai_posts || 100;
+  // Post quota calculation
+  const aiPostsUsed = activeSubscription?.ai_posts_used ?? 0;
+  const totalAiPosts = activeSubscription?.Plan?.ai_posts ?? 30;
   const creditsPercentage = totalAiPosts > 0 ? (aiPostsUsed / totalAiPosts) * 100 : 0;
-  const remainingCredits = totalAiPosts - aiPostsUsed;
+  const remainingCredits = Math.max(0, totalAiPosts - aiPostsUsed);
+  const postsUsed = activeSubscription?.posts_used ?? 0;
+
+  // Posts list
+  const postsList: PostData[] = Array.isArray(userData?.Posts) ? userData!.Posts : [];
+
+  const getPostDisplayDate = (post: PostData) => {
+    // prefer status-specific date
+    try {
+      if (post.status === "published" && post.published_at) {
+        return { label: "Published", date: new Date(post.published_at) };
+      }
+      if (post.status === "scheduled" && post.scheduled_at) {
+        return { label: "Scheduled", date: new Date(post.scheduled_at) };
+      }
+    } catch (e) {
+      // fall back silently
+    }
+    return { label: "Created", date: new Date(post.created_at) };
+  };
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -241,40 +281,46 @@ const UserAnalytics = () => {
                 <Zap className="h-5 w-5 text-indigo-600" />
                 <h3 className="font-semibold text-gray-700">Post Quota</h3>
               </div>
-              <div className="space-y-3">
-                <div>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-4xl font-bold text-gray-900">{aiPostsUsed}</span>
-                    <span className="text-2xl text-gray-400">/</span>
-                    <span className="text-2xl font-semibold text-gray-600">{totalAiPosts}</span>
+              
+              {activeSubscription ? (
+                <div className="space-y-3">
+                  <div>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-4xl font-bold text-gray-900">{aiPostsUsed}</span>
+                      <span className="text-2xl text-gray-400">/</span>
+                      <span className="text-2xl font-semibold text-gray-600">{totalAiPosts}</span>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      [plan: {activeSubscription?.Plan?.name || "No Plan"}]
+                    </p>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">
-                    [plan: {activeSubscription?.Plan?.name || "No Plan"}]
-                  </p>
-                </div>
-                
-                <div className="pt-3">
-                  <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
-                    <div
-                      className="bg-gradient-to-r from-indigo-500 to-purple-600 h-full transition-all duration-500"
-                      style={{ width: `${creditsPercentage}%` }}
-                    />
+                  
+                  <div className="pt-3">
+                    <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+                      <div
+                        className="bg-gradient-to-r from-indigo-500 to-purple-600 h-full transition-all duration-500"
+                        style={{ width: `${creditsPercentage}%` }}
+                      />
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">
+                      Your account has {remainingCredits} posts left in this month's quota.
+                    </p>
                   </div>
-                  <p className="text-xs text-gray-600 mt-2">
-                    Your account has {remainingCredits} posts left in this month's quota.
-                  </p>
-                </div>
 
-                <div className="pt-2 border-t border-gray-100">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Total Posted:</span>
-                    <span className="font-bold text-gray-900">
-                      {activeSubscription?.posts_used || 0}
-                    </span>
+                  <div className="pt-2 border-t border-gray-100">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Total Posted:</span>
+                      <span className="font-bold text-gray-900">{postsUsed}</span>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">Compared to last 30 days</p>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">Compared to last 30 days</p>
                 </div>
-              </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Zap className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                  <p className="text-sm text-gray-500">No active subscription</p>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -434,8 +480,67 @@ const UserAnalytics = () => {
           </CardContent>
         </Card>
 
+          {/* Posts History */}
+          <Card className="bg-white border border-gray-200 shadow-sm">
+            <CardHeader className="border-b border-gray-200 bg-gray-50">
+              <CardTitle className="text-xl font-bold text-gray-900">Posts History</CardTitle>
+              <CardDescription>
+                All posts created by this user ({postsList.length} total)
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-6">
+              {postsList.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-gray-200">
+                        <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600 uppercase">Date</th>
+                        <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600 uppercase">Type</th>
+                        <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600 uppercase">Title</th>
+                        <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600 uppercase">Status</th>
+                        <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600 uppercase">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {postsList.map((post) => (
+                        <tr key={post.id} className="border-b border-gray-100 hover:bg-gray-50">
+                          <td className="py-3 px-4 text-sm text-gray-600">
+                            {(() => {
+                              const d = getPostDisplayDate(post);
+                              return `${d.label}: ${isNaN(d.date.getTime()) ? "N/A" : d.date.toLocaleString()}`;
+                            })()}
+                          </td>
+                          <td className="py-3 px-4 text-sm text-gray-700">{post.is_ai_generated ? "AI" : "Manual"}</td>
+                          <td className="py-3 px-4 text-sm font-medium text-gray-900 truncate" title={post.title}>{post.title}</td>
+                          <td className="py-3 px-4 text-sm">
+                            <Badge className={`${getStatusColor(post.status)} border text-xs`}>{post.status.toUpperCase()}</Badge>
+                          </td>
+                          <td className="py-3 px-4 text-sm">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => { setSelectedPost(post); setShowPostModal(true); }}
+                            >
+                              View
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="text-center py-12 bg-gray-50 rounded-lg">
+                  <Zap className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                  <p className="text-gray-600 font-medium">No posts found</p>
+                  <p className="text-sm text-gray-500 mt-1">This user hasn't created any posts yet.</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
         {/* Current Active Subscription Details */}
-        {activeSubscription && (
+        {activeSubscription && allSubscriptions.length > 0 && (
           <Card className="bg-gradient-to-br from-indigo-50 to-purple-50 border-2 border-indigo-200 shadow-lg">
             <CardHeader className="border-b border-indigo-200 bg-white/50">
               <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
@@ -500,6 +605,96 @@ const UserAnalytics = () => {
               </div>
             </CardContent>
           </Card>
+        )}
+
+        {/* Post Details Modal */}
+        {showPostModal && selectedPost && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="absolute inset-0 bg-black opacity-40" onClick={() => { setShowPostModal(false); setSelectedPost(null); }} />
+            <div className="relative bg-white rounded-lg shadow-lg max-w-3xl w-full mx-4 z-10 overflow-auto" style={{ maxHeight: '80vh' }}>
+              <div className="flex items-center justify-between p-4 border-b">
+                <h3 className="text-lg font-bold">Post Details</h3>
+                <Button size="sm" variant="ghost" onClick={() => { setShowPostModal(false); setSelectedPost(null); }}>
+                  Close
+                </Button>
+              </div>
+
+              <div className="p-6 space-y-4">
+                <div>
+                  <p className="text-xs text-gray-500">Title</p>
+                  <p className="text-lg font-semibold">{selectedPost.title}</p>
+                </div>
+
+                <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
+                  <div>
+                    <p className="text-xs text-gray-500">Created</p>
+                    <p className="text-sm text-gray-700">{selectedPost.created_at ? new Date(selectedPost.created_at).toLocaleString() : "N/A"}</p>
+                  </div>
+
+                  {selectedPost.published_at && (
+                    <div>
+                      <p className="text-xs text-gray-500">Published</p>
+                      <p className="text-sm text-gray-700">{new Date(selectedPost.published_at).toLocaleString()}</p>
+                    </div>
+                  )}
+
+                  {selectedPost.scheduled_at && (
+                    <div>
+                      <p className="text-xs text-gray-500">Scheduled</p>
+                      <p className="text-sm text-gray-700">{new Date(selectedPost.scheduled_at).toLocaleString()}</p>
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <p className="text-xs text-gray-500">Type</p>
+                  <p className="text-sm">{selectedPost.is_ai_generated ? 'AI Generated' : 'Manual'}</p>
+                </div>
+
+                {selectedPost.ai_prompt && (
+                  <div>
+                    <p className="text-xs text-gray-500">AI Prompt</p>
+                    <p className="text-sm text-gray-800">{selectedPost.ai_prompt}</p>
+                  </div>
+                )}
+
+                <div>
+                  <p className="text-xs text-gray-500">Content</p>
+                  <div className="prose max-w-none text-sm text-gray-800 whitespace-pre-line">{selectedPost.content}</div>
+                </div>
+
+                {(selectedPost.image_url || (selectedPost.media_urls && selectedPost.media_urls.length)) && (
+                  <div>
+                    <p className="text-xs text-gray-500">Media</p>
+                    <div className="mt-2">
+                      {selectedPost.image_url && (
+                        // eslint-disable-next-line jsx-a11y/img-redundant-alt
+                        <img src={selectedPost.image_url} alt="post-image" className="max-h-64 w-auto rounded-md mb-2" />
+                      )}
+                      {selectedPost.media_urls && Array.isArray(selectedPost.media_urls) && selectedPost.media_urls.map((m: string, i: number) => (
+                        <div key={i} className="mb-2">
+                          <a href={m} target="_blank" rel="noreferrer" className="text-indigo-600 underline">Open media {i + 1}</a>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {selectedPost.video_url && (
+                  <div>
+                    <p className="text-xs text-gray-500">Video</p>
+                    <video controls src={selectedPost.video_url} className="w-full max-h-80 rounded-md" />
+                  </div>
+                )}
+
+                <div className="pt-4 border-t">
+                  <Button onClick={() => { setShowPostModal(false); setSelectedPost(null); }}>
+                    Close
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>
