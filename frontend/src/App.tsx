@@ -16,6 +16,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminPlans from "./pages/admin/Plans";
 import AdminUsers from "./pages/admin/Users";
 import UserDetails from "@/pages/admin/UserDetails";
+import UserAnalytics from "@/pages/admin/UserAnalytics";
 import AdminSubscriptions from "./pages/admin/Subscriptions";
 import AdminPosts from "./pages/admin/Posts";
 import AdminViewPost from "./pages/admin/ViewPost";
@@ -91,7 +92,8 @@ function App() {
             <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
             <Route path="/admin/plans" element={<AdminRoute><AdminPlans /></AdminRoute>} />
             <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
-            <Route path="/admin/users/:id" element={<AdminRoute><UserDetails /></AdminRoute>} />
+            <Route path="/admin/users/:userId" element={<AdminRoute><UserAnalytics /></AdminRoute>} />
+            <Route path="/admin/users/details/:id" element={<AdminRoute><UserDetails /></AdminRoute>} />
             <Route path="/admin/subscriptions" element={<AdminRoute><AdminSubscriptions /></AdminRoute>} />
             <Route path="/admin/posts" element={<AdminRoute><AdminPosts /></AdminRoute>} />
             <Route path="/admin/posts/:id" element={<AdminRoute><AdminViewPost /></AdminRoute>} />
