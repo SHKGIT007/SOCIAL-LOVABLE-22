@@ -30,6 +30,7 @@ import CreateUser from "./pages/admin/CreateUser";
 import DeletedUsers from "./pages/admin/DeletedUsers";
 import UpdateProfile from "./pages/UpdateProfile";
 import Report from "./pages/admin/Report";
+import UserPostsReport from "./pages/admin/UserPostReports";
 
 const queryClient = new QueryClient();
 
@@ -102,6 +103,7 @@ function App() {
             <Route path="/admin/create-user" element={<AdminRoute><CreateUser/></AdminRoute>} />
             <Route path="/admin/deleted-users" element={<AdminRoute><DeletedUsers /></AdminRoute>} />
             <Route path="/admin/report" element={<AdminRoute><Report /></AdminRoute>} />
+            <Route path="/admin/userpostreports/user/:userId/posts" element={<AdminRoute><UserPostsReport /></AdminRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

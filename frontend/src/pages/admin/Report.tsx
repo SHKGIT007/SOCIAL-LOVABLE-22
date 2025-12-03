@@ -185,12 +185,15 @@ const Report = () => {
                           {user?.subscription?.plan_ai_posts ?? "N/A"}
                         </TableCell>
                       <TableCell className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                        >
-                          View
-                        </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              navigate(`/admin/reports/user/${user.id}/posts`)
+                            }
+                          >
+                            View
+                          </Button>
                       </TableCell>
                     </TableRow>
                   ))}
