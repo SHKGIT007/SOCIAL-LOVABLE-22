@@ -308,10 +308,10 @@ const UserAnalytics = () => {
                   </div>
 
                   <div className="pt-2 border-t border-gray-100">
-                    <div className="flex justify-between text-sm">
+                    {/* <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Total Posted:</span>
                       <span className="font-bold text-gray-900">{postsUsed}</span>
-                    </div>
+                    </div> */}
                     <p className="text-xs text-gray-500 mt-1">Compared to last 30 days</p>
                   </div>
                 </div>
@@ -382,9 +382,9 @@ const UserAnalytics = () => {
                   <table className="w-full">
                     <thead>
                       <tr className="border-b border-gray-200">
-                        <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600 uppercase">
+                        {/* <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600 uppercase">
                           ID
-                        </th>
+                        </th> */}
                         <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600 uppercase">
                           Plan
                         </th>
@@ -419,9 +419,9 @@ const UserAnalytics = () => {
                             sub.status === "active" ? "bg-green-50" : ""
                           }`}
                         >
-                          <td className="py-3 px-4 text-sm font-medium text-gray-900">
+                          {/* <td className="py-3 px-4 text-sm font-medium text-gray-900">
                             #{sub.id}
-                          </td>
+                          </td> */}
                           <td className="py-3 px-4 text-sm text-gray-700">
                             {sub.Plan?.name || "N/A"}
                           </td>
