@@ -387,7 +387,7 @@ const Users = () => {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => navigate(`/admin/users/${user.id}`)}
+                          onClick={() => navigate(`/admin/users/details/${user.id}`)}
                         >
                           View
                         </Button>
