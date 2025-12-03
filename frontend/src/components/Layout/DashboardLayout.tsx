@@ -98,6 +98,11 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
             label: "System Settings",
             path: "/admin/system-settings",
           },
+          {
+            icon: Zap,
+            label: "Report",
+            path: "/admin/report",
+          },
         ]
       : [
           { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },

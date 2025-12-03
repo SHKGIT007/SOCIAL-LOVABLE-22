@@ -29,6 +29,7 @@ import { getAuthData, isAuthenticated } from "@/utils/auth";
 import CreateUser from "./pages/admin/CreateUser";
 import DeletedUsers from "./pages/admin/DeletedUsers";
 import UpdateProfile from "./pages/UpdateProfile";
+import Report from "./pages/admin/Report";
 
 const queryClient = new QueryClient();
 
@@ -100,6 +101,7 @@ function App() {
             <Route path="/admin/system-settings" element={<AdminRoute><SystemSettings /></AdminRoute>} />
             <Route path="/admin/create-user" element={<AdminRoute><CreateUser/></AdminRoute>} />
             <Route path="/admin/deleted-users" element={<AdminRoute><DeletedUsers /></AdminRoute>} />
+            <Route path="/admin/report" element={<AdminRoute><Report /></AdminRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
