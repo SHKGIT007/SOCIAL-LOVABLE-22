@@ -24,7 +24,6 @@ import {
   Menu,
 } from "lucide-react";
 import Swal from "sweetalert2";
-// --- No data or logic removed ---
 
 interface DashboardLayoutProps {
   children: ReactNode;
