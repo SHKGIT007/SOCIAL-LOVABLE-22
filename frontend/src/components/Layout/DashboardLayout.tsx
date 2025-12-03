@@ -11,14 +11,18 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import {
   LayoutDashboard,
-  FileText,
   Users,
+  FileText,
+  BadgeDollarSign,
+  CreditCard,
   Settings,
-  LogOut,
-  Menu,
-  X,
+  SlidersHorizontal,
+  FileChartColumn,
   Zap,
-} from "lucide-react"; // Added Zap
+  LogOut,
+  X,
+  Menu,
+} from "lucide-react";
 import Swal from "sweetalert2";
 // --- No data or logic removed ---
 
@@ -85,24 +89,27 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
       ? [
           { icon: LayoutDashboard, label: "Dashboard", path: "/admin" },
           { icon: Users, label: "Users", path: "/admin/users" },
-          // { icon: Users, label: "Deleted Users", path: "/admin/deleted-users" },
           { icon: FileText, label: "Posts", path: "/admin/posts" },
-          { icon: Settings, label: "Plans", path: "/admin/plans" },
+
+          // Plans (= Pricing)
+          { icon: BadgeDollarSign, label: "Plans", path: "/admin/plans" },
+
+          // Subscriptions
           {
-            icon: Settings,
+            icon: CreditCard,
             label: "Subscriptions",
             path: "/admin/subscriptions",
           },
+
+          // System Settings
           {
-            icon: Zap,
+            icon: SlidersHorizontal,
             label: "System Settings",
             path: "/admin/system-settings",
           },
-          {
-            icon: Zap,
-            label: "Report",
-            path: "/admin/report",
-          },
+
+          // Report
+          { icon: FileChartColumn, label: "Report", path: "/admin/report" },
         ]
       : [
           { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },

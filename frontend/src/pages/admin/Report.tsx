@@ -175,25 +175,27 @@ const Report = () => {
                       </TableCell>
                       <TableCell>
                         {user?.subscription?.plan
-                          ? (typeof user.subscription.plan === "string"
-                              ? user.subscription.plan
-                              : user.subscription.plan?.name)
+                          ? typeof user.subscription.plan === "string"
+                            ? user.subscription.plan
+                            : user.subscription.plan?.name
                           : "N/A"}
                       </TableCell>
-                        <TableCell>
-                          {user?.subscription?.ai_posts_used ?? "N/A"}/
-                          {user?.subscription?.plan_ai_posts ?? "N/A"}
-                        </TableCell>
+                      <TableCell>
+                        {user?.subscription?.ai_posts_used ?? "N/A"}/
+                        {user?.subscription?.plan_ai_posts ?? "N/A"}
+                      </TableCell>
                       <TableCell className="flex gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() =>
-                              navigate(`/admin/reports/user/${user.id}/posts`)
-                            }
-                          >
-                            View
-                          </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            navigate(
+                              `/admin/userpostreports/user/${user.id}/posts`
+                            )
+                          }
+                        >
+                          View
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}

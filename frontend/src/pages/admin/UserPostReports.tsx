@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/select";
 import Swal from "sweetalert2";
 import { Calendar, Filter, User, FileText } from "lucide-react";
+import { Tab } from "@headlessui/react";
 
 interface Post {
   id: string;
@@ -56,9 +57,13 @@ const UserPostsReport = () => {
   const [filteredPosts, setFilteredPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Filter states
-  const [selectedYear, setSelectedYear] = useState<string>("");
-  const [selectedMonth, setSelectedMonth] = useState<string>("");
+  // Filter states - Initialize with undefined instead of empty string
+  const [selectedYear, setSelectedYear] = useState<string | undefined>(
+    undefined
+  );
+  const [selectedMonth, setSelectedMonth] = useState<string | undefined>(
+    undefined
+  );
   const [selectedDate, setSelectedDate] = useState<string>("");
 
   const primaryGradient = "from-indigo-600 to-cyan-500";
@@ -96,9 +101,9 @@ const UserPostsReport = () => {
         setPosts(userData.Posts || []);
 
         // Set default to current month
-        const now = new Date();
-        setSelectedYear(now.getFullYear().toString());
-        setSelectedMonth((now.getMonth() + 1).toString().padStart(2, "0"));
+        // const now = new Date();
+        // setSelectedYear(now.getFullYear().toString());
+        // setSelectedMonth((now.getMonth() + 1).toString().padStart(2, "0"));
       } else {
         Swal.fire({
           icon: "error",
@@ -125,14 +130,14 @@ const UserPostsReport = () => {
   const filterPosts = () => {
     let filtered = [...posts];
 
-    if (selectedYear) {
+    if (selectedYear && selectedYear !== "all") {
       filtered = filtered.filter((post) => {
         const postDate = new Date(post.created_at);
         return postDate.getFullYear().toString() === selectedYear;
       });
     }
 
-    if (selectedMonth) {
+    if (selectedMonth && selectedMonth !== "all") {
       filtered = filtered.filter((post) => {
         const postDate = new Date(post.created_at);
         return (
@@ -153,9 +158,8 @@ const UserPostsReport = () => {
   };
 
   const resetFilters = () => {
-    const now = new Date();
-    setSelectedYear(now.getFullYear().toString());
-    setSelectedMonth((now.getMonth() + 1).toString().padStart(2, "0"));
+    setSelectedYear(undefined);
+    setSelectedMonth(undefined);
     setSelectedDate("");
   };
 
@@ -232,10 +236,7 @@ const UserPostsReport = () => {
                 </p>
               )}
             </div>
-            <Button
-              variant="outline"
-              onClick={() => navigate("/admin/reports")}
-            >
+            <Button variant="outline" onClick={() => navigate("/admin/report")}>
               Back to Reports
             </Button>
           </div>
@@ -256,12 +257,17 @@ const UserPostsReport = () => {
                 <label className="text-sm font-medium text-gray-700">
                   Year
                 </label>
-                <Select value={selectedYear} onValueChange={setSelectedYear}>
+                <Select
+                  value={selectedYear || "all"}
+                  onValueChange={(value) =>
+                    setSelectedYear(value === "all" ? undefined : value)
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select Year" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Years</SelectItem>
+                    <SelectItem value="all">All Years</SelectItem>
                     {getYearOptions().map((year) => (
                       <SelectItem key={year} value={year.toString()}>
                         {year}
@@ -276,12 +282,17 @@ const UserPostsReport = () => {
                 <label className="text-sm font-medium text-gray-700">
                   Month
                 </label>
-                <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                <Select
+                  value={selectedMonth || "all"}
+                  onValueChange={(value) =>
+                    setSelectedMonth(value === "all" ? undefined : value)
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select Month" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Months</SelectItem>
+                    <SelectItem value="all">All Months</SelectItem>
                     {monthNames.map((month, index) => (
                       <SelectItem
                         key={index}
@@ -317,7 +328,7 @@ const UserPostsReport = () => {
                   onClick={resetFilters}
                   className="w-full"
                 >
-                  Reset to Current Month
+                  Reset
                 </Button>
               </div>
             </div>
@@ -387,34 +398,15 @@ const UserPostsReport = () => {
                             }
                           )}
                         </TableCell>
-                        <TableCell>
-                          {post.published_at
-                            ? new Date(post.published_at).toLocaleDateString(
-                                "en-US",
-                                {
-                                  year: "numeric",
-                                  month: "short",
-                                  day: "numeric",
-                                }
-                              )
-                            : post.scheduled_at
-                            ? new Date(post.scheduled_at).toLocaleDateString(
-                                "en-US",
-                                {
-                                  year: "numeric",
-                                  month: "short",
-                                  day: "numeric",
-                                }
-                              )
-                            : "N/A"}
+                       <TableCell>
+                        {post.status }
                         </TableCell>
                         <TableCell>
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => {
-                              // Yahan next step ki functionality add hogi
-                              console.log("View post:", post.id);
+                                navigate(`/admin/posts/${post.id}`);
                             }}
                           >
                             View
