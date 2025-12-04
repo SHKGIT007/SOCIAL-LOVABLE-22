@@ -16,6 +16,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminPlans from "./pages/admin/Plans";
 import AdminUsers from "./pages/admin/Users";
 import UserDetails from "@/pages/admin/UserDetails";
+import UserAnalytics from "@/pages/admin/UserAnalytics";
 import AdminSubscriptions from "./pages/admin/Subscriptions";
 import AdminPosts from "./pages/admin/Posts";
 import AdminViewPost from "./pages/admin/ViewPost";
@@ -28,6 +29,8 @@ import { getAuthData, isAuthenticated } from "@/utils/auth";
 import CreateUser from "./pages/admin/CreateUser";
 import DeletedUsers from "./pages/admin/DeletedUsers";
 import UpdateProfile from "./pages/UpdateProfile";
+import Report from "./pages/admin/Report";
+import UserPostsReport from "./pages/admin/UserPostReports";
 
 const queryClient = new QueryClient();
 
@@ -91,13 +94,16 @@ function App() {
             <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
             <Route path="/admin/plans" element={<AdminRoute><AdminPlans /></AdminRoute>} />
             <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
-            <Route path="/admin/users/:id" element={<AdminRoute><UserDetails /></AdminRoute>} />
+            <Route path="/admin/users/:userId" element={<AdminRoute><UserAnalytics /></AdminRoute>} />
+            <Route path="/admin/users/details/:id" element={<AdminRoute><UserDetails /></AdminRoute>} />
             <Route path="/admin/subscriptions" element={<AdminRoute><AdminSubscriptions /></AdminRoute>} />
             <Route path="/admin/posts" element={<AdminRoute><AdminPosts /></AdminRoute>} />
             <Route path="/admin/posts/:id" element={<AdminRoute><AdminViewPost /></AdminRoute>} />
             <Route path="/admin/system-settings" element={<AdminRoute><SystemSettings /></AdminRoute>} />
             <Route path="/admin/create-user" element={<AdminRoute><CreateUser/></AdminRoute>} />
             <Route path="/admin/deleted-users" element={<AdminRoute><DeletedUsers /></AdminRoute>} />
+            <Route path="/admin/report" element={<AdminRoute><Report /></AdminRoute>} />
+            <Route path="/admin/userpostreports/user/:userId/posts" element={<AdminRoute><UserPostsReport /></AdminRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

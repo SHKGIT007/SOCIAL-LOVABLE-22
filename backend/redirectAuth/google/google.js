@@ -131,6 +131,11 @@ module.exports = function (app) {
       } else {
         // signin/default flow: create or update user
         if (user) {
+          // If user was deleted/blocked by admin, prevent OAuth sign-in and redirect with an error
+          if (user.is_deleted) {
+            const redirectDashboardOrigin = state.redirect_dashboard ? new URL(state.redirect_dashboard).origin : (process.env.FRONTEND_URL || `${req.protocol}://${req.get('host')}`);
+            return res.redirect(`${redirectDashboardOrigin}/auth?social_error=account_blocked`);
+          }
           user.avatar_url = profile.picture || user.avatar_url;
           user.full_name = profile.name || user.full_name;
           user.user_fname = profile.given_name || user.user_fname;

@@ -152,8 +152,15 @@ const getAllUsers = asyncHandler(async (req, res) => {
       ? {
           plan: user.Subscriptions[0].Plan?.name,
           status: user.Subscriptions[0].status,
+          plan_ai_posts: Number(user.Subscriptions[0].Plan?.ai_posts || 0),
+          ai_posts_used: Number(user.Subscriptions[0].ai_posts_used || 0),
         }
-      : null,
+      : {
+          plan: null,
+          status: null,
+          plan_ai_posts: 0,
+          ai_posts_used: 0,
+        },
     created_at: user.created_at,
   }));
 
@@ -189,13 +196,41 @@ const getUserById = asyncHandler(async (req, res) => {
       {
         model: Subscription,
         as: "Subscriptions",
-        attributes: ["status"],
+        attributes: [
+          "id",
+          "plan_id",
+          "status",
+          "start_date",
+          "end_date",
+          "posts_used",
+          "ai_posts_used",
+          "payment_status",
+          "amount_paid",
+        ],
         include: [
           {
             model: Plan,
             as: "Plan",
-            attributes: ["name"],
+            attributes: ["id", "name", "ai_posts", "linked_accounts", "price"],
           },
+        ],
+      },
+      {
+        model: Post,
+        as: "Posts",
+        attributes: [
+          "id",
+          "title",
+          "content",
+          "status",
+          "is_ai_generated",
+          "ai_prompt",
+          "scheduled_at",
+          "published_at",
+          "media_urls",
+          "image_url",
+          "video_url",
+          "created_at",
         ],
       },
     ],

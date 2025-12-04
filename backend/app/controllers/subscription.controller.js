@@ -140,7 +140,21 @@ const createRazorpayOrder = asyncHandler(async (req, res) => {
     });
   }
 
-  const amountInPaise = Math.round(Number(plan.price) * 100);
+  // Validate plan price
+  const planPrice = parseFloat(plan.price);
+  if (isNaN(planPrice) || planPrice <= 0) {
+    logger.error("Invalid plan price", {
+      plan_id,
+      price: plan.price,
+      parsedPrice: planPrice,
+    });
+    return res.status(400).json({
+      status: false,
+      message: "Plan price is invalid. Please contact support.",
+    });
+  }
+
+  const amountInPaise = Math.round(planPrice * 100);
 
   if (!amountInPaise || amountInPaise <= 0) {
     return res.status(400).json({
@@ -151,15 +165,39 @@ const createRazorpayOrder = asyncHandler(async (req, res) => {
 
   const receipt = `sub_${userId}_${plan_id}_${Date.now()}`;
 
-  const order = await razorpayService.createOrder({
-    amount: amountInPaise,
-    currency: "INR",
-    receipt,
-    notes: {
-      plan_id: plan.id,
-      user_id: userId,
-    },
-  });
+  let order;
+  try {
+    logger.info("Creating Razorpay order", {
+      userId,
+      plan_id,
+      amount: amountInPaise,
+      currency: "INR",
+    });
+    order = await razorpayService.createOrder({
+      amount: amountInPaise,
+      currency: "INR",
+      receipt,
+      notes: {
+        plan_id: plan.id,
+        user_id: userId,
+      },
+    });
+    if (!order || !order.id) {
+      throw new Error("Invalid response from Razorpay - order ID missing");
+    }
+    logger.info("Razorpay order created successfully", { orderId: order.id });
+  } catch (error) {
+    logger.error("Razorpay order creation failed", {
+      error: error.message,
+      planId: plan_id,
+      userId,
+    });
+    return res.status(500).json({
+      status: false,
+      message: error.message || "Failed to create Razorp  ay order. Please verify your credentials.",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
+  }
 
   const startDate = moment().tz("Asia/Kolkata").startOf("day");
 
