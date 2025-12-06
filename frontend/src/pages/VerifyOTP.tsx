@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import Swal from "sweetalert2";
-import { Loader2, Shield, ArrowLeft } from "lucide-react";
+import { Loader2, Shield } from "lucide-react";
 import { apiService } from "@/services/api";
 
 const VerifyOTP = () => {
@@ -22,12 +22,10 @@ const VerifyOTP = () => {
   const [email, setEmail] = useState("");
 
   useEffect(() => {
-    // Get email from navigation state
     const state = location.state as any;
     if (state?.email) {
       setEmail(state.email);
     } else {
-      // If no email in state, redirect to forgot password
       navigate("/forgot-password");
     }
   }, [location, navigate]);
@@ -56,7 +54,7 @@ const VerifyOTP = () => {
           text: "You can now reset your password",
           confirmButtonColor: "#6366f1",
         });
-        // Navigate to reset password page, passing email
+
         navigate("/reset-password", { state: { email, otp } });
       } else {
         Swal.fire({
@@ -67,15 +65,10 @@ const VerifyOTP = () => {
         });
       }
     } catch (error: any) {
-      const errorMessage =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Failed to verify OTP";
-
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: errorMessage,
+        text: error?.response?.data?.message || "Failed to verify OTP",
         confirmButtonColor: "#ef4444",
       });
     } finally {
@@ -84,24 +77,17 @@ const VerifyOTP = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-cyan-50 flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-sky-50 p-4">
       <div className="w-full max-w-md">
-        {/* Back Button */}
-        <button
-          onClick={() => navigate("/forgot-password")}
-          className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 mb-6 font-medium"
-        >
-          <ArrowLeft size={18} />
-          Back
-        </button>
-
-        <Card className="shadow-lg border-2 border-indigo-100/50">
-          <CardHeader className="space-y-2">
-            <CardTitle className="text-2xl bg-gradient-to-r from-indigo-600 to-cyan-500 bg-clip-text text-transparent">
-              Verify OTP
+        <Card className="w-full border-indigo-100/70 shadow-xl rounded-2xl">
+          <CardHeader className="space-y-2 text-center">
+            <CardTitle className="text-3xl font-extrabold">
+              <span className="bg-gradient-to-r from-indigo-600 to-sky-400 bg-clip-text text-transparent">
+                Verify OTP
+              </span>
             </CardTitle>
             <CardDescription>
-              Enter the OTP code sent to your email: <strong>{email}</strong>
+              Enter the OTP sent to <strong>{email}</strong>
             </CardDescription>
           </CardHeader>
 
@@ -117,7 +103,7 @@ const VerifyOTP = () => {
                   <Input
                     id="otp"
                     type="text"
-                    placeholder="Enter 4-6 digit OTP"
+                    placeholder="Enter 6 digit OTP"
                     value={otp}
                     onChange={(e) =>
                       setOtp(e.target.value.replace(/[^0-9]/g, ""))
@@ -128,14 +114,14 @@ const VerifyOTP = () => {
                     className="border-gray-300 focus-visible:ring-indigo-500 pl-10 text-center text-lg tracking-widest font-mono"
                   />
                 </div>
-                <p className="text-xs text-gray-500">
-                  Check your email for the OTP code
+                <p className="text-xs text-gray-500 text-center">
+                  Check your email for the OTP
                 </p>
               </div>
 
               <Button
                 type="submit"
-                className="w-full h-10 bg-gradient-to-r from-indigo-600 to-sky-500 hover:from-indigo-500 hover:to-sky-400 text-white shadow-md mt-6"
+                className="w-full h-10 bg-gradient-to-r from-indigo-600 to-sky-500 hover:from-indigo-500 hover:to-sky-400 text-white shadow-md mt-4"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -147,14 +133,17 @@ const VerifyOTP = () => {
                   "Verify OTP"
                 )}
               </Button>
-
-              <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-sm text-blue-700">
-                  💡 <strong>Tip:</strong> If you didn't receive the OTP, check
-                  your spam folder or request a new one.
-                </p>
-              </div>
             </form>
+
+            {/* Centered Back to Login Button */}
+            <div className="flex justify-center mt-6">
+              <button
+                onClick={() => navigate("/auth")}
+                className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-medium"
+              >
+                Back to Login
+              </button>
+            </div>
           </CardContent>
         </Card>
       </div>

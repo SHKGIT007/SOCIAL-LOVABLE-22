@@ -3,7 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import Swal from "sweetalert2";
 import { Loader2, Mail, ArrowLeft } from "lucide-react";
 import { apiService } from "@/services/api";
@@ -37,7 +43,6 @@ const ForgotPassword = () => {
           text: "Check your email for the OTP code",
           confirmButtonColor: "#6366f1",
         });
-        // Navigate to OTP verification page, passing email
         navigate("/verify-otp", { state: { email } });
       } else {
         Swal.fire({
@@ -48,15 +53,10 @@ const ForgotPassword = () => {
         });
       }
     } catch (error: any) {
-      const errorMessage =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Failed to send OTP";
-
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: errorMessage,
+        text: error?.response?.data?.message || "Failed to send OTP",
         confirmButtonColor: "#ef4444",
       });
     } finally {
@@ -65,24 +65,18 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-cyan-50 flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-sky-50 p-4">
       <div className="w-full max-w-md">
-        {/* Back Button */}
-        <button
-          onClick={() => navigate("/auth")}
-          className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 mb-6 font-medium"
-        >
-          <ArrowLeft size={18} />
-          Back to Login
-        </button>
-
-        <Card className="shadow-lg border-2 border-indigo-100/50">
-          <CardHeader className="space-y-2">
-            <CardTitle className="text-2xl bg-gradient-to-r from-indigo-600 to-cyan-500 bg-clip-text text-transparent">
-              Forgot Password?
+        <Card className="w-full border-indigo-100/70 shadow-xl rounded-2xl">
+          <CardHeader className="space-y-2 text-center">
+            <CardTitle className="text-3xl font-extrabold">
+              <span className="bg-gradient-to-r from-indigo-600 to-sky-400 bg-clip-text text-transparent">
+                Forgot Password?
+              </span>
             </CardTitle>
             <CardDescription>
-              Enter your email address and we'll send you an OTP to reset your password
+              Enter your email address and we’ll send you an OTP to reset your
+              password
             </CardDescription>
           </CardHeader>
 
@@ -91,7 +85,10 @@ const ForgotPassword = () => {
               <div className="space-y-2">
                 <Label htmlFor="email">Email Address*</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                  <Mail
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    size={18}
+                  />
                   <Input
                     id="email"
                     type="email"
@@ -107,7 +104,7 @@ const ForgotPassword = () => {
 
               <Button
                 type="submit"
-                className="w-full h-10 bg-gradient-to-r from-indigo-600 to-sky-500 hover:from-indigo-500 hover:to-sky-400 text-white shadow-md mt-6"
+                className="w-full h-10 bg-gradient-to-r from-indigo-600 to-sky-500 hover:from-indigo-500 hover:to-sky-400 text-white shadow-md mt-4"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -120,6 +117,16 @@ const ForgotPassword = () => {
                 )}
               </Button>
             </form>
+
+            {/* Centered Back to Login Button */}
+            <div className="flex justify-center mt-6">
+              <button
+                onClick={() => navigate("/auth")}
+                className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-medium"
+              >
+                Back to Login
+              </button>
+            </div>
           </CardContent>
         </Card>
       </div>
