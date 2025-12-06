@@ -561,16 +561,25 @@ const Auth = () => {
                   )}
                 </Button>
 
-                <p className="text-center text-sm mt-3">
-                  Don’t have an account?{" "}
+                <div className="flex items-center justify-between text-sm mt-3">
+                  <p>
+                    Don't have an account?{" "}
+                    <button
+                      type="button"
+                      className="text-indigo-600 font-semibold hover:underline"
+                      onClick={() => setActiveTab("signup")}
+                    >
+                      Sign Up
+                    </button>
+                  </p>
                   <button
                     type="button"
                     className="text-indigo-600 font-semibold hover:underline"
-                    onClick={() => setActiveTab("signup")}
+                    onClick={() => navigate("/forgot-password")}
                   >
-                    Sign Up
+                    Forgot Password?
                   </button>
-                </p>
+                </div>
               </form>
             </TabsContent>
 

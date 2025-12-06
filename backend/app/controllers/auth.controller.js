@@ -520,6 +520,69 @@ const sendOTPEmail = async (email, otp) => {
   });
 };
 
+const sendOTPforgotPassword = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({ status: false, message: "Email is required" });
+  }
+  const user = await User.findOne({ where: { email, is_email_verified: true } });
+  if (!user) {
+    return res.status(404).json({ status: false, message: "Email not found" });
+  }
+  const otp = generateOTP();
+  const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
+  await User.update({ otp, otp_expiry: otpExpiry }, { where: { email } });
+  await sendOTPEmail(email, otp);
+
+  res.json({ status: true, message: "OTP sent to email" });
+});
+
+const verifyOTPforgotPassword = asyncHandler(async (req, res) => {
+  const { email, otp } = req.body;
+  if (!email || !otp) {
+    return res.status(400).json({ status: false, message: "Email and OTP are required" });
+  }
+  const user = await User.findOne({ where: { email } });
+  if (!user) {
+    return res.status(404).json({ status: false, message: "Email not found" });
+  }
+  if (new Date() > new Date(user.otp_expiry)) {
+    return res.status(400).json({ status: false, message: "OTP expired" });
+  }
+
+  if (user.otp !== otp.trim()) {
+    return res.status(400).json({ status: false, message: "Invalid OTP" });
+  }
+
+  res.json({ status: true, message: "OTP verified" });
+});
+
+const resetPassword = asyncHandler(async (req, res) => {
+  const { email, otp, new_password, confirm_password } = req.body;
+  if (!email || !otp || !new_password || !confirm_password) {
+    return res.status(400).json({ status: false, message: "All fields are required" });
+  }
+  if (new_password !== confirm_password) {
+    return res.status(400).json({ status: false, message: "Passwords do not match" });
+  }
+  const user = await User.findOne({ where: { email } });
+  if (!user) {
+    return res.status(404).json({ status: false, message: "Email not found" });
+  }
+  if (new Date() > new Date(user.otp_expiry)) {
+    return res.status(400).json({ status: false, message: "OTP expired" });
+  }
+
+  if (user.otp !== otp.trim()) {
+    return res.status(400).json({ status: false, message: "Invalid OTP" });
+  }
+
+  const hashedPassword = await bcrypt.hash(new_password, 12);
+  await User.update({ password: hashedPassword, otp: null, otp_expiry: null }, { where: { email } });
+
+  res.json({ status: true, message: "Password reset successfully" });
+});
+
 module.exports = {
   register,
   verifyOTP,
@@ -528,6 +591,9 @@ module.exports = {
   getProfile,
   updateProfile,
   changePassword,
+  sendOTPforgotPassword,
+  verifyOTPforgotPassword,
+  resetPassword,
 };
 
 // Complete social signup (set password after OAuth signup)
