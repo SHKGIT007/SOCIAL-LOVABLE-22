@@ -375,7 +375,7 @@ const NewPost = () => {
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
-                <Label>Title *</Label>
+                <Label>Business/Creator Name *</Label>
                 <Input
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
@@ -385,7 +385,7 @@ const NewPost = () => {
               </div>
 
               <div>
-                <Label>Content *</Label>
+                <Label>Description *</Label>
                 <Textarea
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
