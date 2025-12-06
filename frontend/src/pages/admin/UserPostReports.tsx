@@ -406,7 +406,7 @@ const UserPostsReport = () => {
                             variant="outline"
                             size="sm"
                             onClick={() => {
-                                navigate(`/admin/posts/${post.id}`);
+                                navigate(`/admin/users/${userId}`);
                             }}
                           >
                             View

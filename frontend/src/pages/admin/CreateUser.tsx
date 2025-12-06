@@ -136,7 +136,7 @@ const CreateUser = () => {
 
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-2 gap-4">
                 <div>
                   <Label>First Name*</Label>
                   <Input
@@ -156,9 +156,17 @@ const CreateUser = () => {
                     required
                   />
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <Label>Username*</Label>
+                  <Input
+                    name="user_name"
+                    value={formData.user_name}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+
                 <div>
                   <Label>Phone*</Label>
                   <Input
@@ -168,25 +176,15 @@ const CreateUser = () => {
                     required
                   />
                 </div>
+              </div>
 
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label>Email*</Label>
                   <Input
                     type="email"
                     name="email"
                     value={formData.email}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <Label>Username*</Label>
-                  <Input
-                    name="user_name"
-                    value={formData.user_name}
                     onChange={handleChange}
                     required
                   />
@@ -214,6 +212,8 @@ const CreateUser = () => {
                   </div>
                 </div>
               </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
 
               {/* Confirm Password */}
               <div>

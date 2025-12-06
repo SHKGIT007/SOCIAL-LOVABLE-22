@@ -124,7 +124,7 @@ const UserAnalytics = () => {
       <div className="flex items-center justify-center h-screen bg-gray-50">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-800">User not found</h2>
-          <Button onClick={() => navigate("/admin/users")} className="mt-4">
+          <Button onClick={() => navigate("/admin")} className="mt-4">
             Back to Users
           </Button>
         </div>
@@ -194,7 +194,7 @@ const UserAnalytics = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => navigate("/admin/users")}
+              onClick={() => navigate("/admin/report")}
               className="gap-2 hover:bg-gray-100"
             >
               <ArrowLeft className="h-4 w-4" />
