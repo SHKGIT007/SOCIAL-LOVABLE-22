@@ -335,7 +335,7 @@ const Users = () => {
                                   ? "default"
                                   : "destructive"
                               }
-                              className="ml-1"
+                              className="ml-1 "
                             >
                               {user.subscription.status === "active"
                                 ? "Active"
@@ -357,6 +357,7 @@ const Users = () => {
                                 user.active_status
                               )
                             }
+                            className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-300"
                           />
 
                           <span
@@ -387,7 +388,9 @@ const Users = () => {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => navigate(`/admin/users/details/${user.id}`)}
+                          onClick={() =>
+                            navigate(`/admin/users/details/${user.id}`)
+                          }
                         >
                           View
                         </Button>

@@ -543,6 +543,13 @@ class ApiService {
       skipAuthLogout: true,
     });
   }
+
+  async deleteMyAccount() {
+    return this.request('/users/deletemyaccount', {
+      method: 'POST',
+    });
+  }
+
 }
 
 // Export singleton instance
