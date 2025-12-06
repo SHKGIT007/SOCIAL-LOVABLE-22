@@ -208,8 +208,7 @@ const AdminPosts = () => {
                   <TableHead>Platforms</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Review Status</TableHead>
-                                    <TableHead>Scheduled At</TableHead>
-
+                  <TableHead>Scheduled At</TableHead>
                   <TableHead>Type</TableHead> <TableHead>Actions</TableHead>
                   <TableHead>Created</TableHead>
                 </TableRow>
@@ -250,17 +249,17 @@ const AdminPosts = () => {
                               : "outline"
                           }
                         >
-                          {post.status}
+                          {post.status.charAt(0).toUpperCase() +
+                            post.status.slice(1)}
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge
-                        >
-                          {post.review_status}
+                        <Badge>
+                          {post.review_status.charAt(0).toUpperCase() +
+                            post.review_status.slice(1)}
                         </Badge>
                       </TableCell>
-
-<TableCell>
+                      <TableCell>
                         <Badge variant="outline">
                           {post.scheduled_at
                             ? new Date(post.scheduled_at).toLocaleString()

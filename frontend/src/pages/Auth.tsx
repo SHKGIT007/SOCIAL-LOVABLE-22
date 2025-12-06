@@ -34,6 +34,7 @@ const Auth = () => {
   const [userLname, setUserLname] = useState("");
   const [userPhone, setUserPhone] = useState("");
   const [showSignupPassword, setShowSignupPassword] = useState(false);
+  const [activeTab, setActiveTab] = useState("signin");
 
   // OTP states
   const [otp, setOtp] = useState("");
@@ -419,9 +420,9 @@ const Auth = () => {
       } else {
         // Handle case where response.status is false
         setIsLoading(false);
-
         const errText =
-          response?.errors?.[0]?.msg ||
+          response?.message || // <-- backend ka main error message
+          response?.errors?.[0]?.msg || // validation error message
           "Unable to create account. Please try again.";
 
         Swal.fire({
@@ -448,7 +449,7 @@ const Auth = () => {
         ) {
           // Get the first error's message
           errorMessage =
-            data.errors[0].msg || data.errors[0].message || errorMessage;
+            data.errors[0].msg || data.errors[0].message || data.message;
         }
         // Second priority: Check for general message
         else if (data.message) {
@@ -482,7 +483,11 @@ const Auth = () => {
         </CardHeader>
 
         <CardContent>
-          <Tabs defaultValue="signin" className="w-full">
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="w-full"
+          >
             <TabsList className="grid w-full grid-cols-2 rounded-xl bg-indigo-50 p-1">
               <TabsTrigger
                 value="signin"
@@ -556,7 +561,16 @@ const Auth = () => {
                   )}
                 </Button>
 
-                {/* removed Google button from Sign In - Sign Up flow is preferred */}
+                <p className="text-center text-sm mt-3">
+                  Don’t have an account?{" "}
+                  <button
+                    type="button"
+                    className="text-indigo-600 font-semibold hover:underline"
+                    onClick={() => setActiveTab("signup")}
+                  >
+                    Sign Up
+                  </button>
+                </p>
               </form>
             </TabsContent>
 
@@ -587,7 +601,10 @@ const Auth = () => {
                       type="text"
                       placeholder="John"
                       value={userFname}
-                      onChange={(e) => setUserFname(e.target.value)}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/[^A-Za-z]/g, "");
+                        setUserFname(value);
+                      }}
                       required
                       disabled={isLoading}
                       className="border-gray-300 focus-visible:ring-indigo-500"
@@ -600,7 +617,10 @@ const Auth = () => {
                       type="text"
                       placeholder="Doe"
                       value={userLname}
-                      onChange={(e) => setUserLname(e.target.value)}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/[^A-Za-z]/g, "");
+                        setUserLname(value);
+                      }}
                       required
                       disabled={isLoading}
                       className="border-gray-300 focus-visible:ring-indigo-500"
@@ -614,9 +634,13 @@ const Auth = () => {
                   <Input
                     id="signup-phone"
                     type="tel"
-                    placeholder="+91 12345 67890"
+                    placeholder="1234567890"
                     value={userPhone}
-                    onChange={(e) => setUserPhone(e.target.value)}
+                    onChange={(e) =>
+                      setUserPhone(
+                        e.target.value.replace(/\D/g, "").slice(0, 10)
+                      )
+                    }
                     required
                     disabled={isLoading}
                     className="border-gray-300 focus-visible:ring-indigo-500"
@@ -664,7 +688,9 @@ const Auth = () => {
                 {isOtpSent && !isOtpVerified && (
                   <div className="space-y-2">
                     <Label htmlFor="otp">Enter OTP*</Label>
-                    <div className="flex gap-2">
+
+                    <div className="flex items-center gap-2">
+                      {/* OTP Input */}
                       <Input
                         id="otp"
                         type="text"
@@ -676,42 +702,39 @@ const Auth = () => {
                         maxLength={6}
                         required
                         disabled={isLoading}
-                        className="border-gray-300 focus-visible:ring-indigo-500 flex-1 text-center text-lg tracking-widest"
+                        className="flex-1 border-gray-300 text-center text-lg tracking-widest focus-visible:ring-indigo-500"
                       />
-                      {/* Resend OTP button */}
-                      {isOtpSent && !isOtpVerified && otpTimer === 0 && (
+
+                      {/* Resend OTP Button */}
+                      {otpTimer === 0 ? (
                         <Button
                           type="button"
                           onClick={handleSendOTP}
                           disabled={isLoading}
-                          className="w-full bg-indigo-600 hover:bg-indigo-700"
+                          className="bg-indigo-600 hover:bg-indigo-700 whitespace-nowrap"
                         >
-                          <Mail size={18} className="mr-2" />
                           Resend OTP
                         </Button>
+                      ) : (
+                        <div className="px-3 py-2 bg-gray-100 text-gray-600 rounded-lg text-sm font-medium whitespace-nowrap">
+                          {formatTime(otpTimer)}
+                        </div>
                       )}
 
+                      {/* Verify OTP Button */}
                       <Button
                         type="button"
                         onClick={handleVerifyOTP}
                         disabled={isLoading || otp.length !== 6}
                         className="bg-green-600 hover:bg-green-700 whitespace-nowrap"
                       >
-                        {isLoading ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          "Verify OTP"
-                        )}
+                        Verify OTP
                       </Button>
                     </div>
-                    <div className="flex items-center justify-between text-xs">
-                      <p className="text-gray-500">OTP sent to your email</p>
-                      {otpTimer > 0 && (
-                        <p className="text-indigo-600 font-medium">
-                          {formatTime(otpTimer)}
-                        </p>
-                      )}
-                    </div>
+
+                    <p className="text-gray-500 text-xs">
+                      OTP sent to your email
+                    </p>
                   </div>
                 )}
 
@@ -757,7 +780,7 @@ const Auth = () => {
                 {/* Submit Button */}
                 <Button
                   type="submit"
-                  className="w-full h-10 bg-gradient-to-r from-indigo-600 to-sky-500 hover:from-indigo-500 hover:to-sky-400 text-white shadow-md"
+                  className="w-full h-10 bg-gradient-to-r from-indigo-600 to-sky-500  text-white shadow-md"
                   disabled={isLoading}
                 >
                   {isLoading ? (
@@ -769,10 +792,10 @@ const Auth = () => {
                     "Sign Up"
                   )}
                 </Button>
-                <div className="mt-3">
+                <div className="mt-3 ">
                   <Button
                     type="button"
-                    className="w-full h-10 bg-white border border-gray-200 text-gray-700"
+                    className="w-full h-10 bg-blue-500"
                     onClick={() => {
                       const backendBase = API_CONFIG.BASE_URL.replace(
                         "/api",
@@ -788,6 +811,16 @@ const Auth = () => {
                     Sign up with Google
                   </Button>
                 </div>
+                <p className="text-center text-sm mt-3">
+                  Already have an account?{" "}
+                  <button
+                    type="button"
+                    className="text-indigo-600 font-semibold hover:underline"
+                    onClick={() => setActiveTab("signin")}
+                  >
+                    Sign In
+                  </button>
+                </p>
               </form>
             </TabsContent>
           </Tabs>

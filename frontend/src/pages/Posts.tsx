@@ -326,16 +326,34 @@ const Posts = () => {
                   >
                     <CardHeader className="pb-3">
                       <div className="space-y-2">
-                        <CardTitle className="text-lg line-clamp-1">
-                          {post.title}
-                        </CardTitle>
+                        <div className="relative">
+                          <CardTitle className="text-lg font-semibold line-clamp-1 pr-24">
+                            {post.title}
+                          </CardTitle>
+
+                          {post.review_status === "pending" &&
+                            isPastSchedule && (
+                              <Badge
+                                className="
+        absolute top-0 right-0
+        bg-red-100 text-red-700 
+        border border-red-200 
+        text-xs font-medium 
+        px-2 py-0.5 rounded-md
+      "
+                              >
+                                Review Expired
+                              </Badge>
+                            )}
+                        </div>
+
                         <CardDescription className="line-clamp-2">
                           {post.content}
                         </CardDescription>
                       </div>
 
                       <div className="flex flex-wrap gap-2 mt-3">
-                        <Badge className={statusClasses(post.status)}>
+                        <Badge variant="outline" className="capitalize">
                           {post.status}
                         </Badge>
 

@@ -179,6 +179,12 @@ const EditPost = () => {
         image_prompt: dataPost.image_prompt || null,
         image_url: dataPost.image_url || null,
       });
+      // Set autoToggle based on review_status
+      if (dataPost.status === "scheduled") {
+        setAutoToggle(dataPost.review_status === "pending");
+      } else {
+        setAutoToggle(false); // default
+      }
     } catch (error: any) {
       Swal.fire({
         icon: "error",
@@ -435,7 +441,7 @@ const EditPost = () => {
                       }
                       required
                       className="border-gray-300 focus-visible:ring-indigo-500 block"
-                      min={new Date().toISOString().slice(0, 16)}
+                      min={toKolkataDatetimeLocal(new Date().toISOString())}
                     />
                     {formData.scheduled_at && (
                       <div className="text-xs text-gray-500 mt-1">
