@@ -5,7 +5,8 @@ const { User, SystemSetting } = require("../../app/models");
 
 module.exports = function (app) {
   // Start Google OAuth flow
-  app.get("/auth/google", async (req, res) => {
+  // Accept both root and proxied (/backend) paths so callback works behind reverse proxies
+  app.get(["/auth/google", "/backend/auth/google"], async (req, res) => {
     // Load system settings from DB if available, fallback to env
     let settings;
     try {
@@ -16,11 +17,12 @@ module.exports = function (app) {
 
     const client_id =
       (settings && settings.google_client_id) || process.env.GOOGLE_CLIENT_ID;
-   // Detect redirect URI dynamically
-const redirect_uri =
-  req.hostname === "localhost"
-    ? "http://localhost:9999/auth/google/callback"
-    : `${req.protocol}://${req.get("host")}/auth/google/callback`;
+   // Detect redirect URI dynamically and include '/backend' prefix when present
+   const prefix = (req.path && req.path.startsWith("/backend")) ? "/backend" : "";
+   const redirect_uri =
+     req.hostname === "localhost"
+       ? "http://localhost:9999/auth/google/callback"
+       : `${req.protocol}://${req.get("host")}${prefix}/auth/google/callback`;
 
     // Auto-detect frontend origin from request referer or use query param, fallback to FRONTEND_URL env
     let redirect_dashboard =
@@ -69,8 +71,8 @@ const redirect_uri =
     return res.redirect(oauthUrl);
   });
 
-  // OAuth callback
-  app.get("/auth/google/callback", async (req, res) => {
+  // OAuth callback - accept both root and proxied (/backend) callback paths
+  app.get(["/auth/google/callback", "/backend/auth/google/callback"], async (req, res) => {
     try {
       const code = req.query.code;
       const rawState = req.query.state;
@@ -100,10 +102,12 @@ const redirect_uri =
       const client_secret =
         (settings && settings.google_client_secret) ||
         process.env.GOOGLE_CLIENT_SECRET;
+      // Ensure redirect_uri used for token exchange matches the one sent to Google
+      const callbackPrefix = (req.path && req.path.startsWith("/backend")) ? "/backend" : "";
       const redirect_uri =
         (settings && settings.google_redirect_uri) ||
         process.env.GOOGLE_REDIRECT_URI ||
-        `${req.protocol}://${req.get("host")}/auth/google/callback`;
+        `${req.protocol}://${req.get("host")}${callbackPrefix}/auth/google/callback`;
 
       // Exchange code for tokens
       const tokenRes = await axios.post(
