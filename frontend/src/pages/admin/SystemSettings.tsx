@@ -163,13 +163,13 @@ const SystemSettings = () => {
             value={form.google_client_secret ?? ''}
             onChange={e => handleChange('google_client_secret', e.target.value)}
           />
-          <label className="block text-sm font-medium text-gray-700 mb-1">Redirect URI</label>
-          <input
+          {/* <label className="block text-sm font-medium text-gray-700 mb-1">Redirect URI</label> */}
+          {/* <input
             className="w-full mb-2 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all"
             placeholder="Redirect URI"
             value={form.google_redirect_uri ?? ''}
             onChange={e => handleChange('google_redirect_uri', e.target.value)}
-          />
+          /> */}
         </div>
         <button
           className={`w-full py-3 bg-indigo-600 text-white font-bold rounded-lg ${(!form['type'] || !form['api_url'] || !form['value']) ? 'opacity-50 cursor-not-allowed' : ''}`}
