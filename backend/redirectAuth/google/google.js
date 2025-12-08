@@ -16,9 +16,12 @@ module.exports = function (app) {
 
     const client_id =
       (settings && settings.google_client_id) || process.env.GOOGLE_CLIENT_ID;
-    // Detect redirect URI dynamically
+
+    // Prefer explicit redirect URI from settings or env. If not set, fall back to
+    // constructing from the incoming request. Using an explicit configured
+    // redirect URI avoids common redirect_uri_mismatch errors in production.
     const redirect_uri =
-      req.hostname === "localhost"
+       req.hostname === "localhost"
         ? "http://localhost:9999/auth/google/callback"
         : `${req.protocol}://${req.get("host")}/auth/google/callback`;
 
@@ -55,10 +58,9 @@ module.exports = function (app) {
       );
       console.log("GOOGLE_CLIENT_ID present:", !!client_id);
       console.log(
-        "Using redirect_uri (source):",
-        settings && settings.google_redirect_uri ? "db" : "env"
+        "Using redirect_uri (value):",
+        redirect_uri
       );
-      console.log("Using GOOGLE_REDIRECT_URI:", redirect_uri);
       console.log("Action:", action);
       console.log("OAuth URL (preview):", oauthUrl.substring(0, 200));
       console.log("--- /Google OAuth Start ---");

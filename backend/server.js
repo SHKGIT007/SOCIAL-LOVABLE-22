@@ -7,6 +7,10 @@ const routes = require('./app/route');
 
 const cors = require('cors');
 const app = express();
+// If app is running behind a reverse proxy (nginx, load balancer),
+// trust the X-Forwarded-* headers so `req.protocol` and `req.get('host')`
+// reflect the original request. This helps OAuth redirect URI generation.
+app.set('trust proxy', true);
 const PORT = process.env.PORT || 9999;
 const bodyParser = require('body-parser');
 const fileUpload = require('express-fileupload');
