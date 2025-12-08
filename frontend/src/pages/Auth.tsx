@@ -836,11 +836,14 @@ const Auth = () => {
                         "/api",
                         ""
                       );
-                      const redirectDashboard =
-                        window.location.origin + "/dashboard";
-                      window.location.href = `${backendBase}/auth/google?redirect_dashboard=${encodeURIComponent(
-                        redirectDashboard
+                      // Use current page origin as the frontend redirect destination
+                      const redirectDashboard = `${window.location.origin}/complete-social-signup`;
+                      // Pass action=signup to explicitly indicate this is a signup flow
+                      const url = `${backendBase}/auth/google?redirect_dashboard=${encodeURIComponent(
+                        window.location.origin
                       )}&action=signup`;
+                      console.log("Redirecting to Google with URL:", url);
+                      window.location.href = url;
                     }}
                   >
                     Sign up with Google

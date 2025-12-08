@@ -74,7 +74,18 @@ const redirect_uri =
     try {
       const code = req.query.code;
       const rawState = req.query.state;
-      const state = rawState ? JSON.parse(decodeURIComponent(rawState)) : {};
+      let state = {};
+      
+      // Parse state safely with error handling
+      if (rawState) {
+        try {
+          state = JSON.parse(decodeURIComponent(rawState));
+        } catch (parseError) {
+          console.error("Failed to parse state parameter:", parseError.message);
+          console.error("Raw state value:", rawState);
+          state = {};
+        }
+      }
 
       // Load system settings from DB (if any) to use google credentials stored in DB
       let settings;
@@ -124,8 +135,12 @@ const redirect_uri =
       // Find existing user
       let user = await User.findOne({ where: { email: profile.email } });
 
-      // If the flow was started for signup explicitly and user already exists -> error
-      const flowAction = state.action || "signin";
+      // Determine the flow action: check state first, then fallback to query param, then default to "signin"
+      const flowAction = state.action || req.query.action || "signin";
+      
+      console.log("Google OAuth Flow Action:", flowAction);
+      console.log("State:", JSON.stringify(state));
+      console.log("Query action param:", req.query.action);
 
       if (flowAction === "signup") {
         if (user) {
