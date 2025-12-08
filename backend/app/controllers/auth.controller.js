@@ -82,18 +82,26 @@ const generateToken = (userId) => {
 // });
 
 const login = asyncHandler(async (req, res) => {
-  const { email, password } = req.body;
+  const { email, username, password } = req.body;
 
-  // Find user
+  // User can login with either email or username
+  if (!email && !username) {
+    return res.status(400).json({
+      status: false,
+      message: "Please provide email or username",
+    });
+  }
+
+  // Find user by email or username
   const user = await User.findOne({
-    where: { email },
+    where: email ? { email } : { user_name: username },
     include: [{ model: Role, as: "Role" }],
   });
 
   if (!user) {
     return res.status(401).json({
       status: false,
-      message: "Invalid email or password",
+      message: "Invalid email/username or password",
     });
   }
   
@@ -118,7 +126,7 @@ const login = asyncHandler(async (req, res) => {
   if (!isPasswordValid) {
     return res.status(401).json({
       status: false,
-      message: "Invalid email or password",
+      message: "Invalid email/username or password",
     });
   }
 
@@ -128,6 +136,7 @@ const login = asyncHandler(async (req, res) => {
   logger.info("User logged in successfully", {
     userId: user.id,
     email: user.email,
+    username: user.user_name,
   });
 
   res.json({

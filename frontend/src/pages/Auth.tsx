@@ -23,6 +23,7 @@ const Auth = () => {
 
   // Login states
   const [loginEmail, setLoginEmail] = useState("");
+  const [loginUsername, setLoginUsername] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [showLoginPassword, setShowLoginPassword] = useState(false);
 
@@ -286,6 +287,17 @@ const Auth = () => {
 
     if (isLoading) return;
 
+    // Validate email or username is provided
+    if (!loginEmail && !loginUsername) {
+      Swal.fire({
+        icon: "warning",
+        title: "Required",
+        text: "Please enter email or username",
+        confirmButtonColor: "#ef4444",
+      });
+      return;
+    }
+
     // Basic client-side validation for password
     if (!loginPassword || loginPassword.length < 6) {
       Swal.fire({
@@ -301,7 +313,8 @@ const Auth = () => {
 
     try {
       const response = await apiService.login({
-        email: loginEmail,
+        ...(loginEmail ? { email: loginEmail } : {}),
+        ...(loginUsername ? { username: loginUsername } : {}),
         password: loginPassword,
       });
 
@@ -332,7 +345,8 @@ const Auth = () => {
           icon: "error",
           title: "Login Failed",
           text:
-            response?.message || "Invalid email or password. Please try again.",
+            response?.message ||
+            "Invalid email/username or password. Please try again.",
           confirmButtonColor: "#ef4444",
         });
       }
@@ -507,17 +521,29 @@ const Auth = () => {
             <TabsContent value="signin" className="mt-6">
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signin-email">Email*</Label>
-                  <Input
-                    id="signin-email"
-                    type="email"
-                    placeholder="your.email@example.com"
-                    value={loginEmail}
-                    onChange={(e) => setLoginEmail(e.target.value)}
-                    required
-                    disabled={isLoading}
-                    className="border-gray-300 focus-visible:ring-indigo-500"
-                  />
+                  <Label htmlFor="signin-email">Email or Username*</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="signin-email"
+                      type="text"
+                      placeholder="your.email@example.com or username"
+                      value={loginEmail || loginUsername}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        // Auto-detect if it's likely an email or username
+                        if (val.includes("@")) {
+                          setLoginEmail(val);
+                          setLoginUsername("");
+                        } else {
+                          setLoginUsername(val);
+                          setLoginEmail("");
+                        }
+                      }}
+                      disabled={isLoading}
+                      className="border-gray-300 focus-visible:ring-indigo-500"
+                    />
+                  </div>
+                  {/* <p className="text-xs text-gray-500">Use email or your username to login</p> */}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signin-password">Password*</Label>
