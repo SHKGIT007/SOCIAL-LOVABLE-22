@@ -223,15 +223,9 @@ const EditPost = () => {
       }
 
       let reviewStatus = "approved";
-      if (formData.status === "draft") {
-        reviewStatus = "pending";
-      }
-      if (formData.status === "scheduled") {
+      if (formData.status === "draft") reviewStatus = "pending";
+      if (formData.status === "scheduled")
         reviewStatus = autoToggle ? "pending" : "approved";
-      }
-      if (formData.status === "published") {
-        reviewStatus = "approved";
-      }
 
       const updateData = {
         title: formData.title,
@@ -244,7 +238,19 @@ const EditPost = () => {
         review_status: reviewStatus,
       };
 
-      await apiService.updatePost(id, updateData);
+      const res = await apiService.updatePost(id, updateData);
+
+      // ✅ IMPORTANT: Validate API response
+      if (!res.status) {
+        Swal.fire({
+          icon: "error",
+          title: "Validation Error",
+          text: res?.errors?.[0]?.msg,
+          confirmButtonColor: "#6366f1",
+        });
+        setIsSaving(false);
+        return; // STOP HERE, DO NOT SHOW SUCCESS
+      }
 
       Swal.fire({
         icon: "success",

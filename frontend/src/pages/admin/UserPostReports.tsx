@@ -398,15 +398,15 @@ const UserPostsReport = () => {
                             }
                           )}
                         </TableCell>
-                       <TableCell>
-                        {post.status }
-                        </TableCell>
+                        <TableCell>{post.status}</TableCell>
                         <TableCell>
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => {
-                                navigate(`/admin/users/${userId}`);
+                              navigate(`/admin/users/${userId}`, {
+                                state: { postId: post.id },
+                              });
                             }}
                           >
                             View
