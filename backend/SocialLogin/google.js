@@ -10,10 +10,14 @@ module.exports = function (app) {
     const client_id =
       (settings && settings.google_client_id) || process.env.GOOGLE_CLIENT_ID;
 
+    // Allow an explicit BACKEND_URL to be set in production so redirect
+    // URIs generated here always point to the publicly reachable backend
+    // path (useful when frontend and backend are reverse-proxied).
     const prefix = req.path.startsWith("/backend") ? "/backend" : "";
-    const redirect_uri = `${req.protocol}://${req.get(
-      "host"
-    )}${prefix}/auth/google/callback`;
+    const backendBase = process.env.BACKEND_URL
+      ? process.env.BACKEND_URL.replace(/\/$/, "")
+      : `${req.protocol}://${req.get("host")}${prefix}`;
+    const redirect_uri = `${backendBase}/auth/google/callback`;
 
     let redirect_dashboard =
       req.query.redirect_dashboard ||
@@ -57,10 +61,13 @@ module.exports = function (app) {
           (settings && settings.google_client_secret) ||
           process.env.GOOGLE_CLIENT_SECRET;
 
+        // Use BACKEND_URL if provided so the redirect URI matches what
+        // Google expects and what is actually reachable externally.
         const prefix = req.path.startsWith("/backend") ? "/backend" : "";
-        const redirect_uri = `${req.protocol}://${req.get(
-          "host"
-        )}${prefix}/auth/google/callback`;
+        const backendBase = process.env.BACKEND_URL
+          ? process.env.BACKEND_URL.replace(/\/$/, "")
+          : `${req.protocol}://${req.get("host")}${prefix}`;
+        const redirect_uri = `${backendBase}/auth/google/callback`;
 
         const tokenRes = await axios.post(
           "https://oauth2.googleapis.com/token",
