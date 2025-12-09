@@ -14,9 +14,19 @@ module.exports = function (app) {
     // URIs generated here always point to the publicly reachable backend
     // path (useful when frontend and backend are reverse-proxied).
     const prefix = req.path.startsWith("/backend") ? "/backend" : "";
+    // If BACKEND_URL is explicitly provided, prefer it. Otherwise attempt to
+    // honor reverse proxy headers so we construct a redirect_uri that matches
+    // the public path (some proxies strip a prefix like `/backend` before
+    // forwarding requests to the app).
+    const forwardedProto = req.get("x-forwarded-proto") || req.protocol;
+    const forwardedHost = req.get("x-forwarded-host") || req.get("host");
+    const forwardedPrefix =
+      req.get("x-forwarded-prefix") || req.headers["x-forwarded-prefix"] || prefix;
+
     const backendBase = process.env.BACKEND_URL
       ? process.env.BACKEND_URL.replace(/\/$/, "")
-      : `${req.protocol}://${req.get("host")}${prefix}`;
+      : `${forwardedProto}://${forwardedHost}${forwardedPrefix}`;
+
     const redirect_uri = `${backendBase}/auth/google/callback`;
 
     // Diagnostic logging to help debug live redirect issues
@@ -36,7 +46,7 @@ module.exports = function (app) {
     const state = encodeURIComponent(
       JSON.stringify({ redirect_dashboard, action })
     );
-
+            
     const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(
       client_id
     )}&redirect_uri=${encodeURIComponent(
@@ -70,9 +80,15 @@ module.exports = function (app) {
             // Use BACKEND_URL if provided so the redirect URI matches what
             // Google expects and what is actually reachable externally.
             const prefix = req.path.startsWith("/backend") ? "/backend" : "";
+            const forwardedProto = req.get("x-forwarded-proto") || req.protocol;
+            const forwardedHost = req.get("x-forwarded-host") || req.get("host");
+            const forwardedPrefix =
+              req.get("x-forwarded-prefix") || req.headers["x-forwarded-prefix"] || prefix;
+
             const backendBase = process.env.BACKEND_URL
               ? process.env.BACKEND_URL.replace(/\/$/, "")
-              : `${req.protocol}://${req.get("host")}${prefix}`;
+              : `${forwardedProto}://${forwardedHost}${forwardedPrefix}`;
+
             const redirect_uri = `${backendBase}/auth/google/callback`;
 
             // Diagnostic logs for callback entry
