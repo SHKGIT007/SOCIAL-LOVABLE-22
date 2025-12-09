@@ -827,28 +827,42 @@ const Auth = () => {
                     "Sign Up"
                   )}
                 </Button>
-                <div className="mt-3 ">
+                {/* ================= Google Sign Up Button ================= */}
+                <div className="mt-3">
                   <Button
                     type="button"
-                    className="w-full h-10 bg-blue-500"
+                    className="w-full h-10 bg-white border border-gray-300 flex items-center justify-center gap-2 hover:bg-gray-100 text-gray-800 shadow-sm"
                     onClick={() => {
+                      // Base backend URL (remove /api if present)
                       const backendBase = API_CONFIG.BASE_URL.replace(
                         "/api",
                         ""
                       );
-                      // Use current page origin as the frontend redirect destination
-                      const redirectDashboard = `${window.location.origin}/complete-social-signup`;
-                      // Pass action=signup to explicitly indicate this is a signup flow
-                      const url = `${backendBase}/auth/google?redirect_dashboard=${encodeURIComponent(
-                        window.location.origin
+
+                      // Frontend redirect after Google signup/login
+                      const redirectAfter = `${window.location.origin}/complete-social-signup`;
+
+                      // Construct Google OAuth URL
+                      const googleUrl = `${backendBase}/auth/google?redirect_dashboard=${encodeURIComponent(
+                        redirectAfter
                       )}&action=signup`;
-                      console.log("Redirecting to Google with URL:", url);
-                      window.location.href = url;
+
+                      console.log("Redirecting to Google OAuth:", googleUrl);
+
+                      // Redirect user
+                      window.location.href = googleUrl;
                     }}
                   >
+                    {/* Optional: Google Icon */}
+                    {/* <img
+                      src="/assets/google-icon.svg"
+                      alt="Google"
+                      className="w-5 h-5"
+                    /> */}
                     Sign up with Google
                   </Button>
                 </div>
+
                 <p className="text-center text-sm mt-3">
                   Already have an account?{" "}
                   <button

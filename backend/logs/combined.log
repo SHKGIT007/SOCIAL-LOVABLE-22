@@ -1109,3 +1109,4 @@
 {"level":"info","message":"User status updated Successfully","service":"social-lovable-api","timestamp":"2025-12-03T09:05:05.692Z","updatedBy":1,"userId":"45"}
 {"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-12-08T04:28:07.405Z","userId":1}
 {"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-12-08T04:33:38.912Z","userId":2}
+{"email":"shaktijatpnp09@gmail.com","level":"info","message":"OTP sent","service":"social-lovable-api","timestamp":"2025-12-09T06:21:09.005Z"}
