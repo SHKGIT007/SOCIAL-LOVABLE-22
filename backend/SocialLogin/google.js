@@ -19,6 +19,12 @@ module.exports = function (app) {
       : `${req.protocol}://${req.get("host")}${prefix}`;
     const redirect_uri = `${backendBase}/auth/google/callback`;
 
+    // Diagnostic logging to help debug live redirect issues
+    console.log("[Google OAuth] init handler - incoming path:", req.path);
+    console.log("[Google OAuth] host:", req.get("host"));
+    console.log("[Google OAuth] computed backendBase:", backendBase);
+    console.log("[Google OAuth] redirect_uri:", redirect_uri);
+
     let redirect_dashboard =
       req.query.redirect_dashboard ||
       req.get("referer") ||
@@ -61,13 +67,21 @@ module.exports = function (app) {
           (settings && settings.google_client_secret) ||
           process.env.GOOGLE_CLIENT_SECRET;
 
-        // Use BACKEND_URL if provided so the redirect URI matches what
-        // Google expects and what is actually reachable externally.
-        const prefix = req.path.startsWith("/backend") ? "/backend" : "";
-        const backendBase = process.env.BACKEND_URL
-          ? process.env.BACKEND_URL.replace(/\/$/, "")
-          : `${req.protocol}://${req.get("host")}${prefix}`;
-        const redirect_uri = `${backendBase}/auth/google/callback`;
+            // Use BACKEND_URL if provided so the redirect URI matches what
+            // Google expects and what is actually reachable externally.
+            const prefix = req.path.startsWith("/backend") ? "/backend" : "";
+            const backendBase = process.env.BACKEND_URL
+              ? process.env.BACKEND_URL.replace(/\/$/, "")
+              : `${req.protocol}://${req.get("host")}${prefix}`;
+            const redirect_uri = `${backendBase}/auth/google/callback`;
+
+            // Diagnostic logs for callback entry
+            console.log("[Google OAuth] callback handler - incoming path:", req.path);
+            console.log("[Google OAuth] callback originalUrl:", req.originalUrl);
+            console.log("[Google OAuth] computed redirect_uri:", redirect_uri);
+            console.log("[Google OAuth] state param (decoded):", (() => {
+              try { return JSON.parse(decodeURIComponent(req.query.state || "{}")); } catch(e) { return req.query.state; }
+            })());
 
         const tokenRes = await axios.post(
           "https://oauth2.googleapis.com/token",
