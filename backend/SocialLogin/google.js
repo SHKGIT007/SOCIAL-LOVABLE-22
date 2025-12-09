@@ -23,9 +23,24 @@ module.exports = function (app) {
     const forwardedPrefix =
       req.get("x-forwarded-prefix") || req.headers["x-forwarded-prefix"] || prefix;
 
-    const backendBase = process.env.BACKEND_URL
+    let backendBase = process.env.BACKEND_URL
       ? process.env.BACKEND_URL.replace(/\/$/, "")
       : `${forwardedProto}://${forwardedHost}${forwardedPrefix}`;
+
+    // Quick production fallback: if no BACKEND_URL provided and the request
+    // host matches the known production domain, force HTTPS + /backend
+    // prefix. This helps when the reverse proxy forwards the request as
+    // plain HTTP and strips prefixes before reaching the app.
+    try {
+      const reqHost = (req.get("host") || "").toLowerCase();
+      if (!process.env.BACKEND_URL && reqHost === "socialvibe.tradestreet.in") {
+        backendBase = `https://${reqHost}/backend`;
+        console.log(
+          `[Google OAuth] forcing backendBase for known host ${reqHost}:`,
+          backendBase
+        );
+      }
+    } catch (e) {}
 
     const redirect_uri = `${backendBase}/auth/google/callback`;
 
@@ -85,9 +100,20 @@ module.exports = function (app) {
             const forwardedPrefix =
               req.get("x-forwarded-prefix") || req.headers["x-forwarded-prefix"] || prefix;
 
-            const backendBase = process.env.BACKEND_URL
+            let backendBase = process.env.BACKEND_URL
               ? process.env.BACKEND_URL.replace(/\/$/, "")
               : `${forwardedProto}://${forwardedHost}${forwardedPrefix}`;
+
+            try {
+              const reqHost = (req.get("host") || "").toLowerCase();
+              if (!process.env.BACKEND_URL && reqHost === "socialvibe.tradestreet.in") {
+                backendBase = `https://${reqHost}/backend`;
+                console.log(
+                  `[Google OAuth] forcing backendBase for known host ${reqHost}:`,
+                  backendBase
+                );
+              }
+            } catch (e) {}
 
             const redirect_uri = `${backendBase}/auth/google/callback`;
 
