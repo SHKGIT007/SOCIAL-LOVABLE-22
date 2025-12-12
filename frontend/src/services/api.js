@@ -40,6 +40,18 @@ class ApiService {
     return this.request("/system-settings");
   }
 
+  async getAIProviderCredentials() {
+    return this.request("/system-settings/ai-provider");
+  }
+
+  async getCloudinaryCredentials() {
+    return this.request("/system-settings/cloudinary");
+  }
+
+  async getGoogleOAuthCredentials() {
+    return this.request("/system-settings/google-oauth");
+  }
+
   async updateSystemSettings(settings) {
     return this.request("/system-settings/update", {
       method: "POST",
