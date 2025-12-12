@@ -149,31 +149,57 @@ const NewPost = () => {
       return;
     }
     if (status === "scheduled") {
+      if (!scheduledAt) {
+        Swal.fire({
+          icon: "error",
+          title: "Schedule Required",
+          text: "Please select a date & time for scheduled post.",
+          confirmButtonColor: "#6366f1",
+        });
+        return;
+      }
+
       const selected = new Date(scheduledAt);
       const now = new Date();
 
-      if (selected <= now) {
+      if (isNaN(selected.getTime()) || selected <= now) {
         Swal.fire({
           icon: "error",
           title: "Invalid Schedule Time",
-          text: "Please choose a future date and time.",
+          text: "Please choose a valid future date and time.",
           confirmButtonColor: "#6366f1",
         });
         return;
       }
     }
+
     setIsLoading(true);
     try {
       if (!isAuthenticated()) return navigate("/auth");
       const formData = new FormData();
-      formData.append("title", title);
+      // Use optional title if provided, otherwise use profile title
+      const finalTitle = ["", null, undefined].includes(optionalTitlePrompt)
+        ? title
+        : optionalTitlePrompt;
+      formData.append("title", finalTitle);
       formData.append("content", content);
       formData.append("platforms", JSON.stringify(platforms));
       formData.append("status", status);
       if (scheduledAt) formData.append("scheduled_at", scheduledAt);
       formData.append("is_ai_generated", String(mode === "ai"));
-      if (aiPrompt) formData.append("ai_prompt", aiPrompt);
-      if (imagePrompt) formData.append("image_prompt", imagePrompt);
+      // Use optional prompts if provided, otherwise use profile prompts
+      const finalAiPrompt = ["", null, undefined].includes(
+        optionalContentPrompt
+      )
+        ? aiPrompt
+        : optionalContentPrompt;
+      const finalImagePrompt = ["", null, undefined].includes(
+        optionalImagePrompt
+      )
+        ? imagePrompt
+        : optionalImagePrompt;
+      if (finalAiPrompt) formData.append("ai_prompt", finalAiPrompt);
+      if (finalImagePrompt) formData.append("image_prompt", finalImagePrompt);
       if (imageContent) formData.append("image_url", imageContent);
       if (imageFile) formData.append("image_file", imageFile);
       if (videoFile) formData.append("video_file", videoFile);
@@ -254,11 +280,11 @@ const NewPost = () => {
         {/* AI Section */}
         {mode === "ai" && (
           <Card className="border-indigo-100">
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 mt-4">
               {/* Optional Title Prompt */}
               <div className="mb-2">
                 <label className="block text-sm font-semibold text-gray-700 mb-1">
-                  Optional Title Prompt
+                  Optional Business/Creator Name
                 </label>
                 <input
                   type="text"
@@ -272,7 +298,7 @@ const NewPost = () => {
               {/* Optional Content Prompt */}
               <div className="mb-2">
                 <label className="block text-sm font-semibold text-gray-700 mb-1">
-                  Optional Content Prompt
+                  Optional Description
                 </label>
                 <textarea
                   value={optionalContentPrompt}
@@ -320,10 +346,14 @@ const NewPost = () => {
                     <img
                       src={imageContent}
                       alt="Generated"
-                      className="rounded-md border max-w-sm"
+                      className="rounded-md border max-w-sm mb-6"
                     />
                   )}
-                  <Label>Edit Caption</Label>
+
+                  <Label className="me-4 text-lg font-medium mb-2">
+                    Edit Caption
+                  </Label>
+
                   <Textarea
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
@@ -345,7 +375,7 @@ const NewPost = () => {
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
-                <Label>Title *</Label>
+                <Label>Business/Creator Name *</Label>
                 <Input
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
@@ -355,7 +385,7 @@ const NewPost = () => {
               </div>
 
               <div>
-                <Label>Content *</Label>
+                <Label>Description *</Label>
                 <Textarea
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
@@ -367,7 +397,7 @@ const NewPost = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <Label className="flex items-center gap-2">
+                  <Label className="flex items-center gap-2 mb-4">
                     <ImageIcon className="h-4 w-4 text-indigo-600" /> Image
                     Upload
                   </Label>
@@ -451,6 +481,7 @@ const NewPost = () => {
                     onChange={(e) => setScheduledAt(e.target.value)}
                     className="border-gray-300 focus-visible:ring-indigo-500"
                     min={new Date().toISOString().slice(0, 16)}
+                    required
                   />
                 </div>
 

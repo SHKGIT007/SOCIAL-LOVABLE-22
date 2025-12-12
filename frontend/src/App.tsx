@@ -6,6 +6,9 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import CompleteSocialSignup from "./pages/CompleteSocialSignup";
+import ForgotPassword from "./pages/ForgotPassword";
+import VerifyOTP from "./pages/VerifyOTP";
+import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
 import Posts from "./pages/Posts";
 import NewPost from "./pages/NewPost";
@@ -77,6 +80,9 @@ function App() {
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/complete-social-signup" element={<CompleteSocialSignup />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/verify-otp" element={<VerifyOTP />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             
             {/* Client Routes */}
             <Route path="/dashboard" element={<ClientRoute><Dashboard /></ClientRoute>} />

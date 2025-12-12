@@ -54,9 +54,21 @@ const validateUserRegistration = [
 
 const validateUserLogin = [
   body("email")
+    .optional()
     .isEmail()
     .withMessage("Valid email is required")
     .normalizeEmail(),
+  body("username")
+    .optional()
+    .isLength({ min: 3 })
+    .withMessage("Username must be at least 3 characters"),
+  // Custom validation: either email or username must be provided
+  body().custom((value, { req }) => {
+    if (!req.body.email && !req.body.username) {
+      throw new Error("Email or username is required");
+    }
+    return true;
+  }),
   body("password").notEmpty().withMessage("Password is required"),
   handleValidationErrors,
 ];

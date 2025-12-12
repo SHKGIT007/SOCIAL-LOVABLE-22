@@ -531,7 +531,29 @@ const getDeletedUsers = asyncHandler(async (req, res) => {
   });
 });
 
+const deleteMyAccount = asyncHandler(async (req, res) => {
+  const userId = req.user.id;
+  const user = await User.findByPk(userId);
+  if (!user) {
+    return res.status(404).json({
+      status: false,
+      message: "User not found",
+    });
+  }
 
+  user.is_deleted = true;
+  user.deleted_at = new Date();
+  await user.save();
+
+  logger.info("User soft-deleted their account", {
+    userId: userId,
+  });
+
+  res.json({
+    status: true,
+    message: "Your account has been deleted successfully",
+  });
+});
 
 module.exports = {
   createUser,
@@ -543,4 +565,5 @@ module.exports = {
   getAdminStats,
   updateUserStatus,
   getDeletedUsers,
+  deleteMyAccount,
 };

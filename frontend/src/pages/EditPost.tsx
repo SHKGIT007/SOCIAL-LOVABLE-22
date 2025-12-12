@@ -179,6 +179,12 @@ const EditPost = () => {
         image_prompt: dataPost.image_prompt || null,
         image_url: dataPost.image_url || null,
       });
+      // Set autoToggle based on review_status
+      if (dataPost.status === "scheduled") {
+        setAutoToggle(dataPost.review_status === "pending");
+      } else {
+        setAutoToggle(false); // default
+      }
     } catch (error: any) {
       Swal.fire({
         icon: "error",
@@ -217,15 +223,9 @@ const EditPost = () => {
       }
 
       let reviewStatus = "approved";
-      if (formData.status === "draft") {
-        reviewStatus = "pending";
-      }
-      if (formData.status === "scheduled") {
+      if (formData.status === "draft") reviewStatus = "pending";
+      if (formData.status === "scheduled")
         reviewStatus = autoToggle ? "pending" : "approved";
-      }
-      if (formData.status === "published") {
-        reviewStatus = "approved";
-      }
 
       const updateData = {
         title: formData.title,
@@ -238,7 +238,19 @@ const EditPost = () => {
         review_status: reviewStatus,
       };
 
-      await apiService.updatePost(id, updateData);
+      const res = await apiService.updatePost(id, updateData);
+
+      // ✅ IMPORTANT: Validate API response
+      if (!res.status) {
+        Swal.fire({
+          icon: "error",
+          title: "Validation Error",
+          text: res?.errors?.[0]?.msg,
+          confirmButtonColor: "#6366f1",
+        });
+        setIsSaving(false);
+        return; // STOP HERE, DO NOT SHOW SUCCESS
+      }
 
       Swal.fire({
         icon: "success",
@@ -435,7 +447,7 @@ const EditPost = () => {
                       }
                       required
                       className="border-gray-300 focus-visible:ring-indigo-500 block"
-                      min={new Date().toISOString().slice(0, 16)}
+                      min={toKolkataDatetimeLocal(new Date().toISOString())}
                     />
                     {formData.scheduled_at && (
                       <div className="text-xs text-gray-500 mt-1">

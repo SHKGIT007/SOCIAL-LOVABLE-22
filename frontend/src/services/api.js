@@ -543,6 +543,38 @@ class ApiService {
       skipAuthLogout: true,
     });
   }
+
+  async deleteMyAccount() {
+    return this.request('/users/deletemyaccount', {
+      method: 'POST',
+    });
+  }
+
+  async sendOTPforgotPassword(data) {
+    return this.request("/auth/send-otp-forgot-password", {
+      method: "POST",
+      body: data,
+      includeAuth: false,
+      skipAuthLogout: true,
+    });
+  }
+  async verifyOTPforgotPassword(data) {
+    return this.request("/auth/verify-forgot-password-otp", {
+      method: "POST",
+      body: data,
+      includeAuth: false,
+      skipAuthLogout: true,
+    });
+  }
+  async resetPassword(data) {
+    return this.request("/auth/reset-password", {
+      method: "POST",
+      body: data,
+      includeAuth: false,
+      skipAuthLogout: true,
+    });
+  }
+
 }
 
 // Export singleton instance

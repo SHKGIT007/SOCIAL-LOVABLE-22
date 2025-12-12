@@ -499,6 +499,7 @@ const Plans = () => {
                       <Switch
                         checked={plan.is_active === true}
                         onCheckedChange={() => handleStatusToggle(plan)}
+                        className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-300"
                       />
                     </TableCell>
 
@@ -519,7 +520,7 @@ const Plans = () => {
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
-                    </TableCell>  
+                    </TableCell>
                     <TableCell>
                       {new Date(
                         (plan as any).created_at || Date.now()

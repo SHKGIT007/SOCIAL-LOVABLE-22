@@ -142,7 +142,7 @@ const Profile = () => {
             <span className="bg-gradient-to-r from-indigo-600 to-sky-400 bg-clip-text text-transparent">
               Post
             </span>
-            <span className="text-gray-900"> Settings</span>
+            <span className="text-gray-900"> Setting</span>
           </h1>
           <p className="text-muted-foreground">
             Define your brand’s personality and preferences for AI-generated
