@@ -1,38 +1,29 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import Swal from "sweetalert2";
-import { apiService } from "@/services/api";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Eye, EyeOff } from "lucide-react";
+import ReusableForm from "@/components/ReusableForm";
+import { apiService } from "@/services/api";
+import * as Yup from "yup";
 
 const UpdateProfile = () => {
   const [loading, setLoading] = useState(false);
-
-  const [form, setForm] = useState({
+  const [formValues, setFormValues] = useState({
     user_name: "",
     user_fname: "",
     user_lname: "",
     user_phone: "",
     email: "",
   });
+  const [originalData, setOriginalData] = useState<any>(null);
 
   const [passForm, setPassForm] = useState({
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
-
-  const [showPassword, setShowPassword] = useState({
-    current: false,
-    new: false,
-    confirm: false,
-  });
-
-  const [originalData, setOriginalData] = useState<any>(null);
 
   useEffect(() => {
     fetchProfile();
@@ -42,9 +33,8 @@ const UpdateProfile = () => {
     setLoading(true);
     try {
       const res = await apiService.getProfile();
-      if (res.status === true) {
+      if (res.status) {
         const u = res.data.user;
-
         const userData = {
           user_name: u.user_name || "",
           user_fname: u.user_fname || "",
@@ -52,8 +42,7 @@ const UpdateProfile = () => {
           user_phone: u.user_phone || "",
           email: u.email || "",
         };
-
-        setForm(userData);
+        setFormValues(userData);
         setOriginalData(userData);
       }
     } catch (err) {
@@ -63,40 +52,75 @@ const UpdateProfile = () => {
     }
   };
 
-  const handleChange = (e: any) => {
-    let { name, value } = e.target;
+  // Profile Fields Configuration
+  const profileFields = [
+    { name: "user_name", label: "Username", type: "text", required: true },
+    { name: "email", label: "Email", type: "email", required: true },
+    { name: "user_phone", label: "Phone", type: "text", required: true },
+    { name: "user_fname", label: "First Name", type: "text", required: true },
+    { name: "user_lname", label: "Last Name", type: "text", required: true },
+  ];
 
-    if (name === "user_fname" || name === "user_lname")
-      value = value.replace(/[^A-Za-z]/g, "");
-    if (name === "user_phone")
-      value = value.replace(/[^0-9]/g, "").slice(0, 10);
+  // Profile Validation Schema
+  const profileSchema = Yup.object().shape({
+    user_name: Yup.string().required("Username is required"),
+    email: Yup.string().email("Invalid email").required("Email is required"),
+    user_phone: Yup.string()
+      .matches(/^\d{10}$/, "Phone must be 10 digits")
+      .required("Phone is required"),
+    user_fname: Yup.string().required("First name is required"),
+    user_lname: Yup.string().required("Last name is required"),
+  });
 
-    setForm({ ...form, [name]: value });
-  };
+  // Password Fields Configuration
+  const passwordFields = [
+    {
+      name: "currentPassword",
+      label: "Current Password",
+      type: "password",
+      required: true,
+      placeholder: "Enter current password",
+    },
+    {
+      name: "newPassword",
+      label: "New Password",
+      type: "password",
+      required: true,
+      placeholder: "Enter new password",
+    },
+    {
+      name: "confirmPassword",
+      label: "Confirm Password",
+      type: "password",
+      required: true,
+      placeholder: "Confirm new password",
+    },
+  ];
 
-  const handlePasswordChange = (e: any) => {
-    const { name, value } = e.target;
-    setPassForm({ ...passForm, [name]: value });
-  };
+  // Password Validation Schema
+  const passwordSchema = Yup.object().shape({
+    currentPassword: Yup.string().required("Current password is required"),
+    newPassword: Yup.string()
+      .min(6, "Password must be at least 6 characters")
+      .matches(
+        /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+        "Password must contain at least one lowercase, one uppercase, and one number"
+      )
+      .required("New password is required"),
+    confirmPassword: Yup.string()
+      .oneOf([Yup.ref("newPassword")], "Passwords must match")
+      .required("Confirm password is required"),
+  });
 
-  const handleUpdate = async () => {
-    if (form.user_phone.length !== 10)
-      return Swal.fire("Invalid Phone", "Phone must be 10 digits", "error");
-
-    if (!form.email.includes("@") || !form.email.includes(".")) {
-      return Swal.fire("Invalid Email", "Enter valid email", "error");
-    }
-
+  // Profile Submit Handler
+  const handleProfileSubmit = async (values: any) => {
     const noChanges =
       originalData &&
-      originalData.user_name === form.user_name &&
-      originalData.user_fname === form.user_fname &&
-      originalData.user_lname === form.user_lname &&
-      originalData.user_phone === form.user_phone &&
-      originalData.email === form.email;
+      Object.keys(values).every((key) => originalData[key] === values[key]);
 
-    if (noChanges)
-      return Swal.fire("No Changes", "You didn’t change anything.", "info");
+    if (noChanges) {
+      return Swal.fire("No Changes", "You didn't change anything.", "info");
+    }
 
     const confirm = await Swal.fire({
       icon: "warning",
@@ -108,90 +132,51 @@ const UpdateProfile = () => {
 
     if (!confirm.isConfirmed) return;
 
+    setLoading(true);
     try {
-      const res = await apiService.updateProfile(form);
-
-      if (res.status === true) {
+      const res = await apiService.updateProfile(values);
+      if (res.status) {
         Swal.fire("Success", "Profile updated successfully", "success");
+        setOriginalData(values);
+        setFormValues(values);
       } else {
-        const backendError =
-          res?.errors?.[0]?.msg || res?.message || "Something went wrong";
-
-        Swal.fire("Error", backendError, "error");
+        Swal.fire("Error", res?.message || "Something went wrong", "error");
       }
     } catch (err: any) {
-      const backendError =
-        err?.response?.data?.errors?.[0]?.msg ||
-        err?.response?.data?.message ||
-        "Something went wrong";
-
-      Swal.fire("Error", backendError, "error");
+      Swal.fire(
+        "Error",
+        err?.response?.data?.message || "Something went wrong",
+        "error"
+      );
+    } finally {
+      setLoading(false);
     }
   };
-  const handlePasswordSubmit = async () => {
-    // basic client-side checks
-    const old = passForm.currentPassword.trim();
-    const nw = passForm.newPassword;
-    const confirm = passForm.confirmPassword;
 
-    if (!old || !nw || !confirm) {
-      return Swal.fire("Error", "All fields are required", "error");
-    }
-
-    if (nw !== confirm) {
-      return Swal.fire(
-        "Mismatch",
-        "New password & confirm password must match",
-        "error"
-      );
-    }
-
-    if (nw.length < 6) {
-      return Swal.fire(
-        "Weak Password",
-        "New password must be at least 6 characters long",
-        "error"
-      );
-    }
-
-    // same regex used by backend validator: at least one lowercase, one uppercase and one number
-    const pwdRegex = /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/;
-    if (!pwdRegex.test(nw)) {
-      return Swal.fire(
-        "Weak Password",
-        "New password must contain at least one lowercase letter, one uppercase letter, and one number",
-        "error"
-      );
-    }
-
-    // map camelCase -> snake_case to match backend expectations
+  // Password Submit Handler
+  const handlePasswordSubmit = async (values: any) => {
     const payload = {
-      old_password: old,
-      new_password: nw,
-      confirm_password: confirm,
+      old_password: values.currentPassword,
+      new_password: values.newPassword,
+      confirm_password: values.confirmPassword,
     };
 
+    setLoading(true);
     try {
       const res = await apiService.changePassword(payload);
-
-      // backend success format: { status: true, ... }
-      if (res && res.status === true) {
+      if (res.status) {
         Swal.fire("Success", "Password changed successfully", "success");
         setPassForm({
           currentPassword: "",
           newPassword: "",
           confirmPassword: "",
         });
-        return;
+      } else {
+        const backendErrors =
+          res?.errors?.map((e: any) => e.msg).join(", ") || res?.message;
+        Swal.fire("Error", backendErrors || "Something went wrong", "error");
       }
-
-      // handle backend validation errors (array) or message
-      const backendErrors =
-        res?.errors?.map((e: any) => e.msg).join(", ") || res?.message;
-
-      Swal.fire("Error", backendErrors || "Something went wrong", "error");
     } catch (err: any) {
-      // robust error extraction from axios/fetch style response
       const serverData = err?.response?.data;
       const errMsg =
         (serverData?.errors &&
@@ -199,15 +184,15 @@ const UpdateProfile = () => {
         serverData?.message ||
         err?.message ||
         "Something went wrong";
-
       Swal.fire("Error", errMsg, "error");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <DashboardLayout userRole="client">
       <div className="space-y-6">
-        {/* Gradient Title */}
         <h1 className="text-3xl font-extrabold bg-gradient-to-r from-indigo-600 to-sky-400 bg-clip-text text-transparent">
           Update Profile
         </h1>
@@ -220,7 +205,6 @@ const UpdateProfile = () => {
             >
               Personal Information
             </TabsTrigger>
-
             <TabsTrigger
               value="password"
               className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white rounded-lg px-6 py-2"
@@ -229,7 +213,7 @@ const UpdateProfile = () => {
             </TabsTrigger>
           </TabsList>
 
-          {/* PERSONAL INFORMATION TAB */}
+          {/* PERSONAL INFORMATION */}
           <TabsContent value="info">
             <Card className="border border-indigo-100/70 shadow-md rounded-xl">
               <CardHeader>
@@ -237,70 +221,21 @@ const UpdateProfile = () => {
                   Personal Information
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-5">
-                {/* Username */}
-                <div className="space-y-1">
-                  <Label>Username</Label>
-                  <Input
-                    name="user_name"
-                    value={form.user_name}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                {/* Email */}
-                <div className="space-y-1">
-                  <Label>Email</Label>
-                  <Input
-                    name="email"
-                    value={form.email}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                {/* Phone */}
-                <div className="space-y-1">
-                  <Label>Phone</Label>
-                  <Input
-                    name="user_phone"
-                    value={form.user_phone}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                {/* First + Last Name */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <Label>First Name</Label>
-                    <Input
-                      name="user_fname"
-                      value={form.user_fname}
-                      onChange={handleChange}
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label>Last Name</Label>
-                    <Input
-                      name="user_lname"
-                      value={form.user_lname}
-                      onChange={handleChange}
-                    />
-                  </div>
-                </div>
-
-                <div className="flex justify-end pt-3">
-                  <Button
-                    className="bg-indigo-600 hover:bg-indigo-700"
-                    onClick={handleUpdate}
-                  >
-                    Save Changes
-                  </Button>
-                </div>
+              <CardContent>
+                <ReusableForm
+                  initialValues={formValues}
+                  validationSchema={profileSchema}
+                  fields={profileFields}
+                  onSubmit={handleProfileSubmit}
+                  SubmitBtn="Save Changes"
+                  loading={loading}
+                  enableReinitialize={true}
+                />
               </CardContent>
             </Card>
           </TabsContent>
 
-          {/* CHANGE PASSWORD TAB */}
+          {/* CHANGE PASSWORD */}
           <TabsContent value="password">
             <Card className="border border-indigo-100/70 shadow-md rounded-xl">
               <CardHeader>
@@ -308,88 +243,16 @@ const UpdateProfile = () => {
                   Change Password
                 </CardTitle>
               </CardHeader>
-
-              <CardContent className="space-y-5">
-                {/* Current Password */}
-                <div className="space-y-1">
-                  <Label>Current Password</Label>
-                  <div className="relative">
-                    <Input
-                      type={showPassword.current ? "text" : "password"}
-                      name="currentPassword"
-                      value={passForm.currentPassword}
-                      onChange={handlePasswordChange}
-                    />
-                    <span
-                      className="absolute right-3 top-3 cursor-pointer"
-                      onClick={() =>
-                        setShowPassword({
-                          ...showPassword,
-                          current: !showPassword.current,
-                        })
-                      }
-                    >
-                      {showPassword.current ? <EyeOff /> : <Eye />}
-                    </span>
-                  </div>
-                </div>
-
-                {/* New Password */}
-                <div className="space-y-1">
-                  <Label>New Password</Label>
-                  <div className="relative">
-                    <Input
-                      type={showPassword.new ? "text" : "password"}
-                      name="newPassword"
-                      value={passForm.newPassword}
-                      onChange={handlePasswordChange}
-                    />
-                    <span
-                      className="absolute right-3 top-3 cursor-pointer"
-                      onClick={() =>
-                        setShowPassword({
-                          ...showPassword,
-                          new: !showPassword.new,
-                        })
-                      }
-                    >
-                      {showPassword.new ? <EyeOff /> : <Eye />}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Confirm Password */}
-                <div className="space-y-1">
-                  <Label>Confirm Password</Label>
-                  <div className="relative">
-                    <Input
-                      type={showPassword.confirm ? "text" : "password"}
-                      name="confirmPassword"
-                      value={passForm.confirmPassword}
-                      onChange={handlePasswordChange}
-                    />
-                    <span
-                      className="absolute right-3 top-3 cursor-pointer"
-                      onClick={() =>
-                        setShowPassword({
-                          ...showPassword,
-                          confirm: !showPassword.confirm,
-                        })
-                      }
-                    >
-                      {showPassword.confirm ? <EyeOff /> : <Eye />}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex justify-end pt-3">
-                  <Button
-                    className="bg-indigo-600 hover:bg-indigo-700"
-                    onClick={handlePasswordSubmit}
-                  >
-                    Change Password
-                  </Button>
-                </div>
+              <CardContent>
+                <ReusableForm
+                  initialValues={passForm}
+                  validationSchema={passwordSchema}
+                  fields={passwordFields}
+                  onSubmit={handlePasswordSubmit}
+                  SubmitBtn="Change Password"
+                  loading={loading}
+                  enableReinitialize={false}
+                />
               </CardContent>
             </Card>
           </TabsContent>

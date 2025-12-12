@@ -10,27 +10,19 @@ module.exports = function (app) {
     const client_id =
       (settings && settings.google_client_id) || process.env.GOOGLE_CLIENT_ID;
 
-    // Allow an explicit BACKEND_URL to be set in production so redirect
-    // URIs generated here always point to the publicly reachable backend
-    // path (useful when frontend and backend are reverse-proxied).
     const prefix = req.path.startsWith("/backend") ? "/backend" : "";
-    // If BACKEND_URL is explicitly provided, prefer it. Otherwise attempt to
-    // honor reverse proxy headers so we construct a redirect_uri that matches
-    // the public path (some proxies strip a prefix like `/backend` before
-    // forwarding requests to the app).
+
     const forwardedProto = req.get("x-forwarded-proto") || req.protocol;
     const forwardedHost = req.get("x-forwarded-host") || req.get("host");
     const forwardedPrefix =
-      req.get("x-forwarded-prefix") || req.headers["x-forwarded-prefix"] || prefix;
+      req.get("x-forwarded-prefix") ||
+      req.headers["x-forwarded-prefix"] ||
+      prefix;
 
     let backendBase = process.env.BACKEND_URL
       ? process.env.BACKEND_URL.replace(/\/$/, "")
       : `${forwardedProto}://${forwardedHost}${forwardedPrefix}`;
 
-    // Quick production fallback: if no BACKEND_URL provided and the request
-    // host matches the known production domain, force HTTPS + /backend
-    // prefix. This helps when the reverse proxy forwards the request as
-    // plain HTTP and strips prefixes before reaching the app.
     try {
       const reqHost = (req.get("host") || "").toLowerCase();
       if (!process.env.BACKEND_URL && reqHost === "socialvibe.tradestreet.in") {
@@ -44,7 +36,6 @@ module.exports = function (app) {
 
     const redirect_uri = `${backendBase}/auth/google/callback`;
 
-    // Diagnostic logging to help debug live redirect issues
     console.log("[Google OAuth] init handler - incoming path:", req.path);
     console.log("[Google OAuth] host:", req.get("host"));
     console.log("[Google OAuth] computed backendBase:", backendBase);
@@ -61,7 +52,7 @@ module.exports = function (app) {
     const state = encodeURIComponent(
       JSON.stringify({ redirect_dashboard, action })
     );
-            
+
     const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(
       client_id
     )}&redirect_uri=${encodeURIComponent(
@@ -92,38 +83,50 @@ module.exports = function (app) {
           (settings && settings.google_client_secret) ||
           process.env.GOOGLE_CLIENT_SECRET;
 
-            // Use BACKEND_URL if provided so the redirect URI matches what
-            // Google expects and what is actually reachable externally.
-            const prefix = req.path.startsWith("/backend") ? "/backend" : "";
-            const forwardedProto = req.get("x-forwarded-proto") || req.protocol;
-            const forwardedHost = req.get("x-forwarded-host") || req.get("host");
-            const forwardedPrefix =
-              req.get("x-forwarded-prefix") || req.headers["x-forwarded-prefix"] || prefix;
+        const prefix = req.path.startsWith("/backend") ? "/backend" : "";
+        const forwardedProto = req.get("x-forwarded-proto") || req.protocol;
+        const forwardedHost = req.get("x-forwarded-host") || req.get("host");
+        const forwardedPrefix =
+          req.get("x-forwarded-prefix") ||
+          req.headers["x-forwarded-prefix"] ||
+          prefix;
 
-            let backendBase = process.env.BACKEND_URL
-              ? process.env.BACKEND_URL.replace(/\/$/, "")
-              : `${forwardedProto}://${forwardedHost}${forwardedPrefix}`;
+        let backendBase = process.env.BACKEND_URL
+          ? process.env.BACKEND_URL.replace(/\/$/, "")
+          : `${forwardedProto}://${forwardedHost}${forwardedPrefix}`;
 
+        try {
+          const reqHost = (req.get("host") || "").toLowerCase();
+          if (
+            !process.env.BACKEND_URL &&
+            reqHost === "socialvibe.tradestreet.in"
+          ) {
+            backendBase = `https://${reqHost}/backend`;
+            console.log(
+              `[Google OAuth] forcing backendBase for known host ${reqHost}:`,
+              backendBase
+            );
+          }
+        } catch (e) {}
+
+        const redirect_uri = `${backendBase}/auth/google/callback`;
+
+        console.log(
+          "[Google OAuth] callback handler - incoming path:",
+          req.path
+        );
+        console.log("[Google OAuth] callback originalUrl:", req.originalUrl);
+        console.log("[Google OAuth] computed redirect_uri:", redirect_uri);
+        console.log(
+          "[Google OAuth] state param (decoded):",
+          (() => {
             try {
-              const reqHost = (req.get("host") || "").toLowerCase();
-              if (!process.env.BACKEND_URL && reqHost === "socialvibe.tradestreet.in") {
-                backendBase = `https://${reqHost}/backend`;
-                console.log(
-                  `[Google OAuth] forcing backendBase for known host ${reqHost}:`,
-                  backendBase
-                );
-              }
-            } catch (e) {}
-
-            const redirect_uri = `${backendBase}/auth/google/callback`;
-
-            // Diagnostic logs for callback entry
-            console.log("[Google OAuth] callback handler - incoming path:", req.path);
-            console.log("[Google OAuth] callback originalUrl:", req.originalUrl);
-            console.log("[Google OAuth] computed redirect_uri:", redirect_uri);
-            console.log("[Google OAuth] state param (decoded):", (() => {
-              try { return JSON.parse(decodeURIComponent(req.query.state || "{}")); } catch(e) { return req.query.state; }
-            })());
+              return JSON.parse(decodeURIComponent(req.query.state || "{}"));
+            } catch (e) {
+              return req.query.state;
+            }
+          })()
+        );
 
         const tokenRes = await axios.post(
           "https://oauth2.googleapis.com/token",

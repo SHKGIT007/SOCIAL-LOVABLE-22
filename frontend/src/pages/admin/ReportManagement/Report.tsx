@@ -12,31 +12,26 @@ import { saveAs } from "file-saver";
 import { Card, CardContent } from "@/components/ui/card";
 import { X } from "lucide-react";
 
-interface SubscriptionData {
+interface UserData {
   id: string;
-  user_id: string;
-  status: string;
-  start_date: string;
-  end_date: string | null;
-  posts_used: number;
-  ai_posts_used: number;
-  payment_status: string;
-  User?: {
-    email: string;
-    user_name: string | null;
-  };
-  Plan: {
-    name: string;
-    price: number;
-    monthly_posts: number;
-    ai_posts: number;
-    linked_accounts: number;
+  email: string;
+  user_phone: string | null;
+  user_name: string | null;
+  created_at: string;
+  role: string;
+  subscription: {
+    plan: { name: string } | null;
+    status: string;
+    plan_ai_posts: number | null;
+    ai_posts_used: number | null;
   } | null;
+  active_status: boolean;
 }
 
-const Subscriptions = () => {
+const Report = () => {
   const navigate = useNavigate();
-  const [subscriptions, setSubscriptions] = useState<SubscriptionData[]>([]);
+
+  const [users, setUsers] = useState<UserData[]>([]);
   const [totalRows, setTotalRows] = useState(0);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
@@ -46,36 +41,35 @@ const Subscriptions = () => {
   const primaryGradient = "from-indigo-600 to-cyan-500";
   const primaryGradientClass = `bg-gradient-to-r ${primaryGradient}`;
 
-  const fetchSubscriptions = async (
-    pageNumber = 1,
-    pageSize = 10,
-    searchTerm = ""
-  ) => {
+  const fetchUsers = async (pageNumber = 1, pageSize = 10, searchTerm = "") => {
     setLoading(true);
     try {
-      const data = await apiService.getAllSubscriptions({
+      const data = await apiService.getAllUsers({
         page: pageNumber,
         limit: pageSize,
         search: searchTerm,
       });
 
       if (data.status) {
-        setSubscriptions(data.data.subscriptions || []);
+        setUsers(data.data.users || []);
         setTotalRows(data.data.pagination.total || 0);
       } else {
-        setSubscriptions([]);
+        setUsers([]);
         Swal.fire({
           icon: "error",
           title: "Error",
-          text: data.message || "Failed to fetch subscriptions.",
+          text: data.message || "Failed to fetch users.",
           confirmButtonColor: "#6366f1",
         });
       }
     } catch (error: any) {
+      if (error.message === "Authentication failed" || error.status === 401) {
+        navigate("/auth");
+      }
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: error.message || "Failed to fetch subscriptions.",
+        text: error.message || "Failed to fetch users.",
         confirmButtonColor: "#6366f1",
       });
     } finally {
@@ -86,123 +80,124 @@ const Subscriptions = () => {
   useEffect(() => {
     if (!isAuthenticated()) return navigate("/auth");
     if (!isAdmin()) return navigate("/dashboard");
-    fetchSubscriptions(page, perPage, search);
+    fetchUsers(page, perPage, search);
   }, [page, perPage, search]);
 
-  // Export to Excel
   const exportExcel = () => {
-    const excelData = subscriptions.map((s, index) => ({
+    const excelData = users.map((u, index) => ({
       "S.No": index + 1,
-      User: s.User?.user_name || "N/A",
-      Email: s.User?.email || "N/A",
-      Plan: s.Plan?.name || "N/A",
-      Price: s.Plan?.price || 0,
-      "AI Posts Used": `${s.ai_posts_used}/${s.Plan?.ai_posts}`,
-      "Linked Accounts": s.Plan?.linked_accounts || 0,
-      Status: s.payment_status,
-      "Start Date": new Date(s.start_date).toLocaleDateString(),
+      Name: u.user_name || "N/A",
+      Email: u.email,
+      Phone: u.user_phone || "N/A",
+      "Plan Name": u.subscription?.plan?.name || "N/A",
+      Status: u.subscription?.status || "N/A",
+      "AI Used": u.subscription?.ai_posts_used ?? "N/A",
+      "AI Total": u.subscription?.plan_ai_posts ?? "N/A",
     }));
 
     const ws = XLSX.utils.json_to_sheet(excelData);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Subscriptions");
+    XLSX.utils.book_append_sheet(wb, ws, "Report");
     const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    saveAs(new Blob([buf]), "subscriptions.xlsx");
+    saveAs(new Blob([buf]), "report.xlsx");
   };
 
-  // Columns for DataTable
-  const columns: TableColumn<SubscriptionData>[] = useMemo(
+  const columns: TableColumn<UserData>[] = useMemo(
     () => [
       {
         name: "S.No",
-        width: "70px",
-        cell: (row, index) =>
+        width: "80px",
+        cell: (_, index) =>
           page === 1 ? index + 1 : (page - 1) * perPage + (index + 1),
       },
       {
-        name: "User",
-        selector: (row) => row?.User?.user_name || "N/A",
-        width: "120px",
+        name: "Name",
+        selector: (row) => row.user_name || "N/A",
+        sortable: true,
+        width: "150px",
       },
       {
         name: "Email",
-        selector: (row) => row?.User?.email || "N/A",
+        selector: (row) => row.email,
         sortable: true,
+        width: "200px",
+      },
+      {
+        name: "Phone",
+        selector: (row) => row.user_phone || "N/A",
         width: "140px",
       },
       {
-        name: "Plan",
-        selector: (row) => row.Plan?.name || "N/A",
-        sortable: true,
-        width: "100px",
-      },
-       {
-        name: "Plan Price",
-        selector: (row) => row.Plan?.price || "N/A",
-        sortable: true,
-        width: "140px",
+        name: "Plan Status",
+        width: "160px",
+        cell: (row) =>
+          row.subscription?.plan ? (
+            <div>
+              {row.subscription.plan.name}
+              <Badge
+                variant={
+                  row.subscription.status === "active"
+                    ? "default"
+                    : "destructive"
+                }
+                className="ml-2"
+              >
+                {row.subscription.status}
+              </Badge>
+            </div>
+          ) : (
+            "N/A"
+          ),
       },
       {
         name: "AI Posts Used",
-        width: "150px",
-        selector: (row) => `${row.ai_posts_used} / ${row.Plan?.ai_posts || 0}`,
+        width: "140px",
+        cell: (row) =>
+          `${row.subscription?.ai_posts_used ?? "N/A"} / ${
+            row.subscription?.plan_ai_posts ?? "N/A"
+          }`,
       },
       {
-        name: "Linked Accounts",
-        selector: (row) => row.Plan?.linked_accounts || 0,
-        width: "150px",
-      },
-      {
-        name: "Status",
+        name: "Actions",
         width: "120px",
-        cell: (row) => <Badge>{row.payment_status}</Badge>,
-      },
-      {
-        name: "Start Date",
-        width: "120px",
-        selector: (row) => new Date(row.start_date).toLocaleDateString(),
-        sortable: true,
+        cell: (row) => (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              navigate(`/admin/userpostreports/user/${row.id}/posts`)
+            }
+          >
+            View
+          </Button>
+        ),
       },
     ],
-    [subscriptions, page, perPage]
+    [users, page, perPage]
   );
 
   return (
     <DashboardLayout userRole="admin">
       <div className="space-y-8">
         {/* Page Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-gray-200">
-          <div>
-            <h1 className="text-3xl font-extrabold">
-              <span
-                className={`bg-clip-text text-transparent ${primaryGradientClass}`}
-              >
-                Subscriptions
-              </span>{" "}
-              Management
-            </h1>
-            <p className="text-gray-600 text-lg mt-1">
-              View and manage user subscription details.
-            </p>
-          </div>
-
-          <Button
-            className="bg-green-600 hover:bg-green-700 px-6"
-            onClick={exportExcel}
-          >
-            Export Excel
-          </Button>
+        <div className="pb-4 border-b border-gray-100">
+          <h1 className="text-3xl font-extrabold tracking-tight">
+            <span
+              className={`text-transparent bg-clip-text ${primaryGradientClass}`}
+            >
+              Report
+            </span>
+          </h1>
         </div>
 
-        {/* Search + Table */}
         <Card className="shadow-xl border border-indigo-100/50 rounded-2xl">
           <CardContent className="pt-6">
-            {/* Search Bar */}
-            <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            {/* Search + Export */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
               <div className="relative w-full sm:w-72">
                 <input
                   type="text"
-                  placeholder="Search user, plan..."
+                  placeholder="Search name, email..."
                   className="border px-3 py-2 rounded-lg w-full shadow-sm focus:ring-indigo-300 focus:border-indigo-400 pr-9"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
@@ -215,13 +210,20 @@ const Subscriptions = () => {
                   />
                 )}
               </div>
+
+              <Button
+                className="bg-green-600 hover:bg-green-700 px-6"
+                onClick={exportExcel}
+              >
+                Export Excel
+              </Button>
             </div>
 
-            {/* Data Table */}
-            <div className="rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+            {/* DataTable */}
+            <div className="rounded-xl border overflow-hidden">
               <DataTable
                 columns={columns}
-                data={subscriptions}
+                data={users}
                 progressPending={loading}
                 pagination
                 paginationServer
@@ -232,21 +234,15 @@ const Subscriptions = () => {
                   setPage(1);
                 }}
                 highlightOnHover
-                pointerOnHover
                 responsive
                 persistTableHead
                 customStyles={{
-                  rows: { style: { minHeight: "60px", fontSize: "15px" } },
                   headCells: {
                     style: {
                       background: "#f8f9ff",
                       fontWeight: "700",
                       fontSize: "14px",
-                      padding: "14px",
                     },
-                  },
-                  cells: {
-                    style: { paddingTop: "14px", paddingBottom: "14px" },
                   },
                 }}
               />
@@ -258,4 +254,4 @@ const Subscriptions = () => {
   );
 };
 
-export default Subscriptions;
+export default Report;

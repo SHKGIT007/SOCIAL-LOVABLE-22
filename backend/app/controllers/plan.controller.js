@@ -13,7 +13,8 @@ const createPlan = asyncHandler(async (req, res) => {
     features,
     description,
     is_active,
-    duration_months,
+    // duration_months,
+    monthly_posts,
   } = req.body;
 
 
@@ -24,7 +25,8 @@ const createPlan = asyncHandler(async (req, res) => {
     linked_accounts,
     features,
     description,
-    duration_months,
+    // duration_months,
+    monthly_posts,
     is_active: is_active == 0 || is_active === false ? 0 : 1,
   });
 
@@ -124,7 +126,7 @@ const updatePlan = asyncHandler(async (req, res) => {
     features,
     description,
     is_active,
-    duration_months,
+    // duration_months,
   } = req.body;
 
   const plan = await Plan.findByPk(id);
@@ -149,8 +151,8 @@ const updatePlan = asyncHandler(async (req, res) => {
   if (is_active !== undefined)
     updateData.is_active = is_active == 0 || is_active === false ? 0 : 1;
 
-  if (duration_months !== undefined)
-    updateData.duration_months = duration_months;
+  // if (duration_months !== undefined)
+  //   updateData.duration_months = duration_months;
 
   await Plan.update(updateData, { where: { id } });
 
@@ -164,7 +166,6 @@ const updatePlan = asyncHandler(async (req, res) => {
     data: { plan: updatedPlan },
   });
 });
-
 
 const deletePlan = asyncHandler(async (req, res) => {
   const { id } = req.params;

@@ -558,6 +558,7 @@ class ApiService {
       skipAuthLogout: true,
     });
   }
+
   async verifyOTPforgotPassword(data) {
     return this.request("/auth/verify-forgot-password-otp", {
       method: "POST",
@@ -566,12 +567,25 @@ class ApiService {
       skipAuthLogout: true,
     });
   }
+
   async resetPassword(data) {
     return this.request("/auth/reset-password", {
       method: "POST",
       body: data,
       includeAuth: false,
       skipAuthLogout: true,
+    });
+  }
+
+async getUserPlanHistory(id, queryParams = {}) {
+    return this.request(`/users/user-plan-history/${id}`, {
+      queryParams,
+    });
+  }
+
+async getUserPostHistory(id, queryParams = {}) {
+    return this.request(`/users/user-post-history/${id}`, {
+      queryParams,
     });
   }
 

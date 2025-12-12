@@ -69,6 +69,8 @@ const createUser = asyncHandler(async (req, res) => {
     user_phone,
     user_type: user_type || "client",
     role_id: roleId,
+    is_email_verified: true,
+    active_status: true,
   });
 
   logger.info("User created by admin", {
@@ -100,10 +102,8 @@ const getAllUsers = asyncHandler(async (req, res) => {
 
   const whereClause = {};
 
-  // Hide deleted users
   whereClause.is_deleted = false;
 
-  // Search filters
   if (search) {
     whereClause[Op.or] = [
       { user_name: { [Op.like]: `%${search}%` } },
@@ -113,31 +113,35 @@ const getAllUsers = asyncHandler(async (req, res) => {
     ];
   }
 
-  // Filter by user type if provided
   if (user_type) {
     whereClause.user_type = user_type;
   }
 
-  // Exclude admin always
   whereClause.user_type = { [Op.ne]: "admin" };
 
-  const { count, rows: users } = await User.findAndCountAll({
-    where: whereClause,
-    include: [
-      { model: Role, as: "Role" },
-      {
-        model: Subscription,
-        as: "Subscriptions",
-        where: { status: "active" },
-        required: false,
-        include: [{ model: Plan, as: "Plan" }],
-      },
-    ],
-    attributes: { exclude: ["password"] },
-    limit: parseInt(limit),
-    offset: parseInt(offset),
-    order: [["created_at", "DESC"]],
-  });
+ const { count, rows: users } = await User.findAndCountAll({
+  where: whereClause,
+  distinct: true,   
+  col: "id",        
+  include: [
+    { model: Role, as: "Role" },
+    {
+      model: Subscription,
+      as: "Subscriptions",
+      where: { status: "active" },
+      required: false,
+      include: [{ model: Plan, as: "Plan" }],
+    },
+  ],
+  attributes: { exclude: ["password"] },
+  limit: parseInt(limit),
+  offset: parseInt(offset),
+  order: [
+    ["created_at", "DESC"],
+    ["id", "DESC"],
+  ],
+});
+
 
   const formattedUsers = users.map((user) => ({
     id: user.id,
@@ -248,41 +252,6 @@ const getUserById = asyncHandler(async (req, res) => {
     data: { user },
   });
 });
-
-// const updateUser = asyncHandler(async (req, res) => {
-//   const { id } = req.params;
-//   const { user_name, user_fname, user_lname, user_phone, email } = req.body;
-
-//   const user = await User.findByPk(id);
-//   if (!user) {
-//     return res.status(404).json({
-//       status: false,
-//       message: "User not found",
-//     });
-//   }
-
-//   const updateData = {};
-//   if (user_name) updateData.user_name = user_name;
-//   if (user_fname) updateData.user_fname = user_fname;
-//   if (user_lname) updateData.user_lname = user_lname;
-//   if (user_phone) updateData.user_phone = user_phone;
-//   if (email) updateData.email = email;
-
-//   await User.update(updateData, { where: { id } });
-
-//   const updatedUser = await User.findByPk(id, {
-//     include: [{ model: Role, as: "Role" }],
-//     attributes: { exclude: ["password"] },
-//   });
-
-//   logger.info("User updated by admin", { userId: id, updatedBy: req.user.id });
-
-//   res.json({
-//     status: true,
-//     message: "User updated successfully",
-//     data: { user: updatedUser },
-//   });
-// });
 
 const updateUser = asyncHandler(async (req, res) => {
   const { id } = req.params;
@@ -555,6 +524,116 @@ const deleteMyAccount = asyncHandler(async (req, res) => {
   });
 });
 
+const getUserPlanHistory = asyncHandler(async (req, res) => {
+  const userId = req.params.id;
+
+  const { page = 1, limit = 10, search } = req.query;
+  const offset = (page - 1) * limit;
+
+  const whereClause = { user_id: userId };
+
+  // Search filter (plan name, status, price)
+  if (search) {
+    whereClause[Op.or] = [
+      { status: { [Op.like]: `%${search}%` } },
+      { "$Plan.name$": { [Op.like]: `%${search}%` } },
+      { "$Plan.type$": { [Op.like]: `%${search}%` } },
+      { "$Plan.price$": { [Op.like]: `%${search}%` } },
+    ];
+  }
+
+  const { count, rows: subscriptions } = await Subscription.findAndCountAll({
+    where: whereClause,
+    include: [{ model: Plan, as: "Plan" }],
+    limit: parseInt(limit),
+    offset: parseInt(offset),
+    order: [
+      ["created_at", "DESC"],
+      ["id", "DESC"],
+    ],
+  });
+
+  res.json({
+    status: true,
+    data: {
+      subscriptions,
+      pagination: {
+        total: count,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalPages: Math.ceil(count / limit),
+      },
+    },
+  });
+});
+
+const getUserPostHistory = asyncHandler(async (req, res) => {
+  const userId = req.params.id;
+
+  const { page = 1, limit = 10, search, year, month, date } = req.query;
+  const offset = (page - 1) * limit;
+
+  const whereClause = { user_id: userId };
+
+  // Search filters
+  if (search) {
+    whereClause[Op.or] = [
+      { title: { [Op.like]: `%${search}%` } },
+      { content: { [Op.like]: `%${search}%` } },
+      { status: { [Op.like]: `%${search}%` } },
+    ];
+  }
+
+  // Filter: Year
+  if (year) {
+    whereClause.created_at = whereClause.created_at || {};
+    whereClause.created_at[Op.gte] = new Date(`${year}-01-01`);
+    whereClause.created_at[Op.lte] = new Date(`${year}-12-31 23:59:59`);
+  }
+
+  // Filter: Month
+  if (month && year) {
+    const start = new Date(`${year}-${month}-01`);
+    const end = new Date(start.getFullYear(), start.getMonth() + 1, 0);
+
+    whereClause.created_at = {
+      [Op.gte]: start,
+      [Op.lte]: new Date(end.setHours(23, 59, 59)),
+    };
+  }
+
+  // Filter: Exact Date
+  if (date) {
+    whereClause.created_at = {
+      [Op.gte]: new Date(`${date} 00:00:00`),
+      [Op.lte]: new Date(`${date} 23:59:59`),
+    };
+  }
+
+  const { count, rows: posts } = await Post.findAndCountAll({
+    where: whereClause,
+    limit: parseInt(limit),
+    offset: parseInt(offset),
+    order: [
+      ["created_at", "DESC"],
+      ["id", "DESC"],
+    ],
+  });
+
+  res.json({
+    status: true,
+    data: {
+      posts,
+      pagination: {
+        total: count,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalPages: Math.ceil(count / limit),
+      },
+    },
+  });
+});
+
 module.exports = {
   createUser,
   getAllUsers,
@@ -566,4 +645,6 @@ module.exports = {
   updateUserStatus,
   getDeletedUsers,
   deleteMyAccount,
+  getUserPlanHistory,
+  getUserPostHistory,
 };

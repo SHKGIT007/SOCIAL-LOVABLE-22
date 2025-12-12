@@ -23,8 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import Swal from "sweetalert2";
-import { Calendar, Filter, User, FileText } from "lucide-react";
-import { Tab } from "@headlessui/react";
+import { Filter, User, FileText } from "lucide-react";
 
 interface Post {
   id: string;
@@ -46,18 +45,17 @@ interface UserData {
   user_name: string;
   email: string;
   user_phone: string | null;
-  Posts: Post[];
 }
 
 const UserPostsReport = () => {
   const navigate = useNavigate();
   const { userId } = useParams<{ userId: string }>();
+
   const [user, setUser] = useState<UserData | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [filteredPosts, setFilteredPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Filter states - Initialize with undefined instead of empty string
   const [selectedYear, setSelectedYear] = useState<string | undefined>(
     undefined
   );
@@ -69,89 +67,79 @@ const UserPostsReport = () => {
   const primaryGradient = "from-indigo-600 to-cyan-500";
   const primaryGradientClass = `bg-gradient-to-r ${primaryGradient}`;
 
+  // INIT
   useEffect(() => {
-    checkAdminAndFetchData();
+    if (!isAuthenticated()) return navigate("/auth");
+    if (!isAdmin()) return navigate("/dashboard");
+
+    fetchUserDetails();
+    fetchUserPosts();
   }, []);
 
+  // FILTERS UPDATE
   useEffect(() => {
     filterPosts();
   }, [posts, selectedYear, selectedMonth, selectedDate]);
 
-  const checkAdminAndFetchData = () => {
-    if (!isAuthenticated()) {
-      navigate("/auth");
-      return;
-    }
-
-    if (!isAdmin()) {
-      navigate("/dashboard");
-      return;
-    }
-
-    fetchUserData();
-  };
-
-  const fetchUserData = async () => {
+  // FETCH USER BASIC DETAILS
+  const fetchUserDetails = async () => {
     try {
       const response = await apiService.getUserById(userId);
+      if (response.status) {
+        setUser(response.data.user);
+      }
+    } catch (err) {}
+  };
 
-      if (response.status === true) {
-        const userData = response.data.user;
-        setUser(userData);
-        setPosts(userData.Posts || []);
+  // FETCH POSTS USING NEW HISTORY API
+  const fetchUserPosts = async () => {
+    try {
+      const response = await apiService.getUserPostHistory(userId);
 
-        // Set default to current month
-        // const now = new Date();
-        // setSelectedYear(now.getFullYear().toString());
-        // setSelectedMonth((now.getMonth() + 1).toString().padStart(2, "0"));
+      if (response.status) {
+        setPosts(response.data.posts || []);
       } else {
+        setPosts([]);
         Swal.fire({
           icon: "error",
           title: "Error",
-          text: response.message || "Failed to fetch user data.",
-          confirmButtonColor: "#6366f1",
+          text: response.message || "Failed to load post history",
         });
       }
-    } catch (error: any) {
-      if (error.message === "Authentication failed" || error.status === 401) {
-        navigate("/auth");
-      }
+    } catch (err: any) {
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: error.message || "Failed to fetch user data.",
-        confirmButtonColor: "#6366f1",
+        text: err.message || "Failed to fetch post history",
       });
     } finally {
       setIsLoading(false);
     }
   };
 
+  // APPLY FILTERS
   const filterPosts = () => {
     let filtered = [...posts];
 
     if (selectedYear && selectedYear !== "all") {
-      filtered = filtered.filter((post) => {
-        const postDate = new Date(post.created_at);
-        return postDate.getFullYear().toString() === selectedYear;
-      });
+      filtered = filtered.filter(
+        (p) => new Date(p.created_at).getFullYear().toString() === selectedYear
+      );
     }
 
     if (selectedMonth && selectedMonth !== "all") {
-      filtered = filtered.filter((post) => {
-        const postDate = new Date(post.created_at);
-        return (
-          (postDate.getMonth() + 1).toString().padStart(2, "0") ===
-          selectedMonth
-        );
-      });
+      filtered = filtered.filter(
+        (p) =>
+          (new Date(p.created_at).getMonth() + 1)
+            .toString()
+            .padStart(2, "0") === selectedMonth
+      );
     }
 
     if (selectedDate) {
-      filtered = filtered.filter((post) => {
-        const postDate = new Date(post.created_at);
-        return postDate.toISOString().split("T")[0] === selectedDate;
-      });
+      filtered = filtered.filter(
+        (p) => p.created_at.split("T")[0] === selectedDate
+      );
     }
 
     setFilteredPosts(filtered);
@@ -163,30 +151,9 @@ const UserPostsReport = () => {
     setSelectedDate("");
   };
 
-  const getStatusBadge = (status: string) => {
-    const statusConfig = {
-      draft: { variant: "secondary" as const, label: "Draft" },
-      scheduled: { variant: "default" as const, label: "Scheduled" },
-      published: { variant: "default" as const, label: "Published" },
-    };
-
-    const config = statusConfig[status as keyof typeof statusConfig] || {
-      variant: "secondary" as const,
-      label: status,
-    };
-
-    return (
-      <Badge variant={config.variant} className="capitalize">
-        {config.label}
-      </Badge>
-    );
-  };
-
   const getYearOptions = () => {
     const years = new Set<number>();
-    posts.forEach((post) => {
-      years.add(new Date(post.created_at).getFullYear());
-    });
+    posts.forEach((p) => years.add(new Date(p.created_at).getFullYear()));
     return Array.from(years).sort((a, b) => b - a);
   };
 
@@ -208,8 +175,8 @@ const UserPostsReport = () => {
   if (isLoading) {
     return (
       <DashboardLayout userRole="admin">
-        <div className="flex items-center justify-center h-full min-h-screen">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-indigo-600"></div>
+        <div className="flex items-center justify-center h-screen">
+          <div className="animate-spin h-12 w-12 rounded-full border-b-4 border-indigo-600"></div>
         </div>
       </DashboardLayout>
     );
@@ -218,17 +185,18 @@ const UserPostsReport = () => {
   return (
     <DashboardLayout userRole="admin">
       <div className="space-y-6">
-        {/* Header */}
+        {/* HEADER */}
         <div className="pb-4 border-b border-gray-100">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-extrabold tracking-tight text-gray-900">
+              <h1 className="text-3xl font-extrabold text-gray-900">
                 <span
                   className={`text-transparent bg-clip-text ${primaryGradientClass}`}
                 >
                   User Posts Report
                 </span>
               </h1>
+
               {user && (
                 <p className="mt-2 text-gray-600 flex items-center gap-2">
                   <User className="w-4 h-4" />
@@ -236,13 +204,14 @@ const UserPostsReport = () => {
                 </p>
               )}
             </div>
+
             <Button variant="outline" onClick={() => navigate("/admin/report")}>
               Back to Reports
             </Button>
           </div>
         </div>
 
-        {/* Filters Card */}
+        {/* FILTERS CARD */}
         <Card className="shadow-lg border-2 border-indigo-100/50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -250,17 +219,16 @@ const UserPostsReport = () => {
               Filters
             </CardTitle>
           </CardHeader>
+
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              {/* Year Filter */}
+              {/* YEAR */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">
-                  Year
-                </label>
+                <label>Year</label>
                 <Select
                   value={selectedYear || "all"}
-                  onValueChange={(value) =>
-                    setSelectedYear(value === "all" ? undefined : value)
+                  onValueChange={(v) =>
+                    setSelectedYear(v === "all" ? undefined : v)
                   }
                 >
                   <SelectTrigger>
@@ -277,15 +245,13 @@ const UserPostsReport = () => {
                 </Select>
               </div>
 
-              {/* Month Filter */}
+              {/* MONTH */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">
-                  Month
-                </label>
+                <label>Month</label>
                 <Select
                   value={selectedMonth || "all"}
-                  onValueChange={(value) =>
-                    setSelectedMonth(value === "all" ? undefined : value)
+                  onValueChange={(v) =>
+                    setSelectedMonth(v === "all" ? undefined : v)
                   }
                 >
                   <SelectTrigger>
@@ -293,36 +259,31 @@ const UserPostsReport = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Months</SelectItem>
-                    {monthNames.map((month, index) => (
+                    {monthNames.map((m, i) => (
                       <SelectItem
-                        key={index}
-                        value={(index + 1).toString().padStart(2, "0")}
+                        key={i}
+                        value={(i + 1).toString().padStart(2, "0")}
                       >
-                        {month}
+                        {m}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
 
-              {/* Date Filter */}
+              {/* DATE */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">
-                  Specific Date
-                </label>
+                <label>Date</label>
                 <Input
                   type="date"
                   value={selectedDate}
                   onChange={(e) => setSelectedDate(e.target.value)}
-                  className="w-full"
                 />
               </div>
 
-              {/* Reset Button */}
+              {/* RESET */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700 invisible">
-                  Actions
-                </label>
+                <label className="invisible">Reset</label>
                 <Button
                   variant="outline"
                   onClick={resetFilters}
@@ -333,13 +294,13 @@ const UserPostsReport = () => {
               </div>
             </div>
 
-            <div className="mt-4 text-sm text-gray-600">
+            <p className="mt-3 text-sm text-gray-600">
               Showing {filteredPosts.length} of {posts.length} posts
-            </div>
+            </p>
           </CardContent>
         </Card>
 
-        {/* Posts Table */}
+        {/* POSTS TABLE */}
         <Card className="shadow-lg border-2 border-indigo-100/50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -347,12 +308,11 @@ const UserPostsReport = () => {
               Posts ({filteredPosts.length})
             </CardTitle>
           </CardHeader>
+
           <CardContent>
             {filteredPosts.length === 0 ? (
-              <div className="text-center py-12 text-gray-500">
-                <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p className="text-lg font-medium">No posts found</p>
-                <p className="text-sm">Try adjusting your filters</p>
+              <div className="text-center py-10 text-gray-500">
+                No posts found
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -363,51 +323,38 @@ const UserPostsReport = () => {
                       <TableHead>Status</TableHead>
                       <TableHead>Type</TableHead>
                       <TableHead>Created Date</TableHead>
-                      <TableHead>Scheduled/Published</TableHead>
                       <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
+
                   <TableBody>
                     {filteredPosts.map((post) => (
                       <TableRow key={post.id}>
-                        <TableCell className="font-medium max-w-xs truncate">
-                          {post.title || "Untitled"}
-                        </TableCell>
-                        <TableCell>{getStatusBadge(post.status)}</TableCell>
+                        <TableCell>{post.title || "Untitled"}</TableCell>
+
                         <TableCell>
-                          <Badge
-                            variant={
-                              post.is_ai_generated ? "default" : "outline"
-                            }
-                            className={
-                              post.is_ai_generated
-                                ? "bg-purple-100 text-purple-800 border-purple-300"
-                                : ""
-                            }
-                          >
+                          <Badge>{post.status}</Badge>
+                        </TableCell>
+
+                        <TableCell>
+                          <Badge>
                             {post.is_ai_generated ? "AI Generated" : "Manual"}
                           </Badge>
                         </TableCell>
+
                         <TableCell>
-                          {new Date(post.created_at).toLocaleDateString(
-                            "en-US",
-                            {
-                              year: "numeric",
-                              month: "short",
-                              day: "numeric",
-                            }
-                          )}
+                          {new Date(post.created_at).toLocaleDateString()}
                         </TableCell>
-                        <TableCell>{post.status}</TableCell>
+
                         <TableCell>
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => {
+                            onClick={() =>
                               navigate(`/admin/users/${userId}`, {
                                 state: { postId: post.id },
-                              });
-                            }}
+                              })
+                            }
                           >
                             View
                           </Button>
