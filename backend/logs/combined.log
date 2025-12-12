@@ -1134,3 +1134,6 @@
 {"level":"info","message":"User status updated Successfully","service":"social-lovable-api","timestamp":"2025-12-03T09:05:02.869Z","updatedBy":1,"userId":"45"}
 {"level":"info","message":"User status updated Successfully","service":"social-lovable-api","timestamp":"2025-12-03T09:05:05.692Z","updatedBy":1,"userId":"45"}
 >>>>>>> 275a112c186da3c61aac9c9eb8a437c202fc4149
+{"amountPaid":0,"hasEndDate":false,"level":"info","message":"Subscription created","paymentStatus":"success","planId":1,"service":"social-lovable-api","subscriptionId":42,"timestamp":"2025-12-04T12:30:24.219Z","userId":46}
+{"email":"snehpnp@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-12-04T12:33:22.676Z","userId":46}
+{"ai_prompt":"Title: Please complete your profile before generating AI content.\nDetails: Please complete your profile before generating AI content.","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-12-04T12:37:27.173Z","userId":46}
