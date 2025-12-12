@@ -1145,3 +1145,4 @@
 >>>>>>> 597ce589a0d97204ac1d5a5e22593e3f67f894c9
 {"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-12-12T07:15:20.558Z","userId":1,"username":"admin"}
 {"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-12-12T07:18:19.694Z","userId":2,"username":"test"}
+{"level":"info","message":"Post updated","postId":"128","service":"social-lovable-api","timestamp":"2025-12-12T07:54:06.279Z","userId":2}

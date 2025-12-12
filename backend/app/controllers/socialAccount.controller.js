@@ -430,7 +430,7 @@ const getconnnectedAccounts = asyncHandler(async (req, res) => {
             user_id: userId,
             status: "active",
             start_date: { [Op.lte]: currentDate },
-            end_date: { [Op.gte]: currentDate },
+            // end_date: { [Op.gte]: currentDate },
         },
         order: [["end_date", "DESC"]],
         attributes: [
@@ -438,14 +438,14 @@ const getconnnectedAccounts = asyncHandler(async (req, res) => {
         ],
     });
     
-    if(!current_subscription){
-        return  res.json({
-            status: false,
-            message: "No active subscription found",
-            limitcount: 0,
-            activecount: 0
-        });
-    }
+    // if(!current_subscription){
+    //     return  res.json({
+    //         status: false,
+    //         message: "No active subscription found",
+    //         limitcount: 0,
+    //         activecount: 0
+    //     });
+    // }
 
     console.log("Current Subscription:", current_subscription);
     const activeLinkedCount = await SocialAccount.count({
