@@ -398,7 +398,6 @@ const Auth = () => {
     }
 
     if (isLoading) return;
-
     setIsLoading(true);
 
     try {
@@ -414,7 +413,6 @@ const Auth = () => {
 
       if (response && response.status) {
         setAuthData(response.data);
-
         Swal.fire({
           icon: "success",
           title: "Success",
@@ -435,10 +433,9 @@ const Auth = () => {
         // Handle case where response.status is false
         setIsLoading(false);
         const errText =
-          response?.message || // <-- backend ka main error message
-          response?.errors?.[0]?.msg || // validation error message
+          response?.errors?.[0]?.msg ||
+          response?.message ||
           "Unable to create account. Please try again.";
-
         Swal.fire({
           icon: "error",
           title: "Registration Failed",
@@ -449,29 +446,42 @@ const Auth = () => {
     } catch (error: any) {
       setIsLoading(false);
 
-      // Get the error message from various possible locations
+      // Debug: Log the entire error object
+      console.log("Full error object:", error);
+      console.log("Error response:", error?.response);
+      console.log("Error response data:", error?.response?.data);
+
+      // Default error message
       let errorMessage = "Unable to create account. Please try again.";
 
+      // Check if error response exists
       if (error?.response?.data) {
         const data = error.response.data;
 
-        // First priority: Check for validation errors array with detailed message
+        console.log("Data errors:", data.errors);
+        console.log("Data message:", data.message);
+
+        // First priority: Check for validation errors array
         if (
           data.errors &&
           Array.isArray(data.errors) &&
           data.errors.length > 0
         ) {
-          // Get the first error's message
-          errorMessage =
-            data.errors[0].msg || data.errors[0].message || data.message;
+          errorMessage = data.errors[0].msg || data.errors[0].message;
+          console.log("Using error from array:", errorMessage);
         }
         // Second priority: Check for general message
         else if (data.message) {
           errorMessage = data.message;
+          console.log("Using general message:", errorMessage);
         }
-      } else if (error?.message) {
+      }
+      // If no response data, check error message directly
+      else if (error?.message) {
         errorMessage = error.message;
       }
+
+      console.log("Final error message:", errorMessage);
 
       Swal.fire({
         icon: "error",
@@ -526,7 +536,7 @@ const Auth = () => {
                     <Input
                       id="signin-email"
                       type="text"
-                      placeholder="your.email@example.com or username"
+                      placeholder="your email or username"
                       value={loginEmail || loginUsername}
                       onChange={(e) => {
                         const val = e.target.value;
@@ -634,7 +644,7 @@ const Auth = () => {
                     <Input
                       id="signup-fname"
                       type="text"
-                      placeholder="John"
+                      placeholder="Your First Name"
                       value={userFname}
                       onChange={(e) => {
                         const value = e.target.value.replace(/[^A-Za-z]/g, "");
@@ -650,7 +660,7 @@ const Auth = () => {
                     <Input
                       id="signup-lname"
                       type="text"
-                      placeholder="Doe"
+                      placeholder="Your Last Name"
                       value={userLname}
                       onChange={(e) => {
                         const value = e.target.value.replace(/[^A-Za-z]/g, "");
@@ -669,7 +679,7 @@ const Auth = () => {
                   <Input
                     id="signup-phone"
                     type="tel"
-                    placeholder="1234567890"
+                    placeholder="Your Phone Number"
                     value={userPhone}
                     onChange={(e) =>
                       setUserPhone(
@@ -688,7 +698,7 @@ const Auth = () => {
                   <Input
                     id="signup-email"
                     type="email"
-                    placeholder="your.email@example.com"
+                    placeholder="your email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -790,7 +800,7 @@ const Auth = () => {
                     <Input
                       id="signup-password"
                       type={showSignupPassword ? "text" : "password"}
-                      // placeholder="Password (min. 6 characters)"
+                      placeholder="Your Password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required

@@ -193,9 +193,12 @@ const UpdateProfile = () => {
   return (
     <DashboardLayout userRole="client">
       <div className="space-y-6">
-        <h1 className="text-3xl font-extrabold bg-gradient-to-r from-indigo-600 to-sky-400 bg-clip-text text-transparent">
-          Update Profile
-        </h1>
+        <h2 className="flex items-baseline gap-2 text-3xl font-extrabold">
+          <span className="flex bg-gradient-to-r from-indigo-600 to-sky-400 bg-clip-text text-transparent">
+            Update
+          </span>
+          Profile
+        </h2>
 
         <Tabs defaultValue="info" className="w-full">
           <TabsList className="bg-indigo-50/50 p-1 rounded-xl">

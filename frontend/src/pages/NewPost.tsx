@@ -216,12 +216,18 @@ const NewPost = () => {
 
       const res = await apiService.createPost(formData, true);
       if (res.status) {
+        const successMessage =
+          status === "published"
+            ? "Post published successfully!"
+            : "Post created successfully!";
+
         Swal.fire({
           icon: "success",
           title: "Success",
-          text: "Post created successfully!",
+          text: successMessage,
           confirmButtonColor: "#6366f1",
         });
+
         navigate("/posts");
       }
     } catch (err: any) {

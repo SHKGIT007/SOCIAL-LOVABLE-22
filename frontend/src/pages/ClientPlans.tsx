@@ -246,7 +246,7 @@ const ClientPlans = () => {
                   </span>
                 </div>
 
-                <div className="flex justify-between">
+                {/* <div className="flex justify-between">
                   <span className="font-medium">End Date:</span>
                   <span>
                     {currentSubscription.end_date
@@ -255,7 +255,7 @@ const ClientPlans = () => {
                         ).toLocaleDateString("en-IN")
                       : "No End Date"}
                   </span>
-                </div>
+                </div> */}
 
                 {/* 🔥 AI Posts with Progress Bar */}
                 <div className="space-y-1">
@@ -359,11 +359,11 @@ const ClientPlans = () => {
                   </CardDescription>
                 </CardHeader>
 
-                <CardDescription className="px-6">
+                {/* <CardDescription className="px-6">
                   <span className="text-sm text-gray-600">
                     {plan.duration_months} months duration
                   </span>
-                </CardDescription>
+                </CardDescription> */}
 
                 <CardContent>
                   <div className="space-y-2 text-gray-800">

@@ -83,6 +83,7 @@ const Report = () => {
     fetchUsers(page, perPage, search);
   }, [page, perPage, search]);
 
+  /* -------------------- Excel Export -------------------- */
   const exportExcel = () => {
     const excelData = users.map((u, index) => ({
       "S.No": index + 1,
@@ -90,7 +91,7 @@ const Report = () => {
       Email: u.email,
       Phone: u.user_phone || "N/A",
       "Plan Name": u.subscription?.plan?.name || "N/A",
-      Status: u.subscription?.status || "N/A",
+      "Plan Status": u.subscription?.status || "N/A",
       "AI Used": u.subscription?.ai_posts_used ?? "N/A",
       "AI Total": u.subscription?.plan_ai_posts ?? "N/A",
     }));
@@ -99,14 +100,15 @@ const Report = () => {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Report");
     const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    saveAs(new Blob([buf]), "report.xlsx");
+    saveAs(new Blob([buf]), "user-report.xlsx");
   };
 
+  /* -------------------- DataTable Columns -------------------- */
   const columns: TableColumn<UserData>[] = useMemo(
     () => [
       {
         name: "S.No",
-        width: "80px",
+        width: "70px",
         cell: (_, index) =>
           page === 1 ? index + 1 : (page - 1) * perPage + (index + 1),
       },
@@ -120,7 +122,7 @@ const Report = () => {
         name: "Email",
         selector: (row) => row.email,
         sortable: true,
-        width: "200px",
+        width: "220px",
       },
       {
         name: "Phone",
@@ -128,19 +130,18 @@ const Report = () => {
         width: "140px",
       },
       {
-        name: "Plan Status",
-        width: "160px",
+        name: "Plan",
+        width: "170px",
         cell: (row) =>
           row.subscription?.plan ? (
-            <div>
-              {row.subscription.plan.name}
+            <div className="flex items-center gap-2">
+              <span>{row.subscription.plan.name}</span>
               <Badge
                 variant={
                   row.subscription.status === "active"
                     ? "default"
                     : "destructive"
                 }
-                className="ml-2"
               >
                 {row.subscription.status}
               </Badge>
@@ -150,7 +151,7 @@ const Report = () => {
           ),
       },
       {
-        name: "AI Posts Used",
+        name: "AI Usage",
         width: "140px",
         cell: (row) =>
           `${row.subscription?.ai_posts_used ?? "N/A"} / ${
@@ -159,7 +160,7 @@ const Report = () => {
       },
       {
         name: "Actions",
-        width: "120px",
+        width: "140px",
         cell: (row) => (
           <Button
             variant="outline"
@@ -173,27 +174,34 @@ const Report = () => {
         ),
       },
     ],
-    [users, page, perPage]
+    [page, perPage]
   );
 
   return (
     <DashboardLayout userRole="admin">
       <div className="space-y-8">
         {/* Page Header */}
-        <div className="pb-4 border-b border-gray-100">
-          <h1 className="text-3xl font-extrabold tracking-tight">
-            <span
-              className={`text-transparent bg-clip-text ${primaryGradientClass}`}
-            >
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-gray-200">
+          <div>
+            <h1 className="text-3xl font-extrabold">
+              <span
+                className={`bg-clip-text text-transparent ${primaryGradientClass}`}
+              >
+                Users
+              </span>{" "}
               Report
-            </span>
-          </h1>
+            </h1>
+            <p className="text-gray-600 text-lg mt-1">
+              Subscription & AI usage report of all users.
+            </p>
+          </div>
         </div>
 
+        {/* Card + Table */}
         <Card className="shadow-xl border border-indigo-100/50 rounded-2xl">
           <CardContent className="pt-6">
             {/* Search + Export */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
+            <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div className="relative w-full sm:w-72">
                 <input
                   type="text"
@@ -219,8 +227,8 @@ const Report = () => {
               </Button>
             </div>
 
-            {/* DataTable */}
-            <div className="rounded-xl border overflow-hidden">
+            {/* Data Table */}
+            <div className="rounded-xl border border-gray-200 overflow-hidden shadow-sm">
               <DataTable
                 columns={columns}
                 data={users}
@@ -234,14 +242,28 @@ const Report = () => {
                   setPage(1);
                 }}
                 highlightOnHover
+                pointerOnHover
                 responsive
                 persistTableHead
                 customStyles={{
+                  rows: {
+                    style: {
+                      minHeight: "60px",
+                      fontSize: "15px",
+                    },
+                  },
                   headCells: {
                     style: {
                       background: "#f8f9ff",
                       fontWeight: "700",
                       fontSize: "14px",
+                      padding: "14px",
+                    },
+                  },
+                  cells: {
+                    style: {
+                      paddingTop: "14px",
+                      paddingBottom: "14px",
                     },
                   },
                 }}

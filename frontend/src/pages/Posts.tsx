@@ -189,6 +189,20 @@ const Posts = () => {
   function filteredPosts(posts: Post[], status: string, generation: string) {
     let filtered = posts;
 
+    const isAnyFilterApplied = status !== "all" || generation !== "all";
+
+    if (isAnyFilterApplied) {
+      filtered = filtered.filter((post) => {
+        const isReviewExpired =
+          post.review_status === "pending" &&
+          post.scheduled_at &&
+          new Date(post.scheduled_at) <= new Date();
+
+        // ❌ filter laga ho to review expired hata do
+        return !isReviewExpired;
+      });
+    }
+
     if (status !== "all") {
       filtered = filtered.filter((post) => post.status === status);
     }

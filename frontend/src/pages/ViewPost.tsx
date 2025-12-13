@@ -191,9 +191,10 @@ const ViewPost = () => {
               </CardTitle>
               <div className="flex flex-wrap gap-2">
                 <Badge className={`${getStatusColor(post.status)} text-white`}>
-                  {post.status}
+                  {post.status.charAt(0).toUpperCase() + post.status.slice(1)}
                 </Badge>
-                {post.is_ai_generated && (
+
+                {post.is_ai_generated ? (
                   <Badge
                     variant="outline"
                     className="border-indigo-200 text-indigo-700"
@@ -201,7 +202,15 @@ const ViewPost = () => {
                     <Sparkles className="mr-1 h-3 w-3" />
                     AI Generated
                   </Badge>
+                ) : (
+                  <Badge
+                    variant="outline"
+                    className="border-gray-200 text-gray-700"
+                  >
+                    Manual
+                  </Badge>
                 )}
+
                 {post.category && (
                   <Badge variant="secondary">{post.category}</Badge>
                 )}
@@ -301,7 +310,7 @@ const ViewPost = () => {
               )}
 
             {/* Prompt (if any) */}
-            {post.ai_prompt && (
+            {post.is_ai_generated && post.ai_prompt && (
               <section className="space-y-3">
                 <h3 className="text-sm font-semibold text-gray-900">
                   Prompt Used
