@@ -43,6 +43,16 @@ const Auth = () => {
   const [isOtpVerified, setIsOtpVerified] = useState(false);
   const [otpTimer, setOtpTimer] = useState(0);
 
+  const isFormComplete =
+    userName &&
+    userFname &&
+    userLname &&
+    userPhone &&
+    email &&
+    password &&
+    otp &&
+    isOtpVerified;
+
   useEffect(() => {
     if (isAuthenticated()) {
       const authData = getAuthData();
@@ -536,7 +546,7 @@ const Auth = () => {
                     <Input
                       id="signin-email"
                       type="text"
-                      placeholder="your email or username"
+                      placeholder="Your Email or Username"
                       value={loginEmail || loginUsername}
                       onChange={(e) => {
                         const val = e.target.value;
@@ -581,7 +591,13 @@ const Auth = () => {
                     </button>
                   </div>
                 </div>
-
+                <button
+                  type="button"
+                  className="text-indigo-600 font-semibold hover:underline"
+                  onClick={() => navigate("/forgot-password")}
+                >
+                  Forgot Password?
+                </button>
                 <Button
                   type="submit"
                   className="w-full h-10 bg-gradient-to-r from-indigo-600 to-sky-500 hover:from-indigo-500 hover:to-sky-400 text-white shadow-md"
@@ -608,13 +624,6 @@ const Auth = () => {
                       Sign Up
                     </button>
                   </p>
-                  <button
-                    type="button"
-                    className="text-indigo-600 font-semibold hover:underline"
-                    onClick={() => navigate("/forgot-password")}
-                  >
-                    Forgot Password?
-                  </button>
                 </div>
               </form>
             </TabsContent>
@@ -698,14 +707,29 @@ const Auth = () => {
                   <Input
                     id="signup-email"
                     type="email"
-                    placeholder="your email"
+                    placeholder="Your Email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    disabled={isLoading || isOtpVerified}
+                    disabled={isLoading || isOtpSent || isOtpVerified}
                     className="border-gray-300 focus-visible:ring-indigo-500"
                   />
                 </div>
+
+                {isOtpSent && !isOtpVerified && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsOtpSent(false);
+                      setIsOtpVerified(false);
+                      setOtp("");
+                      setOtpTimer(0);
+                    }}
+                    className="text-sm text-indigo-600 font-semibold hover:underline mt-1"
+                  >
+                    Update Email
+                  </button>
+                )}
 
                 {/* Send OTP Button - Shows after email entered */}
                 {email && !isOtpSent && (
@@ -825,8 +849,8 @@ const Auth = () => {
                 {/* Submit Button */}
                 <Button
                   type="submit"
-                  className="w-full h-10 bg-gradient-to-r from-indigo-600 to-sky-500  text-white shadow-md"
-                  disabled={isLoading}
+                  className="w-full h-10 bg-gradient-to-r from-indigo-600 to-sky-500 text-white shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={isLoading || !isFormComplete}
                 >
                   {isLoading ? (
                     <>
@@ -837,6 +861,7 @@ const Auth = () => {
                     "Sign Up"
                   )}
                 </Button>
+
                 {/* ================= Google Sign Up Button ================= */}
                 <div className="mt-3">
                   <Button

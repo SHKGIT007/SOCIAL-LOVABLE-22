@@ -36,7 +36,13 @@ const CreateUser = () => {
       .matches(/^[0-9]{10}$/, "Phone must be exactly 10 digits")
       .required("Phone is required"),
     email: Yup.string().email("Invalid email").required("Email required"),
-    password: Yup.string().required("Password required"),
+    password: Yup.string()
+  .required("Password required")
+  .matches(
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$/,
+    "Password must contain at least one lowercase letter, one uppercase letter, and one number"
+  ),
+
     confirm_password: Yup.string()
       .oneOf([Yup.ref("password")], "Passwords do not match")
       .required("Confirm password required"),
@@ -86,8 +92,8 @@ const CreateUser = () => {
       onToggle: () => setShowPassword(!showPassword),
       required: true,
       placeholder: "Enter password",
-      helperText:
-        "Password must contain at least one lowercase letter, one uppercase letter, and one number",
+      // helperText:
+      //   "Password must contain at least one lowercase letter, one uppercase letter, and one number",
     },
     {
       name: "confirm_password",

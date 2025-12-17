@@ -18,6 +18,11 @@ const initialProfile = {
 const profileSchema = Yup.object().shape({
   business_name: Yup.string().required("Business/Creator Name is required"),
   description: Yup.string().required("Description is required"),
+  platforms: Yup.string().required("Preferred Platforms is required"),
+  brand_voice: Yup.string().required("Brand Voice is required"),
+  hashtags: Yup.string().required("Default Hashtags are required"),
+  image_style: Yup.string().required("Image Prompt is required"),
+  festival: Yup.string().required("Current Festival/Event is required"),
 });
 
 const Profile = () => {
@@ -120,8 +125,16 @@ const Profile = () => {
     {
       name: "platforms",
       label: "Preferred Platforms",
-      type: "text",
-      placeholder: "Facebook, Instagram, X (Twitter)",
+      type: "select",
+      placeholder: "Select platform",
+      required: true,
+      options: [
+        { label: "Facebook", value: "facebook" },
+        { label: "Instagram", value: "instagram" },
+        { label: "X (Twitter)", value: "twitter" },
+        { label: "LinkedIn", value: "linkedin" },
+        { label: "YouTube", value: "youtube" },
+      ],
     },
     {
       name: "description",
@@ -135,24 +148,28 @@ const Profile = () => {
       label: "Image Prompt",
       type: "textarea",
       placeholder: "Enter preferred image style or title",
+      required: true,
     },
     {
       name: "brand_voice",
       label: "Brand Voice",
       type: "text",
       placeholder: "Friendly, Bold, Professional...",
+      required: true,
     },
     {
       name: "hashtags",
       label: "Default Hashtags",
       type: "text",
       placeholder: "#marketing, #socialmedia",
+      required: true,
     },
     {
       name: "festival",
       label: "Current Festival/Event",
       type: "text",
       placeholder: "e.g. Diwali, Christmas, Eid",
+      required: true,
     },
   ];
 

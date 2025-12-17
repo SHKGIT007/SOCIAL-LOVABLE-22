@@ -222,6 +222,23 @@ const Users = () => {
         width: "100px",
       },
       {
+        name: "Plan Status",
+        width: "120px",
+        cell: (row) => {
+          const status = row.subscription?.status;
+
+          if (status === "active") {
+            return (
+              <span className="px-3 py-1 rounded-full bg-green-700 text-white text-xs font-semibold">
+                Active
+              </span>
+            );
+          }
+
+          return <span className="text-gray-500">N/A</span>;
+        },
+      },
+      {
         name: "Status",
         width: "100px",
         cell: (row) => (

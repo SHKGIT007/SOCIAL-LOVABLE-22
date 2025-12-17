@@ -169,7 +169,18 @@ const AdminViewPost = () => {
               <Badge variant="secondary">Status: {post.status}</Badge>
 
               {post.is_ai_generated && (
-                <Badge className="flex items-center gap-1 bg-indigo-100 text-indigo-800">
+                <Badge
+                  className="
+      flex items-center gap-1
+      bg-indigo-100 text-indigo-800
+      hover:bg-indigo-100
+      focus:bg-indigo-100
+      active:bg-indigo-100
+      cursor-default
+      transition-none
+      pointer-events-none
+    "
+                >
                   <Zap className="h-3 w-3" /> AI Generated
                 </Badge>
               )}

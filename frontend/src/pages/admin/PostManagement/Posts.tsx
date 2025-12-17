@@ -161,21 +161,27 @@ const AdminPosts = () => {
       {
         name: "Status",
         width: "120px",
-        cell: (row) => (
-          <Badge
-            variant="outline"
-            className={
-              row.status === "published"
-                ? "bg-green-100 text-green-700 border-green-300"
-                : row.status === "scheduled"
-                ? "bg-blue-100 text-blue-700 border-blue-300"
-                : "bg-gray-100 text-gray-700 border-gray-300"
-            }
-          >
-            {row.status}
-          </Badge>
-        ),
+        cell: (row) => {
+          const status =
+            row.status.charAt(0).toUpperCase() + row.status.slice(1);
+
+          return (
+            <Badge
+              variant="outline"
+              className={
+                row.status === "published"
+                  ? "bg-green-100 text-green-700 border-green-300"
+                  : row.status === "scheduled"
+                  ? "bg-blue-100 text-blue-700 border-blue-300"
+                  : "bg-gray-100 text-gray-700 border-gray-300"
+              }
+            >
+              {status}
+            </Badge>
+          );
+        },
       },
+
       {
         name: "Type",
         width: "100px",

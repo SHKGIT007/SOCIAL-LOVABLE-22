@@ -1,17 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import DataTable, { TableColumn } from "react-data-table-component";
 import { apiService } from "@/services/api";
 import { isAdmin, isAuthenticated } from "@/utils/auth";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -23,7 +16,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import Swal from "sweetalert2";
-import { Filter, User, FileText } from "lucide-react";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import { Filter, User, FileText, X } from "lucide-react";
 
 interface Post {
   id: string;
@@ -53,16 +48,11 @@ const UserPostsReport = () => {
 
   const [user, setUser] = useState<UserData | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
-  const [filteredPosts, setFilteredPosts] = useState<Post[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const [selectedYear, setSelectedYear] = useState<string | undefined>(
-    undefined
-  );
-  const [selectedMonth, setSelectedMonth] = useState<string | undefined>(
-    undefined
-  );
-  const [selectedDate, setSelectedDate] = useState<string>("");
+  const [totalRows, setTotalRows] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
+  const [search, setSearch] = useState("");
 
   const primaryGradient = "from-indigo-600 to-cyan-500";
   const primaryGradientClass = `bg-gradient-to-r ${primaryGradient}`;
@@ -73,13 +63,12 @@ const UserPostsReport = () => {
     if (!isAdmin()) return navigate("/dashboard");
 
     fetchUserDetails();
-    fetchUserPosts();
   }, []);
 
-  // FILTERS UPDATE
+  // Fetch posts whenever page, perPage, search, or filters change
   useEffect(() => {
-    filterPosts();
-  }, [posts, selectedYear, selectedMonth, selectedDate]);
+    fetchUserPosts(page, perPage, search);
+  }, [page, perPage, search]);
 
   // FETCH USER BASIC DETAILS
   const fetchUserDetails = async () => {
@@ -91,70 +80,55 @@ const UserPostsReport = () => {
     } catch (err) {}
   };
 
-  // FETCH POSTS USING NEW HISTORY API
-  const fetchUserPosts = async () => {
+  const fetchUserPosts = async (
+    pageNumber = 1,
+    pageSize = 10,
+    searchTerm = ""
+  ) => {
+    setLoading(true);
     try {
-      const response = await apiService.getUserPostHistory(userId);
+      // Build filter params
+      const params: any = {
+        page: pageNumber,
+        limit: pageSize,
+      };
+
+      if (searchTerm) {
+        params.search = searchTerm;
+      }
+
+      const response = await apiService.getUserPostHistory(userId, params);
 
       if (response.status) {
         setPosts(response.data.posts || []);
+        setTotalRows(response.data.pagination?.total || 0);
       } else {
         setPosts([]);
+        setTotalRows(0);
         Swal.fire({
           icon: "error",
           title: "Error",
           text: response.message || "Failed to load post history",
+          confirmButtonColor: "#6366f1",
         });
       }
     } catch (err: any) {
+      setPosts([]);
+      setTotalRows(0);
       Swal.fire({
         icon: "error",
         title: "Error",
         text: err.message || "Failed to fetch post history",
+        confirmButtonColor: "#6366f1",
       });
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
-  };
-
-  // APPLY FILTERS
-  const filterPosts = () => {
-    let filtered = [...posts];
-
-    if (selectedYear && selectedYear !== "all") {
-      filtered = filtered.filter(
-        (p) => new Date(p.created_at).getFullYear().toString() === selectedYear
-      );
-    }
-
-    if (selectedMonth && selectedMonth !== "all") {
-      filtered = filtered.filter(
-        (p) =>
-          (new Date(p.created_at).getMonth() + 1)
-            .toString()
-            .padStart(2, "0") === selectedMonth
-      );
-    }
-
-    if (selectedDate) {
-      filtered = filtered.filter(
-        (p) => p.created_at.split("T")[0] === selectedDate
-      );
-    }
-
-    setFilteredPosts(filtered);
   };
 
   const resetFilters = () => {
-    setSelectedYear(undefined);
-    setSelectedMonth(undefined);
-    setSelectedDate("");
-  };
-
-  const getYearOptions = () => {
-    const years = new Set<number>();
-    posts.forEach((p) => years.add(new Date(p.created_at).getFullYear()));
-    return Array.from(years).sort((a, b) => b - a);
+    setSearch("");
+    setPage(1);
   };
 
   const monthNames = [
@@ -172,43 +146,140 @@ const UserPostsReport = () => {
     "December",
   ];
 
-  if (isLoading) {
-    return (
-      <DashboardLayout userRole="admin">
-        <div className="flex items-center justify-center h-screen">
-          <div className="animate-spin h-12 w-12 rounded-full border-b-4 border-indigo-600"></div>
-        </div>
-      </DashboardLayout>
-    );
-  }
+  const exportExcel = async () => {
+    try {
+      // Fetch all data for export
+      const params: any = {
+        page: 1,
+        limit: 10000, // Get all records
+      };
+
+      const response = await apiService.getUserPostHistory(userId, params);
+
+      if (!response.status || !response.data.posts) {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Failed to fetch data for export",
+          confirmButtonColor: "#6366f1",
+        });
+        return;
+      }
+
+      const excelData = response.data.posts.map(
+        (post: Post, index: number) => ({
+          "S.No": index + 1,
+          Title: post.title || "Untitled",
+          Status: post.status,
+          Type: post.is_ai_generated ? "AI Generated" : "Manual",
+          "Created Date": new Date(post.created_at).toLocaleDateString(),
+          "Published Date": post.published_at
+            ? new Date(post.published_at).toLocaleDateString()
+            : "N/A",
+          "Scheduled Date": post.scheduled_at
+            ? new Date(post.scheduled_at).toLocaleDateString()
+            : "N/A",
+        })
+      );
+
+      const ws = XLSX.utils.json_to_sheet(excelData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Posts");
+      const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+      saveAs(new Blob([buf]), `${user?.user_name || "user"}-posts-report.xlsx`);
+    } catch (err) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Failed to export data",
+        confirmButtonColor: "#6366f1",
+      });
+    }
+  };
+
+  /* -------------------- DataTable Columns -------------------- */
+  const columns: TableColumn<Post>[] = useMemo(
+    () => [
+      {
+        name: "S.No",
+        width: "70px",
+        cell: (_, index) =>
+          page === 1 ? index + 1 : (page - 1) * perPage + (index + 1),
+      },
+      {
+        name: "Title",
+        selector: (row) => row.title || "Untitled",
+        sortable: true,
+        width: "250px",
+      },
+      {
+        name: "Status",
+        width: "120px",
+        cell: (row) => <Badge>{row.status}</Badge>,
+        sortable: true,
+      },
+      {
+        name: "Type",
+        width: "140px",
+        cell: (row) => (
+          <Badge variant={row.is_ai_generated ? "default" : "secondary"}>
+            {row.is_ai_generated ? "AI Generated" : "Manual"}
+          </Badge>
+        ),
+      },
+      {
+        name: "Created Date",
+        selector: (row) => new Date(row.created_at).toLocaleDateString(),
+        sortable: true,
+        width: "140px",
+      },
+      {
+        name: "Actions",
+        width: "120px",
+        cell: (row) => (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              navigate(`/admin/users/${userId}`, {
+                state: { postId: row.id },
+              })
+            }
+          >
+            View
+          </Button>
+        ),
+      },
+    ],
+    [page, perPage]
+  );
 
   return (
     <DashboardLayout userRole="admin">
-      <div className="space-y-6">
-        {/* HEADER */}
-        <div className="pb-4 border-b border-gray-100">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-extrabold text-gray-900">
-                <span
-                  className={`text-transparent bg-clip-text ${primaryGradientClass}`}
-                >
-                  User Posts Report
-                </span>
-              </h1>
+      <div className="space-y-8">
+        {/* Page Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-gray-200">
+          <div>
+            <h1 className="text-3xl font-extrabold">
+              <span
+                className={`bg-clip-text text-transparent ${primaryGradientClass}`}
+              >
+                User Posts
+              </span>{" "}
+              Report
+            </h1>
 
-              {user && (
-                <p className="mt-2 text-gray-600 flex items-center gap-2">
-                  <User className="w-4 h-4" />
-                  {user.user_name} ({user.email})
-                </p>
-              )}
-            </div>
-
-            <Button variant="outline" onClick={() => navigate("/admin/report")}>
-              Back to Reports
-            </Button>
+            {user && (
+              <p className="text-gray-600 text-lg mt-1 flex items-center gap-2">
+                <User className="w-4 h-4" />
+                {user.user_name} ({user.email})
+              </p>
+            )}
           </div>
+
+          <Button variant="outline" onClick={() => navigate("/admin/report")}>
+            Back to Reports
+          </Button>
         </div>
 
         {/* FILTERS CARD */}
@@ -226,21 +297,15 @@ const UserPostsReport = () => {
               <div className="space-y-2">
                 <label>Year</label>
                 <Select
-                  value={selectedYear || "all"}
-                  onValueChange={(v) =>
-                    setSelectedYear(v === "all" ? undefined : v)
-                  }
+                  onValueChange={(v) => {
+                    setPage(1);
+                  }}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select Year" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Years</SelectItem>
-                    {getYearOptions().map((year) => (
-                      <SelectItem key={year} value={year.toString()}>
-                        {year}
-                      </SelectItem>
-                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -249,10 +314,9 @@ const UserPostsReport = () => {
               <div className="space-y-2">
                 <label>Month</label>
                 <Select
-                  value={selectedMonth || "all"}
-                  onValueChange={(v) =>
-                    setSelectedMonth(v === "all" ? undefined : v)
-                  }
+                  onValueChange={(v) => {
+                    setPage(1);
+                  }}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select Month" />
@@ -276,8 +340,9 @@ const UserPostsReport = () => {
                 <label>Date</label>
                 <Input
                   type="date"
-                  value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
+                  onChange={(e) => {
+                    setPage(1);
+                  }}
                 />
               </div>
 
@@ -293,78 +358,87 @@ const UserPostsReport = () => {
                 </Button>
               </div>
             </div>
-
-            <p className="mt-3 text-sm text-gray-600">
-              Showing {filteredPosts.length} of {posts.length} posts
-            </p>
           </CardContent>
         </Card>
 
-        {/* POSTS TABLE */}
-        <Card className="shadow-lg border-2 border-indigo-100/50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="w-5 h-5" />
-              Posts ({filteredPosts.length})
-            </CardTitle>
-          </CardHeader>
+        {/* Card + Table */}
+        <Card className="shadow-xl border border-indigo-100/50 rounded-2xl">
+          <CardContent className="pt-6">
+            {/* Search + Export */}
+            <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="relative w-full sm:w-72">
+                <input
+                  type="text"
+                  placeholder="Search title, content, status..."
+                  className="border px-3 py-2 rounded-lg w-full shadow-sm focus:ring-indigo-300 focus:border-indigo-400 pr-9"
+                  value={search}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setPage(1);
+                  }}
+                />
 
-          <CardContent>
-            {filteredPosts.length === 0 ? (
-              <div className="text-center py-10 text-gray-500">
-                No posts found
+                {search && (
+                  <X
+                    className="absolute right-3 top-2.5 h-4 w-4 cursor-pointer text-gray-400 hover:text-gray-600"
+                    onClick={() => {
+                      setSearch("");
+                      setPage(1);
+                    }}
+                  />
+                )}
               </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Title</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Created Date</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
 
-                  <TableBody>
-                    {filteredPosts.map((post) => (
-                      <TableRow key={post.id}>
-                        <TableCell>{post.title || "Untitled"}</TableCell>
+              <Button
+                className="bg-green-600 hover:bg-green-700 px-6"
+                onClick={exportExcel}
+              >
+                Export Excel
+              </Button>
+            </div>
 
-                        <TableCell>
-                          <Badge>{post.status}</Badge>
-                        </TableCell>
-
-                        <TableCell>
-                          <Badge>
-                            {post.is_ai_generated ? "AI Generated" : "Manual"}
-                          </Badge>
-                        </TableCell>
-
-                        <TableCell>
-                          {new Date(post.created_at).toLocaleDateString()}
-                        </TableCell>
-
-                        <TableCell>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() =>
-                              navigate(`/admin/users/${userId}`, {
-                                state: { postId: post.id },
-                              })
-                            }
-                          >
-                            View
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
+            {/* Data Table */}
+            <div className="rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+              <DataTable
+                columns={columns}
+                data={posts}
+                progressPending={loading}
+                pagination
+                paginationServer
+                paginationTotalRows={totalRows}
+                onChangePage={(p) => setPage(p)}
+                onChangeRowsPerPage={(size) => {
+                  setPerPage(size);
+                  setPage(1);
+                }}
+                highlightOnHover
+                pointerOnHover
+                responsive
+                persistTableHead
+                customStyles={{
+                  rows: {
+                    style: {
+                      minHeight: "60px",
+                      fontSize: "15px",
+                    },
+                  },
+                  headCells: {
+                    style: {
+                      background: "#f8f9ff",
+                      fontWeight: "700",
+                      fontSize: "14px",
+                      padding: "14px",
+                    },
+                  },
+                  cells: {
+                    style: {
+                      paddingTop: "14px",
+                      paddingBottom: "14px",
+                    },
+                  },
+                }}
+              />
+            </div>
           </CardContent>
         </Card>
       </div>

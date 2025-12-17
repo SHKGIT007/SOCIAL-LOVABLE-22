@@ -36,11 +36,6 @@ module.exports = function (app) {
 
     const redirect_uri = `${backendBase}/auth/google/callback`;
 
-    console.log("[Google OAuth] init handler - incoming path:", req.path);
-    console.log("[Google OAuth] host:", req.get("host"));
-    console.log("[Google OAuth] computed backendBase:", backendBase);
-    console.log("[Google OAuth] redirect_uri:", redirect_uri);
-
     let redirect_dashboard =
       req.query.redirect_dashboard ||
       req.get("referer") ||
@@ -111,23 +106,6 @@ module.exports = function (app) {
 
         const redirect_uri = `${backendBase}/auth/google/callback`;
 
-        console.log(
-          "[Google OAuth] callback handler - incoming path:",
-          req.path
-        );
-        console.log("[Google OAuth] callback originalUrl:", req.originalUrl);
-        console.log("[Google OAuth] computed redirect_uri:", redirect_uri);
-        console.log(
-          "[Google OAuth] state param (decoded):",
-          (() => {
-            try {
-              return JSON.parse(decodeURIComponent(req.query.state || "{}"));
-            } catch (e) {
-              return req.query.state;
-            }
-          })()
-        );
-
         const tokenRes = await axios.post(
           "https://oauth2.googleapis.com/token",
           new URLSearchParams({
@@ -150,7 +128,7 @@ module.exports = function (app) {
           })
           .then((r) => r.data);
 
-        let user = await User.findOne({ where: { email: profile.email } });
+        let user = await User.findOne({ where: { email: profile.email, is_email_verified: true, } });
 
         const action = state.action || "signin";
 

@@ -131,24 +131,25 @@ const Report = () => {
       },
       {
         name: "Plan",
-        width: "170px",
-        cell: (row) =>
-          row.subscription?.plan ? (
-            <div className="flex items-center gap-2">
-              <span>{row.subscription.plan.name}</span>
-              <Badge
-                variant={
-                  row.subscription.status === "active"
-                    ? "default"
-                    : "destructive"
-                }
-              >
-                {row.subscription.status}
-              </Badge>
-            </div>
-          ) : (
-            "N/A"
-          ),
+        selector: (row) => row.subscription?.plan || "N/A",
+        width: "100px",
+      },
+      {
+        name: "Plan Status",
+        width: "120px",
+        cell: (row) => {
+          const status = row.subscription?.status;
+
+          if (status === "active") {
+            return (
+              <span className="px-3 py-1 rounded-full bg-green-700 text-white text-xs font-semibold">
+                Active
+              </span>
+            );
+          }
+
+          return <span className="text-gray-500">N/A</span>;
+        },
       },
       {
         name: "AI Usage",
