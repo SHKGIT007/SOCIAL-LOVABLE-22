@@ -646,6 +646,21 @@
 {"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-18T10:38:47.382Z","userId":2}
 {"email":"shaktijatpnp09@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-18T11:42:33.601Z","userId":17}
 {"level":"info","message":"Razorpay order created","orderId":"order_RhBsbcG3me3195","planId":12,"service":"social-lovable-api","timestamp":"2025-11-18T11:43:23.774Z","userId":17}
+<<<<<<< HEAD
+{"expiredAt":"2025-11-17T04:50:38.000Z","level":"error","message":"Authentication error: jwt expired","name":"TokenExpiredError","service":"social-lovable-api","stack":"TokenExpiredError: jwt expired\n    at C:\\SOCIAL-LOVABLE-22\\backend\\node_modules\\jsonwebtoken\\verify.js:190:21\n    at getSecret (C:\\SOCIAL-LOVABLE-22\\backend\\node_modules\\jsonwebtoken\\verify.js:97:14)\n    at module.exports [as verify] (C:\\SOCIAL-LOVABLE-22\\backend\\node_modules\\jsonwebtoken\\verify.js:101:10)\n    at authenticateToken (C:\\SOCIAL-LOVABLE-22\\backend\\app\\middleware\\auth.middleware.js:18:29)\n    at Layer.handle [as handle_request] (C:\\SOCIAL-LOVABLE-22\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n    at trim_prefix (C:\\SOCIAL-LOVABLE-22\\backend\\node_modules\\express\\lib\\router\\index.js:328:13)\n    at C:\\SOCIAL-LOVABLE-22\\backend\\node_modules\\express\\lib\\router\\index.js:286:9\n    at Function.process_params (C:\\SOCIAL-LOVABLE-22\\backend\\node_modules\\express\\lib\\router\\index.js:346:12)\n    at next (C:\\SOCIAL-LOVABLE-22\\backend\\node_modules\\express\\lib\\router\\index.js:280:10)\n    at Function.handle (C:\\SOCIAL-LOVABLE-22\\backend\\node_modules\\express\\lib\\router\\index.js:175:3)","timestamp":"2025-11-19T05:01:32.176Z"}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-19T05:01:42.022Z","userId":2}
+{"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-19T05:02:45.010Z","userId":1}
+{"level":"info","message":"Published to Facebook","postId":38,"service":"social-lovable-api","timestamp":"2025-11-19T05:33:09.778Z"}
+{"level":"info","message":"Published to Facebook","postId":39,"service":"social-lovable-api","timestamp":"2025-11-19T06:25:07.849Z"}
+{"level":"info","message":"Published to Facebook","postId":40,"service":"social-lovable-api","timestamp":"2025-11-19T06:42:09.445Z"}
+{"level":"info","message":"Published to Facebook","postId":41,"service":"social-lovable-api","timestamp":"2025-11-19T08:28:08.094Z"}
+{"level":"info","message":"Published to Facebook","postId":42,"service":"social-lovable-api","timestamp":"2025-11-19T08:58:08.129Z"}
+{"level":"info","message":"Published to Facebook","postId":43,"service":"social-lovable-api","timestamp":"2025-11-19T09:01:07.074Z"}
+{"level":"info","message":"Published to Facebook","postId":44,"service":"social-lovable-api","timestamp":"2025-11-19T09:43:08.878Z"}
+{"level":"info","message":"Published to Facebook","postId":45,"service":"social-lovable-api","timestamp":"2025-11-19T10:46:08.603Z"}
+{"level":"info","message":"Published to Facebook","postId":46,"service":"social-lovable-api","timestamp":"2025-11-19T13:21:07.237Z"}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-19T14:54:05.946Z","userId":2}
+=======
 {"level":"info","message":"Razorpay order created","orderId":"order_RhUa8q8shTKE8d","planId":12,"service":"social-lovable-api","timestamp":"2025-11-19T06:01:06.487Z","userId":17}
 {"level":"info","message":"Subscription created","planId":12,"service":"social-lovable-api","subscriptionId":15,"timestamp":"2025-11-19T06:01:30.647Z","userId":17}
 {"level":"info","message":"Razorpay payment verified","orderId":"order_RhUa8q8shTKE8d","paymentId":"pay_RhUaLwghBXdhp6","service":"social-lovable-api","subscriptionId":15,"timestamp":"2025-11-19T06:01:30.650Z"}
@@ -766,6 +781,9 @@
 {"createdBy":1,"email":"shakir@gmail.com","level":"info","message":"User created by admin","service":"social-lovable-api","timestamp":"2025-11-20T12:28:41.179Z","userId":18}
 {"level":"info","message":"User status updated Successfully","service":"social-lovable-api","timestamp":"2025-11-20T12:28:46.205Z","updatedBy":1,"userId":"18"}
 {"level":"info","message":"User status updated Successfully","service":"social-lovable-api","timestamp":"2025-11-20T12:28:54.113Z","updatedBy":1,"userId":"18"}
+<<<<<<< HEAD
+>>>>>>> 49602abb986564f593185216598562ec6eecdd84
+=======
 {"level":"info","message":"User updated by admin","service":"social-lovable-api","timestamp":"2025-11-21T04:40:21.385Z","updatedBy":1,"userId":"18"}
 {"level":"info","message":"User updated by admin","service":"social-lovable-api","timestamp":"2025-11-21T04:42:00.132Z","updatedBy":1,"userId":"17"}
 {"level":"info","message":"User status updated Successfully","service":"social-lovable-api","timestamp":"2025-11-21T04:42:52.033Z","updatedBy":1,"userId":"18"}
@@ -850,6 +868,9 @@
 {"email":"shaktijatpnp09@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-21T13:10:03.618Z","userId":17}
 {"level":"info","message":"User status updated Successfully","service":"social-lovable-api","timestamp":"2025-11-21T13:12:02.394Z","updatedBy":1,"userId":"17"}
 {"email":"shaktijatpnp09@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-21T13:12:07.131Z","userId":17}
+<<<<<<< HEAD
+>>>>>>> bebf5f114a6ead0c650aba67adf06659ca70277b
+=======
 {"level":"error","message":"Authentication error:","name":"SequelizeConnectionRefusedError","original":{"code":"ECONNREFUSED","fatal":true},"parent":{"code":"ECONNREFUSED","fatal":true},"service":"social-lovable-api","stack":"SequelizeConnectionRefusedError\n    at ConnectionManager.connect (C:\\Project\\SOCIAL-LOVABLE-22\\backend\\node_modules\\sequelize\\lib\\dialects\\mysql\\connection-manager.js:92:17)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async ConnectionManager._connect (C:\\Project\\SOCIAL-LOVABLE-22\\backend\\node_modules\\sequelize\\lib\\dialects\\abstract\\connection-manager.js:222:24)","timestamp":"2025-11-21T13:26:48.825Z"}
 {"level":"error","message":"Authentication error:","name":"SequelizeConnectionRefusedError","original":{"code":"ECONNREFUSED","fatal":true},"parent":{"code":"ECONNREFUSED","fatal":true},"service":"social-lovable-api","stack":"SequelizeConnectionRefusedError\n    at ConnectionManager.connect (C:\\Project\\SOCIAL-LOVABLE-22\\backend\\node_modules\\sequelize\\lib\\dialects\\mysql\\connection-manager.js:92:17)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async ConnectionManager._connect (C:\\Project\\SOCIAL-LOVABLE-22\\backend\\node_modules\\sequelize\\lib\\dialects\\abstract\\connection-manager.js:222:24)","timestamp":"2025-11-21T13:26:50.120Z"}
 {"email":"shaktijatpnp09@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-22T05:43:36.533Z","userId":17}
@@ -1098,6 +1119,11 @@
 {"email":"shaktijatpnp09@gmail.com","level":"info","message":"OTP sent","service":"social-lovable-api","timestamp":"2025-11-29T05:05:18.126Z"}
 {"email":"shaktijatpnp09@gmail.com","level":"info","message":"OTP verified successfully","service":"social-lovable-api","timestamp":"2025-11-29T05:05:36.540Z"}
 {"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-29T05:33:54.177Z","userId":1}
+<<<<<<< HEAD
+>>>>>>> 845655c65df6f2ef618547f949f006f950b89ce3
+{"expiredAt":"2025-11-26T05:01:42.000Z","level":"error","message":"Authentication error: jwt expired","name":"TokenExpiredError","service":"social-lovable-api","stack":"TokenExpiredError: jwt expired\n    at C:\\SOCIAL-LOVABLE-22\\backend\\node_modules\\jsonwebtoken\\verify.js:190:21\n    at getSecret (C:\\SOCIAL-LOVABLE-22\\backend\\node_modules\\jsonwebtoken\\verify.js:97:14)\n    at module.exports [as verify] (C:\\SOCIAL-LOVABLE-22\\backend\\node_modules\\jsonwebtoken\\verify.js:101:10)\n    at authenticateToken (C:\\SOCIAL-LOVABLE-22\\backend\\app\\middleware\\auth.middleware.js:18:29)\n    at Layer.handle [as handle_request] (C:\\SOCIAL-LOVABLE-22\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n    at trim_prefix (C:\\SOCIAL-LOVABLE-22\\backend\\node_modules\\express\\lib\\router\\index.js:328:13)\n    at C:\\SOCIAL-LOVABLE-22\\backend\\node_modules\\express\\lib\\router\\index.js:286:9\n    at Function.process_params (C:\\SOCIAL-LOVABLE-22\\backend\\node_modules\\express\\lib\\router\\index.js:346:12)\n    at next (C:\\SOCIAL-LOVABLE-22\\backend\\node_modules\\express\\lib\\router\\index.js:280:10)\n    at Function.handle (C:\\SOCIAL-LOVABLE-22\\backend\\node_modules\\express\\lib\\router\\index.js:175:3)","timestamp":"2025-11-29T11:01:58.426Z"}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-11-29T11:02:38.503Z","userId":2}
+=======
 {"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-12-01T04:44:41.288Z","userId":1}
 {"email":"shaktijatpnp09@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-12-01T05:10:04.829Z","userId":44}
 {"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-12-01T05:25:25.656Z","userId":1}
@@ -1107,9 +1133,16 @@
 {"ai_prompt":"Title: Fire Cracker\nDetails: Business/Creator: Fire Cracker\nDescription: This image captures the exact moment a firecracker bursts open in the sky. The explosion creates sharp, golden spark trails that scatter in all directions. The dark background makes the glowing sparks look even more dramatic and detailed, giving a high-speed photography feel.\nPlatforms: facebook\nBrand Voice: Fire \nHashtags: #marketing \nFestival/Event: Diwali","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-12-02T10:40:33.370Z","userId":45}
 {"level":"info","message":"User status updated Successfully","service":"social-lovable-api","timestamp":"2025-12-03T09:05:02.869Z","updatedBy":1,"userId":"45"}
 {"level":"info","message":"User status updated Successfully","service":"social-lovable-api","timestamp":"2025-12-03T09:05:05.692Z","updatedBy":1,"userId":"45"}
+<<<<<<< HEAD
+>>>>>>> 275a112c186da3c61aac9c9eb8a437c202fc4149
+{"amountPaid":0,"hasEndDate":false,"level":"info","message":"Subscription created","paymentStatus":"success","planId":1,"service":"social-lovable-api","subscriptionId":42,"timestamp":"2025-12-04T12:30:24.219Z","userId":46}
+{"email":"snehpnp@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-12-04T12:33:22.676Z","userId":46}
+{"ai_prompt":"Title: Please complete your profile before generating AI content.\nDetails: Please complete your profile before generating AI content.","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2025-12-04T12:37:27.173Z","userId":46}
+=======
 {"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-12-08T04:28:07.405Z","userId":1}
 {"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-12-08T04:33:38.912Z","userId":2}
 {"email":"shaktijatpnp09@gmail.com","level":"info","message":"OTP sent","service":"social-lovable-api","timestamp":"2025-12-09T06:21:09.005Z"}
+<<<<<<< HEAD
 {"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-12-09T10:05:55.174Z","userId":2,"username":"test"}
 {"level":"info","message":"User password changed","service":"social-lovable-api","timestamp":"2025-12-10T04:38:28.019Z","userId":2}
 {"level":"info","message":"User password changed","service":"social-lovable-api","timestamp":"2025-12-10T04:38:44.737Z","userId":2}
@@ -1173,3 +1206,9 @@
 {"level":"info","message":"Plan updated","planId":"26","service":"social-lovable-api","timestamp":"2025-12-11T08:49:28.811Z","updatedBy":1}
 {"level":"info","message":"Plan updated","planId":"38","service":"social-lovable-api","timestamp":"2025-12-11T08:53:38.122Z","updatedBy":1}
 {"level":"info","message":"Plan updated","planId":"38","service":"social-lovable-api","timestamp":"2025-12-11T08:53:42.895Z","updatedBy":1}
+=======
+>>>>>>> 597ce589a0d97204ac1d5a5e22593e3f67f894c9
+{"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-12-12T07:15:20.558Z","userId":1,"username":"admin"}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-12-12T07:18:19.694Z","userId":2,"username":"test"}
+{"level":"info","message":"Post updated","postId":"128","service":"social-lovable-api","timestamp":"2025-12-12T07:54:06.279Z","userId":2}
+>>>>>>> cc1906b2a92e3e7051b10e3241dd24550246eaf0
