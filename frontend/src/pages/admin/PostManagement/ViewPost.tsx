@@ -166,7 +166,10 @@ const AdminViewPost = () => {
                 </Badge>
               ))}
 
-              <Badge variant="secondary">Status: {post.status}</Badge>
+              <Badge variant="secondary">
+                Status:{" "}
+                {post.status.charAt(0).toUpperCase() + post.status.slice(1)}
+              </Badge>
 
               {post.is_ai_generated && (
                 <Badge

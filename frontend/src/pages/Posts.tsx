@@ -347,17 +347,19 @@ const Posts = () => {
 
                           {post.review_status === "pending" &&
                             isPastSchedule && (
-                              <Badge
-                                className="
-        absolute top-0 right-0
-        bg-red-100 text-red-700 
-        border border-red-200 
-        text-xs font-medium 
-        px-2 py-0.5 rounded-md
-      "
-                              >
-                                Review Expired
-                              </Badge>
+                             <Badge
+  className="
+    absolute top-0 right-0
+    bg-red-100 text-red-700
+    border border-red-200
+    text-xs font-medium
+    px-2 py-0.5 rounded-md
+    pointer-events-none
+  "
+>
+  Review Expired
+</Badge>
+
                             )}
                         </div>
 
