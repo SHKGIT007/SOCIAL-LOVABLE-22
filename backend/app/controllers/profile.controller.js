@@ -4,7 +4,7 @@ const { User } = require('../models');
 // Get profile for logged-in user
 exports.getProfile = async (req, res) => {
   try {
-    const profile = await Profile.findOne({ where: { user_id: req.user.id } });
+    const profile = await Profile.findOne({ where: { user_id: req.user?.dataValues?.id || req.user.id } });
     if (!profile) return res.status(404).json({ status: false, message: 'Profile not found' });
     res.json({ status: true, data: { profile } });
   } catch (error) {

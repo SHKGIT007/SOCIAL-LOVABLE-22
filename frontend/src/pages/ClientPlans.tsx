@@ -53,6 +53,10 @@ const ClientPlans = () => {
     };
   }, []);
 
+  const hasAnySubscription =
+  currentSubscription && currentSubscription.status === "active";
+
+
   const checkAuthAndFetchData = async () => {
     try {
       if (!isAuthenticated()) {
@@ -238,7 +242,7 @@ const ClientPlans = () => {
 
                 {/* 🔥 Display Start & End Date */}
                 <div className="flex justify-between">
-                  <span className="font-medium">Start Date:</span>
+                  <span className="font-medium">Subsciption Date:</span>
                   <span>
                     {new Date(
                       currentSubscription.start_date
@@ -246,7 +250,7 @@ const ClientPlans = () => {
                   </span>
                 </div>
 
-                <div className="flex justify-between">
+                {/* <div className="flex justify-between">
                   <span className="font-medium">End Date:</span>
                   <span>
                     {currentSubscription.end_date
@@ -255,7 +259,7 @@ const ClientPlans = () => {
                         ).toLocaleDateString("en-IN")
                       : "No End Date"}
                   </span>
-                </div>
+                </div> */}
 
                 {/* 🔥 AI Posts with Progress Bar */}
                 <div className="space-y-1">
@@ -317,85 +321,63 @@ const ClientPlans = () => {
           </Card>
         )}
         {/* Plans */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {plans.map((plan) => {
-            const isCurrent = currentSubscription?.plan_id === plan.id;
-            const buttonDisabled = hasActiveSubscription;
-            const buttonLabel = (() => {
-              if (isCurrent && hasActiveSubscription) return "Current Plan";
-              if (hasActiveSubscription) return "Cancel current plan first";
-              if (isCurrent && isPostLimitReached) return "Renew Plan";
-              return "Subscribe";
-            })();
+        {/* Show plans ONLY if no active subscription OR limit reached */}
+       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+  {plans.map((plan) => {
+    const isCurrent = currentSubscription?.plan_id === plan.id;
 
-            return (
-              <Card
-                key={plan.id}
-                className={`relative overflow-hidden transition-all hover:shadow-lg ${
-                  isCurrent
-                    ? "border-indigo-300 ring-1 ring-indigo-200"
-                    : "border-indigo-100"
-                }`}
-              >
-                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-600 to-sky-500" />
+    return (
+      <Card
+        key={plan.id}
+        className={`relative overflow-hidden ${
+          isCurrent
+            ? "border-indigo-300 ring-1 ring-indigo-200"
+            : "border-indigo-100"
+        }`}
+      >
+        {isCurrent && (
+          <div className="absolute right-0 top-3 rounded-s-full bg-indigo-600 px-3 py-1 text-xs font-semibold text-white">
+            Current
+          </div>
+        )}
 
-                {isCurrent && (
-                  <div className="absolute right-0 top-3 -translate-y-1/2 rounded-s-full bg-indigo-600 px-3 py-1 text-xs font-semibold text-white shadow">
-                    Current
-                  </div>
-                )}
+        <CardHeader>
+          <CardTitle>{plan.name}</CardTitle>
+          <CardDescription>
+            <span className="text-3xl font-bold">₹{plan.price}</span>
+          </CardDescription>
+          <CardDescription>{plan.description}</CardDescription>
+        </CardHeader>
 
-                <CardHeader>
-                  <CardTitle className="text-xl">{plan.name}</CardTitle>
-                  <CardDescription>
-                    <span className="text-3xl font-extrabold text-gray-900">
-                      ₹{plan.price}
-                    </span>
-                  </CardDescription>
-                  <CardDescription>
-                    <span className="text-l font-bold text-gray-900">
-                      {plan.description}
-                    </span>
-                  </CardDescription>
-                </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <div className="flex gap-2">
+              <Check className="h-4 w-4 text-indigo-600" />
+              <span>{plan.ai_posts} AI posts</span>
+            </div>
+            <div className="flex gap-2">
+              <Check className="h-4 w-4 text-indigo-600" />
+              <span>{plan.linked_accounts} linked accounts</span>
+            </div>
+          </div>
+        </CardContent>
 
-                <CardDescription className="px-6">
-                  <span className="text-sm text-gray-600">
-                    {plan.duration_months} months duration
-                  </span>
-                </CardDescription>
+        {/* 🔥 BUTTON ONLY WHEN NO SUBSCRIPTION */}
+        {!hasAnySubscription && (
+          <CardFooter>
+            <Button
+              className="w-full bg-gradient-to-r from-indigo-600 to-sky-500 text-white"
+              onClick={() => handleSubscribe(plan.id)}
+            >
+              Subscribe
+            </Button>
+          </CardFooter>
+        )}
+      </Card>
+    );
+  })}
+</div>
 
-                <CardContent>
-                  <div className="space-y-2 text-gray-800">
-                    <div className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-indigo-600" />
-                      <span>{plan.ai_posts} AI-generated posts</span>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-indigo-600" />
-                      <span>{plan.linked_accounts} linked accounts</span>
-                    </div>
-                  </div>
-                </CardContent>
-
-                <CardFooter>
-                  <Button
-                    className={`w-full shadow-md ${
-                      buttonDisabled
-                        ? "bg-gray-200 text-gray-700 cursor-not-allowed"
-                        : "bg-gradient-to-r from-indigo-600 to-sky-500 text-white"
-                    }`}
-                    onClick={() => handleSubscribe(plan.id)}
-                    disabled={buttonDisabled}
-                  >
-                    {buttonLabel}
-                  </Button>
-                </CardFooter>
-              </Card>
-            );
-          })}
-        </div>
       </div>
     </DashboardLayout>
   );

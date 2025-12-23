@@ -21,9 +21,14 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import Swal from "sweetalert2";
-import { Loader2, Sparkles, Image as ImageIcon, Film } from "lucide-react";
+import {
+  Loader2,
+  Sparkles,
+  Image as ImageIcon,
+  AlertCircle,
+} from "lucide-react";
 import { apiService } from "@/services/api";
-import { isAuthenticated, logout } from "@/utils/auth";
+import { isAuthenticated } from "@/utils/auth";
 
 const NewPost = () => {
   // States
@@ -45,13 +50,11 @@ const NewPost = () => {
   const [optionalImagePrompt, setOptionalImagePrompt] = useState("");
   const [optionalTitlePrompt, setOptionalTitlePrompt] = useState("");
 
-  console.log("optionalContentPrompt", optionalContentPrompt);
-  console.log("optionalImagePrompt", optionalImagePrompt);
-
   const [connectedAccounts, setConnectedAccounts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [mode, setMode] = useState<"ai" | "manual">("ai");
+  const [profileLoaded, setProfileLoaded] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -59,6 +62,7 @@ const NewPost = () => {
       try {
         const accRes = await apiService.getMySocialAccounts();
         setConnectedAccounts(accRes.data.socialAccounts || []);
+
         const profileRes = await apiService.request("/profile");
         if (profileRes.status && profileRes.data?.profile) {
           const p = profileRes.data.profile;
@@ -67,8 +71,11 @@ const NewPost = () => {
           if (p.festival?.trim()) prompt += `\nFestival/Event: ${p.festival}`;
           setAiPrompt(prompt);
           setImagePrompt(p.image_style || "");
+          setProfileLoaded(true);
         }
-      } catch {}
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
     };
     fetchData();
   }, []);
@@ -81,12 +88,20 @@ const NewPost = () => {
     );
 
   const handleGenerateAI = async () => {
-    if (!aiPrompt.trim()) {
+    // Check if profile is loaded and prompt is available
+    if (!profileLoaded || !aiPrompt.trim()) {
       Swal.fire({
         icon: "warning",
-        title: "Profile should be update first",
+        title: "Profile Update Required",
         text: "Please complete your profile before generating AI content.",
         confirmButtonColor: "#6366f1",
+        showCancelButton: true,
+        cancelButtonText: "Later",
+        confirmButtonText: "Go to Profile",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate("/profile");
+        }
       });
       return;
     }
@@ -94,39 +109,64 @@ const NewPost = () => {
     setIsGenerating(true);
     try {
       const res = await apiService.generateAIPost({
-        title: ["", null, undefined].includes(optionalTitlePrompt)
-          ? title
-          : optionalTitlePrompt,
-        ai_prompt: ["", null, undefined].includes(optionalContentPrompt)
-          ? aiPrompt
-          : optionalContentPrompt,
-        image_prompt: ["", null, undefined].includes(optionalImagePrompt)
-          ? imagePrompt
-          : optionalImagePrompt,
+        title: optionalTitlePrompt?.trim() || title,
+        ai_prompt: optionalContentPrompt?.trim() || aiPrompt,
+        image_prompt: optionalImagePrompt?.trim() || imagePrompt,
       });
 
       if (res.status) {
-        setContent(res.data.content);
-        setImageContent(res.data.imageUrl);
+        setContent(res.data.content || "");
+        setImageContent(res.data.imageUrl || "");
+
         Swal.fire({
           icon: "success",
-          title: "Success",
+          title: "Success!",
           text: "AI post generated successfully!",
           confirmButtonColor: "#6366f1",
+          timer: 2000,
         });
+      } else {
+        throw new Error(res.message || "Failed to generate post");
       }
     } catch (err: any) {
-      const message =
-        err?.response?.data?.message ||
-        err?.response?.data?.error ||
-        err?.message ||
-        "Failed to generate post";
+      console.error("AI Generation Error:", err);
 
+      // Extract error message
+      let errorMessage = "Failed to generate post. Please try again.";
+
+      if (err?.response?.data) {
+        errorMessage =
+          err.response.data.message || err.response.data.error || errorMessage;
+      } else if (err?.message) {
+        errorMessage = err.message;
+      }
+
+      // Show detailed error with action buttons
       Swal.fire({
         icon: "error",
-        title: "Error",
-        text: message,
+        title: "Generation Failed",
+        html: `
+          <div style="text-align: left; margin: 20px 0;">
+            <p style="color: #dc2626; font-weight: 600; margin-bottom: 10px;">
+              ${errorMessage}
+            </p>
+            ${
+              errorMessage.includes("subscription")
+                ? '<p style="color: #6b7280; font-size: 14px;"></p>'
+                : ""
+            }
+          </div>
+        `,
         confirmButtonColor: "#6366f1",
+        confirmButtonText: errorMessage.includes("subscription")
+          ? "View Plans"
+          : "OK",
+        showCancelButton: errorMessage.includes("subscription"),
+        cancelButtonText: "Cancel",
+      }).then((result) => {
+        if (result.isConfirmed && errorMessage.includes("subscription")) {
+          navigate("/plans");
+        }
       });
     } finally {
       setIsGenerating(false);
@@ -135,51 +175,75 @@ const NewPost = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validation
     if (!title || !content || platforms.length === 0) {
       Swal.fire({
         icon: "error",
-        title: "Error",
+        title: "Missing Information",
         text: !title
-          ? "Please update your profile first."
+          ? "Please update your profile first to set a business name."
           : !content
-          ? "Please generate or enter content."
-          : "Select at least one platform.",
+          ? "Please generate or enter content for your post."
+          : "Please select at least one platform.",
         confirmButtonColor: "#6366f1",
       });
       return;
     }
+
     if (status === "scheduled") {
+      if (!scheduledAt) {
+        Swal.fire({
+          icon: "error",
+          title: "Schedule Required",
+          text: "Please select a date & time for scheduled post.",
+          confirmButtonColor: "#6366f1",
+        });
+        return;
+      }
+
       const selected = new Date(scheduledAt);
       const now = new Date();
 
-      if (selected <= now) {
+      if (isNaN(selected.getTime()) || selected <= now) {
         Swal.fire({
           icon: "error",
           title: "Invalid Schedule Time",
-          text: "Please choose a future date and time.",
+          text: "Please choose a valid future date and time.",
           confirmButtonColor: "#6366f1",
         });
         return;
       }
     }
+
     setIsLoading(true);
     try {
-      if (!isAuthenticated()) return navigate("/auth");
+      if (!isAuthenticated()) {
+        navigate("/auth");
+        return;
+      }
+
       const formData = new FormData();
-      formData.append("title", title);
+      const finalTitle = optionalTitlePrompt?.trim() || title;
+      formData.append("title", finalTitle);
       formData.append("content", content);
       formData.append("platforms", JSON.stringify(platforms));
       formData.append("status", status);
+
       if (scheduledAt) formData.append("scheduled_at", scheduledAt);
       formData.append("is_ai_generated", String(mode === "ai"));
-      if (aiPrompt) formData.append("ai_prompt", aiPrompt);
-      if (imagePrompt) formData.append("image_prompt", imagePrompt);
+
+      const finalAiPrompt = optionalContentPrompt?.trim() || aiPrompt;
+      const finalImagePrompt = optionalImagePrompt?.trim() || imagePrompt;
+
+      if (finalAiPrompt) formData.append("ai_prompt", finalAiPrompt);
+      if (finalImagePrompt) formData.append("image_prompt", finalImagePrompt);
       if (imageContent) formData.append("image_url", imageContent);
       if (imageFile) formData.append("image_file", imageFile);
       if (videoFile) formData.append("video_file", videoFile);
 
       // Set review_status based on status
-      let reviewStatus = "pending"; // Default for draft
+      let reviewStatus = "pending";
       if (status === "scheduled") {
         reviewStatus = autoToggle ? "pending" : "approved";
       } else if (status === "published") {
@@ -189,26 +253,38 @@ const NewPost = () => {
       formData.append("review_status", reviewStatus);
 
       const res = await apiService.createPost(formData, true);
+
       if (res.status) {
+        const successMessage =
+          status === "published"
+            ? "Post published successfully!"
+            : status === "scheduled"
+            ? "Post scheduled successfully!"
+            : "Post saved as draft!";
+
         Swal.fire({
           icon: "success",
-          title: "Success",
-          text: "Post created successfully!",
+          title: "Success!",
+          text: successMessage,
           confirmButtonColor: "#6366f1",
+          timer: 2000,
         });
+
         navigate("/posts");
       }
     } catch (err: any) {
-      const message =
+      console.error("Submit Error:", err);
+
+      const errorMessage =
         err?.response?.data?.message ||
         err?.response?.data?.error ||
         err?.message ||
-        "Failed to create post";
+        "Failed to create post. Please try again.";
 
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: message,
+        text: errorMessage,
         confirmButtonColor: "#6366f1",
       });
     } finally {
@@ -218,7 +294,7 @@ const NewPost = () => {
 
   return (
     <DashboardLayout userRole="client">
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="max-w-4xl mx-auto space-y-8 pb-8">
         {/* Header */}
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight">
@@ -226,7 +302,7 @@ const NewPost = () => {
               Create New Post
             </span>
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground mt-1">
             Generate AI posts or create manually
           </p>
         </div>
@@ -238,7 +314,7 @@ const NewPost = () => {
               key={m}
               onClick={() => {
                 setMode(m as "ai" | "manual");
-                setContent("");
+                if (m === "manual") setContent("");
               }}
               className={`flex-1 py-3 text-sm font-semibold rounded-xl transition-all ${
                 mode === m
@@ -246,90 +322,155 @@ const NewPost = () => {
                   : "text-indigo-700 hover:bg-indigo-50"
               }`}
             >
-              {m === "ai" ? "AI Generate" : "Manual Create"}
+              {m === "ai" ? "🤖 AI Generate" : "✍️ Manual Create"}
             </button>
           ))}
         </div>
 
         {/* AI Section */}
         {mode === "ai" && (
-          <Card className="border-indigo-100">
-            <CardContent className="space-y-4">
+          <Card className="border-indigo-100 shadow-sm">
+            {/* <CardHeader className="bg-gradient-to-r from-indigo-50 to-cyan-50">
+              <CardTitle className="text-indigo-900 flex items-center gap-2">
+                <Sparkles className="h-5 w-5" />
+                AI Content Generator
+              </CardTitle>
+              <CardDescription>
+                Customize the AI generation or use your profile defaults
+              </CardDescription>
+            </CardHeader> */}
+            <CardContent className="space-y-5 mt-6">
+              {/* Info Banner */}
+              {!profileLoaded && (
+                <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                  <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-amber-900">
+                      Profile setup required
+                    </p>
+                    <p className="text-sm text-amber-700 mt-1">
+                      Please complete your profile to use AI generation
+                    </p>
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={() => navigate("/profile")}
+                    className="bg-amber-600 hover:bg-amber-700"
+                  >
+                    Setup Profile
+                  </Button>
+                </div>
+              )}
+
               {/* Optional Title Prompt */}
-              <div className="mb-2">
-                <label className="block text-sm font-semibold text-gray-700 mb-1">
-                  Optional Title Prompt
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Optional Business/Creator Name
                 </label>
-                <input
+                <Input
                   type="text"
                   value={optionalTitlePrompt}
                   onChange={(e) => setOptionalTitlePrompt(e.target.value)}
-                  className="w-full p-2 rounded border border-indigo-200 focus:border-indigo-400 focus:ring focus:ring-indigo-100 text-sm"
-                  placeholder="Add extra instructions for AI title..."
+                  className="focus-visible:ring-indigo-500"
+                  placeholder={title || "Add custom title for this post..."}
                 />
+                {/* {title && !optionalTitlePrompt && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    Using profile default: {title}
+                  </p>
+                )} */}
               </div>
 
               {/* Optional Content Prompt */}
-              <div className="mb-2">
-                <label className="block text-sm font-semibold text-gray-700 mb-1">
-                  Optional Content Prompt
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Optional Description / Content Instructions
                 </label>
-                <textarea
+                <Textarea
                   value={optionalContentPrompt}
                   onChange={(e) => setOptionalContentPrompt(e.target.value)}
-                  className="w-full p-2 rounded border border-indigo-200 focus:border-indigo-400 focus:ring focus:ring-indigo-100 text-sm"
-                  rows={2}
-                  placeholder="Add extra instructions for AI content..."
+                  className="focus-visible:ring-indigo-500"
+                  rows={3}
+                  placeholder="Add extra instructions for AI content generation..."
                 />
+                {/* {!optionalContentPrompt && aiPrompt && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    Using profile prompt (click to expand)
+                  </p>
+                )} */}
               </div>
 
               {/* Optional Image Prompt */}
-              <div className="mb-2">
-                <label className="block text-sm font-semibold text-gray-700 mb-1">
-                  Optional Image Prompt
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Optional Image Generation Prompt
                 </label>
-                <textarea
+                <Textarea
                   value={optionalImagePrompt}
                   onChange={(e) => setOptionalImagePrompt(e.target.value)}
-                  className="w-full p-2 rounded border border-indigo-200 focus:border-indigo-400 focus:ring focus:ring-indigo-100 text-sm"
+                  className="focus-visible:ring-indigo-500"
                   rows={2}
-                  placeholder="Add extra instructions for AI image..."
+                  placeholder="Describe the image you want AI to generate..."
                 />
+                {/* {imagePrompt && !optionalImagePrompt && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    Using profile default: {imagePrompt}
+                  </p>
+                )} */}
               </div>
 
+              {/* Generate Button */}
               <Button
                 onClick={handleGenerateAI}
-                disabled={isGenerating}
-                className="w-full h-11 bg-gradient-to-r from-indigo-600 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 text-white font-semibold shadow-md"
+                disabled={isGenerating || !profileLoaded}
+                className="w-full h-12 bg-gradient-to-r from-indigo-600 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 text-white font-semibold shadow-md text-base"
               >
                 {isGenerating ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />{" "}
-                    Generating...
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Generating Amazing Content...
                   </>
                 ) : (
                   <>
-                    <Sparkles className="mr-2 h-4 w-4" /> Generate Post with AI
+                    <Sparkles className="mr-2 h-5 w-5" />
+                    Generate Post with AI
                   </>
                 )}
               </Button>
 
+              {/* Generated Content Preview */}
               {content && (
-                <div className="space-y-4 border-t pt-4">
+                <div className="space-y-4 border-t pt-6 mt-6">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-lg font-semibold text-gray-800">
+                      Generated Content
+                    </Label>
+                    <span className="text-xs text-green-600 font-medium">
+                      ✓ Generated Successfully
+                    </span>
+                  </div>
+
                   {imageContent && (
-                    <img
-                      src={imageContent}
-                      alt="Generated"
-                      className="rounded-md border max-w-sm"
-                    />
+                    <div className="rounded-lg overflow-hidden border-2 border-indigo-100">
+                      <img
+                        src={imageContent}
+                        alt="AI Generated"
+                        className="w-full max-w-md mx-auto"
+                      />
+                    </div>
                   )}
-                  <Label>Edit Caption</Label>
-                  <Textarea
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    rows={8}
-                    className="focus-visible:ring-indigo-500"
-                  />
+
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                      Edit Caption
+                    </Label>
+                    <Textarea
+                      value={content}
+                      onChange={(e) => setContent(e.target.value)}
+                      rows={10}
+                      className="focus-visible:ring-indigo-500"
+                    />
+                  </div>
                 </div>
               )}
             </CardContent>
@@ -338,38 +479,48 @@ const NewPost = () => {
 
         {/* Manual Section */}
         {mode === "manual" && (
-          <Card className="border-indigo-100">
-            <CardHeader>
-              <CardTitle>Create Post Manually</CardTitle>
-              <CardDescription>Write your own post content.</CardDescription>
+          <Card className="border-indigo-100 shadow-sm">
+            <CardHeader className="bg-gradient-to-r from-indigo-50 to-cyan-50">
+              <CardTitle className="text-indigo-900">
+                Create Post Manually
+              </CardTitle>
+              <CardDescription>
+                Write your own post content and upload media
+              </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-6 mt-6">
               <div>
-                <Label>Title *</Label>
+                <Label className="flex items-center gap-2 mb-4">
+                  Business/Creator Name *
+                </Label>
                 <Input
-                  value={title}
+                  // value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Enter post title"
+                  placeholder="Enter business or creator name"
                   className="focus-visible:ring-indigo-500"
+                  required
                 />
               </div>
 
               <div>
-                <Label>Content *</Label>
+                <Label className="flex items-center gap-2 mb-4">
+                  Post Content *
+                </Label>
                 <Textarea
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
-                  rows={8}
-                  placeholder="Write your post content"
+                  rows={10}
+                  placeholder="Write your post content here..."
                   className="focus-visible:ring-indigo-500"
+                  required
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <Label className="flex items-center gap-2">
-                    <ImageIcon className="h-4 w-4 text-indigo-600" /> Image
-                    Upload
+                  <Label className="flex items-center gap-2 mb-4">
+                    <ImageIcon className="h-4 w-4 text-indigo-600" />
+                    Image Upload (Optional)
                   </Label>
                   <Input
                     type="file"
@@ -382,15 +533,20 @@ const NewPost = () => {
                         reader.onload = (ev) =>
                           setImagePreview(ev.target?.result as string);
                         reader.readAsDataURL(file);
-                      } else setImagePreview("");
+                      } else {
+                        setImagePreview("");
+                      }
                     }}
+                    className="cursor-pointer"
                   />
                   {imagePreview && (
-                    <img
-                      src={imagePreview}
-                      alt="Preview"
-                      className="mt-2 rounded-md border max-w-xs"
-                    />
+                    <div className="mt-3 rounded-lg overflow-hidden border-2 border-indigo-100">
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="w-full"
+                      />
+                    </div>
                   )}
                 </div>
               </div>
@@ -398,100 +554,159 @@ const NewPost = () => {
           </Card>
         )}
 
+        {/* Post Settings */}
         <Card className="border-indigo-100 shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-gray-800">Post Settings</CardTitle>
+          <CardHeader className="bg-gradient-to-r from-indigo-50 to-cyan-50">
+            <CardTitle className="text-indigo-900">Post Settings</CardTitle>
+            <CardDescription>
+              Configure platforms, status, and scheduling
+            </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-6 mt-6">
+            {/* Platforms */}
             <div>
-              <Label className="text-gray-700">Platforms *</Label>
-              <div className="flex flex-wrap gap-4 mt-2">
-                {connectedAccounts.length === 0 ? (
-                  <p className="text-gray-500">No social accounts connected.</p>
-                ) : (
-                  connectedAccounts.map((acc) => (
-                    <div key={acc.id} className="flex items-center space-x-2">
+              <Label className="text-gray-900 font-semibold mb-3 block">
+                Select Platforms *
+              </Label>
+              {connectedAccounts.length === 0 ? (
+                <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                  <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-amber-900">
+                      No social accounts connected
+                    </p>
+                    <p className="text-sm text-amber-700 mt-1">
+                      Please connect your social media accounts first
+                    </p>
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={() => navigate("/social-accounts")}
+                    className="bg-amber-600 hover:bg-amber-700"
+                  >
+                    Connect Accounts
+                  </Button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  {connectedAccounts.map((acc) => (
+                    <div
+                      key={acc.id}
+                      className={`flex items-center space-x-3 p-3 border-2 rounded-lg cursor-pointer transition-all ${
+                        platforms.includes(acc.platform)
+                          ? "border-indigo-500 bg-indigo-50"
+                          : "border-gray-200 hover:border-indigo-300"
+                      }`}
+                      onClick={() => handlePlatformToggle(acc.platform)}
+                    >
                       <Checkbox
                         checked={platforms.includes(acc.platform)}
                         onCheckedChange={() =>
                           handlePlatformToggle(acc.platform)
                         }
                       />
-                      <label className="text-sm font-medium text-gray-700">
-                        {acc.platform}{" "}
-                        {acc.account_name ? `(${acc.account_name})` : ""}
-                      </label>
+                      <div className="flex-1">
+                        <label className="text-sm font-semibold text-gray-900 cursor-pointer">
+                          {acc.platform}
+                        </label>
+                        {acc.account_name && (
+                          <p className="text-xs text-gray-600">
+                            {acc.account_name}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                  ))
-                )}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
 
+            {/* Status */}
             <div>
-              <Label className="text-gray-700">Status</Label>
+              <Label className="text-gray-900 font-semibold mb-3 block">
+                Post Status *
+              </Label>
               <Select value={status} onValueChange={setStatus}>
-                <SelectTrigger className="border-gray-300 focus-visible:ring-indigo-500">
-                  <SelectValue />
+                <SelectTrigger className="border-gray-300 focus-visible:ring-indigo-500 h-11">
+                  <SelectValue placeholder="Select status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="draft">Draft</SelectItem>
-                  <SelectItem value="scheduled">Scheduled</SelectItem>
-                  <SelectItem value="published">Published</SelectItem>
+                  <SelectItem value="draft">💾 Save as Draft</SelectItem>
+                  <SelectItem value="scheduled">
+                    📅 Schedule for Later
+                  </SelectItem>
+                  <SelectItem value="published">🚀 Publish Now</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
+            {/* Schedule Settings */}
             {status === "scheduled" && (
-              <>
+              <div className="space-y-4 p-4 bg-indigo-50 rounded-lg border border-indigo-200">
                 <div>
-                  <Label className="text-gray-700">Schedule Date & Time</Label>
+                  <Label className="text-gray-900 font-semibold mb-2 block">
+                    Schedule Date & Time *
+                  </Label>
                   <Input
                     type="datetime-local"
                     value={scheduledAt}
                     onChange={(e) => setScheduledAt(e.target.value)}
-                    className="border-gray-300 focus-visible:ring-indigo-500"
+                    className="border-indigo-300 focus-visible:ring-indigo-500"
                     min={new Date().toISOString().slice(0, 16)}
+                    required
                   />
                 </div>
 
-                {/* Toggle Button - Only show when status is scheduled */}
-                <div className="flex items-center justify-between p-3 border rounded-lg">
-                  <span className="text-sm font-medium text-gray-700">
-                    On Toggle for Review Post Before Publishing
-                  </span>
-
+                {/* Review Toggle */}
+                <div className="flex items-center justify-between p-3 bg-white border-2 border-indigo-200 rounded-lg">
+                  <div className="flex-1">
+                    <span className="text-sm font-semibold text-gray-900 block">
+                      Review Before Publishing
+                    </span>
+                    <span className="text-xs text-gray-600">
+                      {autoToggle
+                        ? "Post will be reviewed before publishing"
+                        : "Post will auto-publish at scheduled time"}
+                    </span>
+                  </div>
                   <button
                     type="button"
                     onClick={() => setAutoToggle(!autoToggle)}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${
                       autoToggle ? "bg-indigo-600" : "bg-gray-300"
                     }`}
                   >
                     <span
-                      className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${
-                        autoToggle ? "translate-x-5" : "translate-x-1"
+                      className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-md ${
+                        autoToggle ? "translate-x-6" : "translate-x-1"
                       }`}
                     />
                   </button>
                 </div>
-              </>
+              </div>
             )}
 
-            <div className="flex justify-end gap-3 pt-4">
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-3 pt-4 border-t">
               <Button
+                type="button"
                 variant="outline"
                 onClick={() => navigate("/posts")}
-                className="text-indigo-600 border-indigo-200"
+                className="text-indigo-600 border-indigo-200 hover:bg-indigo-50"
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleSubmit}
-                disabled={isLoading}
-                className="bg-gradient-to-r from-indigo-600 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 text-white font-semibold shadow-md"
+                disabled={isLoading || !content || platforms.length === 0}
+                className="bg-gradient-to-r from-indigo-600 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 text-white font-semibold shadow-md px-8"
               >
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{" "}
-                Create Post
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {status === "published"
+                  ? "🚀 Publish Now"
+                  : status === "scheduled"
+                  ? "📅 Schedule Post"
+                  : "💾 Save Draft"}
               </Button>
             </div>
           </CardContent>

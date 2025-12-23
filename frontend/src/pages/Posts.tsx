@@ -189,6 +189,20 @@ const Posts = () => {
   function filteredPosts(posts: Post[], status: string, generation: string) {
     let filtered = posts;
 
+    const isAnyFilterApplied = status !== "all" || generation !== "all";
+
+    if (isAnyFilterApplied) {
+      filtered = filtered.filter((post) => {
+        const isReviewExpired =
+          post.review_status === "pending" &&
+          post.scheduled_at &&
+          new Date(post.scheduled_at) <= new Date();
+
+        // ❌ filter laga ho to review expired hata do
+        return !isReviewExpired;
+      });
+    }
+
     if (status !== "all") {
       filtered = filtered.filter((post) => post.status === status);
     }
@@ -326,16 +340,36 @@ const Posts = () => {
                   >
                     <CardHeader className="pb-3">
                       <div className="space-y-2">
-                        <CardTitle className="text-lg line-clamp-1">
-                          {post.title}
-                        </CardTitle>
+                        <div className="relative">
+                          <CardTitle className="text-lg font-semibold line-clamp-1 pr-24">
+                            {post.title}
+                          </CardTitle>
+
+                          {post.review_status === "pending" &&
+                            isPastSchedule && (
+                             <Badge
+  className="
+    absolute top-0 right-0
+    bg-red-100 text-red-700
+    border border-red-200
+    text-xs font-medium
+    px-2 py-0.5 rounded-md
+    pointer-events-none
+  "
+>
+  Review Expired
+</Badge>
+
+                            )}
+                        </div>
+
                         <CardDescription className="line-clamp-2">
                           {post.content}
                         </CardDescription>
                       </div>
 
                       <div className="flex flex-wrap gap-2 mt-3">
-                        <Badge className={statusClasses(post.status)}>
+                        <Badge variant="outline" className="capitalize">
                           {post.status}
                         </Badge>
 

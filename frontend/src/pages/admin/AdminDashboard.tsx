@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Users, FileText, CreditCard, TrendingUp, Zap } from "lucide-react";
 import Swal from "sweetalert2";
 import { apiService } from "@/services/api";
@@ -97,7 +103,8 @@ const AdminDashboard = () => {
       icon: FileText,
       color: "text-amber-500",
       format: (val: number) => val.toLocaleString(),
-      isClickable: false,
+      onClick: () => navigate("/admin/posts"),
+      isClickable: true,
     },
     {
       title: "Active Subscriptions",
@@ -116,7 +123,8 @@ const AdminDashboard = () => {
       icon: TrendingUp,
       color: "text-green-600",
       format: (val: number) => `₹${val.toLocaleString()}`,
-      isClickable: false,
+      onClick: () => navigate("/admin/subscriptions"),
+      isClickable: true,
     },
   ];
 

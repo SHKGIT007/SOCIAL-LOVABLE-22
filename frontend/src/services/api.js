@@ -40,6 +40,18 @@ class ApiService {
     return this.request("/system-settings");
   }
 
+  async getAIProviderCredentials() {
+    return this.request("/system-settings/ai-provider");
+  }
+
+  async getCloudinaryCredentials() {
+    return this.request("/system-settings/cloudinary");
+  }
+
+  async getGoogleOAuthCredentials() {
+    return this.request("/system-settings/google-oauth");
+  }
+
   async updateSystemSettings(settings) {
     return this.request("/system-settings/update", {
       method: "POST",
@@ -543,6 +555,52 @@ class ApiService {
       skipAuthLogout: true,
     });
   }
+
+  async deleteMyAccount() {
+    return this.request('/users/deletemyaccount', {
+      method: 'POST',
+    });
+  }
+
+  async sendOTPforgotPassword(data) {
+    return this.request("/auth/send-otp-forgot-password", {
+      method: "POST",
+      body: data,
+      includeAuth: false,
+      skipAuthLogout: true,
+    });
+  }
+
+  async verifyOTPforgotPassword(data) {
+    return this.request("/auth/verify-forgot-password-otp", {
+      method: "POST",
+      body: data,
+      includeAuth: false,
+      skipAuthLogout: true,
+    });
+  }
+
+  async resetPassword(data) {
+    return this.request("/auth/reset-password", {
+      method: "POST",
+      body: data,
+      includeAuth: false,
+      skipAuthLogout: true,
+    });
+  }
+
+async getUserPlanHistory(id, queryParams = {}) {
+    return this.request(`/users/user-plan-history/${id}`, {
+      queryParams,
+    });
+  }
+
+async getUserPostHistory(id, queryParams = {}) {
+    return this.request(`/users/user-post-history/${id}`, {
+      queryParams,
+    });
+  }
+
 }
 
 // Export singleton instance

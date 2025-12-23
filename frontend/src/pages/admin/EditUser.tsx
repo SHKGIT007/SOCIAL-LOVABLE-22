@@ -162,7 +162,25 @@ const EditUserModal = ({
         ) : (
           <div className="space-y-4">
             <div>
-              <Label>Name</Label>
+              <Label>First Name</Label>
+              <Input
+                name="user_fname"
+                value={form.user_fname}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div>
+              <Label>Last Name</Label>
+              <Input
+                name="user_lname"
+                value={form.user_lname}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div>
+              <Label>User Name</Label>
               <Input
                 name="user_name"
                 value={form.user_name}
@@ -180,24 +198,6 @@ const EditUserModal = ({
               <Input
                 name="user_phone"
                 value={form.user_phone}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div>
-              <Label>First Name</Label>
-              <Input
-                name="user_fname"
-                value={form.user_fname}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div>
-              <Label>Last Name</Label>
-              <Input
-                name="user_lname"
-                value={form.user_lname}
                 onChange={handleChange}
               />
             </div>

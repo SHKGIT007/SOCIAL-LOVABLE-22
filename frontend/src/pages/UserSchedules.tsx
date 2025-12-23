@@ -346,9 +346,9 @@ export default function UserSchedules() {
           <div className="flex items-center justify-between mb-8">
             <h2 className="flex items-baseline gap-2 text-3xl font-extrabold">
               <span className="flex bg-gradient-to-r from-indigo-600 to-sky-400 bg-clip-text text-transparent">
-                Your
+               Scheduled
               </span>
-              Scheduled Posts
+               Posts
             </h2>
             <div></div>
             <button
