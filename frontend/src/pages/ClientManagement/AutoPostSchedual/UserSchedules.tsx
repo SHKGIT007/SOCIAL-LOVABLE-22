@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Dialog } from "@headlessui/react";
 import { apiService } from "@/services/api";
 import Swal from "sweetalert2";
-import DashboardLayout from "../components/Layout/DashboardLayout";
+import DashboardLayout from "../../../components/Layout/DashboardLayout";
 import { Bell, BellOff, Edit2, Trash2, Eye } from "lucide-react";
 
 // Helper to get day label

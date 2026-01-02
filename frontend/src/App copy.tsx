@@ -4,13 +4,13 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
-import Auth from "./pages/Auth";
-import Dashboard from "./pages/Dashboard";
-import Posts from "./pages/Posts";
-import NewPost from "./pages/NewPost";
-import ViewPost from "./pages/ViewPost";
-import EditPost from "./pages/EditPost";
-import ClientPlans from "./pages/ClientPlans";
+import Auth from "./pages/AuthManagement/Auth";
+import Dashboard from "./pages/ClientManagement/DashBoardManagement/Dashboard";
+import Posts from "./pages/ClientManagement/PostManagement/Posts";
+import NewPost from "./pages/ClientManagement/PostManagement/NewPost";
+import ViewPost from "./pages/ClientManagement/PostManagement/ViewPost";
+import EditPost from "./pages/ClientManagement/PostManagement/EditPost";
+import ClientPlans from "./pages/ClientManagement/PlanManagement/ClientPlans";
 import AdminDashboard from "./pages/admin/Dashboard/AdminDashboard";
 import AdminPlans from "./pages/admin/PlanManagement/Plans";
 import AdminUsers from "./pages/admin/UserManagement/Users";
@@ -19,7 +19,7 @@ import AdminSubscriptions from "./pages/admin/SubscriptionManagement/Subscriptio
 import AdminPosts from "./pages/admin/PostManagement/Posts";
 import AdminViewPost from "./pages/admin/PostManagement/ViewPost";
 import NotFound from "./pages/NotFound";
-import SocialAccounts from "./pages/SocialAccounts";
+import SocialAccounts from "./pages/ClientManagement/SocialAccountsManagement/SocialAccounts";
 import { getAuthData } from "@/utils/auth";
 
 function getUserRole() {

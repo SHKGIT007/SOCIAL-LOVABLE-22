@@ -1223,3 +1223,6 @@
 {"level":"info","message":"Plan updated","planId":"26","service":"social-lovable-api","timestamp":"2026-01-02T06:52:15.895Z","updatedBy":1}
 {"deletedBy":1,"level":"info","message":"Plan deleted","planId":"28","service":"social-lovable-api","timestamp":"2026-01-02T07:06:34.973Z"}
 {"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-01-02T08:44:56.411Z","userId":1,"username":"admin"}
+{"createdBy":1,"email":"admin1@gmail.com","level":"info","message":"User created by admin","service":"social-lovable-api","timestamp":"2026-01-02T11:51:03.323Z","userId":100}
+{"level":"info","message":"Plan updated","planId":"26","service":"social-lovable-api","timestamp":"2026-01-02T11:52:25.108Z","updatedBy":1}
+{"createdBy":1,"level":"info","message":"Plan created","planId":41,"service":"social-lovable-api","timestamp":"2026-01-02T11:52:43.439Z"}
