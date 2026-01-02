@@ -254,12 +254,22 @@ const createPost = asyncHandler(async (req, res) => {
 });
 
 const getAllPosts = asyncHandler(async (req, res) => {
-  const { page = 1, limit = 10, search, status, user_id } = req.query;
+ 
+
+
+  const { page = 1, limit = 10, search, status, user_id,generation} = req.query;
   const offset = (page - 1) * limit;
   const userId = req.user.id;
   const userType = req.user.user_type;
 
   const whereClause = {};
+if (generation === "ai") {
+  whereClause.is_ai_generated = true;
+}
+
+if (generation === "manual") {
+  whereClause.is_ai_generated = false;
+}
 
   // If not admin, only show user's own posts
   if (userType !== "admin") {
@@ -308,6 +318,8 @@ const getAllPosts = asyncHandler(async (req, res) => {
     },
   });
 });
+
+
 
 const getPostById = asyncHandler(async (req, res) => {
   const { id } = req.params;

@@ -86,6 +86,8 @@ const Dashboard = () => {
       </DashboardLayout>
     );
   }
+  
+
 
   // Define the stat cards array with distinct colors/icons
   const statCards = [
@@ -95,6 +97,8 @@ const Dashboard = () => {
       description: "All your posts",
       icon: FileText,
       color: "text-gray-600",
+      route: "/posts",
+      state:"",
     },
     {
       title: "AI Generated",
@@ -102,6 +106,8 @@ const Dashboard = () => {
       description: "Posts created by AI",
       icon: Sparkles,
       color: "text-indigo-600", // Indigo for AI/Smart features
+        route: "/posts",
+      state:"AI Generated",
     },
     {
       title: "Scheduled",
@@ -109,6 +115,8 @@ const Dashboard = () => {
       description: "Waiting to publish",
       icon: Calendar,
       color: "text-amber-500", // Amber for pending tasks
+      route: "/posts",
+      state:"Scheduled",
     },
     {
       title: "Published",
@@ -116,8 +124,18 @@ const Dashboard = () => {
       description: "Live posts",
       icon: TrendingUp,
       color: "text-cyan-500", // Cyan for success/live data
+      route: "/posts",
+      state:"Published",
     },
   ];
+
+const handleRoute = (route, state) => {
+  navigate(route, {
+    state: {
+      filter: state, 
+    },
+  });
+};
 
   return (
     // Applied light theme background to the main content area
@@ -148,7 +166,8 @@ const Dashboard = () => {
               key={index}
               // Theme: subtle hover and clean shadow
               className="transition-transform duration-300 hover:shadow-xl hover:scale-[1.02] border border-gray-100 shadow-md"
-            >
+            onClick={() => handleRoute(card.route, card.state)}
+           >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-semibold text-gray-500">
                   {card.title}
