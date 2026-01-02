@@ -37,11 +37,11 @@ const CreateUser = () => {
       .required("Phone is required"),
     email: Yup.string().email("Invalid email").required("Email required"),
     password: Yup.string()
-  .required("Password required")
-  .matches(
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$/,
-    "Password must contain at least one lowercase letter, one uppercase letter, and one number"
-  ),
+      .required("Password required")
+      .matches(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$/,
+        "Password must contain at least one lowercase letter, one uppercase letter, and one number"
+      ),
 
     confirm_password: Yup.string()
       .oneOf([Yup.ref("password")], "Passwords do not match")
@@ -155,16 +155,38 @@ const CreateUser = () => {
 
   return (
     <DashboardLayout userRole="admin">
-      <div className="max-w-4xl mx-auto mt-10">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold">Create New User</h2>
-          {/* Back Button */}
+      <div className="space-y-8">
+        {/* Sticky Page Header */}
+        <div
+          className="
+    sticky top-0 z-10
+    -mx-6 px-6 py-4
+    bg-gradient-to-b from-white/90 to-white/70
+    backdrop-blur
+    border-b border-indigo-100
+    flex flex-col sm:flex-row sm:items-center sm:justify-between
+    gap-4
+  "
+        >
+          {/* Left */}
+          <div>
+            <h1 className="text-3xl font-extrabold">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-cyan-500">
+                Create
+              </span>{" "}
+              User
+            </h1>
+            <p className="text-gray-600 text-lg mt-1">
+              Add a new user to the platform.
+            </p>
+          </div>
+
+          {/* Right */}
           <button
-            type="button"
-            onClick={() => navigate(-1)} // Goes to previous page
-            className="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold transition"
+            onClick={() => navigate(-1)}
+            className="px-4 py-2 text-sm rounded-md border bg-white hover:bg-indigo-50 transition"
           >
-            Back
+            ← Back
           </button>
         </div>
 

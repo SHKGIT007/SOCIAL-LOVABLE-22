@@ -1212,3 +1212,14 @@
 {"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2025-12-12T07:18:19.694Z","userId":2,"username":"test"}
 {"level":"info","message":"Post updated","postId":"128","service":"social-lovable-api","timestamp":"2025-12-12T07:54:06.279Z","userId":2}
 >>>>>>> cc1906b2a92e3e7051b10e3241dd24550246eaf0
+{"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-01-02T04:34:11.183Z","userId":1,"username":"admin"}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-01-02T04:49:52.898Z","userId":2,"username":"test"}
+{"deletedBy":1,"level":"info","message":"User soft-deleted by admin","service":"social-lovable-api","timestamp":"2026-01-02T06:28:34.683Z","userId":"86"}
+{"deletedBy":1,"level":"info","message":"User soft-deleted by admin","service":"social-lovable-api","timestamp":"2026-01-02T06:28:37.048Z","userId":"85"}
+{"deletedBy":1,"level":"info","message":"User soft-deleted by admin","service":"social-lovable-api","timestamp":"2026-01-02T06:28:39.448Z","userId":"81"}
+{"deletedBy":1,"level":"info","message":"User soft-deleted by admin","service":"social-lovable-api","timestamp":"2026-01-02T06:28:41.583Z","userId":"77"}
+{"level":"info","message":"Plan updated","planId":"26","service":"social-lovable-api","timestamp":"2026-01-02T06:49:58.201Z","updatedBy":1}
+{"level":"info","message":"Plan updated","planId":"26","service":"social-lovable-api","timestamp":"2026-01-02T06:50:01.023Z","updatedBy":1}
+{"level":"info","message":"Plan updated","planId":"26","service":"social-lovable-api","timestamp":"2026-01-02T06:52:15.895Z","updatedBy":1}
+{"deletedBy":1,"level":"info","message":"Plan deleted","planId":"28","service":"social-lovable-api","timestamp":"2026-01-02T07:06:34.973Z"}
+{"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-01-02T08:44:56.411Z","userId":1,"username":"admin"}

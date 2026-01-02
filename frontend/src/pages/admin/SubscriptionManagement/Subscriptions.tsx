@@ -136,7 +136,7 @@ const Subscriptions = () => {
         sortable: true,
         width: "100px",
       },
-       {
+      {
         name: "Plan Price",
         selector: (row) => row.Plan?.price || "N/A",
         sortable: true,
@@ -155,8 +155,31 @@ const Subscriptions = () => {
       {
         name: "Status",
         width: "120px",
-        cell: (row) => <Badge>{row.payment_status}</Badge>,
+        cell: (row) => {
+          const status =
+            row.payment_status.charAt(0).toUpperCase() +
+            row.payment_status.slice(1);
+
+          let badgeClasses = "bg-gray-100 text-gray-700 border-gray-300";
+
+          if (row.payment_status === "success") {
+            badgeClasses = "bg-green-100 text-green-700 border-green-300";
+          } else if (row.payment_status === "refunded") {
+            badgeClasses = "bg-blue-100 text-blue-700 border-blue-300";
+          } else if (row.payment_status === "failed") {
+            badgeClasses = "bg-red-100 text-red-700 border-red-300";
+          } else if (row.payment_status === "pending") {
+            badgeClasses = "bg-yellow-100 text-yellow-700 border-yellow-300";
+          }
+
+          return (
+            <Badge variant="outline" className={badgeClasses}>
+              {status}
+            </Badge>
+          );
+        },
       },
+
       {
         name: "Start Date",
         width: "120px",
@@ -170,12 +193,21 @@ const Subscriptions = () => {
   return (
     <DashboardLayout userRole="admin">
       <div className="space-y-8">
-        {/* Page Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-gray-200">
+        <div
+          className="
+    sticky top-0 z-10
+    -mx-2 px-4 py-4
+    bg-gradient-to-b from-white/90 to-white/70
+    backdrop-blur
+    border-b border-indigo-100
+    flex flex-col sm:flex-row sm:items-center sm:justify-between
+    gap-4
+  "
+        >
           <div>
             <h1 className="text-3xl font-extrabold">
               <span
-                className={`bg-clip-text text-transparent ${primaryGradientClass}`}
+                className={`text-transparent bg-clip-text ${primaryGradientClass}`}
               >
                 Subscriptions
               </span>{" "}
@@ -186,19 +218,19 @@ const Subscriptions = () => {
             </p>
           </div>
 
-          <Button
-            className="bg-green-600 hover:bg-green-700 px-6"
-            onClick={exportExcel}
-          >
-            Export Excel
-          </Button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigate(-1)}
+              className="px-4 py-2 text-sm rounded-md border bg-white hover:bg-indigo-50 transition"
+            >
+              ← Back
+            </button>
+          </div>
         </div>
 
-        {/* Search + Table */}
         <Card className="shadow-xl border border-indigo-100/50 rounded-2xl">
           <CardContent className="pt-6">
-            {/* Search Bar */}
-            <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
               <div className="relative w-full sm:w-72">
                 <input
                   type="text"
@@ -207,7 +239,6 @@ const Subscriptions = () => {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
-
                 {search && (
                   <X
                     className="absolute right-3 top-2.5 h-4 w-4 cursor-pointer text-gray-400 hover:text-gray-600"
@@ -215,9 +246,15 @@ const Subscriptions = () => {
                   />
                 )}
               </div>
+
+              <Button
+                className="bg-green-600 hover:bg-green-700 px-6"
+                onClick={exportExcel}
+              >
+                Export Excel
+              </Button>
             </div>
 
-            {/* Data Table */}
             <div className="rounded-xl border border-gray-200 overflow-hidden shadow-sm">
               <DataTable
                 columns={columns}

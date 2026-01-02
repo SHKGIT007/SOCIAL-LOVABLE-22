@@ -23,5 +23,7 @@ router.get('/deleted/list', requireAdmin, validatePagination, userController.get
 router.post('/deletemyaccount', userController.deleteMyAccount);
 router.get('/user-plan-history/:id', requireAdmin, validateId, validatePagination,userController.getUserPlanHistory);
 router.get('/user-post-history/:id', requireAdmin, validateId, validatePagination,userController.getUserPostHistory);
+router.get( "/:id/post-dashboard-stats", requireAdmin, validateId, userController.getUserPostDashboardStats);
+
 
 module.exports = router;

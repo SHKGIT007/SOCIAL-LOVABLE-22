@@ -548,8 +548,8 @@ class ApiService {
   }
 
   async completeSocialSignup(data) {
-    return this.request('/auth/social-complete', {
-      method: 'POST',
+    return this.request("/auth/social-complete", {
+      method: "POST",
       body: data,
       includeAuth: false,
       skipAuthLogout: true,
@@ -557,8 +557,8 @@ class ApiService {
   }
 
   async deleteMyAccount() {
-    return this.request('/users/deletemyaccount', {
-      method: 'POST',
+    return this.request("/users/deletemyaccount", {
+      method: "POST",
     });
   }
 
@@ -589,18 +589,23 @@ class ApiService {
     });
   }
 
-async getUserPlanHistory(id, queryParams = {}) {
+  async getUserPlanHistory(id, queryParams = {}) {
     return this.request(`/users/user-plan-history/${id}`, {
       queryParams,
     });
   }
 
-async getUserPostHistory(id, queryParams = {}) {
+  async getUserPostHistory(id, queryParams = {}) {
     return this.request(`/users/user-post-history/${id}`, {
       queryParams,
     });
   }
 
+  async getUserDashboardStats(userId, queryParams = {}) {
+    return this.request(`/users/${userId}/post-dashboard-stats`, {
+      queryParams,
+    });
+  }
 }
 
 // Export singleton instance

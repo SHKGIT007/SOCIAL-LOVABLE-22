@@ -119,29 +119,28 @@ const getAllUsers = asyncHandler(async (req, res) => {
 
   whereClause.user_type = { [Op.ne]: "admin" };
 
- const { count, rows: users } = await User.findAndCountAll({
-  where: whereClause,
-  distinct: true,   
-  col: "id",        
-  include: [
-    { model: Role, as: "Role" },
-    {
-      model: Subscription,
-      as: "Subscriptions",
-      where: { status: "active" },
-      required: false,
-      include: [{ model: Plan, as: "Plan" }],
-    },
-  ],
-  attributes: { exclude: ["password"] },
-  limit: parseInt(limit),
-  offset: parseInt(offset),
-  order: [
-    ["created_at", "DESC"],
-    ["id", "DESC"],
-  ],
-});
-
+  const { count, rows: users } = await User.findAndCountAll({
+    where: whereClause,
+    distinct: true,
+    col: "id",
+    include: [
+      { model: Role, as: "Role" },
+      {
+        model: Subscription,
+        as: "Subscriptions",
+        where: { status: "active" },
+        required: false,
+        include: [{ model: Plan, as: "Plan" }],
+      },
+    ],
+    attributes: { exclude: ["password"] },
+    limit: parseInt(limit),
+    offset: parseInt(offset),
+    order: [
+      ["created_at", "DESC"],
+      ["id", "DESC"],
+    ],
+  });
 
   const formattedUsers = users.map((user) => ({
     id: user.id,
@@ -217,24 +216,6 @@ const getUserById = asyncHandler(async (req, res) => {
             as: "Plan",
             attributes: ["id", "name", "ai_posts", "linked_accounts", "price"],
           },
-        ],
-      },
-      {
-        model: Post,
-        as: "Posts",
-        attributes: [
-          "id",
-          "title",
-          "content",
-          "status",
-          "is_ai_generated",
-          "ai_prompt",
-          "scheduled_at",
-          "published_at",
-          "media_urls",
-          "image_url",
-          "video_url",
-          "created_at",
         ],
       },
     ],
@@ -474,8 +455,32 @@ const updateUserStatus = asyncHandler(async (req, res) => {
 });
 
 const getDeletedUsers = asyncHandler(async (req, res) => {
-  const deletedUsers = await User.findAll({
-    where: { is_deleted: true },
+  const { page = 1, limit = 10, search, user_type } = req.query;
+  const offset = (page - 1) * limit;
+
+  const whereClause = { is_deleted: true };
+
+  // Search functionality
+  if (search) {
+    whereClause[Op.or] = [
+      { user_name: { [Op.like]: `%${search}%` } },
+      { email: { [Op.like]: `%${search}%` } },
+      { user_fname: { [Op.like]: `%${search}%` } },
+      { user_lname: { [Op.like]: `%${search}%` } },
+    ];
+  }
+
+  // Filter by user_type if provided
+  if (user_type) {
+    whereClause.user_type = user_type;
+  }
+
+  // Exclude admin users (optional, based on your previous API)
+  whereClause.user_type = { [Op.ne]: "admin" };
+
+  // Fetch deleted users with pagination
+  const { count, rows: users } = await User.findAndCountAll({
+    where: whereClause,
     attributes: [
       "id",
       "user_name",
@@ -491,12 +496,26 @@ const getDeletedUsers = asyncHandler(async (req, res) => {
       "is_deleted",
       "deleted_at",
     ],
+    limit: parseInt(limit),
+    offset: parseInt(offset),
+    order: [
+      ["deleted_at", "DESC"],
+      ["id", "DESC"],
+    ],
   });
 
   res.json({
     status: true,
     message: "Deleted users fetched successfully",
-    data: { users: deletedUsers },
+    data: {
+      users,
+      pagination: {
+        total: count,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalPages: Math.ceil(count / limit),
+      },
+    },
   });
 });
 
@@ -634,6 +653,65 @@ const getUserPostHistory = asyncHandler(async (req, res) => {
   });
 });
 
+const getUserPostDashboardStats = asyncHandler(async (req, res) => {
+  const userId = req.params.id; // ✅ target user
+  const now = new Date();
+
+  const [
+    totalCreatedPosts,
+    publishedPosts,
+    draftPosts,
+    scheduledPosts,
+    failedPosts,
+  ] = await Promise.all([
+    Post.count({ where: { user_id: userId } }),
+
+    Post.count({
+      where: { user_id: userId, status: "published" },
+    }),
+
+    Post.count({
+      where: { user_id: userId, status: "draft" },
+    }),
+
+    Post.count({
+      where: {
+        user_id: userId,
+        status: "scheduled",
+        scheduled_at: { [Op.gt]: now },
+      },
+    }),
+
+    Post.count({
+      where: {
+        user_id: userId,
+        status: "scheduled",
+        scheduled_at: { [Op.lt]: now },
+        review_status: "pending",
+      },
+    }),
+  ]);
+
+  const successPercentage =
+    totalCreatedPosts > 0
+      ? ((publishedPosts / totalCreatedPosts) * 100).toFixed(2)
+      : 0;
+
+  res.json({
+    status: true,
+    data: {
+      user_id: Number(userId),
+      total_created_posts: totalCreatedPosts,
+      published_posts: publishedPosts,
+      draft_posts: draftPosts,
+      scheduled_posts: scheduledPosts,
+      failed_posts: failedPosts,
+      success_percentage: Number(successPercentage),
+    },
+  });
+});
+
+
 module.exports = {
   createUser,
   getAllUsers,
@@ -647,4 +725,5 @@ module.exports = {
   deleteMyAccount,
   getUserPlanHistory,
   getUserPostHistory,
+  getUserPostDashboardStats
 };

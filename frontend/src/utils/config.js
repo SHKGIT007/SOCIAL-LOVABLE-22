@@ -36,6 +36,7 @@ export const API_CONFIG = {
       DELETE_MY_ACCOUNT: "/users/deletemyaccount",
       USER_PLAN_HISTORY: "/users/user-plan-history/:id",
       USER_POST_HISTORY: "/users/user-post-history/:id",
+      USER_DASHBOARD_STATS: "/users/:id/post-dashboard-stats",
     },
     // Post endpoints
     POSTS: {

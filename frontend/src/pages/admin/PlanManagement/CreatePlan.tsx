@@ -9,6 +9,8 @@ import ReusableForm from "@/components/ReusableForm";
 const CreatePlanPage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+    const primaryGradient = "from-indigo-600 to-cyan-500";
+  const primaryGradientClass = `bg-gradient-to-r ${primaryGradient}`;
 
   const initialValues = {
     name: "",
@@ -104,16 +106,49 @@ const CreatePlanPage = () => {
 
   return (
     <DashboardLayout userRole="admin">
-      <div className="max-w-4xl mx-auto mt-10 space-y-4">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold">Create New Plan</h2>
-          <button
-            type="button"
-            onClick={() => navigate("/admin/plans")}
-            className="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold transition"
-          >
-            Back
-          </button>
+      <div className="space-y-8">
+        <div
+          className="
+    sticky top-0 z-10
+    -mx-2 px-4 py-4
+    bg-gradient-to-b from-white/90 to-white/70
+    backdrop-blur
+    border-b border-indigo-100
+    flex flex-col sm:flex-row sm:items-center sm:justify-between
+    gap-4
+  "
+        >
+          {/* Left: Title */}
+          <div>
+            <h1 className="text-3xl font-extrabold">
+              <span
+                className={`text-transparent bg-clip-text ${primaryGradientClass}`}
+              >
+                Create
+              </span>{" "}
+              Plan
+            </h1>
+            <p className="text-gray-600 text-lg mt-1">
+              Create and manage plans.
+            </p>
+          </div>
+
+          {/* Right: Actions */}
+          <div className="flex items-center gap-2">
+            {/* <Button
+              className="bg-green-600 hover:bg-green-700"
+              onClick={exportExcel}
+            >
+              Export Excel
+            </Button> */}
+
+            <button
+              onClick={() => navigate(-1)}
+              className="px-4 py-2 text-sm rounded-md border bg-white hover:bg-indigo-50 transition"
+            >
+              ← Back
+            </button>
+          </div>
         </div>
 
         <ReusableForm

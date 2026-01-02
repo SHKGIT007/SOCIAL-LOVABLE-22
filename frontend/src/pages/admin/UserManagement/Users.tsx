@@ -294,7 +294,19 @@ const Users = () => {
     <DashboardLayout userRole="admin">
       <div className="space-y-8">
         {/* Page Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-gray-200">
+        {/* Page Header */}
+        <div
+          className="
+    sticky top-0 z-10
+    -mx-2 px-4 py-4
+    bg-gradient-to-b from-white/90 to-white/70
+    backdrop-blur
+    border-b border-indigo-100
+    flex flex-col sm:flex-row sm:items-center sm:justify-between
+    gap-4
+  "
+        >
+          {/* Left */}
           <div>
             <h1 className="text-3xl font-extrabold">
               <span
@@ -309,9 +321,12 @@ const Users = () => {
             </p>
           </div>
 
-          <div className="flex gap-3 flex-wrap">
+          {/* Right Actions */}
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Back Button */}
+
             <Button
-              className="bg-indigo-600 hover:bg-indigo-700"
+              className="bg-red-600 hover:bg-red-700"
               onClick={() => navigate("/admin/deleted-users")}
             >
               <User className="mr-2 h-4 w-4" />
@@ -325,6 +340,12 @@ const Users = () => {
               <User className="mr-2 h-4 w-4" />
               Create User
             </Button>
+            <button
+              onClick={() => navigate(-1)}
+              className="px-4 py-2 text-sm rounded-md border bg-white hover:bg-indigo-50 transition"
+            >
+              ← Back
+            </button>
           </div>
         </div>
 
@@ -336,7 +357,7 @@ const Users = () => {
               <div className="relative w-full sm:w-72">
                 <input
                   type="text"
-                  placeholder="Search name, email, phone..."
+                  placeholder="Search name, email..."
                   className="border px-3 py-2 rounded-lg w-full shadow-sm focus:ring-indigo-300 focus:border-indigo-400 pr-9"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}

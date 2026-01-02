@@ -213,7 +213,7 @@ const Plans = () => {
               variant="outline"
               onClick={() => navigate(`/admin/edit-plan/${row.id}`)}
             >
-              <Pencil size={14} />
+              Edit
             </Button>
 
             <Button
@@ -221,7 +221,7 @@ const Plans = () => {
               variant="destructive"
               onClick={() => handleDelete(row.id)}
             >
-              <Trash2 size={14} />
+              Delete
             </Button>
           </div>
         ),
@@ -239,18 +239,48 @@ const Plans = () => {
     <DashboardLayout userRole="admin">
       <div className="space-y-8">
         {/* Header */}
-        <div className="pb-4 border-b">
-          <h1 className="text-3xl font-extrabold">
-            <span
-              className={`text-transparent bg-clip-text ${primaryGradientClass}`}
+        <div
+          className="
+    sticky top-0 z-10
+    -mx-2 px-4 py-4
+    bg-gradient-to-b from-white/90 to-white/70
+    backdrop-blur
+    border-b border-indigo-100
+    flex flex-col sm:flex-row sm:items-center sm:justify-between
+    gap-4
+  "
+        >
+          {/* Left: Title */}
+          <div>
+            <h1 className="text-3xl font-extrabold">
+              <span
+                className={`text-transparent bg-clip-text ${primaryGradientClass}`}
+              >
+                Plans
+              </span>{" "}
+              Management
+            </h1>
+            <p className="text-gray-600 text-lg mt-1">
+              View and manage all subscription plans.
+            </p>
+          </div>
+
+          {/* Right: Actions */}
+          <div className="flex items-center gap-2">
+            {/* <Button
+              className="bg-green-600 hover:bg-green-700"
+              onClick={exportExcel}
             >
-              Plans
-            </span>{" "}
-            Management
-          </h1>
-          <p className="text-gray-600">
-            View and manage all subscription plans.
-          </p>
+              Export Excel
+            </Button> */}
+
+            <button
+              onClick={() => navigate(-1)}
+              className="px-4 py-2 text-sm rounded-md border bg-white hover:bg-indigo-50 transition"
+            >
+              ← Back
+            </button>
+          </div>
         </div>
 
         <Card className="shadow-xl border border-indigo-100/50 rounded-2xl">

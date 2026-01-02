@@ -98,52 +98,125 @@ const AdminViewPost = () => {
 
   return (
     <DashboardLayout userRole="admin">
-      <div className="max-w-2xl mx-auto py-8">
-        <button
-          className="mb-4 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded text-sm border"
-          onClick={() => navigate("/admin/posts")}
+      <div className="space-y-8 ">
+        {/* Page Header (Same as AdminPosts) */}
+        {/* Merged Sticky Header */}
+        <div
+          className="sticky top-0 z-10 -mx-2 px-4 py-4
+  bg-gradient-to-b from-white/90 to-white/70
+  backdrop-blur border-b border-indigo-100
+  flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
         >
-          ← Back
-        </button>
+          {/* Left: Title */}
+          <div>
+            <h1 className="text-3xl font-extrabold leading-tight">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-cyan-500">
+                Posts
+              </span>{" "}
+              Details
+            </h1>
+            <p className="text-gray-600 text-lg mt-1">
+              View post information and content.
+            </p>
+          </div>
 
-        <Card className="border border-gray-200 bg-white shadow-sm rounded-xl overflow-hidden">
-          <CardHeader className="bg-gradient-to-r from-indigo-50 to-purple-50 border-b py-4">
-            <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
-              <div className="p-2 bg-indigo-600 rounded-md">
-                <Zap className="h-4 w-4 text-white" />
+          {/* Right: Back Button */}
+          <button
+            onClick={() => navigate("/admin/posts")}
+            className="self-start sm:self-auto px-4 py-2 text-sm rounded-md border bg-white hover:bg-indigo-50 transition"
+          >
+            ← Back
+          </button>
+        </div>
+
+        {/* Main Card */}
+        <Card className="overflow-hidden rounded-2xl border-indigo-100 shadow-xl">
+          {/* Gradient banner */}
+          <div className="relative">
+            <div className="h-24 bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-500" />
+
+            {post.image_url && (
+              <div className="absolute -bottom-10 left-6">
+                <div className="h-20 w-20 rounded-xl overflow-hidden ring-4 ring-white shadow-lg bg-white">
+                  <img
+                    src={post.image_url}
+                    alt="Post"
+                    className="h-full w-full object-cover"
+                  />
+                </div>
               </div>
-              {post.title || "Untitled Post"}
-            </CardTitle>
+            )}
+          </div>
 
-            <CardDescription className="text-gray-600">
-              Posted by {post.User?.user_name} ({post.User?.email})
-            </CardDescription>
-          </CardHeader>
+          {/* Header */}
+          <CardHeader className={`pt-6 ${post.image_url ? "pl-28" : ""}`}>
+            <div className="space-y-2">
+              <CardTitle className="text-3xl tracking-tight text-gray-900 flex items-center gap-2">
+                <Zap className="h-6 w-6 text-indigo-600" />
+                {post.title || "Untitled Post"}
+              </CardTitle>
 
-          <CardContent className="p-6 space-y-5">
-            {/* CONTENT */}
-            <div className="space-y-1">
-              <p className="text-xs font-semibold text-gray-500 uppercase">
-                Content
-              </p>
-              <div className="bg-gray-50 border rounded-lg p-4 text-sm text-gray-700 whitespace-pre-line shadow-inner">
-                {post.content || "No text content"}
+              <CardDescription className="text-gray-600">
+                Posted by {post.User?.user_name} ({post.User?.email})
+              </CardDescription>
+
+              {/* Badges */}
+              <div className="flex flex-wrap gap-2 pt-2">
+                {platforms.map((p: string, i: number) => (
+                  <Badge key={i} variant="secondary" className="capitalize">
+                    {p}
+                  </Badge>
+                ))}
+
+                <Badge className="bg-gray-700 text-white">
+                  {post.status.charAt(0).toUpperCase() + post.status.slice(1)}
+                </Badge>
+
+                {post.is_ai_generated ? (
+                  <Badge
+                    variant="outline"
+                    className="border-indigo-200 text-indigo-700"
+                  >
+                    <Zap className="mr-1 h-3 w-3" />
+                    AI Generated
+                  </Badge>
+                ) : (
+                  <Badge
+                    variant="outline"
+                    className="border-gray-300 text-gray-700"
+                  >
+                    Manual
+                  </Badge>
+                )}
               </div>
             </div>
+          </CardHeader>
 
-            {/* MEDIA */}
-            {(post.image_url || post.video_url) && (
-              <div className="space-y-2">
-                <p className="text-xs font-semibold text-gray-500 uppercase">
-                  Media Preview
+          {/* Content */}
+          <CardContent className="space-y-8">
+            {/* Content */}
+            <section className="space-y-2">
+              <h3 className="text-sm font-semibold text-gray-900">Content</h3>
+              <div className="rounded-xl border bg-white p-4 shadow-sm">
+                <p className="whitespace-pre-wrap text-gray-700 leading-relaxed">
+                  {post.content || "No content available"}
                 </p>
+              </div>
+            </section>
+
+            {/* Media */}
+            {(post.image_url || post.video_url) && (
+              <section className="space-y-3">
+                <h3 className="text-sm font-semibold text-gray-900">
+                  Media Preview
+                </h3>
 
                 {post.image_url && (
-                  <div className="rounded-xl overflow-hidden border shadow-sm">
+                  <div className="rounded-2xl overflow-hidden border shadow-sm bg-gray-50">
                     <img
                       src={post.image_url}
-                      alt="post"
-                      className="w-full max-h-[350px] object-cover"
+                      alt="Post"
+                      className="w-auto max-h-72 object-contain"
                     />
                   </div>
                 )}
@@ -151,62 +224,44 @@ const AdminViewPost = () => {
                 {post.video_url && (
                   <video
                     controls
-                    className="w-full rounded-xl border shadow-sm max-h-[350px]"
                     src={post.video_url}
+                    className="w-full max-h-72 rounded-xl border shadow-sm"
                   />
                 )}
-              </div>
+              </section>
             )}
 
-            {/* BADGES */}
-            <div className="flex flex-wrap gap-2 pt-2">
-              {platforms.map((p: string, i: number) => (
-                <Badge key={i} variant="outline">
-                  {p}
-                </Badge>
-              ))}
-
-              <Badge variant="secondary">
-                Status:{" "}
-                {post.status.charAt(0).toUpperCase() + post.status.slice(1)}
-              </Badge>
-
-              {post.is_ai_generated && (
-                <Badge
-                  className="
-      flex items-center gap-1
-      bg-indigo-100 text-indigo-800
-      hover:bg-indigo-100
-      focus:bg-indigo-100
-      active:bg-indigo-100
-      cursor-default
-      transition-none
-      pointer-events-none
-    "
-                >
-                  <Zap className="h-3 w-3" /> AI Generated
-                </Badge>
-              )}
-            </div>
-
-            {/* DATES FIXED */}
-            <div className="text-xs text-gray-600 border-t pt-4 flex flex-col gap-1">
-              <span>
-                Created At: <strong>{formatDate(post.created_at)}</strong>
-              </span>
+            {/* Dates */}
+            <section className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
+              <div className="rounded-xl border p-4 bg-white shadow-sm">
+                <h4 className="font-semibold text-gray-900 mb-1">Created At</h4>
+                <p className="text-sm text-gray-600">
+                  {formatDate(post.created_at)}
+                </p>
+              </div>
 
               {post.scheduled_at && (
-                <span>
-                  Scheduled At: <strong>{formatDate(post.scheduled_at)}</strong>
-                </span>
+                <div className="rounded-xl border p-4 bg-white shadow-sm">
+                  <h4 className="font-semibold text-gray-900 mb-1">
+                    Scheduled At
+                  </h4>
+                  <p className="text-sm text-gray-600">
+                    {formatDate(post.scheduled_at)}
+                  </p>
+                </div>
               )}
 
               {post.published_at && (
-                <span>
-                  Published At: <strong>{formatDate(post.published_at)}</strong>
-                </span>
+                <div className="rounded-xl border p-4 bg-white shadow-sm">
+                  <h4 className="font-semibold text-gray-900 mb-1">
+                    Published At
+                  </h4>
+                  <p className="text-sm text-gray-600">
+                    {formatDate(post.published_at)}
+                  </p>
+                </div>
               )}
-            </div>
+            </section>
           </CardContent>
         </Card>
       </div>

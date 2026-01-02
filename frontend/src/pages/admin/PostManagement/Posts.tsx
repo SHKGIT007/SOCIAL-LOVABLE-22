@@ -184,7 +184,7 @@ const AdminPosts = () => {
 
       {
         name: "Type",
-        width: "100px",
+        width: "140px",
         cell: (row) => (
           <Badge
             variant="outline"
@@ -194,7 +194,7 @@ const AdminPosts = () => {
                 : "bg-indigo-100 text-indigo-700 border-indigo-300"
             }
           >
-            {row.is_ai_generated ? "AI" : "Manual"}
+            {row.is_ai_generated ? "AI Generated" : "Manual"}
           </Badge>
         ),
       },
@@ -225,7 +225,7 @@ const AdminPosts = () => {
             size="sm"
             onClick={() => navigate(`/admin/posts/${row.id}`)}
           >
-            <Eye className="h-4 w-4 mr-1" /> View
+            View
           </Button>
         ),
       },
@@ -236,8 +236,17 @@ const AdminPosts = () => {
   return (
     <DashboardLayout userRole="admin">
       <div className="space-y-8">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b">
+        <div
+          className="
+    sticky top-0 z-10
+    -mx-2 px-4 py-4
+    bg-gradient-to-b from-white/90 to-white/70
+    backdrop-blur
+    border-b border-indigo-100
+    flex flex-col sm:flex-row sm:items-center sm:justify-between
+    gap-4
+  "
+        >
           <div>
             <h1 className="text-3xl font-extrabold">
               <span
@@ -252,12 +261,14 @@ const AdminPosts = () => {
             </p>
           </div>
 
-          <Button
-            className="bg-green-600 hover:bg-green-700"
-            onClick={exportExcel}
-          >
-            Export Excel
-          </Button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigate(-1)}
+              className="px-4 py-2 text-sm rounded-md border bg-white hover:bg-indigo-50 transition"
+            >
+              ← Back
+            </button>
+          </div>
         </div>
 
         {/* Filters + Table */}
@@ -269,7 +280,7 @@ const AdminPosts = () => {
               <div className="relative w-full sm:w-72">
                 <input
                   type="text"
-                  placeholder="Search title, email..."
+                  placeholder="Search title..."
                   className="border px-3 py-2 rounded-lg w-full shadow-sm focus:ring-indigo-300 focus:border-indigo-400 pr-9"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
@@ -283,19 +294,28 @@ const AdminPosts = () => {
               </div>
 
               {/* Status Filter */}
-              <select
-                value={statusFilter}
-                onChange={(e) => {
-                  setStatusFilter(e.target.value);
-                  setPage(1);
-                }}
-                className="px-3 py-2 rounded-lg border bg-white shadow-sm focus:ring-indigo-300 focus:border-indigo-400"
-              >
-                <option value="all">All Status</option>
-                <option value="draft">Draft</option>
-                <option value="scheduled">Scheduled</option>
-                <option value="published">Published</option>
-              </select>
+              <div className="flex items-center gap-3 flex-wrap">
+                <select
+                  value={statusFilter}
+                  onChange={(e) => {
+                    setStatusFilter(e.target.value);
+                    setPage(1);
+                  }}
+                  className="px-3 py-2 rounded-lg border bg-white shadow-sm focus:ring-indigo-300 focus:border-indigo-400"
+                >
+                  <option value="all">All Status</option>
+                  <option value="draft">Draft</option>
+                  <option value="scheduled">Scheduled</option>
+                  <option value="published">Published</option>
+                </select>
+
+                <Button
+                  className="bg-green-600 hover:bg-green-700 px-6"
+                  onClick={exportExcel}
+                >
+                  Export Excel
+                </Button>
+              </div>
             </div>
 
             {/* Table */}

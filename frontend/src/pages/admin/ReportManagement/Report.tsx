@@ -181,12 +181,21 @@ const Report = () => {
   return (
     <DashboardLayout userRole="admin">
       <div className="space-y-8">
-        {/* Page Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-gray-200">
+        <div
+          className="
+    sticky top-0 z-10
+    -mx-2 px-4 py-4
+    bg-gradient-to-b from-white/90 to-white/70
+    backdrop-blur
+    border-b border-indigo-100
+    flex flex-col sm:flex-row sm:items-center sm:justify-between
+    gap-4
+  "
+        >
           <div>
             <h1 className="text-3xl font-extrabold">
               <span
-                className={`bg-clip-text text-transparent ${primaryGradientClass}`}
+                className={`text-transparent bg-clip-text ${primaryGradientClass}`}
               >
                 Users
               </span>{" "}
@@ -195,6 +204,15 @@ const Report = () => {
             <p className="text-gray-600 text-lg mt-1">
               Subscription & AI usage report of all users.
             </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigate(-1)}
+              className="px-4 py-2 text-sm rounded-md border bg-white hover:bg-indigo-50 transition"
+            >
+              ← Back
+            </button>
           </div>
         </div>
 
