@@ -628,6 +628,13 @@ const Auth = () => {
               </form>
             </TabsContent>
 
+            <p
+              onClick={() => navigate("/")}
+              className="mt-4 text-center text-indigo-600 font-semibold cursor-pointer hover:underline"
+            >
+              Go to Dashboard
+            </p>
+
             {/* ========== SIGN UP TAB ========== */}
             <TabsContent value="signup" className="mt-6">
               <form onSubmit={handleSignUp} className="space-y-4">
@@ -909,6 +916,12 @@ const Auth = () => {
                   </button>
                 </p>
               </form>
+              <p
+                onClick={() => navigate("/")}
+                className="mt-4 text-center text-indigo-600 font-semibold cursor-pointer hover:underline"
+              >
+                Go to Dashboard
+              </p>
             </TabsContent>
           </Tabs>
         </CardContent>

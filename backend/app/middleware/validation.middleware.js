@@ -348,6 +348,32 @@ const validateChangePassword = [
   handleValidationErrors,
 ];
 
+// Forgot / Reset password validation
+const validateResetPassword = [
+  body("new_password")
+    .notEmpty()
+    .withMessage("New password is required")
+    .isLength({ min: 6 })
+    .withMessage("New password must be at least 6 characters long")
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
+    .withMessage(
+      "New password must contain at least one lowercase letter, one uppercase letter, and one number"
+    ),
+
+  body("confirm_password")
+    .notEmpty()
+    .withMessage("Confirm password is required")
+    .custom((value, { req }) => {
+      if (value !== req.body.new_password) {
+        throw new Error("Confirm password does not match new password");
+      }
+      return true;
+    }),
+
+  handleValidationErrors,
+];
+
+
 module.exports = {
   validateUserRegistration,
   validateUserLogin,
@@ -365,4 +391,5 @@ module.exports = {
   validatePagination,
   validateChangePassword,
   handleValidationErrors,
+  validateResetPassword
 };

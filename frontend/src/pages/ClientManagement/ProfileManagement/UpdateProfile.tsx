@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ReusableForm from "@/components/ReusableForm";
 import { apiService } from "@/services/api";
 import * as Yup from "yup";
+import { useNavigate } from "react-router-dom";
 
 const UpdateProfile = () => {
   const [loading, setLoading] = useState(false);
@@ -18,7 +19,9 @@ const UpdateProfile = () => {
     email: "",
   });
   const [originalData, setOriginalData] = useState<any>(null);
-
+  const navigate = useNavigate();
+ const primaryGradient = "from-indigo-600 to-cyan-500";
+  const primaryGradientClass = `bg-gradient-to-r ${primaryGradient}`;
   const [passForm, setPassForm] = useState({
     currentPassword: "",
     newPassword: "",
@@ -192,13 +195,42 @@ const UpdateProfile = () => {
 
   return (
     <DashboardLayout userRole="client">
-      <div className="space-y-6">
-        <h2 className="flex items-baseline gap-2 text-3xl font-extrabold">
-          <span className="flex bg-gradient-to-r from-indigo-600 to-sky-400 bg-clip-text text-transparent">
-            Update
-          </span>
-          Profile
-        </h2>
+      <div className="space-y-8">
+       <div
+          className="
+    sticky top-0 z-10
+    -mx-2 px-4 py-4
+    bg-gradient-to-b from-white/90 to-white/70
+    backdrop-blur
+    border-b border-indigo-100
+    flex flex-col sm:flex-row sm:items-center sm:justify-between
+    gap-4
+  "
+        >
+          <div>
+            <h1 className="text-3xl font-extrabold">
+              <span
+                className={`text-transparent bg-clip-text ${primaryGradientClass}`}
+              >
+                Update
+              </span>{" "}
+              Profile
+            </h1>
+            <p className="text-gray-600 text-lg mt-1">
+              View and manage profile.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigate(-1)}
+              className="px-4 py-2 text-sm rounded-md border bg-white hover:bg-indigo-50 transition"
+            >
+              ← Back
+            </button>
+          </div>
+        </div>
+
 
         <Tabs defaultValue="info" className="w-full">
           <TabsList className="bg-indigo-50/50 p-1 rounded-xl">

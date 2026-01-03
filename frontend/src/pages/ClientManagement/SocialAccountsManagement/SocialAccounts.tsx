@@ -10,6 +10,7 @@ import { apiService } from "@/services/api";
 import { API_CONFIG } from "@/utils/config";
 import { redirect } from "react-router-dom";
 import { platform } from "os";
+import { useNavigate } from "react-router-dom";
 
 const platforms = ["Facebook", "Instagram"];
 
@@ -24,6 +25,9 @@ const SocialAccounts = () => {
     Instagram: `${API_CONFIG.BASE_URL}/social-accounts/oauth/instagram`,
   };
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+ const primaryGradient = "from-indigo-600 to-cyan-500";
+  const primaryGradientClass = `bg-gradient-to-r ${primaryGradient}`;
 
   useEffect(() => {
     fetchAccounts();
@@ -317,15 +321,41 @@ const handleConnect = async (platform: "Facebook" | "Instagram") => {
     <DashboardLayout>
       <div className=" space-y-8">
         {/* Header */}
-        <div>
-          <h1 className="flex items-baseline gap-2 text-3xl font-extrabold">
-            <span className="bg-gradient-to-r from-indigo-600 to-sky-400 bg-clip-text text-transparent">Social</span>
-            <span className="text-gray-900">Accounts</span>
-          </h1>
-          <p className="text-muted-foreground">
-            Connect Facebook / Instagram to publish and fetch insights.
-          </p>
+        <div
+          className="
+    sticky top-0 z-10
+    -mx-2 px-4 py-4
+    bg-gradient-to-b from-white/90 to-white/70
+    backdrop-blur
+    border-b border-indigo-100
+    flex flex-col sm:flex-row sm:items-center sm:justify-between
+    gap-4
+  "
+        >
+          <div>
+            <h1 className="text-3xl font-extrabold">
+              <span
+                className={`text-transparent bg-clip-text ${primaryGradientClass}`}
+              >
+                Social
+              </span>{" "}
+              Accounts
+            </h1>
+            <p className="text-gray-600 text-lg mt-1">
+              Connect Facebook / Instagram to publish and fetch insights.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigate(-1)}
+              className="px-4 py-2 text-sm rounded-md border bg-white hover:bg-indigo-50 transition"
+            >
+              ← Back
+            </button>
+          </div>
         </div>
+
 
         {/* Parent elevated card */}
         <Card className="border-indigo-100/70 shadow-xl hover:shadow-2xl transition-shadow rounded-2xl">

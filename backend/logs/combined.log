@@ -1226,3 +1226,16 @@
 {"createdBy":1,"email":"admin1@gmail.com","level":"info","message":"User created by admin","service":"social-lovable-api","timestamp":"2026-01-02T11:51:03.323Z","userId":100}
 {"level":"info","message":"Plan updated","planId":"26","service":"social-lovable-api","timestamp":"2026-01-02T11:52:25.108Z","updatedBy":1}
 {"createdBy":1,"level":"info","message":"Plan created","planId":41,"service":"social-lovable-api","timestamp":"2026-01-02T11:52:43.439Z"}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-01-03T05:09:59.794Z","userId":2,"username":"test"}
+{"email":"shaktijatpnp09@gmail.com","level":"info","message":"OTP sent","service":"social-lovable-api","timestamp":"2026-01-03T05:11:21.758Z"}
+{"email":"shaktijatpnp09@gmail.com","level":"info","message":"OTP verified successfully","service":"social-lovable-api","timestamp":"2026-01-03T05:11:46.821Z"}
+{"level":"info","message":"User registered","service":"social-lovable-api","timestamp":"2026-01-03T05:12:14.341Z","userId":101}
+{"level":"info","message":"User soft-deleted their account","service":"social-lovable-api","timestamp":"2026-01-03T05:12:23.959Z","userId":101}
+{"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-01-03T05:13:04.708Z","userId":1,"username":"admin"}
+{"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-01-03T05:13:28.917Z","userId":1,"username":"admin"}
+{"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-01-03T05:14:20.948Z","userId":1,"username":"admin"}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-01-03T05:15:16.430Z","userId":2,"username":"test"}
+{"email":"shaktijatpnp09@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-01-03T05:22:04.633Z","userId":101,"username":"shakti"}
+{"level":"info","message":"User password changed","service":"social-lovable-api","timestamp":"2026-01-03T05:22:59.430Z","userId":101}
+{"email":"shaktijatpnp09@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-01-03T05:31:55.666Z","userId":101,"username":"shakti"}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-01-03T05:44:27.771Z","userId":2,"username":"test"}

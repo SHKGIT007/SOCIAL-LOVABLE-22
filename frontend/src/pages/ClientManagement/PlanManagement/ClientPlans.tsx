@@ -40,6 +40,9 @@ const ClientPlans = () => {
   const [currentSubscription, setCurrentSubscription] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const primaryGradient = "from-indigo-600 to-cyan-500";
+  const primaryGradientClass = `bg-gradient-to-r ${primaryGradient}`;
+
   useEffect(() => {
     const script = document.createElement("script");
     script.src = "https://checkout.razorpay.com/v1/checkout.js";
@@ -54,8 +57,7 @@ const ClientPlans = () => {
   }, []);
 
   const hasAnySubscription =
-  currentSubscription && currentSubscription.status === "active";
-
+    currentSubscription && currentSubscription.status === "active";
 
   const checkAuthAndFetchData = async () => {
     try {
@@ -209,17 +211,41 @@ const ClientPlans = () => {
   return (
     <DashboardLayout userRole="client">
       <div className="space-y-8">
-        <div>
-          <h1 className="flex items-baseline gap-2 text-3xl font-extrabold">
-            <span className="bg-gradient-to-r from-indigo-600 to-sky-400 bg-clip-text text-transparent">
+        <div
+          className="
+    sticky top-0 z-10
+    -mx-2 px-4 py-4
+    bg-gradient-to-b from-white/90 to-white/70
+    backdrop-blur
+    border-b border-indigo-100
+    flex flex-col sm:flex-row sm:items-center sm:justify-between
+    gap-4
+  "
+        >
+          <div>
+            <h1 className="text-3xl font-extrabold">
+              <span
+                className={`text-transparent bg-clip-text ${primaryGradientClass}`}
+              >
+                Plans
+              </span>{" "}
               Subscription
-            </span>
-            <span className="text-gray-900"> Plans</span>
-          </h1>
-          <p className="text-muted-foreground">
-            Choose a plan that fits your needs
-          </p>
+            </h1>
+            <p className="text-gray-600 text-lg mt-1">
+              Choose a plan that fits your needs
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigate(-1)}
+              className="px-4 py-2 text-sm rounded-md border bg-white hover:bg-indigo-50 transition"
+            >
+              ← Back
+            </button>
+          </div>
         </div>
+
         {/* Current Subscription */}
         {currentSubscription && (
           <Card className="border-indigo-200 shadow-sm">
@@ -322,62 +348,61 @@ const ClientPlans = () => {
         )}
         {/* Plans */}
         {/* Show plans ONLY if no active subscription OR limit reached */}
-       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-  {plans.map((plan) => {
-    const isCurrent = currentSubscription?.plan_id === plan.id;
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {plans.map((plan) => {
+            const isCurrent = currentSubscription?.plan_id === plan.id;
 
-    return (
-      <Card
-        key={plan.id}
-        className={`relative overflow-hidden ${
-          isCurrent
-            ? "border-indigo-300 ring-1 ring-indigo-200"
-            : "border-indigo-100"
-        }`}
-      >
-        {isCurrent && (
-          <div className="absolute right-0 top-3 rounded-s-full bg-indigo-600 px-3 py-1 text-xs font-semibold text-white">
-            Current
-          </div>
-        )}
+            return (
+              <Card
+                key={plan.id}
+                className={`relative overflow-hidden ${
+                  isCurrent
+                    ? "border-indigo-300 ring-1 ring-indigo-200"
+                    : "border-indigo-100"
+                }`}
+              >
+                {isCurrent && (
+                  <div className="absolute right-0 top-3 rounded-s-full bg-indigo-600 px-3 py-1 text-xs font-semibold text-white">
+                    Current
+                  </div>
+                )}
 
-        <CardHeader>
-          <CardTitle>{plan.name}</CardTitle>
-          <CardDescription>
-            <span className="text-3xl font-bold">₹{plan.price}</span>
-          </CardDescription>
-          <CardDescription>{plan.description}</CardDescription>
-        </CardHeader>
+                <CardHeader>
+                  <CardTitle>{plan.name}</CardTitle>
+                  <CardDescription>
+                    <span className="text-3xl font-bold">₹{plan.price}</span>
+                  </CardDescription>
+                  <CardDescription>{plan.description}</CardDescription>
+                </CardHeader>
 
-        <CardContent>
-          <div className="space-y-2">
-            <div className="flex gap-2">
-              <Check className="h-4 w-4 text-indigo-600" />
-              <span>{plan.ai_posts} AI posts</span>
-            </div>
-            <div className="flex gap-2">
-              <Check className="h-4 w-4 text-indigo-600" />
-              <span>{plan.linked_accounts} linked accounts</span>
-            </div>
-          </div>
-        </CardContent>
+                <CardContent>
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <Check className="h-4 w-4 text-indigo-600" />
+                      <span>{plan.ai_posts} AI posts</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <Check className="h-4 w-4 text-indigo-600" />
+                      <span>{plan.linked_accounts} linked accounts</span>
+                    </div>
+                  </div>
+                </CardContent>
 
-        {/* 🔥 BUTTON ONLY WHEN NO SUBSCRIPTION */}
-        {!hasAnySubscription && (
-          <CardFooter>
-            <Button
-              className="w-full bg-gradient-to-r from-indigo-600 to-sky-500 text-white"
-              onClick={() => handleSubscribe(plan.id)}
-            >
-              Subscribe
-            </Button>
-          </CardFooter>
-        )}
-      </Card>
-    );
-  })}
-</div>
-
+                {/* 🔥 BUTTON ONLY WHEN NO SUBSCRIPTION */}
+                {!hasAnySubscription && (
+                  <CardFooter>
+                    <Button
+                      className="w-full bg-gradient-to-r from-indigo-600 to-sky-500 text-white"
+                      onClick={() => handleSubscribe(plan.id)}
+                    >
+                      Subscribe
+                    </Button>
+                  </CardFooter>
+                )}
+              </Card>
+            );
+          })}
+        </div>
       </div>
     </DashboardLayout>
   );

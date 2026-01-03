@@ -4,6 +4,7 @@ import Swal from "sweetalert2";
 import * as Yup from "yup";
 import ReusableForm from "@/components/ReusableForm";
 import { apiService } from "@/services/api";
+import { useNavigate } from "react-router-dom";
 
 const initialProfile = {
   business_name: "",
@@ -29,6 +30,9 @@ const Profile = () => {
   const [profile, setProfile] = useState(initialProfile);
   const [isLoading, setIsLoading] = useState(false);
   const [originalProfile, setOriginalProfile] = useState(initialProfile);
+  const navigate = useNavigate();
+  const primaryGradient = "from-indigo-600 to-cyan-500";
+  const primaryGradientClass = `bg-gradient-to-r ${primaryGradient}`;
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -176,17 +180,39 @@ const Profile = () => {
   return (
     <DashboardLayout userRole="client">
       <div className="space-y-8">
-        <div>
-          <h1 className="flex items-baseline gap-2 text-3xl font-extrabold">
-            <span className="bg-gradient-to-r from-indigo-600 to-sky-400 bg-clip-text text-transparent">
-              Post
-            </span>
-            <span className="text-gray-900"> Setting</span>
-          </h1>
-          <p className="text-muted-foreground">
-            Define your brand's personality and preferences for AI-generated
-            posts.
-          </p>
+        <div
+          className="
+    sticky top-0 z-10
+    -mx-2 px-4 py-4
+    bg-gradient-to-b from-white/90 to-white/70
+    backdrop-blur
+    border-b border-indigo-100
+    flex flex-col sm:flex-row sm:items-center sm:justify-between
+    gap-4
+  "
+        >
+          <div>
+            <h1 className="text-3xl font-extrabold">
+              <span
+                className={`text-transparent bg-clip-text ${primaryGradientClass}`}
+              >
+                Post
+              </span>{" "}
+              Settings
+            </h1>
+            <p className="text-gray-600 text-lg mt-1">
+              View and manage post setting.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigate(-1)}
+              className="px-4 py-2 text-sm rounded-md border bg-white hover:bg-indigo-50 transition"
+            >
+              ← Back
+            </button>
+          </div>
         </div>
 
         <ReusableForm
