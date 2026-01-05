@@ -127,8 +127,8 @@ module.exports = function (app) {
             headers: { Authorization: `Bearer ${access_token}` },
           })
           .then((r) => r.data);
-
-        let user = await User.findOne({ where: { email: profile.email, is_email_verified: true, } });
+//  let user = await User.findOne({ where: { email: profile.email, is_email_verified: true, } });
+         let user = await User.findOne({ where: { email: profile.email } });
 
         const action = state.action || "signin";
 
@@ -173,24 +173,28 @@ module.exports = function (app) {
           );
         }
 
-        if (!user) {
-          const randomPassword = Math.random().toString(36).slice(-12);
-          const hashed = await bcrypt.hash(randomPassword, 12);
-          const usernameBase = profile.email.split("@")[0];
+    if (action === "signin") {
+  if (!user) {
+    return res.redirect(
+      `${new URL(state.redirect_dashboard).origin}/auth?social_error=account_not_found`
+    );
+  }
 
-          user = await User.create({
-            user_name: `${usernameBase}_${Date.now()}`,
-            email: profile.email,
-            password: hashed,
-            user_fname: profile.given_name,
-            user_lname: profile.family_name,
-            avatar_url: profile.picture,
-            full_name: profile.name,
-            is_email_verified: true,
-            active_status: true,
-            role_id: 2,
-          });
-        } else {
+  if (user.is_deleted) {
+    return res.redirect(
+      `${new URL(state.redirect_dashboard).origin}/auth?social_error=account_blocked`
+    );
+  }
+
+  user.avatar_url = profile.picture || user.avatar_url;
+  user.full_name = profile.name;
+  user.user_fname = profile.given_name;
+  user.user_lname = profile.family_name;
+  user.is_email_verified = true;
+  user.active_status = true;
+  await user.save();
+}
+else {
           if (user.is_deleted) {
             return res.redirect(
               `${
@@ -222,8 +226,10 @@ module.exports = function (app) {
       } catch (err) {
         console.error("Google OAuth Error:", err.response?.data || err.message);
 
-        const frontend =
-          process.env.FRONTEND_URL || `${req.protocol}://${req.get("host")}`;
+        // const frontend =
+        //   process.env.FRONTEND_URL || `${req.protocol}://${req.get("host")}`;
+        const frontend = process.env.FRONTEND_URL;
+
 
         return res.redirect(`${frontend}/auth?social_error=auth_failed`);
       }

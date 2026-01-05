@@ -598,6 +598,27 @@ const Auth = () => {
                 >
                   Forgot Password?
                 </button>
+
+                <Button
+  type="button"
+  className="w-full h-10 bg-white border border-gray-300 flex items-center justify-center gap-2 hover:bg-gray-100 text-gray-800 shadow-sm"
+  onClick={() => {
+    const backendBase = API_CONFIG.BASE_URL.replace("/api", "");
+
+    const redirectAfter = `${window.location.origin}/dashboard`;
+
+    const googleUrl = `${backendBase}/auth/google?redirect_dashboard=${encodeURIComponent(
+      redirectAfter
+    )}&action=signin`;
+
+    console.log("Signin with Google:", googleUrl);
+    window.location.href = googleUrl;
+  }}
+>
+  Sign in with Google
+</Button>
+
+                
                 <Button
                   type="submit"
                   className="w-full h-10 bg-gradient-to-r from-indigo-600 to-sky-500 hover:from-indigo-500 hover:to-sky-400 text-white shadow-md"
@@ -868,6 +889,7 @@ const Auth = () => {
                     "Sign Up"
                   )}
                 </Button>
+
 
                 {/* ================= Google Sign Up Button ================= */}
                 <div className="mt-3">
