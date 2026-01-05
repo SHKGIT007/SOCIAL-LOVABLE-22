@@ -35,6 +35,7 @@ const Users = () => {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
 
   const primaryGradient = "from-indigo-600 to-cyan-500";
   const primaryGradientClass = `bg-gradient-to-r ${primaryGradient}`;
@@ -75,11 +76,22 @@ const Users = () => {
     }
   };
 
+
+  useEffect(() => {
+       const times = setTimeout(() => {
+           setDebouncedSearch(search);
+       }, 1000);
+       return () => clearTimeout(times);
+  },[search])
+      
+
+
+
   useEffect(() => {
     if (!isAuthenticated()) return navigate("/auth");
     if (!isAdmin()) return navigate("/dashboard");
-    fetchUsers(page, perPage, search);
-  }, [page, perPage, search]);
+    fetchUsers(page, perPage, debouncedSearch);
+  }, [page, perPage, debouncedSearch]);
 
   const handleUpdateUserStatus = async (userId: string, newStatus: boolean) => {
     const result = await Swal.fire({
