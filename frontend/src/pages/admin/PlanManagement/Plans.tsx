@@ -34,9 +34,18 @@ const Plans = () => {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
   const [search, setSearch] = useState("");
-
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
   const primaryGradient = "from-indigo-600 to-cyan-500";
   const primaryGradientClass = `bg-gradient-to-r ${primaryGradient}`;
+
+
+  useEffect(() => {
+    const times = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 1000);
+    return () => clearTimeout(times);
+  }, [search]);
+
 
   const fetchPlans = async (pageNumber = 1, pageSize = 10, searchTerm = "") => {
     setLoading(true);
@@ -73,8 +82,8 @@ const Plans = () => {
     if (!isAuthenticated()) return navigate("/auth");
     if (!isAdmin()) return navigate("/dashboard");
 
-    fetchPlans(page, perPage, search);
-  }, [page, perPage, search]);
+    fetchPlans(page, perPage, debouncedSearch);
+  }, [page, perPage, debouncedSearch]);
 
   const handleStatusToggle = async (plan: Plan) => {
     const newStatus = !plan.is_active;

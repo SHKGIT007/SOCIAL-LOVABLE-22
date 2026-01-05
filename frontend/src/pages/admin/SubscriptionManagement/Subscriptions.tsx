@@ -42,9 +42,18 @@ const Subscriptions = () => {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
   const [search, setSearch] = useState("");
-
+   const [debouncedSearch, setDebouncedSearch] = useState(search);
   const primaryGradient = "from-indigo-600 to-cyan-500";
   const primaryGradientClass = `bg-gradient-to-r ${primaryGradient}`;
+
+
+
+  useEffect(() => {
+    const times = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 1000);
+    return () => clearTimeout(times);
+  }, [search]);
 
   const fetchSubscriptions = async (
     pageNumber = 1,
@@ -86,8 +95,8 @@ const Subscriptions = () => {
   useEffect(() => {
     if (!isAuthenticated()) return navigate("/auth");
     if (!isAdmin()) return navigate("/dashboard");
-    fetchSubscriptions(page, perPage, search);
-  }, [page, perPage, search]);
+    fetchSubscriptions(page, perPage, debouncedSearch);
+  }, [page, perPage, debouncedSearch]);
 
   // Export to Excel
   const exportExcel = () => {

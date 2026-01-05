@@ -41,8 +41,17 @@ const AdminPosts = () => {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
+
   const primaryGradient = "from-indigo-600 to-cyan-500";
   const primaryGradientClass = `bg-gradient-to-r ${primaryGradient}`;
+
+  useEffect (()=> {
+     const times = setTimeout(()=> {
+        setDebouncedSearch(search)
+     },1000)
+      return () => clearTimeout(times)
+  },[search])
 
   const fetchPosts = async () => {
     setLoading(true);
@@ -76,7 +85,7 @@ const AdminPosts = () => {
     if (!isAdmin()) return navigate("/dashboard");
 
     fetchPosts();
-  }, [page, perPage, search, statusFilter]);
+  }, [page, perPage, debouncedSearch, statusFilter]);
 
   const getPlatformsArray = (platforms: any): string[] => {
     try {
