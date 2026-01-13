@@ -3,6 +3,7 @@ const { User, Role, Subscription, Post, Plan } = require("../models");
 const { Op } = require("sequelize");
 const { asyncHandler } = require("../middleware/error.middleware");
 const logger = require("../config/logger");
+const socket = require("../../socket");
 
 const createUser = asyncHandler(async (req, res) => {
   const {
@@ -44,15 +45,6 @@ const createUser = asyncHandler(async (req, res) => {
     }
   }
 
-  // Check if user already exists
-  const existingUser = await User.findOne({ where: { email } });
-  if (existingUser) {
-    return res.status(409).json({
-      status: false,
-      message: "User already exists with this email",
-    });
-  }
-
   // Hash password
   const hashedPassword = await bcrypt.hash(password, 12);
 
@@ -71,6 +63,13 @@ const createUser = asyncHandler(async (req, res) => {
     role_id: roleId,
     is_email_verified: true,
     active_status: true,
+  });
+
+  // 🔔 SEND REAL-TIME NOTIFICATION
+  socket.sendNotification(user.id, {
+    title: "Account Created",
+    message: "Admin ne aapka account bana diya 🎉",
+    time: new Date(),
   });
 
   logger.info("User created by admin", {

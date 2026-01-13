@@ -1239,3 +1239,11 @@
 {"level":"info","message":"User password changed","service":"social-lovable-api","timestamp":"2026-01-03T05:22:59.430Z","userId":101}
 {"email":"shaktijatpnp09@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-01-03T05:31:55.666Z","userId":101,"username":"shakti"}
 {"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-01-03T05:44:27.771Z","userId":2,"username":"test"}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-01-12T08:17:47.253Z","userId":2,"username":"test"}
+{"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-01-12T12:59:20.947Z","userId":1,"username":"admin"}
+{"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-01-12T13:05:08.385Z","userId":1,"username":"admin"}
+{"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-01-12T13:07:52.150Z","userId":1,"username":"admin"}
+{"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-01-12T13:09:37.295Z","userId":1,"username":"admin"}
+{"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-01-12T13:12:54.884Z","userId":1,"username":"admin"}
+{"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-01-13T04:37:23.141Z","userId":1,"username":"admin"}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-01-13T05:44:00.617Z","userId":2,"username":"test"}

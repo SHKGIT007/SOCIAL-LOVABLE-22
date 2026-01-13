@@ -37,6 +37,9 @@ import UserPostsReport from "./pages/admin/ReportManagement/UserPostReports";
 import EditUser from "./pages/admin/UserManagement/EditUser";
 import CreatePlanPage from "./pages/admin/PlanManagement/CreatePlan";
 import EditPlanPage from "./pages/admin/PlanManagement/EditPlan";
+import { useEffect } from "react";
+import socket from "@/utils/socket";
+import SocketToast from "@/components/SocketToast";
 
 const queryClient = new QueryClient();
 
@@ -73,12 +76,36 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
 }
 
 function App() {
+
+useEffect(() => {
+
+  const authData = getAuthData();
+  const userId = authData?.user?.id;
+
+  socket.connect();
+
+  socket.on("connect", () => {
+    console.log("Socket connected:", socket.id);
+
+    if (userId) {
+      socket.emit("register", userId);
+    }
+  });
+
+}, []);
+
+
+
+
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
         <Sonner />
+         
         <BrowserRouter>
+         <SocketToast />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />

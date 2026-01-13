@@ -12,7 +12,7 @@ const socialAccounOauthRoutes = require('./socialAccount.oauth.routes');
 const profileRoutes = require('./profile.routes');
 const systemSettingRoutes = require('./systemSetting.routes');
 const scheduleRoutes = require('./schedule.routes');
-
+const notificationRoutes = require("./notification.routes");
 
 
 // Use routes
@@ -27,3 +27,4 @@ router.use('/profile', profileRoutes);
 router.use('/system-settings', require('./systemSetting.routes'));
 router.use('/schedules', scheduleRoutes);
 module.exports = router;
+router.use("/notification", notificationRoutes);
