@@ -67,7 +67,7 @@ const createUser = asyncHandler(async (req, res) => {
   });
 
   // 🔔 SEND NOTIFICATIONS - USER REGISTERED
-  // Admin notification
+  // Admin notification (socket notification sent internally by createNotification)
   await createNotification({
     for_admin: true,
     notification_type: "user_registered",
@@ -78,13 +78,6 @@ const createUser = asyncHandler(async (req, res) => {
       user_name: user.user_name,
       user_email: user.email,
     },
-  });
-
-  // Send real-time socket notification to admin
-  socket.sendAdminNotification({
-    title: "New User Registered",
-    message: `New User: "${user.user_fname} ${user.user_lname}" has been registered successfully.`,
-    type: "user_registered",
   });
 
   logger.info("User created by admin", {

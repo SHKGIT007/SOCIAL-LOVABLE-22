@@ -182,6 +182,7 @@ const createPost = asyncHandler(async (req, res) => {
     const userName = user.user_fname + " " + user.user_lname;
 
     // 🔔 SEND NOTIFICATIONS - POST CREATED
+    // Socket notification sent internally by createNotification
     if (req.body.status === "draft") {
       // Draft post notification
       await createNotification({
@@ -196,12 +197,6 @@ const createPost = asyncHandler(async (req, res) => {
           post_title: req.body.title,
         },
       });
-
-      socket.sendAdminNotification({
-        title: "User Draft Post",
-        message: `${userName} draft a ${req.body.is_ai_generated ? "AI-Post" : "Manual-Post"}.`,
-        type: "post_draft",
-      });
     } else {
       // Post created notification
       await createNotification({
@@ -215,12 +210,6 @@ const createPost = asyncHandler(async (req, res) => {
           post_id: post.id,
           post_title: req.body.title,
         },
-      });
-
-      socket.sendAdminNotification({
-        title: "User Post Created",
-        message: `Post Created: A new post was created by ${userName}.`,
-        type: "post_created",
       });
     }
 
