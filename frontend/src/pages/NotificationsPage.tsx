@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Bell, Trash2, Check, CheckCheck, X } from "lucide-react";
+import { Bell, Check, CheckCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { apiService } from "@/services/api";
 import { API_CONFIG } from "@/utils/config";
@@ -33,7 +33,7 @@ export default function NotificationsPage() {
         page: currentPage,
         limit: 10,
       };
-      
+
       if (filter !== "all") {
         queryParams.is_read = filter === "read" ? "true" : "false";
       }
@@ -58,7 +58,7 @@ export default function NotificationsPage() {
     };
 
     fetchUnreadCount();
-    const interval = setInterval(fetchUnreadCount, 10000); // Refresh every 10s
+    const interval = setInterval(fetchUnreadCount, 10000);
     return () => clearInterval(interval);
   }, []);
 
@@ -84,41 +84,18 @@ export default function NotificationsPage() {
 
   const handleMarkAllAsRead = async () => {
     try {
-      await apiService.request(API_CONFIG.ENDPOINTS.NOTIFICATIONS.MARK_ALL_READ, {
-        method: "PUT",
-      });
+      await apiService.request(
+        API_CONFIG.ENDPOINTS.NOTIFICATIONS.MARK_ALL_READ,
+        {
+          method: "PUT",
+        }
+      );
       refetch();
       Swal.fire("Success", "All notifications marked as read", "success");
     } catch (error) {
       console.error("Error marking all as read", error);
       Swal.fire("Error", "Failed to mark notifications as read", "error");
     }
-  };
-
-  const handleDelete = async (notificationId) => {
-    Swal.fire({
-      title: "Delete Notification?",
-      text: "This action cannot be undone.",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#dc2626",
-      cancelButtonColor: "#6b7280",
-      confirmButtonText: "Delete",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          await apiService.request(
-            `${API_CONFIG.ENDPOINTS.NOTIFICATIONS.DELETE}/${notificationId}`,
-            { method: "DELETE" }
-          );
-          refetch();
-          Swal.fire("Deleted", "Notification deleted successfully", "success");
-        } catch (error) {
-          console.error("Error deleting notification", error);
-          Swal.fire("Error", "Failed to delete notification", "error");
-        }
-      }
-    });
   };
 
   const getNotificationIcon = (type) => {
@@ -183,26 +160,20 @@ export default function NotificationsPage() {
     <DashboardLayout userRole="user">
       <div className="space-y-8">
         {/* Header */}
-        <div
-          className="
-    sticky top-0 z-10
-    -mx-2 px-4 py-4
-    bg-gradient-to-b from-white/90 to-white/70
-    backdrop-blur
-    border-b border-indigo-100
-    flex flex-col sm:flex-row sm:items-center sm:justify-between
-    gap-4
-  "
-        >
+        <div className="sticky top-0 z-10 -mx-2 px-4 py-4 bg-gradient-to-b from-white/90 to-white/70 backdrop-blur border-b border-indigo-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-3xl font-extrabold">
-              <span className={`text-transparent bg-clip-text ${primaryGradientClass}`}>
+              <span
+                className={`text-transparent bg-clip-text ${primaryGradientClass}`}
+              >
                 Notifications
               </span>
             </h1>
             <p className="text-gray-600 text-sm mt-1">
               {unreadCount > 0
-                ? `${unreadCount} unread notification${unreadCount !== 1 ? "s" : ""}`
+                ? `${unreadCount} unread notification${
+                    unreadCount !== 1 ? "s" : ""
+                  }`
                 : "All notifications read"}
             </p>
           </div>
@@ -276,18 +247,18 @@ export default function NotificationsPage() {
             </div>
 
             {/* Notifications List */}
-            <div className="space-y-3">
+            <div className="space-y-2">
               {notifications.length === 0 ? (
-                <div className="text-center py-12">
-                  <Bell className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <p className="text-gray-500 text-lg font-medium">
+                <div className="text-center py-8">
+                  <Bell className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                  <p className="text-gray-500 text-base font-medium">
                     {filter === "unread"
                       ? "No unread notifications"
                       : filter === "read"
                       ? "No read notifications"
                       : "No notifications"}
                   </p>
-                  <p className="text-gray-400 text-sm mt-1">
+                  <p className="text-gray-400 text-xs mt-1">
                     Your notifications will appear here
                   </p>
                 </div>
@@ -295,7 +266,7 @@ export default function NotificationsPage() {
                 notifications.map((notification) => (
                   <div
                     key={notification.id}
-                    className={`border-l-4 p-4 rounded-xl shadow-sm hover:shadow-md transition ${getNotificationColor(
+                    className={`border-l-4 p-3 rounded-lg shadow-sm hover:shadow transition ${getNotificationColor(
                       notification.notification_type
                     )} ${
                       !notification.is_read
@@ -303,18 +274,18 @@ export default function NotificationsPage() {
                         : "border-l-gray-300"
                     }`}
                   >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex items-start gap-4 flex-1">
-                        <span className="text-4xl mt-1 flex-shrink-0">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-3 flex-1">
+                        <span className="text-2xl mt-0.5 flex-shrink-0">
                           {getNotificationIcon(notification.notification_type)}
                         </span>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <h3 className="font-bold text-gray-900 text-lg">
+                            <h3 className="font-bold text-gray-900 text-sm">
                               {notification.title}
                             </h3>
                             {!notification.is_read && (
-                              <span className="inline-block h-2 w-2 bg-indigo-600 rounded-full"></span>
+                              <span className="inline-block h-1.5 w-1.5 bg-indigo-600 rounded-full"></span>
                             )}
                             <Badge
                               variant="outline"
@@ -322,36 +293,37 @@ export default function NotificationsPage() {
                                 notification.notification_type
                               )}`}
                             >
-                              {notification.notification_type.replace(/_/g, " ")}
+                              {notification.notification_type.replace(
+                                /_/g,
+                                " "
+                              )}
                             </Badge>
                           </div>
-                          <p className="text-gray-700 mt-2 text-sm leading-relaxed">
+                          <p className="text-gray-700 mt-1 text-xs leading-relaxed">
                             {notification.message}
                           </p>
-                          <p className="text-xs text-gray-500 mt-3">
-                            {new Date(notification.created_at).toLocaleDateString()} at{" "}
-                            {new Date(notification.created_at).toLocaleTimeString()}
+                          <p className="text-xs text-gray-500 mt-2">
+                            {new Date(
+                              notification.created_at
+                            ).toLocaleDateString()}{" "}
+                            at{" "}
+                            {new Date(
+                              notification.created_at
+                            ).toLocaleTimeString()}
                           </p>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2 flex-shrink-0">
+                      <div className="flex items-center gap-1 flex-shrink-0">
                         {!notification.is_read && (
                           <button
                             onClick={() => handleMarkAsRead(notification.id)}
-                            className="p-2 hover:bg-indigo-200 rounded-lg transition"
+                            className="p-1.5 hover:bg-indigo-200 rounded-lg transition"
                             title="Mark as read"
                           >
-                            <Check className="w-5 h-5 text-indigo-600" />
+                            <Check className="w-4 h-4 text-indigo-600" />
                           </button>
                         )}
-                        <button
-                          onClick={() => handleDelete(notification.id)}
-                          className="p-2 hover:bg-red-200 rounded-lg transition"
-                          title="Delete"
-                        >
-                          <Trash2 className="w-5 h-5 text-red-600" />
-                        </button>
                       </div>
                     </div>
                   </div>
