@@ -851,40 +851,71 @@ const Posts = () => {
     <DashboardLayout userRole="client">
       <div className="space-y-6">
         {/* Header — gradient kicker + subtitle for theme consistency */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <h1 className="flex items-baseline gap-2 text-3xl font-extrabold">
+        <div
+          className="
+    sticky top-0 z-10
+    -mx-2 px-4 py-4
+    bg-gradient-to-b from-white/90 to-white/70
+    backdrop-blur
+    border-b border-indigo-100
+    flex flex-col sm:flex-row sm:items-center sm:justify-between
+    gap-4
+  "
+        >
+          {/* Left Section */}
+          <div>
+            <h1 className="text-3xl font-extrabold">
               <span className="bg-gradient-to-r from-indigo-600 to-sky-400 bg-clip-text text-transparent">
                 Posts
-              </span>
+              </span>{" "}
+              Management
             </h1>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="ml-4 px-3 py-2 rounded-lg border border-indigo-200 text-indigo-700 bg-indigo-50 focus:outline-none focus:ring focus:ring-indigo-100 text-sm font-semibold"
-            >
-              <option value="all">All</option>
-              <option value="draft">Draft</option>
-              <option value="scheduled">Scheduled</option>
-              <option value="published">Published</option>
-            </select>
-            <select
-              value={generationFilter}
-              onChange={(e) => setGenerationFilter(e.target.value)}
-              className="ml-4 px-3 py-2 rounded-lg border border-indigo-200 text-indigo-700 bg-indigo-50 focus:outline-none focus:ring focus:ring-indigo-100 text-sm font-semibold"
-            >
-              <option value="all">All Types</option>
-              <option value="ai">AI Generated</option>
-              <option value="manual">Manually Generated</option>
-            </select>
+            <p className="text-gray-600 text-lg mt-1">
+              View and manage all posts.
+            </p>
+
+            {/* Filters */}
+            <div className="flex flex-wrap items-center gap-3 mt-3">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="px-3 py-2 rounded-lg border border-indigo-200 text-indigo-700 bg-indigo-50 focus:outline-none focus:ring focus:ring-indigo-100 text-sm font-semibold"
+              >
+                <option value="all">All</option>
+                <option value="draft">Draft</option>
+                <option value="scheduled">Scheduled</option>
+                <option value="published">Published</option>
+              </select>
+
+              <select
+                value={generationFilter}
+                onChange={(e) => setGenerationFilter(e.target.value)}
+                className="px-3 py-2 rounded-lg border border-indigo-200 text-indigo-700 bg-indigo-50 focus:outline-none focus:ring focus:ring-indigo-100 text-sm font-semibold"
+              >
+                <option value="all">All Types</option>
+                <option value="ai">AI Generated</option>
+                <option value="manual">Manually Generated</option>
+              </select>
+            </div>
           </div>
-          <Button
-            onClick={() => navigate("/posts/new")}
-            className="h-10 bg-gradient-to-r from-indigo-600 to-sky-500 hover:from-indigo-500 hover:to-sky-400 text-white shadow-md"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Create Post
-          </Button>
+
+          {/* Right Section */}
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={() => navigate("/posts/new")}
+              className="h-10 bg-gradient-to-r from-indigo-600 to-sky-500 hover:from-indigo-500 hover:to-sky-400 text-white shadow-md"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Create Post
+            </Button>
+
+            <button
+              onClick={() => navigate(-1)}
+              className="px-4 py-2 text-sm rounded-md border bg-white hover:bg-indigo-50 transition"
+            >
+              ← Back
+            </button>
+          </div>
         </div>
 
         {posts.length === 0 ? (

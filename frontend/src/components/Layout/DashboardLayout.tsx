@@ -171,7 +171,7 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Fixed Header */}
       <div className="fixed top-0 left-0 right-0 z-50">
-        <Header 
+        <Header
           isSidebarCollapsed={isSidebarCollapsed}
           onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
           isSidebarOpen={isSidebarOpen}
@@ -183,9 +183,7 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
       <aside
         className={`fixed left-0 top-16 h-[calc(100vh-64px)] bg-white border-r border-gray-200 transition-all duration-300 ease-in-out shadow-lg z-40 ${
           isSidebarCollapsed ? "w-20" : "w-64"
-        } ${
-          isSidebarOpen ? "block" : "hidden"
-        } lg:block`}
+        } ${isSidebarOpen ? "block" : "hidden"} lg:block`}
       >
         <div className="flex h-full flex-col">
           {/* Navigation */}
@@ -197,7 +195,9 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
                   key={item.path}
                   variant={isActive ? "default" : "ghost"}
                   className={`w-full transition-all duration-200 ${
-                    isSidebarCollapsed ? "justify-center px-2" : "justify-start px-3"
+                    isSidebarCollapsed
+                      ? "justify-center px-2"
+                      : "justify-start px-3"
                   } ${
                     isActive
                       ? "bg-indigo-600 text-white hover:bg-indigo-700 shadow-md"
@@ -209,8 +209,14 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
                     if (isSidebarOpen) setIsSidebarOpen(false);
                   }}
                 >
-                  <item.icon className={`h-5 w-5 flex-shrink-0 ${!isSidebarCollapsed ? "mr-3" : ""}`} />
-                  {!isSidebarCollapsed && <span className="truncate">{item.label}</span>}
+                  <item.icon
+                    className={`h-5 w-5 flex-shrink-0 ${
+                      !isSidebarCollapsed ? "mr-3" : ""
+                    }`}
+                  />
+                  {!isSidebarCollapsed && (
+                    <span className="truncate">{item.label}</span>
+                  )}
                 </Button>
               );
             })}
@@ -218,7 +224,6 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
 
           {/* Sidebar Footer */}
           <div className="border-t border-gray-100 p-3">
-  
             {/* <Button
               variant="outline"
               className={`w-full border-2 border-indigo-300 text-indigo-600 hover:bg-indigo-50 transition-colors ${
@@ -237,7 +242,7 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
               )}
             </Button> */}
 
-            {getUserRole() === "client" && (
+            {/* {getUserRole() === "client" && (
               <Button
                 variant="destructive"
                 className={`w-full mt-3 border-2 border-red-300 text-red-600 transition-colors ${
@@ -255,14 +260,20 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
                   </>
                 )}
               </Button>
-            )}
+            )} */}
           </div>
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className={`flex-1 transition-all duration-300 overflow-hidden ${isSidebarCollapsed ? "lg:ml-20" : "lg:ml-64"}`}>
-        <div className="h-[calc(100vh-64px)] overflow-y-auto pt-16 pb-8 px-4 lg:px-8">{children}</div>
+      <main
+        className={`flex-1 transition-all duration-300 overflow-hidden ${
+          isSidebarCollapsed ? "lg:ml-20" : "lg:ml-64"
+        }`}
+      >
+        <div className="h-[calc(100vh-64px)] overflow-y-auto pt-16 pb-8 px-4 lg:px-8">
+          {children}
+        </div>
       </main>
 
       {/* Mobile Overlay */}

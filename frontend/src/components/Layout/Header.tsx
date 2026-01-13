@@ -1,5 +1,17 @@
 import { useState, useEffect, useRef } from "react";
-import { Bell, LogOut, Trash2, Settings, User, X, Check, Zap, ChevronLeft, ChevronRight, Menu } from "lucide-react";
+import {
+  Bell,
+  LogOut,
+  Trash2,
+  Settings,
+  User,
+  X,
+  Check,
+  Zap,
+  ChevronLeft,
+  ChevronRight,
+  Menu,
+} from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { getCurrentUser, logout, getUserRole } from "@/utils/auth";
@@ -23,11 +35,11 @@ interface HeaderProps {
   onToggleMobileMenu?: () => void;
 }
 
-export default function Header({ 
-  isSidebarCollapsed, 
+export default function Header({
+  isSidebarCollapsed,
   onToggleSidebar,
   isSidebarOpen = false,
-  onToggleMobileMenu
+  onToggleMobileMenu,
 }: HeaderProps) {
   const navigate = useNavigate();
   const user = getCurrentUser();
@@ -95,9 +107,12 @@ export default function Header({
 
   const handleMarkAllAsRead = async () => {
     try {
-      await apiService.request(API_CONFIG.ENDPOINTS.NOTIFICATIONS.MARK_ALL_READ, {
-        method: "PUT",
-      });
+      await apiService.request(
+        API_CONFIG.ENDPOINTS.NOTIFICATIONS.MARK_ALL_READ,
+        {
+          method: "PUT",
+        }
+      );
       refetch();
     } catch (error) {
       console.error("Error marking all as read", error);
@@ -155,7 +170,9 @@ export default function Header({
   };
 
   const goToNotifications = () => {
-    navigate(getUserRole() === "admin" ? "/admin/notifications" : "/notifications");
+    navigate(
+      getUserRole() === "admin" ? "/admin/notifications" : "/notifications"
+    );
     setIsNotificationOpen(false);
   };
 
@@ -185,7 +202,9 @@ export default function Header({
           {/* Logo */}
           <div className="flex items-center gap-2">
             <Zap className="h-6 w-6" />
-            <span className="text-lg font-extrabold hidden sm:inline">SocialPost AI</span>
+            <span className="text-lg font-extrabold hidden sm:inline">
+              SocialPost AI
+            </span>
           </div>
 
           {/* Collapse Toggle Button - Desktop only */}
@@ -258,7 +277,9 @@ export default function Header({
                         key={notification.id}
                         className={`border-b border-gray-100 p-3 hover:bg-gray-50 transition-colors ${
                           !notification.is_read ? "bg-indigo-50" : ""
-                        } ${idx === notifications.length - 1 ? "border-b-0" : ""}`}
+                        } ${
+                          idx === notifications.length - 1 ? "border-b-0" : ""
+                        }`}
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1 min-w-0">
@@ -269,8 +290,12 @@ export default function Header({
                               {notification.message}
                             </p>
                             <p className="text-xs text-gray-400 mt-2">
-                              {new Date(notification.created_at).toLocaleDateString()}{" "}
-                              {new Date(notification.created_at).toLocaleTimeString([], {
+                              {new Date(
+                                notification.created_at
+                              ).toLocaleDateString()}{" "}
+                              {new Date(
+                                notification.created_at
+                              ).toLocaleTimeString([], {
                                 hour: "2-digit",
                                 minute: "2-digit",
                               })}
@@ -279,7 +304,9 @@ export default function Header({
                           <div className="flex items-center gap-1 flex-shrink-0">
                             {!notification.is_read && (
                               <button
-                                onClick={() => handleMarkAsRead(notification.id)}
+                                onClick={() =>
+                                  handleMarkAsRead(notification.id)
+                                }
                                 className="p-1 hover:bg-indigo-100 rounded transition-colors"
                                 title="Mark as read"
                               >
@@ -328,33 +355,26 @@ export default function Header({
               <div className="absolute right-0 mt-3 w-72 bg-white text-gray-800 rounded-lg shadow-2xl z-50 border border-gray-100">
                 {/* User Info */}
                 <div className="border-b border-gray-200 p-4">
-                  <p className="font-semibold text-gray-900 truncate">{user?.email}</p>
-                  <p className="text-xs text-indigo-600 capitalize mt-1">
-                    {getUserRole()} Account
+                  <p className="font-semibold text-gray-900 truncate">
+                    {user?.email}
                   </p>
+                  {/* <p className="text-xs text-indigo-600 capitalize mt-1">
+                    {getUserRole()} Account
+                  </p> */}
                 </div>
 
                 {/* Menu Items */}
-                <div className="py-2">
-                  <button
-                    onClick={goToProfile}
-                    className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
-                  >
-                    <User className="h-4 w-4" />
-                    Update Profile
-                  </button>
-                  <button
-                    onClick={() => {
-                      navigate("/update-profile");
-                      setIsProfileOpen(false);
-                    }}
-                    className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
-                  >
-                    <Settings className="h-4 w-4" />
-                    Settings
-                  </button>
-                </div>
-
+                {getUserRole() === "client" && (
+                  <div className="py-2">
+                    <button
+                      onClick={goToProfile}
+                      className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                    >
+                      <User className="h-4 w-4" />
+                      Update Profile
+                    </button>
+                  </div>
+                )}
                 {/* Logout & Delete */}
                 <div className="border-t border-gray-200 p-2">
                   <button

@@ -4,7 +4,7 @@ import { apiService } from "@/services/api";
 import Swal from "sweetalert2";
 import DashboardLayout from "../../../components/Layout/DashboardLayout";
 import { Bell, BellOff, Edit2, Trash2, Eye } from "lucide-react";
-
+import { useNavigate } from "react-router-dom";
 // Helper to get day label
 const getDayLabel = (day) => {
   if (day === "custom_date") return "Custom Date Range";
@@ -73,7 +73,7 @@ export default function UserSchedules() {
   const [modalOpen, setModalOpen] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [viewSchedule, setViewSchedule] = useState(null);
-
+  const navigate = useNavigate();
   const fetchSchedules = async () => {
     try {
       const res = await apiService.getSchedules();
@@ -341,73 +341,102 @@ export default function UserSchedules() {
 
   return (
     <DashboardLayout userRole="client">
-      <div className="min-h-[90vh] w-full flex flex-col items-center bg-gradient-to-br from-indigo-50 via-white to-purple-100 py-8 px-3">
-        <div className="w-full max-w-6xl">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="flex items-baseline gap-2 text-3xl font-extrabold">
-              <span className="flex bg-gradient-to-r from-indigo-600 to-sky-400 bg-clip-text text-transparent">
-               Scheduled
-              </span>
-               Posts
+      <div className="space-y-8">
+        <div
+          className="
+    sticky top-0 z-10 mb-4
+    -mx-2 px-4 py-4
+    bg-gradient-to-b from-white/90 to-white/70
+    backdrop-blur
+    border-b border-indigo-100
+    flex flex-col sm:flex-row sm:items-center sm:justify-between
+    gap-4
+  "
+        >
+          {/* Left */}
+          <div>
+            <h2 className="text-3xl font-extrabold">
+              <span className="bg-gradient-to-r from-indigo-600 to-sky-400 bg-clip-text text-transparent">
+                Scheduled
+              </span>{" "}
+              Posts
             </h2>
-            <div></div>
+            <p className="text-gray-600 text-lg mt-1">
+              Manage all scheduled posts here.
+            </p>
+          </div>
+
+          {/* Right */}
+          <div className="flex items-center gap-2">
             <button
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg shadow font-semibold"
+              className="bg-gradient-to-r from-indigo-600 to-sky-500 
+                 hover:from-indigo-500 hover:to-sky-400
+                 text-white px-6 py-2 rounded-lg shadow font-semibold"
               onClick={() => {
                 setRows([emptyRow()]);
                 setEditingId(null);
                 setModalOpen(true);
               }}
             >
-              Create Schedule
+              + Create Schedule
             </button>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => navigate(-1)}
+                className="px-4 py-2 text-sm rounded-md border bg-white hover:bg-indigo-50 transition"
+              >
+                ← Back
+              </button>
+            </div>
           </div>
+        </div>
 
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-indigo-100">
-            <div className="space-y-4">
-              {schedules.length === 0 && (
-                <div className="text-gray-400 text-center py-10">
-                  No schedules set.
-                </div>
-              )}
+        <div className="bg-white rounded-2xl shadow-lg p-6 border border-indigo-100">
+          <div className="space-y-4">
+            {schedules.length === 0 && (
+              <div className="text-gray-400 text-center py-10">
+                No schedules set.
+              </div>
+            )}
 
-              {/* GRID WRAPPER */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-6">
-                {schedules.map((sch) => {
-                  const isActive = sch.status === "1" || sch.status === 1;
-                  return (
-                    <div
-                      key={sch.id}
-                      className="flex flex-col justify-between p-5 rounded-2xl border shadow-md"
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-4">
-                          <span className="grid place-items-center h-10 w-10 rounded-full border bg-indigo-100">
-                            {isActive ? (
-                              <Bell className="h-5 w-5 text-indigo-600" />
-                            ) : (
-                              <BellOff className="h-5 w-5 text-gray-400" />
-                            )}
-                          </span>
-                          <div>
-                            <div className="text-sm text-gray-700 font-semibold">
-                              Platforms:{" "}
-                              <span className="font-normal">
-                                {Array.isArray(sch.platforms)
-                                  ? sch.platforms.join(", ")
-                                  : sch.platforms}
-                              </span>
-                            </div>
-                            {sch.recurrence && (
-                              <div className="text-xs text-indigo-600 mt-0.5">
-                                Recurs: {sch.recurrence}
-                              </div>
-                            )}
+            {/* GRID WRAPPER */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-6">
+              {schedules.map((sch) => {
+                const isActive = sch.status === "1" || sch.status === 1;
+                return (
+                  <div
+                    key={sch.id}
+                    className="flex flex-col justify-between p-5 rounded-2xl border shadow-md"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-4">
+                        <span className="grid place-items-center h-10 w-10 rounded-full border bg-indigo-100">
+                          {isActive ? (
+                            <Bell className="h-5 w-5 text-indigo-600" />
+                          ) : (
+                            <BellOff className="h-5 w-5 text-gray-400" />
+                          )}
+                        </span>
+                        <div>
+                          <div className="text-sm text-gray-700 font-semibold">
+                            Platforms:{" "}
+                            <span className="font-normal">
+                              {Array.isArray(sch.platforms)
+                                ? sch.platforms.join(", ")
+                                : sch.platforms}
+                            </span>
                           </div>
+                          {sch.recurrence && (
+                            <div className="text-xs text-indigo-600 mt-0.5">
+                              Recurs: {sch.recurrence}
+                            </div>
+                          )}
                         </div>
+                      </div>
 
-                        {/* Toggle Switch */}
-                        {/* <ToggleSwitch
+                      {/* Toggle Switch */}
+                      {/* <ToggleSwitch
             checked={isActive}
             onChange={async () => {
               try {
@@ -419,205 +448,203 @@ export default function UserSchedules() {
             }}
           /> */}
 
-                        <ToggleSwitch
-                          checked={isActive}
-                          onChange={async () => {
-                            const result = await Swal.fire({
-                              title: isActive ? "Deactivate?" : "Activate?",
-                              text: `Are you sure you want to ${
-                                isActive ? "deactivate" : "activate"
-                              } this schedule?`,
-                              icon: "warning",
-                              showCancelButton: true,
-                              confirmButtonText: "Yes",
-                              cancelButtonText: "No",
-                            });
+                      <ToggleSwitch
+                        checked={isActive}
+                        onChange={async () => {
+                          const result = await Swal.fire({
+                            title: isActive ? "Deactivate?" : "Activate?",
+                            text: `Are you sure you want to ${
+                              isActive ? "deactivate" : "activate"
+                            } this schedule?`,
+                            icon: "warning",
+                            showCancelButton: true,
+                            confirmButtonText: "Yes",
+                            cancelButtonText: "No",
+                          });
 
-                            if (!result.isConfirmed) return;
+                          if (!result.isConfirmed) return;
 
-                            try {
-                              await apiService.toggleScheduleStatus(
-                                sch.id,
-                                isActive ? "0" : "1"
-                              );
-                              Swal.fire(
-                                isActive ? "Deactivated!" : "Activated!",
-                                `Schedule has been ${
-                                  isActive ? "deactivated" : "activated"
-                                }.`,
-                                "success"
-                              );
-                              fetchSchedules();
-                            } catch {
-                              Swal.fire(
-                                "Error",
-                                "Failed to update status",
-                                "error"
-                              );
-                            }
-                          }}
-                        />
-                      </div>
-
-                      <div className="flex items-center justify-end gap-3 mt-4 pt-3 border-t border-slate-200">
-                        <button
-                          type="button"
-                          title="View Details"
-                          className="p-2 rounded-lg hover:bg-indigo-100 transition"
-                          onClick={() => {
-                            setViewSchedule(sch);
-                            setViewModalOpen(true);
-                          }}
-                        >
-                          <Eye className="h-4 w-4 text-indigo-600" />
-                        </button>
-
-                        <button
-                          type="button"
-                          title="Edit"
-                          className="p-2 rounded-lg hover:bg-indigo-100 transition"
-                          onClick={() => handleEdit(sch)}
-                        >
-                          <Edit2 className="h-4 w-4 text-indigo-600" />
-                        </button>
-
-                        <button
-                          type="button"
-                          title="Delete"
-                          className="p-2 rounded-lg hover:bg-rose-100 transition"
-                          onClick={() => handleDelete(sch.id)}
-                        >
-                          <Trash2 className="h-4 w-4 text-rose-600" />
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* SINGLE DIALOG (outside map) */}
-              <Dialog
-                open={viewModalOpen}
-                onClose={() => setViewModalOpen(false)}
-                className="fixed inset-0 z-50 overflow-y-auto"
-              >
-                <div className="flex items-center justify-center min-h-screen px-4">
-                  <div
-                    className="fixed inset-0 bg-black/50 backdrop-blur-sm"
-                    aria-hidden="true"
-                  />
-                  <Dialog.Panel className="relative w-full max-w-lg mx-auto rounded-2xl shadow-2xl overflow-hidden z-10">
-                    <div className="bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-4">
-                      <Dialog.Title className="text-white text-xl font-bold flex items-center gap-2">
-                        <span className="inline-flex items-center justify-center bg-white/15 rounded-md p-1.5">
-                          <Eye className="h-5 w-5 text-white" />
-                        </span>
-                        Schedule Details
-                      </Dialog.Title>
+                          try {
+                            await apiService.toggleScheduleStatus(
+                              sch.id,
+                              isActive ? "0" : "1"
+                            );
+                            Swal.fire(
+                              isActive ? "Deactivated!" : "Activated!",
+                              `Schedule has been ${
+                                isActive ? "deactivated" : "activated"
+                              }.`,
+                              "success"
+                            );
+                            fetchSchedules();
+                          } catch {
+                            Swal.fire(
+                              "Error",
+                              "Failed to update status",
+                              "error"
+                            );
+                          }
+                        }}
+                      />
                     </div>
 
-                    <div className="bg-white px-6 py-5">
-                      {viewSchedule && (
-                        <div className="space-y-4">
-                          {/* platforms pills */}
-                          <div>
-                            <div className="text-sm font-semibold text-gray-700 mb-1">
-                              Platforms
-                            </div>
-                            <div className="flex flex-wrap gap-2">
-                              {(Array.isArray(viewSchedule.platforms)
-                                ? viewSchedule.platforms
-                                : String(viewSchedule.platforms || "")
-                                    .split(",")
-                                    .map((p) => p.trim())
-                              )
-                                .filter(Boolean)
-                                .map((p, i) => (
-                                  <span
-                                    key={`${p}-${i}`}
-                                    className="px-3 py-1.5 text-xs font-medium rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100"
-                                  >
-                                    {p}
-                                  </span>
-                                ))}
-                            </div>
-                          </div>
-
-                          {/* days & times */}
-                          {viewSchedule.days?.length ? (
-                            <div>
-                              <div className="text-sm font-semibold text-gray-700 mb-2">
-                                Days & Times
-                              </div>
-                              <ul className="space-y-2">
-                                {viewSchedule.days.map((day) => (
-                                  <li
-                                    key={day}
-                                    className="rounded-lg border border-slate-200 bg-slate-50/60 px-3 py-2"
-                                  >
-                                    <div className="flex flex-wrap items-center gap-2">
-                                      <span className="text-sm font-medium text-slate-800">
-                                        {getDayLabel(day)}:
-                                      </span>
-                                      {day === "custom_date" && (
-                                        <span className="text-xs text-slate-500">
-                                          {viewSchedule.customDateFrom} to{" "}
-                                          {viewSchedule.customDateTo}
-                                        </span>
-                                      )}
-                                      {day === "single_date" && (
-                                        <span className="text-xs text-slate-500">
-                                          {viewSchedule.singleDate}
-                                        </span>
-                                      )}
-                                      {viewSchedule.times?.[day]?.filter(
-                                        Boolean
-                                      ).length > 0 && (
-                                        <div className="flex flex-wrap gap-1.5 ml-auto">
-                                          {viewSchedule.times[day]
-                                            .filter(Boolean)
-                                            .map((t, idx) => (
-                                              <span
-                                                key={`${day}-${t}-${idx}`}
-                                                className="px-2 py-0.5 text-xs rounded-md bg-white border border-slate-200 text-slate-700"
-                                              >
-                                                {t}
-                                              </span>
-                                            ))}
-                                        </div>
-                                      )}
-                                    </div>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          ) : null}
-
-                          {viewSchedule?.recurrence && (
-                            <div className="text-xs text-indigo-600">
-                              Recurs:{" "}
-                              <span className="font-medium">
-                                {viewSchedule.recurrence}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="bg-slate-50 px-6 py-3 flex justify-end">
+                    <div className="flex items-center justify-end gap-3 mt-4 pt-3 border-t border-slate-200">
                       <button
                         type="button"
-                        className="inline-flex items-center px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 shadow"
-                        onClick={() => setViewModalOpen(false)}
+                        title="View Details"
+                        className="p-2 rounded-lg hover:bg-indigo-100 transition"
+                        onClick={() => {
+                          setViewSchedule(sch);
+                          setViewModalOpen(true);
+                        }}
                       >
-                        Close
+                        <Eye className="h-4 w-4 text-indigo-600" />
+                      </button>
+
+                      <button
+                        type="button"
+                        title="Edit"
+                        className="p-2 rounded-lg hover:bg-indigo-100 transition"
+                        onClick={() => handleEdit(sch)}
+                      >
+                        <Edit2 className="h-4 w-4 text-indigo-600" />
+                      </button>
+
+                      <button
+                        type="button"
+                        title="Delete"
+                        className="p-2 rounded-lg hover:bg-rose-100 transition"
+                        onClick={() => handleDelete(sch.id)}
+                      >
+                        <Trash2 className="h-4 w-4 text-rose-600" />
                       </button>
                     </div>
-                  </Dialog.Panel>
-                </div>
-              </Dialog>
+                  </div>
+                );
+              })}
             </div>
+
+            {/* SINGLE DIALOG (outside map) */}
+            <Dialog
+              open={viewModalOpen}
+              onClose={() => setViewModalOpen(false)}
+              className="fixed inset-0 z-50 overflow-y-auto"
+            >
+              <div className="flex items-center justify-center min-h-screen px-4">
+                <div
+                  className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+                  aria-hidden="true"
+                />
+                <Dialog.Panel className="relative w-full max-w-lg mx-auto rounded-2xl shadow-2xl overflow-hidden z-10">
+                  <div className="bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-4">
+                    <Dialog.Title className="text-white text-xl font-bold flex items-center gap-2">
+                      <span className="inline-flex items-center justify-center bg-white/15 rounded-md p-1.5">
+                        <Eye className="h-5 w-5 text-white" />
+                      </span>
+                      Schedule Details
+                    </Dialog.Title>
+                  </div>
+
+                  <div className="bg-white px-6 py-5">
+                    {viewSchedule && (
+                      <div className="space-y-4">
+                        {/* platforms pills */}
+                        <div>
+                          <div className="text-sm font-semibold text-gray-700 mb-1">
+                            Platforms
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {(Array.isArray(viewSchedule.platforms)
+                              ? viewSchedule.platforms
+                              : String(viewSchedule.platforms || "")
+                                  .split(",")
+                                  .map((p) => p.trim())
+                            )
+                              .filter(Boolean)
+                              .map((p, i) => (
+                                <span
+                                  key={`${p}-${i}`}
+                                  className="px-3 py-1.5 text-xs font-medium rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100"
+                                >
+                                  {p}
+                                </span>
+                              ))}
+                          </div>
+                        </div>
+
+                        {/* days & times */}
+                        {viewSchedule.days?.length ? (
+                          <div>
+                            <div className="text-sm font-semibold text-gray-700 mb-2">
+                              Days & Times
+                            </div>
+                            <ul className="space-y-2">
+                              {viewSchedule.days.map((day) => (
+                                <li
+                                  key={day}
+                                  className="rounded-lg border border-slate-200 bg-slate-50/60 px-3 py-2"
+                                >
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <span className="text-sm font-medium text-slate-800">
+                                      {getDayLabel(day)}:
+                                    </span>
+                                    {day === "custom_date" && (
+                                      <span className="text-xs text-slate-500">
+                                        {viewSchedule.customDateFrom} to{" "}
+                                        {viewSchedule.customDateTo}
+                                      </span>
+                                    )}
+                                    {day === "single_date" && (
+                                      <span className="text-xs text-slate-500">
+                                        {viewSchedule.singleDate}
+                                      </span>
+                                    )}
+                                    {viewSchedule.times?.[day]?.filter(Boolean)
+                                      .length > 0 && (
+                                      <div className="flex flex-wrap gap-1.5 ml-auto">
+                                        {viewSchedule.times[day]
+                                          .filter(Boolean)
+                                          .map((t, idx) => (
+                                            <span
+                                              key={`${day}-${t}-${idx}`}
+                                              className="px-2 py-0.5 text-xs rounded-md bg-white border border-slate-200 text-slate-700"
+                                            >
+                                              {t}
+                                            </span>
+                                          ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ) : null}
+
+                        {viewSchedule?.recurrence && (
+                          <div className="text-xs text-indigo-600">
+                            Recurs:{" "}
+                            <span className="font-medium">
+                              {viewSchedule.recurrence}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="bg-slate-50 px-6 py-3 flex justify-end">
+                    <button
+                      type="button"
+                      className="inline-flex items-center px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 shadow"
+                      onClick={() => setViewModalOpen(false)}
+                    >
+                      Close
+                    </button>
+                  </div>
+                </Dialog.Panel>
+              </div>
+            </Dialog>
           </div>
         </div>
 
