@@ -8,6 +8,7 @@ const Profile = require('./profile.model');
 const SystemSetting = require('./systemSetting.model');
 const Schedule = require('./schedule.model');
 const AiGenratePost = require('./aiGenratePost.model');
+const Notification = require('./notification.model');
 
 const models = {
     User,
@@ -19,7 +20,8 @@ const models = {
     Profile,
     SystemSetting,
     Schedule,
-    AiGenratePost
+    AiGenratePost,
+    Notification
 };
 
 // Define associations in correct order
@@ -34,6 +36,7 @@ if (Profile.associate) Profile.associate(models);
 if (SystemSetting.associate) SystemSetting.associate(models);
 if (Schedule.associate) Schedule.associate(models);
 if (AiGenratePost.associate) AiGenratePost.associate(models);
+if (Notification.associate) Notification.associate(models);
 
 const sequelizeInstance = require('../config/db.config');
 module.exports = { ...models, sequelize: sequelizeInstance };

@@ -5,6 +5,7 @@ const {
   Subscription,
   SystemSetting,
   AiGenratePost,
+  Notification,
 } = require("../models");
 
 const { Op } = require("sequelize");
@@ -22,6 +23,8 @@ const { type } = require("os");
 const cloudinary = require("cloudinary").v2;
 const moment = require("moment-timezone");
 const { log } = require("console");
+const { createNotification } = require("./notification.controller");
+const socket = require("../../socket");
 
 const createPost = asyncHandler(async (req, res) => {
   // Debug: Log incoming form data and files
@@ -171,6 +174,55 @@ const createPost = asyncHandler(async (req, res) => {
       video_url,
       review_status: review_status,
     });
+
+    // Get user info
+    const user = await User.findByPk(userId, {
+      attributes: ["id", "user_fname", "user_lname", "user_name"],
+    });
+    const userName = user.user_fname + " " + user.user_lname;
+
+    // 🔔 SEND NOTIFICATIONS - POST CREATED
+    if (req.body.status === "draft") {
+      // Draft post notification
+      await createNotification({
+        for_admin: true,
+        notification_type: "post_draft",
+        title: "User Draft Post",
+        message: `${userName} draft a ${req.body.is_ai_generated ? "AI-Post" : "Manual-Post"}.`,
+        metadata: {
+          user_id: userId,
+          user_name: userName,
+          post_id: post.id,
+          post_title: req.body.title,
+        },
+      });
+
+      socket.sendAdminNotification({
+        title: "User Draft Post",
+        message: `${userName} draft a ${req.body.is_ai_generated ? "AI-Post" : "Manual-Post"}.`,
+        type: "post_draft",
+      });
+    } else {
+      // Post created notification
+      await createNotification({
+        for_admin: true,
+        notification_type: "post_created",
+        title: "User Post Created",
+        message: `Post Created: A new post was created by ${userName}.`,
+        metadata: {
+          user_id: userId,
+          user_name: userName,
+          post_id: post.id,
+          post_title: req.body.title,
+        },
+      });
+
+      socket.sendAdminNotification({
+        title: "User Post Created",
+        message: `Post Created: A new post was created by ${userName}.`,
+        type: "post_created",
+      });
+    }
 
     // Update subscription usage
     if (subscription) {

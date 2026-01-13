@@ -71,6 +71,14 @@ export const API_CONFIG = {
       CREATE_ORDER: "/subscriptions/razorpay/order",
       VERIFY_PAYMENT: "/subscriptions/razorpay/verify",
     },
+    // Notification endpoints
+    NOTIFICATIONS: {
+      GET_ALL: "/notifications",
+      GET_UNREAD_COUNT: "/notifications/count/unread",
+      MARK_READ: "/notifications",
+      MARK_ALL_READ: "/notifications/read/all",
+      DELETE: "/notifications",
+    },
     // Social Account endpoints
     SOCIAL_ACCOUNTS: {
       GET_MY: "/social-accounts/my-accounts",

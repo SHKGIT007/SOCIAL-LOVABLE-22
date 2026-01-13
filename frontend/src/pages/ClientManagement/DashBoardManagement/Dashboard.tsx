@@ -140,22 +140,37 @@ const handleRoute = (route, state) => {
   return (
     // Applied light theme background to the main content area
     <DashboardLayout userRole={userRole}>
-      <div className="space-y-8 p-4 sm:p-6 bg-white rounded-lg min-h-screen">
-        {/* Header Section: Theme applied to text */}
-        <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-gray-900">
-            <span
-              className={`text-transparent bg-clip-text ${primaryGradientClass}`}
-            >
-              AI
-            </span>{" "}
-            Dashboard
-          </h1>
-          <p className="text-lg text-gray-600">
-            Welcome back! Here's an overview of your social media activity and
+      <div className="space-y-8 ">
+      
+
+  <div
+          className="
+    sticky top-0 z-10
+    -mx-2 px-4 py-4
+    bg-gradient-to-b from-white/90 to-white/70
+    backdrop-blur
+    border-b border-indigo-100
+    flex flex-col sm:flex-row sm:items-center sm:justify-between
+    gap-4
+  "
+        >
+          <div>
+            <h1 className="text-3xl font-extrabold">
+              <span
+                className={`text-transparent bg-clip-text ${primaryGradientClass}`}
+              >
+                AI
+              </span>{" "}
+              Dashboard
+            </h1>
+            <p className="text-gray-600 text-lg mt-1">
+             Welcome back! Here's an overview of your social media activity and
             performance.
-          </p>
+            </p>
+          </div>
         </div>
+
+
 
         {/* --- */}
 

@@ -46,12 +46,12 @@ const AdminPosts = () => {
   const primaryGradient = "from-indigo-600 to-cyan-500";
   const primaryGradientClass = `bg-gradient-to-r ${primaryGradient}`;
 
-  useEffect (()=> {
-     const times = setTimeout(()=> {
-        setDebouncedSearch(search)
-     },1000)
-      return () => clearTimeout(times)
-  },[search])
+  useEffect(() => {
+    const times = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 1000);
+    return () => clearTimeout(times);
+  }, [search]);
 
   const fetchPosts = async () => {
     setLoading(true);

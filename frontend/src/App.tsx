@@ -37,6 +37,7 @@ import UserPostsReport from "./pages/admin/ReportManagement/UserPostReports";
 import EditUser from "./pages/admin/UserManagement/EditUser";
 import CreatePlanPage from "./pages/admin/PlanManagement/CreatePlan";
 import EditPlanPage from "./pages/admin/PlanManagement/EditPlan";
+import NotificationsPage from "./pages/NotificationsPage";
 import { useEffect } from "react";
 import socket from "@/utils/socket";
 import SocketToast from "@/components/SocketToast";
@@ -81,6 +82,7 @@ useEffect(() => {
 
   const authData = getAuthData();
   const userId = authData?.user?.id;
+  const userType = authData?.user?.user_type;
 
   socket.connect();
 
@@ -88,7 +90,7 @@ useEffect(() => {
     console.log("Socket connected:", socket.id);
 
     if (userId) {
-      socket.emit("register", userId);
+      socket.emit("register", userId, userType);
     }
   });
 
@@ -116,6 +118,7 @@ useEffect(() => {
             
             {/* Client Routes */}
             <Route path="/dashboard" element={<ClientRoute><Dashboard /></ClientRoute>} />
+            <Route path="/notifications" element={<ClientRoute><NotificationsPage /></ClientRoute>} />
             <Route path="/social-accounts" element={<ClientRoute><SocialAccounts /></ClientRoute>} />
             <Route path="/posts" element={<ClientRoute><Posts /></ClientRoute>} />
             <Route path="/posts/new" element={<ClientRoute><NewPost /></ClientRoute>} />
@@ -128,6 +131,7 @@ useEffect(() => {
             
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+            <Route path="/admin/notifications" element={<AdminRoute><NotificationsPage /></AdminRoute>} />
             <Route path="/admin/plans" element={<AdminRoute><AdminPlans /></AdminRoute>} />
             <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
             <Route path="/admin/users/:userId" element={<AdminRoute><UserAnalytics /></AdminRoute>} />

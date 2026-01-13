@@ -83,7 +83,6 @@
 //     navigate("/posts", { replace: true });
 //   }, [filter]);
 
-
 //   const fetchPosts = async () => {
 //     try {
 //       if (!isAuthenticated()) {
@@ -516,9 +515,6 @@
 //         )}
 //       </div>
 
-
-
-
 //       {/* Confirm delete */}
 //       <AlertDialog
 //         open={!!deletePostId}
@@ -543,29 +539,6 @@
 // };
 
 // export default Posts;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -617,7 +590,7 @@ const Posts = () => {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const navigate = useNavigate();
   const location = useLocation();
-  const filter = location.state?.filter
+  const filter = location.state?.filter;
   console.log("Admin filter", filter);
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -627,13 +600,13 @@ const Posts = () => {
   const [limit, setLimit] = useState(12);
   const [totalPages, setTotalPages] = useState(0);
 
-useEffect(() => {
-  setPage(1);
-}, [statusFilter, generationFilter]);
+  useEffect(() => {
+    setPage(1);
+  }, [statusFilter, generationFilter]);
 
-useEffect(() => {
-  fetchPosts();
-}, [page, limit, statusFilter, generationFilter]);
+  useEffect(() => {
+    fetchPosts();
+  }, [page, limit, statusFilter, generationFilter]);
 
   useEffect(() => {
     if (!filter) return;
@@ -659,7 +632,6 @@ useEffect(() => {
     navigate("/posts", { replace: true });
   }, [filter]);
 
-
   const fetchPosts = async () => {
     try {
       if (!isAuthenticated()) {
@@ -670,9 +642,8 @@ useEffect(() => {
       const response = await apiService.getAllPosts({
         page,
         limit,
-         status: statusFilter !== "all" ? statusFilter : undefined,
-  generation: generationFilter !== "all" ? generationFilter : undefined,
-
+        status: statusFilter !== "all" ? statusFilter : undefined,
+        generation: generationFilter !== "all" ? generationFilter : undefined,
       });
       if (response.status) {
         setPosts(response.data.posts || []);
@@ -831,7 +802,6 @@ useEffect(() => {
 
   // Softer pastel chips like your dashboard
 
-
   const statusClasses = (status: string) => {
     switch (status) {
       case "published":
@@ -877,8 +847,6 @@ useEffect(() => {
 
   console.log("post", posts);
 
-
-
   return (
     <DashboardLayout userRole="client">
       <div className="space-y-6">
@@ -919,7 +887,7 @@ useEffect(() => {
           </Button>
         </div>
 
-       {posts.length === 0 ? (
+        {posts.length === 0 ? (
           <Card className="border-indigo-100">
             <CardContent className="flex flex-col items-center justify-center py-12">
               <p className="text-muted-foreground mb-4">No posts yet</p>
@@ -934,36 +902,34 @@ useEffect(() => {
           </Card>
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-            {(posts).map(
-              (post) => {
-                const isPastSchedule = post.scheduled_at
-                  ? new Date(post.scheduled_at) <= new Date()
-                  : false;
-                const showViewOnly =
-                  post.status === "published" ||
-                  post.review_status === "rejected" ||
-                  (post.review_status === "pending" && !!isPastSchedule);
-                const canApproveReject =
-                  post.status === "scheduled" &&
-                  post.review_status === "pending" &&
-                  !isPastSchedule;
+            {posts.map((post) => {
+              const isPastSchedule = post.scheduled_at
+                ? new Date(post.scheduled_at) <= new Date()
+                : false;
+              const showViewOnly =
+                post.status === "published" ||
+                post.review_status === "rejected" ||
+                (post.review_status === "pending" && !!isPastSchedule);
+              const canApproveReject =
+                post.status === "scheduled" &&
+                post.review_status === "pending" &&
+                !isPastSchedule;
 
-                return (
-                  <Card
-                    key={post.id}
-                    className="border border-indigo-100/60 hover:border-indigo-200 hover:shadow-lg transition-all"
-                  >
-                    <CardHeader className="pb-3">
-                      <div className="space-y-2">
-                        <div className="relative">
-                          <CardTitle className="text-lg font-semibold line-clamp-1 pr-24">
-                            {post.title}
-                          </CardTitle>
+              return (
+                <Card
+                  key={post.id}
+                  className="border border-indigo-100/60 hover:border-indigo-200 hover:shadow-lg transition-all"
+                >
+                  <CardHeader className="pb-3">
+                    <div className="space-y-2">
+                      <div className="relative">
+                        <CardTitle className="text-lg font-semibold line-clamp-1 pr-24">
+                          {post.title}
+                        </CardTitle>
 
-                          {post.review_status === "pending" &&
-                            isPastSchedule && (
-                              <Badge
-                                className="
+                        {post.review_status === "pending" && isPastSchedule && (
+                          <Badge
+                            className="
     absolute top-0 right-0
     bg-red-100 text-red-700
     border border-red-200
@@ -971,30 +937,29 @@ useEffect(() => {
     px-2 py-0.5 rounded-md
     pointer-events-none
   "
-                              >
-                                Review Expired
-                              </Badge>
-
-                            )}
-                        </div>
-
-                        <CardDescription className="line-clamp-2">
-                          {post.content}
-                        </CardDescription>
+                          >
+                            Review Expired
+                          </Badge>
+                        )}
                       </div>
 
-                      <div className="flex flex-wrap gap-2 mt-3">
-                        <Badge variant="outline" className="capitalize">
-                          {post.status}
-                        </Badge>
+                      <CardDescription className="line-clamp-2">
+                        {post.content}
+                      </CardDescription>
+                    </div>
 
-                        {post.is_ai_generated ? (
-                          <Badge variant="outline">AI Generated</Badge>
-                        ) : (
-                          <Badge variant="outline">Manually Generated</Badge>
-                        )}
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      <Badge variant="outline" className="capitalize">
+                        {post.status}
+                      </Badge>
 
-                        {/* {post.review_status === "approved" && (
+                      {post.is_ai_generated ? (
+                        <Badge variant="outline">AI Generated</Badge>
+                      ) : (
+                        <Badge variant="outline">Manually Generated</Badge>
+                      )}
+
+                      {/* {post.review_status === "approved" && (
                           <Badge className="bg-emerald-100 text-emerald-700 border border-emerald-200">
                             Approved
                           </Badge>
@@ -1011,103 +976,98 @@ useEffect(() => {
                             Rejected
                           </Badge>
                         )} */}
+                    </div>
+                  </CardHeader>
+
+                  <CardContent className="space-y-4 pt-0">
+                    {/* Platforms */}
+                    <div className="flex flex-wrap gap-1">
+                      {getPlatformsArray(post.platforms).map((platform) => (
+                        <Badge
+                          key={platform}
+                          variant="secondary"
+                          className="capitalize"
+                        >
+                          {platform}
+                        </Badge>
+                      ))}
+                    </div>
+
+                    {/* Schedule */}
+                    {post.scheduled_at && (
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <Calendar className="mr-2 h-4 w-4" />
+                        {new Date(post.scheduled_at).toLocaleString()}
                       </div>
-                    </CardHeader>
+                    )}
+                  </CardContent>
 
-                    <CardContent className="space-y-4 pt-0">
-                      {/* Platforms */}
-                      <div className="flex flex-wrap gap-1">
-                        {getPlatformsArray(post.platforms).map((platform) => (
-                          <Badge
-                            key={platform}
-                            variant="secondary"
-                            className="capitalize"
-                          >
-                            {platform}
-                          </Badge>
-                        ))}
-                      </div>
+                  {/* ------- BUTTONS HERE ------- */}
+                  <CardFooter className="mt-2 pt-4 flex items-center gap-2 flex-wrap border-t">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-9 px-3 flex items-center gap-1"
+                      onClick={() => navigate(`/posts/${post.id}`)}
+                    >
+                      <Eye className="h-4 w-4" />
+                      View
+                    </Button>
 
-                      {/* Schedule */}
-                      {post.scheduled_at && (
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <Calendar className="mr-2 h-4 w-4" />
-                          {new Date(post.scheduled_at).toLocaleString()}
-                        </div>
-                      )}
-                    </CardContent>
+                    {!showViewOnly && (
+                      <>
+                        {canApproveReject && (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-9 px-3 flex items-center gap-1 text-emerald-700 border-emerald-300 hover:bg-emerald-50"
+                              onClick={() => handleApprove(post.id)}
+                            >
+                              ✓ Approve
+                            </Button>
 
-                    {/* ------- BUTTONS HERE ------- */}
-                    <CardFooter className="mt-2 pt-4 flex items-center gap-2 flex-wrap border-t">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-9 px-3 flex items-center gap-1"
-                        onClick={() => navigate(`/posts/${post.id}`)}
-                      >
-                        <Eye className="h-4 w-4" />
-                        View
-                      </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-9 px-3 flex items-center gap-1 text-red-700 border-red-300 hover:bg-red-50"
+                              onClick={() => handleReject(post.id)}
+                            >
+                              ✗ Reject
+                            </Button>
+                          </>
+                        )}
 
-                      {!showViewOnly && (
-                        <>
-                          {canApproveReject && (
-                            <>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-9 px-3 flex items-center gap-1 text-emerald-700 border-emerald-300 hover:bg-emerald-50"
-                                onClick={() => handleApprove(post.id)}
-                              >
-                                ✓ Approve
-                              </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-9 px-3 flex items-center gap-1"
+                          onClick={() => navigate(`/posts/edit/${post.id}`)}
+                        >
+                          <Edit className="h-4 w-4" />
+                          Edit
+                        </Button>
 
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-9 px-3 flex items-center gap-1 text-red-700 border-red-300 hover:bg-red-50"
-                                onClick={() => handleReject(post.id)}
-                              >
-                                ✗ Reject
-                              </Button>
-                            </>
-                          )}
-
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-9 px-3 flex items-center gap-1"
-                            onClick={() => navigate(`/posts/edit/${post.id}`)}
-                          >
-                            <Edit className="h-4 w-4" />
-                            Edit
-                          </Button>
-
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            className="h-9 px-3 flex items-center gap-1"
-                            onClick={() => setDeletePostId(post.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            Delete
-                          </Button>
-                        </>
-                      )}
-                    </CardFooter>
-                  </Card>
-                );
-              }
-            )}
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          className="h-9 px-3 flex items-center gap-1"
+                          onClick={() => setDeletePostId(post.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          Delete
+                        </Button>
+                      </>
+                    )}
+                  </CardFooter>
+                </Card>
+              );
+            })}
           </div>
         )}
       </div>
 
-
-
-
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border rounded-lg bg-white shadow-sm">
-
         {/* Rows per page */}
         <div className="flex items-center gap-2 text-sm">
           <span className="text-gray-600 font-medium">Rows per page:</span>
@@ -1119,8 +1079,10 @@ useEffect(() => {
             }}
             className="border rounded-md px-2 py-1"
           >
-            {[6, 12, 25, 50, 100].map(n => (
-              <option key={n} value={n}>{n}</option>
+            {[6, 12, 25, 50, 100].map((n) => (
+              <option key={n} value={n}>
+                {n}
+              </option>
             ))}
           </select>
         </div>
@@ -1129,7 +1091,7 @@ useEffect(() => {
         <div className="flex items-center gap-3">
           <button
             disabled={page === 1}
-            onClick={() => setPage(p => p - 1)}
+            onClick={() => setPage((p) => p - 1)}
             className="px-4 py-2 border rounded disabled:opacity-50"
           >
             Previous
@@ -1141,23 +1103,13 @@ useEffect(() => {
 
           <button
             disabled={page === totalPages}
-            onClick={() => setPage(p => p + 1)}
+            onClick={() => setPage((p) => p + 1)}
             className="px-4 py-2 border rounded disabled:opacity-50"
           >
             Next
           </button>
         </div>
-
       </div>
-
-
-
-
-
-
-
-
-
 
       {/* Confirm delete */}
       <AlertDialog

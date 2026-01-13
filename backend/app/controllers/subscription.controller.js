@@ -1,9 +1,11 @@
-const { Subscription, Plan, User } = require("../models");
+const { Subscription, Plan, User, Notification } = require("../models");
 const { Op } = require("sequelize");
 const { asyncHandler } = require("../middleware/error.middleware");
 const logger = require("../config/logger");
 const moment = require("moment-timezone");
 const razorpayService = require("../services/razorpay.service");
+const { createNotification } = require("./notification.controller");
+const socket = require("../../socket");
 
 const createSubscriptionRecord = async ({
   userId,
@@ -104,6 +106,40 @@ const createSubscription = asyncHandler(async (req, res) => {
       amount_paid: 0,
       payment_id: null,
       order_id: null,
+    },
+  });
+
+  // 🔔 SEND NOTIFICATIONS - FREE PLAN PURCHASE SUCCESS
+  const user = await User.findByPk(userId);
+  const userName = user.user_fname + " " + user.user_lname;
+
+  // User notification
+  await createNotification({
+    for_user_id: userId,
+    notification_type: "plan_purchase",
+    title: "Plan Purchase Success",
+    message: `Congratulations! You have successfully purchased the plan "${plan.name}".`,
+    metadata: {
+      user_id: userId,
+      plan_id: plan_id,
+      plan_name: plan.name,
+      subscription_id: subscription.id,
+    },
+  });
+
+  // Admin notification
+  await createNotification({
+    for_admin: true,
+    notification_type: "plan_purchase",
+    title: "New Plan Purchase",
+    message: `Congratulations! "${userName}" successfully purchased "${plan.name}" plan.`,
+    metadata: {
+      user_id: userId,
+      user_name: userName,
+      plan_id: plan_id,
+      plan_name: plan.name,
+      subscription_id: subscription.id,
+      amount: 0,
     },
   });
 
@@ -349,7 +385,45 @@ const verifyRazorpayPayment = asyncHandler(async (req, res) => {
         model: Plan,
         as: "Plan",
       },
+      {
+        model: User,
+        as: "User",
+        attributes: ["id", "user_fname", "user_lname", "email", "user_name"],
+      },
     ],
+  });
+
+  // 🔔 SEND NOTIFICATIONS - PLAN PURCHASE SUCCESS
+  const userName = subscription.User.user_fname + " " + subscription.User.user_lname;
+
+  // User notification
+  await createNotification({
+    for_user_id: userId,
+    notification_type: "plan_purchase",
+    title: "Plan Purchase Success",
+    message: `Congratulations! You have successfully purchased the plan "${subscription.Plan.name}".`,
+    metadata: {
+      user_id: userId,
+      plan_id: plan_id,
+      plan_name: subscription.Plan.name,
+      subscription_id: subscription.id,
+    },
+  });
+
+  // Admin notification
+  await createNotification({
+    for_admin: true,
+    notification_type: "plan_purchase",
+    title: "New Plan Purchase",
+    message: `Congratulations! "${userName}" successfully purchased "${subscription.Plan.name}" plan.`,
+    metadata: {
+      user_id: userId,
+      user_name: userName,
+      plan_id: plan_id,
+      plan_name: subscription.Plan.name,
+      subscription_id: subscription.id,
+      amount: subscription.amount_paid,
+    },
   });
 
   logger.info("Razorpay payment verified and subscription activated", {

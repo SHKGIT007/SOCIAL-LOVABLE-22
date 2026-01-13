@@ -5,8 +5,14 @@ import socket from "../utils/socket";
 
 export default function SocketToast() {
   useEffect(() => {
+    console.log("🔔 SocketToast mounted, listening for notifications");
+
     socket.on("receive_notification", (data) => {
-      toast.info(data.message);
+      console.log("📨 Notification received:", data);
+      toast.success(data.message, {
+        position: "top-right",
+        autoClose: 5000,
+      });
     });
 
     return () => {

@@ -131,18 +131,30 @@ const AdminDashboard = () => {
   return (
     <DashboardLayout userRole="admin">
       <div className="space-y-8">
-        <div className="pb-4 border-b border-gray-100">
-          <h1 className="text-3xl font-extrabold tracking-tight text-gray-900">
-            <span
-              className={`text-transparent bg-clip-text ${primaryGradientClass}`}
-            >
-              Admin
-            </span>{" "}
-            Dashboard
-          </h1>
-          <p className="text-lg text-gray-600">
-            Manage users, plans, and monitor platform activity.
-          </p>
+        <div
+          className="
+    sticky top-0 z-10
+    -mx-2 px-4 py-4
+    bg-gradient-to-b from-white/90 to-white/70
+    backdrop-blur
+    border-b border-indigo-100
+    flex flex-col sm:flex-row sm:items-center sm:justify-between
+    gap-4
+  "
+        >
+          <div>
+            <h1 className="text-3xl font-extrabold">
+              <span
+                className={`text-transparent bg-clip-text ${primaryGradientClass}`}
+              >
+                Admin
+              </span>{" "}
+              Dashboard
+            </h1>
+            <p className="text-gray-600 text-lg mt-1">
+              Manage users, plans, and monitor platform activity.
+            </p>
+          </div>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">

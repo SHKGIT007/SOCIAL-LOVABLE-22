@@ -1,9 +1,10 @@
 const bcrypt = require("bcryptjs");
-const { User, Role, Subscription, Post, Plan } = require("../models");
+const { User, Role, Subscription, Post, Plan, Notification } = require("../models");
 const { Op } = require("sequelize");
 const { asyncHandler } = require("../middleware/error.middleware");
 const logger = require("../config/logger");
 const socket = require("../../socket");
+const { createNotification } = require("./notification.controller");
 
 const createUser = asyncHandler(async (req, res) => {
   const {
@@ -65,11 +66,25 @@ const createUser = asyncHandler(async (req, res) => {
     active_status: true,
   });
 
-  // 🔔 SEND REAL-TIME NOTIFICATION
-  socket.sendNotification(user.id, {
-    title: "Account Created",
-    message: "Admin ne aapka account bana diya 🎉",
-    time: new Date(),
+  // 🔔 SEND NOTIFICATIONS - USER REGISTERED
+  // Admin notification
+  await createNotification({
+    for_admin: true,
+    notification_type: "user_registered",
+    title: "New User Registered",
+    message: `New User: "${user.user_fname} ${user.user_lname}" has been registered successfully.`,
+    metadata: {
+      user_id: user.id,
+      user_name: user.user_name,
+      user_email: user.email,
+    },
+  });
+
+  // Send real-time socket notification to admin
+  socket.sendAdminNotification({
+    title: "New User Registered",
+    message: `New User: "${user.user_fname} ${user.user_lname}" has been registered successfully.`,
+    type: "user_registered",
   });
 
   logger.info("User created by admin", {

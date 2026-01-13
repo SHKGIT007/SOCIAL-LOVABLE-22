@@ -606,6 +606,35 @@ class ApiService {
       queryParams,
     });
   }
+
+  // Notification API methods
+  async getAllNotifications(queryParams = {}) {
+    return this.request(API_CONFIG.ENDPOINTS.NOTIFICATIONS.GET_ALL, {
+      queryParams,
+    });
+  }
+
+  async getUnreadNotificationCount() {
+    return this.request(API_CONFIG.ENDPOINTS.NOTIFICATIONS.GET_UNREAD_COUNT);
+  }
+
+  async markNotificationAsRead(id) {
+    return this.request(`${API_CONFIG.ENDPOINTS.NOTIFICATIONS.MARK_READ}/${id}/read`, {
+      method: "PUT",
+    });
+  }
+
+  async markAllNotificationsAsRead() {
+    return this.request(API_CONFIG.ENDPOINTS.NOTIFICATIONS.MARK_ALL_READ, {
+      method: "PUT",
+    });
+  }
+
+  async deleteNotification(id) {
+    return this.request(`${API_CONFIG.ENDPOINTS.NOTIFICATIONS.DELETE}/${id}`, {
+      method: "DELETE",
+    });
+  }
 }
 
 // Export singleton instance
