@@ -718,6 +718,39 @@ const getUserPostDashboardStats = asyncHandler(async (req, res) => {
   });
 });
 
+const getMe = asyncHandler(async (req, res) => {
+  const userId = req.user.id;
+
+  // Only return user data where email is verified
+  const user = await User.findOne({
+    where: { id: userId, is_email_verified: true },
+    attributes: {
+      exclude: ["password"],
+    },
+    include: [
+      { model: Role, as: "Role" },
+      {
+        model: Subscription,
+        as: "Subscriptions",
+        where: { status: "active" },
+        required: false,
+        include: [{ model: Plan, as: "Plan" }],
+      },
+    ],
+  });
+
+  if (!user) {
+    return res.status(403).json({
+      status: false,
+      message: "User not found or email not verified",
+    });
+  }
+
+  res.json({
+    status: true,
+    data: { user },
+  });
+});
 
 module.exports = {
   createUser,
@@ -732,5 +765,6 @@ module.exports = {
   deleteMyAccount,
   getUserPlanHistory,
   getUserPostHistory,
-  getUserPostDashboardStats
+  getUserPostDashboardStats,
+  getMe,
 };

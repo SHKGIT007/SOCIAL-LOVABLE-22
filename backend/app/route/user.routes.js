@@ -7,6 +7,9 @@ const { validateUserRegistration, validateId, validatePagination } = require('..
 // All routes require authentication
 router.use(authenticateToken);
 
+// Get current user profile (must be before /:id route to avoid conflicts)
+router.get('/profile/me', userController.getMe);
+
 // User stats (accessible by both admin and client)
 router.get('/stats', userController.getUserStats);
 

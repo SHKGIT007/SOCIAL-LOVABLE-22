@@ -127,18 +127,26 @@ module.exports = function (app) {
             headers: { Authorization: `Bearer ${access_token}` },
           })
           .then((r) => r.data);
-//  let user = await User.findOne({ where: { email: profile.email, is_email_verified: true, } });
-         let user = await User.findOne({ where: { email: profile.email } });
+        
+        // For signup: Look for verified users only
+        // For signin: Look for any user
+        let user = await User.findOne({ where: { email: profile.email } });
 
         const action = state.action || "signin";
 
         if (action === "signup") {
-          if (user) {
+          // For signup, only reject if there's a VERIFIED user with this email
+          if (user && user.is_email_verified) {
             return res.redirect(
               `${
                 new URL(state.redirect_dashboard).origin
               }/auth?social_error=email_exists`
             );
+          }
+
+          // If there's an unverified user (from incomplete OTP signup), delete it first
+          if (user && !user.is_email_verified) {
+            await User.destroy({ where: { id: user.id } });
           }
 
           const randomPassword = Math.random().toString(36).slice(-12);
@@ -154,7 +162,7 @@ module.exports = function (app) {
             user_lname: profile.family_name,
             avatar_url: profile.picture,
             full_name: profile.name,
-            is_email_verified: true,
+            is_email_verified: false,
             active_status: false,
             role_id: 2,
           });
@@ -180,6 +188,13 @@ module.exports = function (app) {
     );
   }
 
+  // For signin, only allow if email is verified
+  if (!user.is_email_verified) {
+    return res.redirect(
+      `${new URL(state.redirect_dashboard).origin}/auth?social_error=account_not_verified`
+    );
+  }
+
   if (user.is_deleted) {
     return res.redirect(
       `${new URL(state.redirect_dashboard).origin}/auth?social_error=account_blocked`
@@ -190,27 +205,9 @@ module.exports = function (app) {
   user.full_name = profile.name;
   user.user_fname = profile.given_name;
   user.user_lname = profile.family_name;
-  user.is_email_verified = true;
   user.active_status = true;
   await user.save();
 }
-else {
-          if (user.is_deleted) {
-            return res.redirect(
-              `${
-                new URL(state.redirect_dashboard).origin
-              }/auth?social_error=account_blocked`
-            );
-          }
-
-          user.avatar_url = profile.picture || user.avatar_url;
-          user.full_name = profile.name;
-          user.user_fname = profile.given_name;
-          user.user_lname = profile.family_name;
-          user.is_email_verified = true;
-          user.active_status = true;
-          await user.save();
-        }
 
         const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
           expiresIn: process.env.JWT_EXPIRES_IN || "7d",
