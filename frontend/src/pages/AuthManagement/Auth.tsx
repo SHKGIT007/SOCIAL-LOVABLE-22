@@ -599,7 +599,7 @@ const Auth = () => {
                   Forgot Password?
                 </button>
 
-                <Button
+                {/* <Button
   type="button"
   className="w-full h-10 bg-white border border-gray-300 flex items-center justify-center gap-2 hover:bg-gray-100 text-gray-800 shadow-sm"
   onClick={() => {
@@ -616,7 +616,7 @@ const Auth = () => {
   }}
 >
   Sign in with Google
-</Button>
+</Button> */}
 
                 
                 <Button
@@ -649,12 +649,12 @@ const Auth = () => {
               </form>
             </TabsContent>
 
-            <p
+            {/* <p
               onClick={() => navigate("/")}
               className="mt-4 text-center text-indigo-600 font-semibold cursor-pointer hover:underline"
             >
               Go to Dashboard
-            </p>
+            </p> */}
 
             {/* ========== SIGN UP TAB ========== */}
             <TabsContent value="signup" className="mt-6">
