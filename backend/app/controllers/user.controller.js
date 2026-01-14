@@ -110,6 +110,8 @@ const getAllUsers = asyncHandler(async (req, res) => {
   const whereClause = {};
 
   whereClause.is_deleted = false;
+  whereClause.is_email_verified = 1;
+
 
   if (search) {
     whereClause[Op.or] = [
