@@ -171,6 +171,45 @@ class ApiService {
     }
   }
 
+  // Generic POST method
+  async post(endpoint, body = {}, options = {}) {
+    return this.request(endpoint, {
+      method: "POST",
+      body,
+      includeAuth: options.includeAuth !== false,
+      skipAuthLogout: options.skipAuthLogout || false,
+      ...options,
+    });
+  }
+
+  // Generic GET method
+  async get(endpoint, options = {}) {
+    return this.request(endpoint, {
+      method: "GET",
+      includeAuth: options.includeAuth !== false,
+      ...options,
+    });
+  }
+
+  // Generic PUT method
+  async put(endpoint, body = {}, options = {}) {
+    return this.request(endpoint, {
+      method: "PUT",
+      body,
+      includeAuth: options.includeAuth !== false,
+      ...options,
+    });
+  }
+
+  // Generic DELETE method
+  async delete(endpoint, options = {}) {
+    return this.request(endpoint, {
+      method: "DELETE",
+      includeAuth: options.includeAuth !== false,
+      ...options,
+    });
+  }
+
   // Auth API methods
   async register(userData) {
     return this.request(API_CONFIG.ENDPOINTS.AUTH.REGISTER, {

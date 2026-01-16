@@ -592,20 +592,6 @@ const resetPassword = asyncHandler(async (req, res) => {
   res.json({ status: true, message: "Password reset successfully" });
 });
 
-module.exports = {
-  register,
-  verifyOTP,
-  sendOTP,
-  login,
-  getProfile,
-  updateProfile,
-  changePassword,
-  sendOTPforgotPassword,
-  verifyOTPforgotPassword,
-  resetPassword,
-};
-
-// Complete social signup (set password after OAuth signup)
 const completeSocialSignup = asyncHandler(async (req, res) => {
   const { social_token, password, confirm_password } = req.body;
 
@@ -667,4 +653,166 @@ const completeSocialSignup = asyncHandler(async (req, res) => {
   res.json({ status: true, message: 'Account completed', data: { user: { id: updatedUser.id, user_name: updatedUser.user_name, email: updatedUser.email, user_fname: updatedUser.user_fname, user_lname: updatedUser.user_lname, user_type: updatedUser.user_type }, token } });
 });
 
-module.exports.completeSocialSignup = completeSocialSignup;
+const completeSocialSignupV2 = asyncHandler(async (req, res) => {
+  console.log("[completeSocialSignupV2] Request received");
+  console.log("[completeSocialSignupV2] Body:", {
+    token: req.body.token ? "✓" : "✗",
+    email: req.body.email,
+    password: req.body.password ? `(${req.body.password.length} chars)` : "✗",
+  });
+
+  const { token: socialToken, email, password } = req.body;
+
+  if (!socialToken || !email || !password) {
+    console.error("[completeSocialSignupV2] Missing required fields");
+    return res.status(400).json({
+      status: false,
+      message: 'Token, email, and password are required',
+    });
+  }
+
+  if (password.length < 6) {
+    console.error("[completeSocialSignupV2] Password too short");
+    return res.status(400).json({
+      status: false,
+      message: 'Password must be at least 6 characters long',
+    });
+  }
+
+  // Check for uppercase letter
+  if (!/[A-Z]/.test(password)) {
+    console.error("[completeSocialSignupV2] Password missing uppercase");
+    return res.status(400).json({
+      status: false,
+      message: 'Password must contain at least one uppercase letter',
+    });
+  }
+
+  // Check for lowercase letter
+  if (!/[a-z]/.test(password)) {
+    console.error("[completeSocialSignupV2] Password missing lowercase");
+    return res.status(400).json({
+      status: false,
+      message: 'Password must contain at least one lowercase letter',
+    });
+  }
+
+  // Check for number
+  if (!/\d/.test(password)) {
+    console.error("[completeSocialSignupV2] Password missing number");
+    return res.status(400).json({
+      status: false,
+      message: 'Password must contain at least one number',
+    });
+  }
+
+  let payload;
+  try {
+    console.log("[completeSocialSignupV2] Verifying social token...");
+    payload = jwt.verify(socialToken, process.env.JWT_SECRET);
+    console.log("[completeSocialSignupV2] Token verified, payload:", {
+      userId: payload.userId,
+      social_signup: payload.social_signup,
+    });
+  } catch (err) {
+    console.error("[completeSocialSignupV2] Token verification failed:", err.message);
+    logger.error('Social token verification failed', { error: err.message });
+    return res.status(400).json({
+      status: false,
+      message: 'Invalid or expired token',
+    });
+  }
+
+  if (!payload || !payload.social_signup || !payload.userId) {
+    console.error("[completeSocialSignupV2] Invalid token payload");
+    return res.status(400).json({
+      status: false,
+      message: 'Invalid token payload',
+    });
+  }
+
+  console.log("[completeSocialSignupV2] Looking up user with ID:", payload.userId);
+  const user = await User.findByPk(payload.userId);
+  if (!user) {
+    console.error("[completeSocialSignupV2] User not found for ID:", payload.userId);
+    return res.status(404).json({
+      status: false,
+      message: 'User not found',
+    });
+  }
+
+  console.log("[completeSocialSignupV2] User found:", {
+    id: user.id,
+    email: user.email,
+    is_email_verified: user.is_email_verified,
+  });
+
+  // Verify email matches
+  if (user.email !== email) {
+    console.error("[completeSocialSignupV2] Email mismatch - DB:", user.email, "Request:", email);
+    return res.status(400).json({
+      status: false,
+      message: 'Email mismatch',
+    });
+  }
+
+  // Hash password and activate user
+  console.log("[completeSocialSignupV2] Hashing password and updating user...");
+  const hashed = await bcrypt.hash(password, 12);
+  await User.update(
+    {
+      password: hashed,
+      active_status: true,
+      is_email_verified: true,
+    },
+    { where: { id: user.id } }
+  );
+
+  console.log("[completeSocialSignupV2] User updated, fetching updated data...");
+  const updatedUser = await User.findByPk(user.id, {
+    attributes: { exclude: ['password'] },
+  });
+
+  console.log("[completeSocialSignupV2] Updated user data retrieved:", {
+    id: updatedUser.id,
+    email: updatedUser.email,
+    active_status: updatedUser.active_status,
+    is_email_verified: updatedUser.is_email_verified,
+  });
+
+  const token = generateToken(updatedUser.id);
+  console.log("[completeSocialSignupV2] JWT token generated, responding with success");
+
+  logger.info('Social signup completed', { userId: updatedUser.id, email: updatedUser.email });
+
+  res.json({
+    status: true,
+    message: 'Account completed successfully',
+    data: {
+      user: {
+        id: updatedUser.id,
+        user_name: updatedUser.user_name,
+        email: updatedUser.email,
+        user_fname: updatedUser.user_fname,
+        user_lname: updatedUser.user_lname,
+        user_type: updatedUser.user_type,
+      },
+      token,
+    },
+  });
+});
+
+module.exports = {
+  register,
+  verifyOTP,
+  sendOTP,
+  login,
+  getProfile,
+  updateProfile,
+  changePassword,
+  sendOTPforgotPassword,
+  verifyOTPforgotPassword,
+  resetPassword,
+  completeSocialSignup,
+  completeSocialSignupV2,
+};

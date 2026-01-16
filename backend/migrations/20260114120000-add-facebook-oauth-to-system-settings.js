@@ -1,0 +1,67 @@
+'use strict';
+
+module.exports = {
+  up: async (queryInterface, Sequelize) => {
+    try {
+      const table = await queryInterface.describeTable('system_settings');
+      
+      const changes = [];
+      
+      if (!table.facebook_app_id) {
+        changes.push(
+          queryInterface.addColumn('system_settings', 'facebook_app_id', {
+            type: Sequelize.TEXT,
+            allowNull: true,
+          })
+        );
+      }
+      
+      if (!table.facebook_app_secret) {
+        changes.push(
+          queryInterface.addColumn('system_settings', 'facebook_app_secret', {
+            type: Sequelize.TEXT,
+            allowNull: true,
+          })
+        );
+      }
+      
+      if (changes.length > 0) {
+        await Promise.all(changes);
+        console.log('✅ Facebook OAuth fields added to system_settings');
+      } else {
+        console.log('⚠️ Facebook OAuth fields already exist');
+      }
+    } catch (error) {
+      console.error('❌ Migration error:', error);
+      throw error;
+    }
+  },
+
+  down: async (queryInterface, Sequelize) => {
+    try {
+      const table = await queryInterface.describeTable('system_settings');
+      
+      const changes = [];
+      
+      if (table.facebook_app_id) {
+        changes.push(
+          queryInterface.removeColumn('system_settings', 'facebook_app_id')
+        );
+      }
+      
+      if (table.facebook_app_secret) {
+        changes.push(
+          queryInterface.removeColumn('system_settings', 'facebook_app_secret')
+        );
+      }
+      
+      if (changes.length > 0) {
+        await Promise.all(changes);
+        console.log('✅ Facebook OAuth fields removed');
+      }
+    } catch (error) {
+      console.error('❌ Rollback error:', error);
+      throw error;
+    }
+  }
+};

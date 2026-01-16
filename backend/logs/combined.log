@@ -1274,3 +1274,18 @@
 {"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-01-13T12:20:08.774Z","userId":2,"username":"test"}
 {"createdBy":1,"email":"shaktijatpnp09@gmail.com","level":"info","message":"User created by admin","service":"social-lovable-api","timestamp":"2026-01-13T12:46:00.760Z","userId":108}
 {"createdBy":1,"email":"shaktijatpnp09@gmail.com","level":"info","message":"User created by admin","service":"social-lovable-api","timestamp":"2026-01-13T13:12:54.335Z","userId":109}
+{"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-01-14T11:52:28.483Z","userId":1,"username":"admin"}
+{"email":"sewintechnology@outlook.com","level":"info","message":"New user created via Facebook OAuth","service":"social-lovable-api","timestamp":"2026-01-14T12:19:15.809Z","userId":125}
+{"email":"sewintechnology@outlook.com","level":"info","message":"New user created via Facebook OAuth","service":"social-lovable-api","timestamp":"2026-01-14T12:40:12.147Z","userId":126}
+{"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-01-15T04:36:36.246Z","userId":1,"username":"admin"}
+{"email":"sewintechnology@outlook.com","level":"info","message":"New user created via Facebook OAuth","service":"social-lovable-api","timestamp":"2026-01-15T05:14:48.605Z","userId":127}
+{"email":"sewintechnology@outlook.com","level":"info","message":"New user created via Facebook OAuth","service":"social-lovable-api","timestamp":"2026-01-15T08:20:52.498Z","userId":128}
+{"email":"sewintechnology@outlook.com","level":"info","message":"Social signup completed","service":"social-lovable-api","timestamp":"2026-01-15T08:24:27.689Z","userId":128}
+{"email":"sewintechnology@outlook.com","level":"info","message":"New user created via Facebook OAuth","service":"social-lovable-api","timestamp":"2026-01-15T08:42:22.465Z","userId":129}
+{"email":"sewintechnology@outlook.com","level":"info","message":"Social signup completed","service":"social-lovable-api","timestamp":"2026-01-15T08:45:07.942Z","userId":129}
+{"amount":100000,"currency":"INR","level":"info","message":"Creating Razorpay order","plan_id":21,"service":"social-lovable-api","timestamp":"2026-01-15T12:34:55.563Z","userId":129}
+{"level":"info","message":"Razorpay order created successfully","orderId":"order_S49k63I7C4ScmD","service":"social-lovable-api","timestamp":"2026-01-15T12:34:56.650Z"}
+{"hasEndDate":false,"level":"info","message":"Razorpay order created with pending subscription","orderId":"order_S49k63I7C4ScmD","planId":21,"service":"social-lovable-api","subscriptionId":66,"timestamp":"2026-01-15T12:34:56.674Z","userId":129}
+{"level":"info","message":"Razorpay payment verified and subscription activated","orderId":"order_S49k63I7C4ScmD","paymentId":"pay_S49kC1dRADUrYP","service":"social-lovable-api","subscriptionId":66,"timestamp":"2026-01-15T12:35:17.006Z"}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-01-16T04:23:53.359Z","userId":2,"username":"test"}
+{"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-01-16T05:38:43.430Z","userId":1,"username":"admin"}

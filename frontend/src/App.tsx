@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import Auth from "./pages/AuthManagement/Auth";
-import CompleteSocialSignup from "./pages/AuthManagement/CompleteSocialSignup";
+import CompleteSocialSignup from "./pages/CompleteSocialSignup";
 import ForgotPassword from "./pages/AuthManagement/ForgotPassword";
 import VerifyOTP from "./pages/AuthManagement/VerifyOTP";
 import ResetPassword from "./pages/AuthManagement/ResetPassword";

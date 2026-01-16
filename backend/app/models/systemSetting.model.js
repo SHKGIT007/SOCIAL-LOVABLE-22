@@ -31,6 +31,10 @@ const SystemSetting = sequelize.define(
     // Google OAuth
     google_client_id: { type: DataTypes.TEXT },
     google_client_secret: { type: DataTypes.TEXT },
+
+    // Facebook OAuth
+    facebook_app_id: { type: DataTypes.TEXT },
+    facebook_app_secret: { type: DataTypes.TEXT },
   },
   {
     tableName: "system_settings",

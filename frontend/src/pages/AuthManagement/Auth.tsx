@@ -892,7 +892,7 @@ const Auth = () => {
 
 
                 {/* ================= Google Sign Up Button ================= */}
-                <div className="mt-3">
+                <div className="mt-3 space-y-2">
                   <Button
                     type="button"
                     className="w-full h-10 bg-white border border-gray-300 flex items-center justify-center gap-2 hover:bg-gray-100 text-gray-800 shadow-sm"
@@ -924,6 +924,34 @@ const Auth = () => {
                       className="w-5 h-5"
                     /> */}
                     Sign up with Google
+                  </Button>
+
+                  {/* ================= Facebook Sign Up Button ================= */}
+                  <Button
+                    type="button"
+                    className="w-full h-10 bg-blue-600 hover:bg-blue-700 text-white shadow-sm flex items-center justify-center gap-2"
+                    onClick={() => {
+                      // Base backend URL (remove /api if present)
+                      const backendBase = API_CONFIG.BASE_URL.replace(
+                        "/api",
+                        ""
+                      );
+
+                      // Frontend redirect after Facebook signup
+                      const redirectAfter = `${window.location.origin}/complete-social-signup`;
+
+                      // Construct Facebook OAuth URL
+                      const facebookUrl = `${backendBase}/auth/facebook?redirect_dashboard=${encodeURIComponent(
+                        redirectAfter
+                      )}&action=signup`;
+
+                      console.log("Redirecting to Facebook OAuth:", facebookUrl);
+
+                      // Redirect user
+                      window.location.href = facebookUrl;
+                    }}
+                  >
+                    Sign up with Facebook
                   </Button>
                 </div>
 
