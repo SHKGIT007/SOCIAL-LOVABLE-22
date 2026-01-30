@@ -16,18 +16,18 @@ import { Loader2, Eye, EyeOff, Mail, CheckCircle } from "lucide-react";
 import { apiService } from "@/services/api";
 import { API_CONFIG } from "@/utils/config";
 import { setAuthData, isAuthenticated, getAuthData } from "@/utils/auth";
+import { FcGoogle } from "react-icons/fc";
+import { FaFacebookF } from "react-icons/fa";
 
 const Auth = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
-  // Login states
   const [loginEmail, setLoginEmail] = useState("");
   const [loginUsername, setLoginUsername] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [showLoginPassword, setShowLoginPassword] = useState(false);
 
-  // Signup states
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [userName, setUserName] = useState("");
@@ -37,7 +37,6 @@ const Auth = () => {
   const [showSignupPassword, setShowSignupPassword] = useState(false);
   const [activeTab, setActiveTab] = useState("signin");
 
-  // OTP states
   const [otp, setOtp] = useState("");
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [isOtpVerified, setIsOtpVerified] = useState(false);
@@ -64,14 +63,12 @@ const Auth = () => {
     }
   }, [navigate]);
 
-  // Handle redirect from Google OAuth (token present in URL)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const tokenFromUrl = params.get("token");
     const success = params.get("success");
     const socialError = params.get("social_error") || params.get("error");
 
-    // If Google redirected back with an error (e.g., email already registered), show a popup
     if (socialError) {
       let message = "Authentication failed";
       if (socialError === "email_exists")
@@ -86,7 +83,6 @@ const Auth = () => {
         confirmButtonColor: "#ef4444",
       });
 
-      // Clean the URL params
       const url = new URL(window.location.href);
       url.searchParams.delete("social_error");
       url.searchParams.delete("error");
@@ -98,14 +94,13 @@ const Auth = () => {
     if (tokenFromUrl && success === "true") {
       (async () => {
         try {
-          // Fetch profile using token
           const profileRes = await fetch(
             `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AUTH.PROFILE}`,
             {
               headers: {
                 Authorization: `Bearer ${tokenFromUrl}`,
               },
-            }
+            },
           );
 
           if (!profileRes.ok) throw new Error("Failed to fetch profile");
@@ -123,7 +118,6 @@ const Auth = () => {
         } catch (err) {
           console.error("Google login handling failed", err);
         } finally {
-          // Clean URL to remove token
           const url = new URL(window.location.href);
           url.searchParams.delete("token");
           url.searchParams.delete("success");
@@ -133,7 +127,6 @@ const Auth = () => {
     }
   }, [navigate]);
 
-  // OTP Timer countdown
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (otpTimer > 0) {
@@ -144,14 +137,12 @@ const Auth = () => {
     return () => clearInterval(interval);
   }, [otpTimer]);
 
-  // Format timer display (MM:SS)
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  // Send OTP to email
   const handleSendOTP = async () => {
     if (!email) {
       Swal.fire({
@@ -170,7 +161,7 @@ const Auth = () => {
 
       if (response && response.status) {
         setIsOtpSent(true);
-        setOtpTimer(60); // 1 minute = 60 seconds
+        setOtpTimer(60);
 
         Swal.fire({
           icon: "success",
@@ -181,7 +172,6 @@ const Auth = () => {
           showConfirmButton: false,
         });
       } else {
-        // show backend error message when sendOTP returns failure
         Swal.fire({
           icon: "error",
           title: "Failed to send OTP",
@@ -206,7 +196,6 @@ const Auth = () => {
     }
   };
 
-  // Verify OTP
   const handleVerifyOTP = async () => {
     if (!otp || otp.length !== 6) {
       Swal.fire({
@@ -235,7 +224,6 @@ const Auth = () => {
           showConfirmButton: false,
         });
       } else {
-        // Handle case where response.status is false
         let errorMessage = "Invalid or expired OTP. Please try again.";
 
         if (response?.message) {
@@ -264,7 +252,6 @@ const Auth = () => {
       if (error?.response?.data) {
         const data = error.response.data;
 
-        // Check for validation errors array
         if (
           data.errors &&
           Array.isArray(data.errors) &&
@@ -272,9 +259,7 @@ const Auth = () => {
         ) {
           errorMessage =
             data.errors[0].msg || data.errors[0].message || errorMessage;
-        }
-        // Check for general message
-        else if (data.message) {
+        } else if (data.message) {
           errorMessage = data.message;
         }
       } else if (error?.message) {
@@ -297,7 +282,6 @@ const Auth = () => {
 
     if (isLoading) return;
 
-    // Validate email or username is provided
     if (!loginEmail && !loginUsername) {
       Swal.fire({
         icon: "warning",
@@ -308,7 +292,6 @@ const Auth = () => {
       return;
     }
 
-    // Basic client-side validation for password
     if (!loginPassword || loginPassword.length < 6) {
       Swal.fire({
         icon: "warning",
@@ -440,7 +423,6 @@ const Auth = () => {
           }
         }, 1500);
       } else {
-        // Handle case where response.status is false
         setIsLoading(false);
         const errText =
           response?.errors?.[0]?.msg ||
@@ -456,22 +438,14 @@ const Auth = () => {
     } catch (error: any) {
       setIsLoading(false);
 
-      // Debug: Log the entire error object
-      console.log("Full error object:", error);
-      console.log("Error response:", error?.response);
-      console.log("Error response data:", error?.response?.data);
-
-      // Default error message
       let errorMessage = "Unable to create account. Please try again.";
 
-      // Check if error response exists
       if (error?.response?.data) {
         const data = error.response.data;
 
         console.log("Data errors:", data.errors);
         console.log("Data message:", data.message);
 
-        // First priority: Check for validation errors array
         if (
           data.errors &&
           Array.isArray(data.errors) &&
@@ -479,15 +453,11 @@ const Auth = () => {
         ) {
           errorMessage = data.errors[0].msg || data.errors[0].message;
           console.log("Using error from array:", errorMessage);
-        }
-        // Second priority: Check for general message
-        else if (data.message) {
+        } else if (data.message) {
           errorMessage = data.message;
           console.log("Using general message:", errorMessage);
         }
-      }
-      // If no response data, check error message directly
-      else if (error?.message) {
+      } else if (error?.message) {
         errorMessage = error.message;
       }
 
@@ -537,7 +507,6 @@ const Auth = () => {
               </TabsTrigger>
             </TabsList>
 
-            {/* ========== SIGN IN TAB ========== */}
             <TabsContent value="signin" className="mt-6">
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
@@ -550,7 +519,6 @@ const Auth = () => {
                       value={loginEmail || loginUsername}
                       onChange={(e) => {
                         const val = e.target.value;
-                        // Auto-detect if it's likely an email or username
                         if (val.includes("@")) {
                           setLoginEmail(val);
                           setLoginUsername("");
@@ -563,7 +531,6 @@ const Auth = () => {
                       className="border-gray-300 focus-visible:ring-indigo-500"
                     />
                   </div>
-                  {/* <p className="text-xs text-gray-500">Use email or your username to login</p> */}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signin-password">Password*</Label>
@@ -599,26 +566,6 @@ const Auth = () => {
                   Forgot Password?
                 </button>
 
-                {/* <Button
-  type="button"
-  className="w-full h-10 bg-white border border-gray-300 flex items-center justify-center gap-2 hover:bg-gray-100 text-gray-800 shadow-sm"
-  onClick={() => {
-    const backendBase = API_CONFIG.BASE_URL.replace("/api", "");
-
-    const redirectAfter = `${window.location.origin}/dashboard`;
-
-    const googleUrl = `${backendBase}/auth/google?redirect_dashboard=${encodeURIComponent(
-      redirectAfter
-    )}&action=signin`;
-
-    console.log("Signin with Google:", googleUrl);
-    window.location.href = googleUrl;
-  }}
->
-  Sign in with Google
-</Button> */}
-
-                
                 <Button
                   type="submit"
                   className="w-full h-10 bg-gradient-to-r from-indigo-600 to-sky-500 hover:from-indigo-500 hover:to-sky-400 text-white shadow-md"
@@ -647,19 +594,16 @@ const Auth = () => {
                   </p>
                 </div>
               </form>
+              <p
+                onClick={() => navigate("/")}
+                className="mt-4 text-center text-indigo-600 font-semibold cursor-pointer hover:underline"
+              >
+                Go to Dashboard
+              </p>
             </TabsContent>
 
-            {/* <p
-              onClick={() => navigate("/")}
-              className="mt-4 text-center text-indigo-600 font-semibold cursor-pointer hover:underline"
-            >
-              Go to Dashboard
-            </p> */}
-
-            {/* ========== SIGN UP TAB ========== */}
             <TabsContent value="signup" className="mt-6">
               <form onSubmit={handleSignUp} className="space-y-4">
-                {/* Username */}
                 <div className="space-y-2">
                   <Label htmlFor="signup-username">Username*</Label>
                   <Input
@@ -674,7 +618,6 @@ const Auth = () => {
                   />
                 </div>
 
-                {/* First Name & Last Name */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="signup-fname">First Name*</Label>
@@ -710,7 +653,6 @@ const Auth = () => {
                   </div>
                 </div>
 
-                {/* Phone Number */}
                 <div className="space-y-2">
                   <Label htmlFor="signup-phone">Phone Number*</Label>
                   <Input
@@ -720,7 +662,7 @@ const Auth = () => {
                     value={userPhone}
                     onChange={(e) =>
                       setUserPhone(
-                        e.target.value.replace(/\D/g, "").slice(0, 10)
+                        e.target.value.replace(/\D/g, "").slice(0, 10),
                       )
                     }
                     required
@@ -729,7 +671,6 @@ const Auth = () => {
                   />
                 </div>
 
-                {/* Email */}
                 <div className="space-y-2">
                   <Label htmlFor="signup-email">Email*</Label>
                   <Input
@@ -759,7 +700,6 @@ const Auth = () => {
                   </button>
                 )}
 
-                {/* Send OTP Button - Shows after email entered */}
                 {email && !isOtpSent && (
                   <Button
                     type="button"
@@ -781,13 +721,11 @@ const Auth = () => {
                   </Button>
                 )}
 
-                {/* OTP Input - Shows after Send OTP clicked */}
                 {isOtpSent && !isOtpVerified && (
                   <div className="space-y-2">
                     <Label htmlFor="otp">Enter OTP*</Label>
 
                     <div className="flex items-center gap-2">
-                      {/* OTP Input */}
                       <Input
                         id="otp"
                         type="text"
@@ -802,7 +740,6 @@ const Auth = () => {
                         className="flex-1 border-gray-300 text-center text-lg tracking-widest focus-visible:ring-indigo-500"
                       />
 
-                      {/* Resend OTP Button */}
                       {otpTimer === 0 ? (
                         <Button
                           type="button"
@@ -818,7 +755,6 @@ const Auth = () => {
                         </div>
                       )}
 
-                      {/* Verify OTP Button */}
                       <Button
                         type="button"
                         onClick={handleVerifyOTP}
@@ -835,7 +771,6 @@ const Auth = () => {
                   </div>
                 )}
 
-                {/* Verified Message */}
                 {isOtpVerified && (
                   <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
                     <CheckCircle size={20} className="text-green-600" />
@@ -845,7 +780,6 @@ const Auth = () => {
                   </div>
                 )}
 
-                {/* Password */}
                 <div className="space-y-2">
                   <Label htmlFor="signup-password">Password*</Label>
                   <div className="relative">
@@ -874,84 +808,53 @@ const Auth = () => {
                   </div>
                 </div>
 
-                {/* Submit Button */}
                 <Button
                   type="submit"
                   className="w-full h-10 bg-gradient-to-r from-indigo-600 to-sky-500 text-white shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={isLoading || !isFormComplete}
+                  disabled={!isFormComplete}
                 >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Creating Account...
-                    </>
-                  ) : (
-                    "Sign Up"
-                  )}
+                  Sign Up
                 </Button>
 
-
-                {/* ================= Google Sign Up Button ================= */}
-                <div className="mt-3 space-y-2">
+                <div className="mt-4 flex items-center justify-center gap-4">
                   <Button
                     type="button"
-                    className="w-full h-10 bg-white border border-gray-300 flex items-center justify-center gap-2 hover:bg-gray-100 text-gray-800 shadow-sm"
+                    className="h-12 w-12 rounded-full bg-white border border-gray-300 
+               flex items-center justify-center shadow-sm
+               hover:bg-gray-100 transition"
                     onClick={() => {
-                      // Base backend URL (remove /api if present)
                       const backendBase = API_CONFIG.BASE_URL.replace(
                         "/api",
-                        ""
+                        "",
                       );
-
-                      // Frontend redirect after Google signup/login
                       const redirectAfter = `${window.location.origin}/complete-social-signup`;
 
-                      // Construct Google OAuth URL
-                      const googleUrl = `${backendBase}/auth/google?redirect_dashboard=${encodeURIComponent(
-                        redirectAfter
+                      window.location.href = `${backendBase}/auth/google?redirect_dashboard=${encodeURIComponent(
+                        redirectAfter,
                       )}&action=signup`;
-
-                      console.log("Redirecting to Google OAuth:", googleUrl);
-
-                      // Redirect user
-                      window.location.href = googleUrl;
                     }}
                   >
-                    {/* Optional: Google Icon */}
-                    {/* <img
-                      src="/assets/google-icon.svg"
-                      alt="Google"
-                      className="w-5 h-5"
-                    /> */}
-                    Sign up with Google
+                    <FcGoogle size={22} />
                   </Button>
 
-                  {/* ================= Facebook Sign Up Button ================= */}
                   <Button
                     type="button"
-                    className="w-full h-10 bg-blue-600 hover:bg-blue-700 text-white shadow-sm flex items-center justify-center gap-2"
+                    className="h-12 w-12 rounded-full bg-blue-600 text-white 
+               flex items-center justify-center shadow-sm
+               hover:bg-blue-700 transition"
                     onClick={() => {
-                      // Base backend URL (remove /api if present)
                       const backendBase = API_CONFIG.BASE_URL.replace(
                         "/api",
-                        ""
+                        "",
                       );
-
-                      // Frontend redirect after Facebook signup
                       const redirectAfter = `${window.location.origin}/complete-social-signup`;
 
-                      // Construct Facebook OAuth URL
-                      const facebookUrl = `${backendBase}/auth/facebook?redirect_dashboard=${encodeURIComponent(
-                        redirectAfter
+                      window.location.href = `${backendBase}/auth/facebook?redirect_dashboard=${encodeURIComponent(
+                        redirectAfter,
                       )}&action=signup`;
-
-                      console.log("Redirecting to Facebook OAuth:", facebookUrl);
-
-                      // Redirect user
-                      window.location.href = facebookUrl;
                     }}
                   >
-                    Sign up with Facebook
+                    <FaFacebookF size={18} />
                   </Button>
                 </div>
 
