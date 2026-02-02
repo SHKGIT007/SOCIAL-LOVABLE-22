@@ -194,8 +194,8 @@ const AdminPosts = () => {
           page === 1 ? index + 1 : (page - 1) * perPage + (index + 1),
       },
       {
-        name: "Title",
-        width: "180px",
+        name: "Business/Creator Name",
+        width: "220px",
         selector: (row) => row.title||"N/A",
         sortable: true,
       },

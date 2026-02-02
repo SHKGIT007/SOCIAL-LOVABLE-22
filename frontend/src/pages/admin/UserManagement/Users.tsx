@@ -414,12 +414,17 @@ const [exportLoading, setExportLoading] = useState(false);
                 )}
               </div>
 
-              <Button
+<div className="flex items-center gap-3">
+                <Button
                 className="bg-green-600 hover:bg-green-700 px-6"
                 onClick={exportExcel}
               >
                 Export Excel
               </Button>
+              <Button onClick={() => fetchUsers(page, perPage, debouncedSearch)} disabled={tableLoading}>
+                Refresh
+              </Button>
+</div>
             </div>
 
             {/* Data Table */}

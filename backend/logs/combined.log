@@ -1310,3 +1310,10 @@
 {"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-01-30T09:50:44.055Z","userId":2,"username":"test21"}
 {"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-01-30T09:51:00.200Z","userId":1,"username":"admin"}
 {"level":"warn","message":"Scheduled post reached time but was not pushed to any platform","postId":723,"service":"social-lovable-api","timestamp":"2026-02-02T04:58:00.141Z","userId":2}
+{"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-02-02T06:10:27.770Z","userId":1,"username":"admin"}
+{"createdBy":1,"email":"zotuhibul@mailinator.com","level":"info","message":"User created by admin","service":"social-lovable-api","timestamp":"2026-02-02T06:53:59.992Z","userId":74}
+{"createdBy":1,"email":"nimepymuzy@mailinator.com","level":"info","message":"User created by admin","service":"social-lovable-api","timestamp":"2026-02-02T06:54:14.275Z","userId":75}
+{"createdBy":1,"email":"wehimegy@mailinator.com","level":"info","message":"User created by admin","service":"social-lovable-api","timestamp":"2026-02-02T06:54:38.188Z","userId":76}
+{"deletedBy":1,"level":"info","message":"User soft-deleted by admin","service":"social-lovable-api","timestamp":"2026-02-02T06:55:17.576Z","userId":"76"}
+{"deletedBy":1,"level":"info","message":"User soft-deleted by admin","service":"social-lovable-api","timestamp":"2026-02-02T06:55:21.038Z","userId":"75"}
+{"deletedBy":1,"level":"info","message":"User soft-deleted by admin","service":"social-lovable-api","timestamp":"2026-02-02T06:55:25.158Z","userId":"74"}
