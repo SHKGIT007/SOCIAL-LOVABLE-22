@@ -260,11 +260,11 @@ const validateSocialAccountCreation = [
     .withMessage("Platform must be Facebook, Instagram, Twitter, or LinkedIn"),
   body("account_id")
     .optional()
-    .isLength({ max: 100 })
+    .isLength({ max: 1000 })
     .withMessage("Account ID must be less than 100 characters"),
   body("account_name")
     .optional()
-    .isLength({ max: 100 })
+    .isLength({ max: 1000 })
     .withMessage("Account name must be less than 100 characters"),
   handleValidationErrors,
 ];
@@ -317,7 +317,7 @@ const validatePagination = [
     .withMessage("Page must be a positive integer"),
   query("limit")
     .optional()
-    .isInt({ min: 1, max: 100 })
+    .isInt({ min: 1, max: 10000000 })
     .withMessage("Limit must be between 1 and 100"),
   handleValidationErrors,
 ];

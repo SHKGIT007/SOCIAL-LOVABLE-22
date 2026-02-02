@@ -1307,3 +1307,6 @@
 {"email":"shaktijatpnp09@gmail.com","level":"info","message":"OTP sent","service":"social-lovable-api","timestamp":"2026-01-30T06:14:33.744Z"}
 {"email":"shaktijatpnp09@gmail.com","level":"info","message":"OTP verified successfully","service":"social-lovable-api","timestamp":"2026-01-30T06:15:26.954Z"}
 {"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-01-30T06:16:01.901Z","userId":2,"username":"test21"}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-01-30T09:50:44.055Z","userId":2,"username":"test21"}
+{"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-01-30T09:51:00.200Z","userId":1,"username":"admin"}
+{"level":"warn","message":"Scheduled post reached time but was not pushed to any platform","postId":723,"service":"social-lovable-api","timestamp":"2026-02-02T04:58:00.141Z","userId":2}

@@ -32,6 +32,8 @@ const Users = () => {
   const [users, setUsers] = useState<UserData[]>([]);
   const [totalRows, setTotalRows] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [tableLoading, setTableLoading] = useState(false);
+const [exportLoading, setExportLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
   const [search, setSearch] = useState("");
@@ -41,7 +43,7 @@ const Users = () => {
   const primaryGradientClass = `bg-gradient-to-r ${primaryGradient}`;
 
   const fetchUsers = async (pageNumber = 1, pageSize = 10, searchTerm = "") => {
-    setLoading(true);
+    setTableLoading(true);
     try {
       const data = await apiService.getAllUsers({
         page: pageNumber,
@@ -72,20 +74,16 @@ const Users = () => {
         confirmButtonColor: "#6366f1",
       });
     } finally {
-      setLoading(false);
+ setTableLoading(false);
     }
   };
 
-
   useEffect(() => {
-       const times = setTimeout(() => {
-           setDebouncedSearch(search);
-       }, 1000);
-       return () => clearTimeout(times);
-  },[search])
-      
-
-
+    const times = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 1000);
+    return () => clearTimeout(times);
+  }, [search]);
 
   useEffect(() => {
     if (!isAuthenticated()) return navigate("/auth");
@@ -185,22 +183,55 @@ const Users = () => {
     }
   };
 
-  const exportExcel = () => {
-    const excelData = users.map((u, index) => ({
-      "S.No": index + 1,
-      Name: u.user_name || "N/A",
-      Email: u.email,
-      Phone: u.user_phone || "N/A",
-      Plan: u.subscription?.plan || "N/A",
-      Status: u.active_status ? "Active" : "Inactive",
-      Joined: new Date(u.created_at).toLocaleDateString(),
-    }));
+  const exportExcel = async () => {
+    try {
+      setExportLoading(true);
 
-    const ws = XLSX.utils.json_to_sheet(excelData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Users");
-    const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    saveAs(new Blob([buf]), "users.xlsx");
+      const data = await apiService.getAllUsers({
+        page: 1,
+        limit: 100000, // large number to get all
+        search: debouncedSearch, // agar search hai to wahi lagega
+      });
+
+      if (!data.status || !data.data.users || data.data.users.length === 0) {
+        Swal.fire({
+          icon: "warning",
+          title: "No Data Found",
+          text: "There is no data to export.",
+          confirmButtonColor: "#6366f1",
+        });
+        return;
+      }
+
+      const excelData = data.data.users.map((u: UserData, index: number) => ({
+        "S.No": index + 1,
+        Name: u.user_name || "N/A",
+        Email: u.email,
+        Phone: u.user_phone || "N/A",
+        Plan: u.subscription?.plan?.name || "N/A",
+        Status: u.active_status ? "Active" : "Inactive",
+        Joined: new Date(u.created_at).toLocaleDateString(),
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(excelData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Users");
+
+      const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+      saveAs(
+        new Blob([buf]),
+        debouncedSearch ? "filtered-users.xlsx" : "all-users.xlsx",
+      );
+    } catch (error: any) {
+      Swal.fire({
+        icon: "error",
+        title: "Export Failed",
+        text: error.message || "Something went wrong while exporting.",
+        confirmButtonColor: "#6366f1",
+      });
+    } finally {
+      setExportLoading(false);
+    }
   };
 
   const columns: TableColumn<UserData>[] = useMemo(
@@ -299,7 +330,7 @@ const Users = () => {
         width: "120px",
       },
     ],
-    [users, page, perPage]
+    [users, page, perPage],
   );
 
   return (
@@ -396,7 +427,7 @@ const Users = () => {
               <DataTable
                 columns={columns}
                 data={users}
-                progressPending={loading}
+                progressPending={tableLoading}
                 pagination
                 paginationServer
                 paginationTotalRows={totalRows}

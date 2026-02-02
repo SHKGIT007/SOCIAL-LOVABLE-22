@@ -34,6 +34,8 @@ const AdminPosts = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [totalRows, setTotalRows] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [tableLoading, setTableLoading] = useState(false);
+  const [exportLoading, setExportLoading] = useState(false);
 
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
@@ -54,7 +56,7 @@ const AdminPosts = () => {
   }, [search]);
 
   const fetchPosts = async () => {
-    setLoading(true);
+    setTableLoading(true);
     try {
       const params: any = {
         page,
@@ -76,7 +78,7 @@ const AdminPosts = () => {
     } catch (error: any) {
       Swal.fire("Error", error.message || "Failed to fetch posts", "error");
     } finally {
-      setLoading(false);
+      setTableLoading(false);
     }
   };
 
@@ -97,28 +99,90 @@ const AdminPosts = () => {
     }
   };
 
-  const exportExcel = () => {
-    const excelData = posts.map((post, index) => ({
-      "S.No": page === 1 ? index + 1 : (page - 1) * perPage + (index + 1),
-      Title: post.title,
-      Content: post.content,
-      User: post.User?.user_name || "N/A",
-      Email: post.User?.email || "N/A",
-      Platforms: getPlatformsArray(post.platforms).join(", "),
-      Status: post.status,
-      "Review Status": post.review_status,
-      Type: post.is_ai_generated ? "AI Generated" : "Manual",
-      "Scheduled At": post.scheduled_at
-        ? new Date(post.scheduled_at).toLocaleString()
-        : "N/A",
-      "Created At": new Date(post.created_at).toLocaleDateString(),
-    }));
+  const exportExcel = async () => {
+    try {
+      setExportLoading(true);
 
-    const ws = XLSX.utils.json_to_sheet(excelData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Posts");
-    const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    saveAs(new Blob([buf]), "posts.xlsx");
+      let allPosts: Post[] = [];
+      let pageNo = 1;
+      const limit = 1000000;
+      let totalPages = 1;
+
+      do {
+        const params: any = {
+          page: pageNo,
+          limit,
+        };
+
+        if (debouncedSearch.trim()) params.search = debouncedSearch.trim();
+        if (statusFilter !== "all") params.status = statusFilter;
+
+        const res = await apiService.getAllPosts(params);
+
+        if (!res.status) break;
+
+        const postsChunk = res.data.posts || [];
+        allPosts = [...allPosts, ...postsChunk];
+
+        totalPages = res.data.pagination.totalPages;
+        pageNo++;
+      } while (pageNo <= totalPages);
+
+      if (allPosts.length === 0) {
+        Swal.fire({
+          icon: "warning",
+          title: "No Data Found",
+          text: "There is no data to export.",
+          confirmButtonColor: "#6366f1",
+        });
+        return;
+      }
+
+      const excelData = allPosts.map((post, index) => {
+        const platforms = getPlatformsArray(post.platforms);
+
+        return {
+          "S.No": index + 1,
+          Title: post.title,
+          Content: post.content,
+          User: post.User?.user_name || "N/A",
+          Email: post.User?.email || "N/A",
+
+          Platforms: Array.isArray(platforms)
+            ? platforms.join(", ")
+            : platforms || "N/A",
+
+          Status: post.status,
+          "Review Status": post.review_status,
+          Type: post.is_ai_generated ? "AI Generated" : "Manual",
+          "Scheduled At": post.scheduled_at
+            ? new Date(post.scheduled_at).toLocaleString()
+            : "N/A",
+          "Created At": new Date(post.created_at).toLocaleDateString(),
+        };
+      });
+
+      const ws = XLSX.utils.json_to_sheet(excelData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Posts");
+
+      const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+      saveAs(
+        new Blob([buf]),
+        debouncedSearch || statusFilter !== "all"
+          ? "filtered-posts.xlsx"
+          : "all-posts.xlsx",
+      );
+    } catch (error: any) {
+      Swal.fire({
+        icon: "error",
+        title: "Export Failed",
+        text: error.message || "Something went wrong while exporting.",
+        confirmButtonColor: "#6366f1",
+      });
+    } finally {
+      setExportLoading(false);
+    }
   };
 
   const columns: TableColumn<Post>[] = useMemo(
@@ -132,7 +196,7 @@ const AdminPosts = () => {
       {
         name: "Title",
         width: "180px",
-        selector: (row) => row.title,
+        selector: (row) => row.title||"N/A",
         sortable: true,
       },
       {
@@ -140,7 +204,7 @@ const AdminPosts = () => {
         width: "300px",
         cell: (row) => (
           <div className="text-xs text-gray-600 line-clamp-2">
-            {row.content}
+            {row.content||"N/A"}
           </div>
         ),
       },
@@ -161,7 +225,7 @@ const AdminPosts = () => {
           <div className="flex flex-wrap gap-1">
             {getPlatformsArray(row.platforms).map((p) => (
               <Badge key={p} className="text-xs capitalize" variant="secondary">
-                {p}
+                {p||"N/A"}
               </Badge>
             ))}
           </div>
@@ -181,8 +245,8 @@ const AdminPosts = () => {
                 row.status === "published"
                   ? "bg-green-100 text-green-700 border-green-300"
                   : row.status === "scheduled"
-                  ? "bg-blue-100 text-blue-700 border-blue-300"
-                  : "bg-gray-100 text-gray-700 border-gray-300"
+                    ? "bg-blue-100 text-blue-700 border-blue-300"
+                    : "bg-gray-100 text-gray-700 border-gray-300"
               }
             >
               {status}
@@ -239,7 +303,7 @@ const AdminPosts = () => {
         ),
       },
     ],
-    [page, perPage]
+    [page, perPage],
   );
 
   return (
@@ -321,8 +385,9 @@ const AdminPosts = () => {
                 <Button
                   className="bg-green-600 hover:bg-green-700 px-6"
                   onClick={exportExcel}
+                  disabled={exportLoading}
                 >
-                  Export Excel
+                  {exportLoading ? "Exporting..." : "Export Excel"}
                 </Button>
               </div>
             </div>
@@ -332,7 +397,7 @@ const AdminPosts = () => {
               <DataTable
                 columns={columns}
                 data={posts}
-                progressPending={loading}
+                progressPending={tableLoading}
                 pagination
                 paginationServer
                 paginationTotalRows={totalRows}

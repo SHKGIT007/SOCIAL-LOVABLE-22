@@ -31,13 +31,14 @@ const Plans = () => {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [totalRows, setTotalRows] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [tableLoading, setTableLoading] = useState(false);
+  const [exportLoading, setExportLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState(search);
   const primaryGradient = "from-indigo-600 to-cyan-500";
   const primaryGradientClass = `bg-gradient-to-r ${primaryGradient}`;
-
 
   useEffect(() => {
     const times = setTimeout(() => {
@@ -46,9 +47,8 @@ const Plans = () => {
     return () => clearTimeout(times);
   }, [search]);
 
-
   const fetchPlans = async (pageNumber = 1, pageSize = 10, searchTerm = "") => {
-    setLoading(true);
+    setTableLoading(true);
     try {
       const data = await apiService.getAllPlans({
         page: pageNumber,
@@ -74,7 +74,7 @@ const Plans = () => {
         text: error.message || "Failed to fetch plans.",
       });
     } finally {
-      setLoading(false);
+      setTableLoading(false);
     }
   };
 
@@ -161,24 +161,43 @@ const Plans = () => {
     }
   };
 
-  const exportExcel = () => {
-    const excelData = plans.map((p, index) => ({
-      "S.No": index + 1,
-      Name: p.name,
-      Price: p.price,
-      "AI Posts": p.ai_posts,
-      Accounts: p.linked_accounts,
-      Status: p.is_active ? "Active" : "Inactive",
-      Description: p.description,
-      Created: new Date(p.created_at).toLocaleDateString(),
-    }));
+  const exportExcel = async () => {
+    try {
+      setExportLoading(true);
 
-    const ws = XLSX.utils.json_to_sheet(excelData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Plans");
+      const res = await apiService.getAllPlans({
+        page: 1,
+        limit: 1000000,
+        search: debouncedSearch,
+      });
 
-    const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    saveAs(new Blob([buf]), "plans.xlsx");
+      if (!res.status || !res.data.plans.length) {
+        Swal.fire("No Data", "Export ke liye data nahi hai", "warning");
+        return;
+      }
+
+      const excelData = res.data.plans.map((p, index) => ({
+        "S.No": index + 1,
+        Name: p.name||"N/A",
+        Price: p.price||"N/A",
+        "AI Posts": p.ai_posts||"N/A",
+        Accounts: p.linked_accounts||"N/A",
+        Status: p.is_active ? "Active" : "Inactive",
+        Description: p.description||"N/A",
+        Created: new Date(p.created_at).toLocaleDateString(),
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(excelData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Plans");
+
+      const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+      saveAs(new Blob([buf]), "plans.xlsx");
+    } catch (error: any) {
+      Swal.fire("Export Failed", error.message, "error");
+    } finally {
+      setExportLoading(false);
+    }
   };
 
   const columns: TableColumn<Plan>[] = useMemo(
@@ -189,21 +208,39 @@ const Plans = () => {
         cell: (_, index) =>
           page === 1 ? index + 1 : (page - 1) * perPage + (index + 1),
       },
-      { name: "Name", selector: (row) => row.name, sortable: true },
+      {
+        name: "Name",
+        selector: (row) => row.name||"N/A",
+        sortable: true,
+        width: "180px",
+      },
       {
         name: "Description",
-        selector: (row) => row.description,
+        selector: (row) => row.description||"N/A",
         sortable: false,
+        width: "280px",
       },
-      { name: "Price", selector: (row) => row.price, sortable: true },
-      { name: "AI Posts", selector: (row) => row.ai_posts, sortable: true },
+      {
+        name: "Price",
+        selector: (row) => row.price||"N/A",
+        sortable: true,
+        width: "80px",
+      },
+      {
+        name: "AI Posts",
+        selector: (row) => row.ai_posts||"N/A",
+        sortable: true,
+        width: "100px",
+      },
       {
         name: "Accounts",
-        selector: (row) => row.linked_accounts,
+        selector: (row) => row.linked_accounts||"N/A",
         sortable: true,
+        width: "110px",
       },
       {
         name: "Status",
+        width: "80px",
         cell: (row) => (
           <Switch
             checked={row.is_active}
@@ -237,11 +274,12 @@ const Plans = () => {
       },
       {
         name: "Created",
-        selector: (row) => new Date(row.created_at).toLocaleDateString(),
+        selector: (row) => new Date(row.created_at).toLocaleDateString()||"N/A",
         sortable: true,
+        width: "120px",
       },
     ],
-    [plans, page, perPage]
+    [plans, page, perPage],
   );
 
   return (
@@ -334,7 +372,7 @@ const Plans = () => {
               <DataTable
                 columns={columns}
                 data={plans}
-                progressPending={loading}
+                progressPending={exportLoading}
                 pagination
                 paginationServer
                 paginationTotalRows={totalRows}
