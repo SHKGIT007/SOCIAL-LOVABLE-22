@@ -364,6 +364,9 @@ const Plans = () => {
                 >
                   <Plus size={16} className="mr-2" /> Create Plan
                 </Button>
+                <Button  onClick={() => fetchPlans(page, perPage, search)} disabled={tableLoading}>
+                  Refresh
+                </Button>
               </div>
             </div>
 

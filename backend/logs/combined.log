@@ -1317,3 +1317,12 @@
 {"deletedBy":1,"level":"info","message":"User soft-deleted by admin","service":"social-lovable-api","timestamp":"2026-02-02T06:55:17.576Z","userId":"76"}
 {"deletedBy":1,"level":"info","message":"User soft-deleted by admin","service":"social-lovable-api","timestamp":"2026-02-02T06:55:21.038Z","userId":"75"}
 {"deletedBy":1,"level":"info","message":"User soft-deleted by admin","service":"social-lovable-api","timestamp":"2026-02-02T06:55:25.158Z","userId":"74"}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-02-02T09:35:51.398Z","userId":2,"username":"test21"}
+{"level":"info","message":"Post updated","postId":"722","service":"social-lovable-api","timestamp":"2026-02-02T10:33:20.814Z","userId":2}
+{"level":"info","message":"Post updated","postId":"722","service":"social-lovable-api","timestamp":"2026-02-02T10:33:37.107Z","userId":2}
+{"level":"info","message":"Post updated","postId":"722","service":"social-lovable-api","timestamp":"2026-02-02T10:37:11.502Z","userId":2}
+{"level":"info","message":"Post updated","postId":"722","service":"social-lovable-api","timestamp":"2026-02-02T10:37:35.801Z","userId":2}
+{"level":"info","message":"Post updated","postId":"722","service":"social-lovable-api","timestamp":"2026-02-02T10:44:02.954Z","userId":2}
+{"level":"info","message":"Post updated","postId":"722","service":"social-lovable-api","timestamp":"2026-02-02T10:46:18.096Z","userId":2}
+{"level":"info","message":"Post updated","postId":"722","service":"social-lovable-api","timestamp":"2026-02-02T10:54:08.433Z","userId":2}
+{"level":"info","message":"Post updated","postId":"722","service":"social-lovable-api","timestamp":"2026-02-02T10:57:05.938Z","userId":2}

@@ -256,12 +256,21 @@ const Subscriptions = () => {
                 )}
               </div>
 
-              <Button
+             <div className="flex gap-2">
+               <Button
                 className="bg-green-600 hover:bg-green-700 px-6"
                 onClick={exportExcel}
               >
                 Export Excel
               </Button>
+              <Button
+                onClick={() => fetchSubscriptions(page, perPage, debouncedSearch)}
+                
+                disabled={loading}
+              >
+                Refresh
+              </Button>
+             </div>
             </div>
 
             <div className="rounded-xl border border-gray-200 overflow-hidden shadow-sm">

@@ -589,7 +589,7 @@ const NewPost = () => {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  {connectedAccounts.map((acc) => (
+                  {/* {connectedAccounts.map((acc) => (
                     <div
                       key={acc.id}
                       className={`flex items-center space-x-3 p-3 border-2 rounded-lg cursor-pointer transition-all ${
@@ -616,7 +616,42 @@ const NewPost = () => {
                         )}
                       </div>
                     </div>
-                  ))}
+                  ))} */}
+                  {connectedAccounts.map((acc) => (
+  <div
+    key={acc.id}
+    className={`flex items-center space-x-3 p-3 border-2 rounded-lg transition-all ${
+      platforms.includes(acc.platform)
+        ? "border-indigo-500 bg-indigo-50"
+        : "border-gray-200 hover:border-indigo-300"
+    }`}
+  >
+    <Checkbox
+      checked={platforms.includes(acc.platform)}
+      onCheckedChange={(checked) => {
+        if (checked) {
+          setPlatforms((prev) => [...prev, acc.platform]);
+        } else {
+          setPlatforms((prev) =>
+            prev.filter((p) => p !== acc.platform)
+          );
+        }
+      }}
+    />
+
+    <div className="flex-1">
+      <label className="text-sm font-semibold text-gray-900">
+        {acc.platform}
+      </label>
+      {acc.account_name && (
+        <p className="text-xs text-gray-600">
+          {acc.account_name}
+        </p>
+      )}
+    </div>
+  </div>
+))}
+
                 </div>
               )}
             </div>

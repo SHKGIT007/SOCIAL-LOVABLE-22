@@ -11,6 +11,7 @@ import { Eye, X, Calendar } from "lucide-react";
 import Swal from "sweetalert2";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import { Title } from "@radix-ui/react-alert-dialog";
 
 interface Post {
   id: string;
@@ -350,7 +351,7 @@ const AdminPosts = () => {
             {/* Search + Filter */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
               {/* Search */}
-              <div className="relative w-full sm:w-72">
+              <div className="relative w-full sm:w-72 flex gap-3">
                 <input
                   type="text"
                   placeholder="Search title..."
@@ -364,11 +365,7 @@ const AdminPosts = () => {
                     onClick={() => setSearch("")}
                   />
                 )}
-              </div>
-
-              {/* Status Filter */}
-              <div className="flex items-center gap-3 flex-wrap">
-                <select
+                  <select
                   value={statusFilter}
                   onChange={(e) => {
                     setStatusFilter(e.target.value);
@@ -381,6 +378,11 @@ const AdminPosts = () => {
                   <option value="scheduled">Scheduled</option>
                   <option value="published">Published</option>
                 </select>
+              </div>
+
+              {/* Status Filter */}
+              <div className="flex items-center gap-3 flex-wrap">
+              
 
                 <Button
                   className="bg-green-600 hover:bg-green-700 px-6"
@@ -388,6 +390,14 @@ const AdminPosts = () => {
                   disabled={exportLoading}
                 >
                   {exportLoading ? "Exporting..." : "Export Excel"}
+                </Button>
+                
+                <Button
+                  onClick={fetchPosts}
+                  className=" px-6"
+                  disabled={tableLoading}
+                >
+                  Refresh
                 </Button>
               </div>
             </div>
