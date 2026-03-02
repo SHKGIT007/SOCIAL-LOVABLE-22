@@ -89,14 +89,47 @@ const AdminPosts = () => {
     fetchPosts();
   }, [page, perPage, debouncedSearch, statusFilter]);
 
+  // const getPlatformsArray = (platforms: any): string[] => {
+  //   try {
+  //     if (!platforms) return [];
+  //     if (Array.isArray(platforms)) return platforms;
+  //     return JSON.parse(platforms);
+  //   } catch {
+  //     return [];
+  //   }
+  // };
+
   const getPlatformsArray = (platforms: any): string[] => {
-    try {
-      if (!platforms) return [];
-      if (Array.isArray(platforms)) return platforms;
-      return JSON.parse(platforms);
-    } catch {
-      return [];
+    if (!platforms) return [];
+
+    // already array
+    if (Array.isArray(platforms)) return platforms;
+
+    // JSON string
+    if (typeof platforms === "string") {
+      try {
+        const parsed = JSON.parse(platforms);
+        if (Array.isArray(parsed)) return parsed;
+
+        // comma separated string
+        return platforms
+          .split(",")
+          .map((p) => p.trim())
+          .filter(Boolean);
+      } catch {
+        return platforms
+          .split(",")
+          .map((p) => p.trim())
+          .filter(Boolean);
+      }
     }
+
+    // object case { facebook: true }
+    if (typeof platforms === "object") {
+      return Object.keys(platforms);
+    }
+
+    return [];
   };
 
   const exportExcel = async () => {
@@ -196,7 +229,7 @@ const AdminPosts = () => {
       {
         name: "Title",
         width: "180px",
-        selector: (row) => row.title||"N/A",
+        selector: (row) => row.title || "N/A",
         sortable: true,
       },
       {
@@ -204,7 +237,7 @@ const AdminPosts = () => {
         width: "300px",
         cell: (row) => (
           <div className="text-xs text-gray-600 line-clamp-2">
-            {row.content||"N/A"}
+            {row.content || "N/A"}
           </div>
         ),
       },
@@ -218,18 +251,44 @@ const AdminPosts = () => {
         width: "200px",
         selector: (row) => row.User?.email || "N/A",
       },
+      // {
+      //   name: "Platforms",
+      //   width: "150px",
+      //   cell: (row) => (
+      //     <div className="flex flex-wrap gap-1">
+      //       {getPlatformsArray(row?.platforms)?.map((p) => (
+      //         <Badge key={p} className="text-xs capitalize" variant="secondary">
+      //           {p || "N/A"}
+      //         </Badge>
+      //       ))}
+      //     </div>
+      //   ),
+      // },
+
       {
         name: "Platforms",
         width: "150px",
-        cell: (row) => (
-          <div className="flex flex-wrap gap-1">
-            {getPlatformsArray(row.platforms).map((p) => (
-              <Badge key={p} className="text-xs capitalize" variant="secondary">
-                {p||"N/A"}
-              </Badge>
-            ))}
-          </div>
-        ),
+        cell: (row) => {
+          const platforms = getPlatformsArray(row.platforms);
+
+          return (
+            <div className="flex flex-wrap gap-1">
+              {platforms.length > 0 ? (
+                platforms.map((p) => (
+                  <Badge
+                    key={p}
+                    className="text-xs capitalize"
+                    variant="secondary"
+                  >
+                    {p}
+                  </Badge>
+                ))
+              ) : (
+                <span className="text-xs text-gray-400">N/A</span>
+              )}
+            </div>
+          );
+        },
       },
       {
         name: "Status",
