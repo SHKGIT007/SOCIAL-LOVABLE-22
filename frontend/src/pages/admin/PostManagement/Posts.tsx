@@ -55,6 +55,10 @@ const AdminPosts = () => {
     return () => clearTimeout(times);
   }, [search]);
 
+  const handleRefresh = () => {
+    fetchPosts();
+  };
+
   const fetchPosts = async () => {
     setTableLoading(true);
     try {
@@ -367,7 +371,7 @@ const AdminPosts = () => {
 
   return (
     <DashboardLayout userRole="admin">
-      <div className="space-y-8">
+      <div className="space-y-2">
         <div
           className="
     sticky top-0 z-10
@@ -396,7 +400,7 @@ const AdminPosts = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={() => navigate(-1)}
-              className="px-4 py-2 text-sm rounded-md border bg-white hover:bg-indigo-50 transition"
+              className="px-4 py-2text-sm rounded-md border bg-white hover:bg-indigo-50 transition"
             >
               ← Back
             </button>

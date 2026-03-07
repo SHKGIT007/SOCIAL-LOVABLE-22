@@ -47,6 +47,11 @@ const Plans = () => {
     return () => clearTimeout(times);
   }, [search]);
 
+  // refresh the current plan list
+  const handleRefresh = () => {
+    fetchPlans(page, perPage, debouncedSearch);
+  };
+
   const fetchPlans = async (pageNumber = 1, pageSize = 10, searchTerm = "") => {
     setTableLoading(true);
     try {
@@ -284,7 +289,7 @@ const Plans = () => {
 
   return (
     <DashboardLayout userRole="admin">
-      <div className="space-y-8">
+      <div className="space-y-2">
         {/* Header */}
         <div
           className="
@@ -372,7 +377,18 @@ const Plans = () => {
               <DataTable
                 columns={columns}
                 data={plans}
-                progressPending={exportLoading}
+                progressPending={exportLoading || tableLoading}
+                actions={
+                  <Button
+                    className="bg-blue-500 hover:bg-blue-600"
+                    onClick={handleRefresh}
+                    disabled={tableLoading || exportLoading}
+                  >
+                    {tableLoading || exportLoading
+                      ? "Refreshing..."
+                      : "Refresh"}
+                  </Button>
+                }
                 pagination
                 paginationServer
                 paginationTotalRows={totalRows}

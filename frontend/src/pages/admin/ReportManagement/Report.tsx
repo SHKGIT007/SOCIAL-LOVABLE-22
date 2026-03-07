@@ -49,6 +49,9 @@ const [debouncedSearch, setDebouncedSearch ] = useState(search)
     return () => clearTimeout(times)
   },[search])
     
+  const handleRefresh = () => {
+    fetchUsers(page, perPage, debouncedSearch);
+  };
 
   const fetchUsers = async (pageNumber = 1, pageSize = 10, searchTerm = "") => {
     setLoading(true);
@@ -189,7 +192,7 @@ const [debouncedSearch, setDebouncedSearch ] = useState(search)
 
   return (
     <DashboardLayout userRole="admin">
-      <div className="space-y-8">
+      <div className="space-y-2">
         <div
           className="
     sticky top-0 z-10
@@ -261,6 +264,15 @@ const [debouncedSearch, setDebouncedSearch ] = useState(search)
                 columns={columns}
                 data={users}
                 progressPending={loading}
+                actions={
+                  <Button
+                    className="bg-blue-500 hover:bg-blue-600"
+                    onClick={handleRefresh}
+                    disabled={loading}
+                  >
+                    {loading ? "Refreshing..." : "Refresh"}
+                  </Button>
+                }
                 pagination
                 paginationServer
                 paginationTotalRows={totalRows}

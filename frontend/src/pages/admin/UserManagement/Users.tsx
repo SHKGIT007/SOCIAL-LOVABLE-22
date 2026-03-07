@@ -85,6 +85,11 @@ const [exportLoading, setExportLoading] = useState(false);
     return () => clearTimeout(times);
   }, [search]);
 
+  // refresh the current list using the existing parameters
+  const handleRefresh = () => {
+    fetchUsers(page, perPage, debouncedSearch);
+  };
+
   useEffect(() => {
     if (!isAuthenticated()) return navigate("/auth");
     if (!isAdmin()) return navigate("/dashboard");
@@ -335,7 +340,7 @@ const [exportLoading, setExportLoading] = useState(false);
 
   return (
     <DashboardLayout userRole="admin">
-      <div className="space-y-8">
+      <div className="space-y-2">
         {/* Page Header */}
         {/* Page Header */}
         <div
@@ -428,6 +433,15 @@ const [exportLoading, setExportLoading] = useState(false);
                 columns={columns}
                 data={users}
                 progressPending={tableLoading}
+                actions={
+                  <Button
+                    className="bg-blue-500 hover:bg-blue-600"
+                    onClick={handleRefresh}
+                    disabled={tableLoading}
+                  >
+                    {tableLoading ? "Refreshing..." : "Refresh"}
+                  </Button>
+                }
                 pagination
                 paginationServer
                 paginationTotalRows={totalRows}

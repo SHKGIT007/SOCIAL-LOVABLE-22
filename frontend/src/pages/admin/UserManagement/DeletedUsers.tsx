@@ -74,6 +74,10 @@ const DeletedUsers = () => {
     fetchDeletedUsers();
   }, [page, perPage, search]);
 
+  const handleRefresh = () => {
+    fetchDeletedUsers();
+  };
+
   const columns: TableColumn<User>[] = useMemo(
     () => [
       {
@@ -120,7 +124,7 @@ const DeletedUsers = () => {
 
   return (
     <DashboardLayout userRole="admin">
-      <div className="space-y-8">
+      <div className="space-y-2">
         {/* Header */}
         <div
           className="
@@ -188,6 +192,15 @@ const DeletedUsers = () => {
                 columns={columns}
                 data={users}
                 progressPending={loading}
+                actions={
+                  <Button
+                    className="bg-blue-500 hover:bg-blue-600"
+                    onClick={handleRefresh}
+                    disabled={loading}
+                  >
+                    {loading ? "Refreshing..." : "Refresh"}
+                  </Button>
+                }
                 pagination
                 paginationServer
                 paginationTotalRows={totalRows}

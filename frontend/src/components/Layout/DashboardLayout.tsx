@@ -271,7 +271,7 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
           isSidebarCollapsed ? "lg:ml-20" : "lg:ml-64"
         }`}
       >
-        <div className="h-[calc(100vh-64px)] overflow-y-auto pt-16 pb-8 px-4 lg:px-8">
+        <div className="h-[calc(110vh-64px)] overflow-y-auto pt-16 pb-4 px-4 lg:px-4">
           {children}
         </div>
       </main>

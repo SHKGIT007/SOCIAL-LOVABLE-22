@@ -75,6 +75,10 @@ const UserPostsReport = () => {
     fetchUserPosts();
   }, [page, perPage, search, year, month, date]);
 
+  const handleRefresh = () => {
+    fetchUserPosts();
+  };
+
   const fetchUserPosts = async () => {
     setLoading(true);
     try {
@@ -275,7 +279,7 @@ const UserPostsReport = () => {
 
   return (
     <DashboardLayout userRole="admin">
-      <div className="space-y-8">
+      <div className="space-y-2">
         <div
           className="
           sticky top-0 z-10
@@ -402,6 +406,15 @@ const UserPostsReport = () => {
                 columns={columns}
                 data={posts}
                 progressPending={loading}
+                actions={
+                  <Button
+                    className="bg-blue-500 hover:bg-blue-600"
+                    onClick={handleRefresh}
+                    disabled={loading}
+                  >
+                    {loading ? "Refreshing..." : "Refresh"}
+                  </Button>
+                }
                 pagination
                 paginationServer
                 paginationTotalRows={totalRows}

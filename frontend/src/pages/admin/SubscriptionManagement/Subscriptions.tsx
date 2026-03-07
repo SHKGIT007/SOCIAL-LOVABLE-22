@@ -55,6 +55,10 @@ const Subscriptions = () => {
     return () => clearTimeout(times);
   }, [search]);
 
+  const handleRefresh = () => {
+    fetchSubscriptions(page, perPage, debouncedSearch);
+  };
+
   const fetchSubscriptions = async (
     pageNumber = 1,
     pageSize = 10,
@@ -201,7 +205,7 @@ const Subscriptions = () => {
 
   return (
     <DashboardLayout userRole="admin">
-      <div className="space-y-8">
+      <div className="space-y-2">
         <div
           className="
     sticky top-0 z-10
@@ -269,6 +273,15 @@ const Subscriptions = () => {
                 columns={columns}
                 data={subscriptions}
                 progressPending={loading}
+                actions={
+                  <Button
+                    className="bg-blue-500 hover:bg-blue-600"
+                    onClick={handleRefresh}
+                    disabled={loading}
+                  >
+                    {loading ? "Refreshing..." : "Refresh"}
+                  </Button>
+                }
                 pagination
                 paginationServer
                 paginationTotalRows={totalRows}
