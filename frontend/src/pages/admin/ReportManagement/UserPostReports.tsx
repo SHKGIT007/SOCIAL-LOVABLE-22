@@ -214,8 +214,8 @@ const UserPostsReport = () => {
                 row.status === "published"
                   ? "bg-green-100 text-green-700 border-green-300"
                   : row.status === "scheduled"
-                  ? "bg-blue-100 text-blue-700 border-blue-300"
-                  : "bg-gray-100 text-gray-700 border-gray-300"
+                    ? "bg-blue-100 text-blue-700 border-blue-300"
+                    : "bg-gray-100 text-gray-700 border-gray-300"
               }
             >
               {status}
@@ -318,23 +318,33 @@ const UserPostsReport = () => {
         <Card className="shadow-xl border border-indigo-100 rounded-2xl">
           <CardContent className="pt-6">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
-              <div className="relative w-full sm:w-72">
-                <input
-                  type="text"
-                  placeholder="Search title..."
-                  className="border px-3 py-2 rounded-lg w-full shadow-sm focus:ring-indigo-300 focus:border-indigo-400 pr-9"
-                  value={search}
-                  onChange={(e) => {
-                    setSearch(e.target.value);
-                    setPage(1);
-                  }}
-                />
-                {search && (
-                  <X
-                    className="absolute right-3 top-2.5 h-4 w-4 text-gray-500 cursor-pointer"
-                    onClick={() => setSearch("")}
+              <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+                <div className="relative w-full sm:w-72">
+                  <input
+                    type="text"
+                    placeholder="Search title..."
+                    className="border px-3 py-2 rounded-lg w-full shadow-sm focus:ring-indigo-300 focus:border-indigo-400 pr-9"
+                    value={search}
+                    onChange={(e) => {
+                      setSearch(e.target.value);
+                      setPage(1);
+                    }}
                   />
-                )}
+                  {search && (
+                    <X
+                      className="absolute right-3 top-2.5 h-4 w-4 text-gray-500 cursor-pointer"
+                      onClick={() => setSearch("")}
+                    />
+                  )}
+                </div>
+
+                <Button
+                  className="bg-blue-500 hover:bg-blue-600 w-full sm:w-auto"
+                  onClick={handleRefresh}
+                  disabled={loading}
+                >
+                  {loading ? "Refreshing..." : "Refresh"}
+                </Button>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 w-full lg:w-auto">
@@ -406,15 +416,6 @@ const UserPostsReport = () => {
                 columns={columns}
                 data={posts}
                 progressPending={loading}
-                actions={
-                  <Button
-                    className="bg-blue-500 hover:bg-blue-600"
-                    onClick={handleRefresh}
-                    disabled={loading}
-                  >
-                    {loading ? "Refreshing..." : "Refresh"}
-                  </Button>
-                }
                 pagination
                 paginationServer
                 paginationTotalRows={totalRows}

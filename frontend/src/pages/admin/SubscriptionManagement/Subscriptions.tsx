@@ -42,7 +42,7 @@ const Subscriptions = () => {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
   const [search, setSearch] = useState("");
-   const [debouncedSearch, setDebouncedSearch] = useState(search);
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
   const primaryGradient = "from-indigo-600 to-cyan-500";
   const primaryGradientClass = `bg-gradient-to-r ${primaryGradient}`;
 
@@ -244,20 +244,30 @@ const Subscriptions = () => {
         <Card className="shadow-xl border border-indigo-100/50 rounded-2xl">
           <CardContent className="pt-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-              <div className="relative w-full sm:w-72">
-                <input
-                  type="text"
-                  placeholder="Search user, plan..."
-                  className="border px-3 py-2 rounded-lg w-full shadow-sm focus:ring-indigo-300 focus:border-indigo-400 pr-9"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-                {search && (
-                  <X
-                    className="absolute right-3 top-2.5 h-4 w-4 cursor-pointer text-gray-400 hover:text-gray-600"
-                    onClick={() => setSearch("")}
+              <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+                <div className="relative w-full sm:w-72">
+                  <input
+                    type="text"
+                    placeholder="Search user, plan..."
+                    className="border px-3 py-2 rounded-lg w-full shadow-sm focus:ring-indigo-300 focus:border-indigo-400 pr-9"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
                   />
-                )}
+                  {search && (
+                    <X
+                      className="absolute right-3 top-2.5 h-4 w-4 cursor-pointer text-gray-400 hover:text-gray-600"
+                      onClick={() => setSearch("")}
+                    />
+                  )}
+                </div>
+
+                <Button
+                  className="bg-blue-500 hover:bg-blue-600 w-full sm:w-auto"
+                  onClick={handleRefresh}
+                  disabled={loading}
+                >
+                  {loading ? "Refreshing..." : "Refresh"}
+                </Button>
               </div>
 
               <Button
@@ -273,15 +283,6 @@ const Subscriptions = () => {
                 columns={columns}
                 data={subscriptions}
                 progressPending={loading}
-                actions={
-                  <Button
-                    className="bg-blue-500 hover:bg-blue-600"
-                    onClick={handleRefresh}
-                    disabled={loading}
-                  >
-                    {loading ? "Refreshing..." : "Refresh"}
-                  </Button>
-                }
                 pagination
                 paginationServer
                 paginationTotalRows={totalRows}

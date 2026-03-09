@@ -183,12 +183,12 @@ const Plans = () => {
 
       const excelData = res.data.plans.map((p, index) => ({
         "S.No": index + 1,
-        Name: p.name||"N/A",
-        Price: p.price||"N/A",
-        "AI Posts": p.ai_posts||"N/A",
-        Accounts: p.linked_accounts||"N/A",
+        Name: p.name || "N/A",
+        Price: p.price || "N/A",
+        "AI Posts": p.ai_posts || "N/A",
+        Accounts: p.linked_accounts || "N/A",
         Status: p.is_active ? "Active" : "Inactive",
-        Description: p.description||"N/A",
+        Description: p.description || "N/A",
         Created: new Date(p.created_at).toLocaleDateString(),
       }));
 
@@ -215,31 +215,31 @@ const Plans = () => {
       },
       {
         name: "Name",
-        selector: (row) => row.name||"N/A",
+        selector: (row) => row.name || "N/A",
         sortable: true,
         width: "180px",
       },
       {
         name: "Description",
-        selector: (row) => row.description||"N/A",
+        selector: (row) => row.description || "N/A",
         sortable: false,
         width: "280px",
       },
       {
         name: "Price",
-        selector: (row) => row.price||"N/A",
+        selector: (row) => row.price || "N/A",
         sortable: true,
         width: "80px",
       },
       {
         name: "AI Posts",
-        selector: (row) => row.ai_posts||"N/A",
+        selector: (row) => row.ai_posts || "N/A",
         sortable: true,
         width: "100px",
       },
       {
         name: "Accounts",
-        selector: (row) => row.linked_accounts||"N/A",
+        selector: (row) => row.linked_accounts || "N/A",
         sortable: true,
         width: "110px",
       },
@@ -279,7 +279,7 @@ const Plans = () => {
       },
       {
         name: "Created",
-        selector: (row) => new Date(row.created_at).toLocaleDateString()||"N/A",
+        selector: (row) => new Date(row.created_at).toLocaleDateString() || "N/A",
         sortable: true,
         width: "120px",
       },
@@ -339,20 +339,30 @@ const Plans = () => {
           <CardContent className="pt-6">
             {/* Search + Buttons */}
             <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-              <div className="relative w-full sm:w-72">
-                <input
-                  type="text"
-                  placeholder="Search name, description..."
-                  className="border px-3 py-2 rounded-lg w-full shadow-sm focus:ring-indigo-300 focus:border-indigo-400 pr-9"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-                {search && (
-                  <X
-                    className="absolute right-3 top-2.5 cursor-pointer text-gray-400 hover:text-gray-600"
-                    onClick={() => setSearch("")}
+              <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+                <div className="relative w-full sm:w-72">
+                  <input
+                    type="text"
+                    placeholder="Search name, description..."
+                    className="border px-3 py-2 rounded-lg w-full shadow-sm focus:ring-indigo-300 focus:border-indigo-400 pr-9"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
                   />
-                )}
+                  {search && (
+                    <X
+                      className="absolute right-3 top-2.5 cursor-pointer text-gray-400 hover:text-gray-600"
+                      onClick={() => setSearch("")}
+                    />
+                  )}
+                </div>
+
+                <Button
+                  className="bg-blue-500 hover:bg-blue-600 w-full sm:w-auto"
+                  onClick={handleRefresh}
+                  disabled={tableLoading || exportLoading}
+                >
+                  {tableLoading || exportLoading ? "Refreshing..." : "Refresh"}
+                </Button>
               </div>
 
               <div className="flex gap-3">
@@ -378,17 +388,6 @@ const Plans = () => {
                 columns={columns}
                 data={plans}
                 progressPending={exportLoading || tableLoading}
-                actions={
-                  <Button
-                    className="bg-blue-500 hover:bg-blue-600"
-                    onClick={handleRefresh}
-                    disabled={tableLoading || exportLoading}
-                  >
-                    {tableLoading || exportLoading
-                      ? "Refreshing..."
-                      : "Refresh"}
-                  </Button>
-                }
                 pagination
                 paginationServer
                 paginationTotalRows={totalRows}

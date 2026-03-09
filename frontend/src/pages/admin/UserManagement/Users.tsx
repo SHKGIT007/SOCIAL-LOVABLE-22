@@ -33,7 +33,7 @@ const Users = () => {
   const [totalRows, setTotalRows] = useState(0);
   const [loading, setLoading] = useState(false);
   const [tableLoading, setTableLoading] = useState(false);
-const [exportLoading, setExportLoading] = useState(false);
+  const [exportLoading, setExportLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
   const [search, setSearch] = useState("");
@@ -74,7 +74,7 @@ const [exportLoading, setExportLoading] = useState(false);
         confirmButtonColor: "#6366f1",
       });
     } finally {
- setTableLoading(false);
+      setTableLoading(false);
     }
   };
 
@@ -99,9 +99,8 @@ const [exportLoading, setExportLoading] = useState(false);
   const handleUpdateUserStatus = async (userId: string, newStatus: boolean) => {
     const result = await Swal.fire({
       title: "Are you sure?",
-      text: `You are about to mark this user as ${
-        newStatus ? "Active" : "Inactive"
-      }.`,
+      text: `You are about to mark this user as ${newStatus ? "Active" : "Inactive"
+        }.`,
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#6366f1",
@@ -266,7 +265,7 @@ const [exportLoading, setExportLoading] = useState(false);
       },
       {
         name: "Plan",
-        selector: (row) => row.subscription?.plan || "N/A",
+        selector: (row) => row.subscription?.plan?.name || "N/A",
         width: "100px",
       },
       {
@@ -402,21 +401,31 @@ const [exportLoading, setExportLoading] = useState(false);
           <CardContent className="pt-6">
             {/* Search Bar */}
             <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-              <div className="relative w-full sm:w-72">
-                <input
-                  type="text"
-                  placeholder="Search name, email..."
-                  className="border px-3 py-2 rounded-lg w-full shadow-sm focus:ring-indigo-300 focus:border-indigo-400 pr-9"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-
-                {search && (
-                  <X
-                    className="absolute right-3 top-2.5 h-4 w-4 cursor-pointer text-gray-400 hover:text-gray-600"
-                    onClick={() => setSearch("")}
+              <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+                <div className="relative w-full sm:w-72">
+                  <input
+                    type="text"
+                    placeholder="Search name, email..."
+                    className="border px-3 py-2 rounded-lg w-full shadow-sm focus:ring-indigo-300 focus:border-indigo-400 pr-9"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
                   />
-                )}
+
+                  {search && (
+                    <X
+                      className="absolute right-3 top-2.5 h-4 w-4 cursor-pointer text-gray-400 hover:text-gray-600"
+                      onClick={() => setSearch("")}
+                    />
+                  )}
+                </div>
+
+                <Button
+                  className="bg-blue-500 hover:bg-blue-600 w-full sm:w-auto"
+                  onClick={handleRefresh}
+                  disabled={tableLoading}
+                >
+                  {tableLoading ? "Refreshing..." : "Refresh"}
+                </Button>
               </div>
 
               <Button
@@ -433,15 +442,6 @@ const [exportLoading, setExportLoading] = useState(false);
                 columns={columns}
                 data={users}
                 progressPending={tableLoading}
-                actions={
-                  <Button
-                    className="bg-blue-500 hover:bg-blue-600"
-                    onClick={handleRefresh}
-                    disabled={tableLoading}
-                  >
-                    {tableLoading ? "Refreshing..." : "Refresh"}
-                  </Button>
-                }
                 pagination
                 paginationServer
                 paginationTotalRows={totalRows}

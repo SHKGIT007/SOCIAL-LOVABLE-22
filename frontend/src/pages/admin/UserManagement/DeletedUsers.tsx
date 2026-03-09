@@ -166,23 +166,33 @@ const DeletedUsers = () => {
           <CardContent className="pt-6">
             {/* Search */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-              <div className="relative w-full sm:w-72">
-                <input
-                  type="text"
-                  placeholder="Search deleted users..."
-                  className="border px-3 py-2 rounded-lg w-full shadow-sm focus:ring-red-300 focus:border-red-400 pr-9"
-                  value={search}
-                  onChange={(e) => {
-                    setSearch(e.target.value);
-                    setPage(1);
-                  }}
-                />
-                {search && (
-                  <X
-                    className="absolute right-3 top-2.5 h-4 w-4 text-gray-500 cursor-pointer hover:text-gray-700"
-                    onClick={() => setSearch("")}
+              <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+                <div className="relative w-full sm:w-72">
+                  <input
+                    type="text"
+                    placeholder="Search deleted users..."
+                    className="border px-3 py-2 rounded-lg w-full shadow-sm focus:ring-red-300 focus:border-red-400 pr-9"
+                    value={search}
+                    onChange={(e) => {
+                      setSearch(e.target.value);
+                      setPage(1);
+                    }}
                   />
-                )}
+                  {search && (
+                    <X
+                      className="absolute right-3 top-2.5 h-4 w-4 text-gray-500 cursor-pointer hover:text-gray-700"
+                      onClick={() => setSearch("")}
+                    />
+                  )}
+                </div>
+
+                <Button
+                  className="bg-blue-500 hover:bg-blue-600 w-full sm:w-auto"
+                  onClick={handleRefresh}
+                  disabled={loading}
+                >
+                  {loading ? "Refreshing..." : "Refresh"}
+                </Button>
               </div>
             </div>
 
@@ -192,15 +202,6 @@ const DeletedUsers = () => {
                 columns={columns}
                 data={users}
                 progressPending={loading}
-                actions={
-                  <Button
-                    className="bg-blue-500 hover:bg-blue-600"
-                    onClick={handleRefresh}
-                    disabled={loading}
-                  >
-                    {loading ? "Refreshing..." : "Refresh"}
-                  </Button>
-                }
                 pagination
                 paginationServer
                 paginationTotalRows={totalRows}
