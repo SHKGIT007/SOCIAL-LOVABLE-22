@@ -28,7 +28,7 @@ module.exports = function (app) {
       if (!process.env.BACKEND_URL && reqHost === "socialvibe.tradestreet.in") {
         backendBase = `https://${reqHost}/backend`;
       }
-    } catch (e) {}
+    } catch (e) { }
 
     const redirect_uri = `${backendBase}/auth/google/callback`;
 
@@ -62,7 +62,7 @@ module.exports = function (app) {
         let state = {};
         try {
           state = JSON.parse(decodeURIComponent(req.query.state || "{}"));
-        } catch (e) {}
+        } catch (e) { }
 
         let settings = await SystemSetting.findByPk(1).catch(() => null);
 
@@ -94,7 +94,7 @@ module.exports = function (app) {
           ) {
             backendBase = `https://${reqHost}/backend`;
           }
-        } catch (e) {}
+        } catch (e) { }
 
         const redirect_uri = `${backendBase}/auth/google/callback`;
 
@@ -119,7 +119,7 @@ module.exports = function (app) {
             headers: { Authorization: `Bearer ${access_token}` },
           })
           .then((r) => r.data);
-        
+
         // For signup: Look for verified users only
         // For signin: Look for any user
         let user = await User.findOne({ where: { email: profile.email } });
@@ -130,8 +130,7 @@ module.exports = function (app) {
           // For signup, only reject if there's a VERIFIED user with this email
           if (user && user.is_email_verified) {
             return res.redirect(
-              `${
-                new URL(state.redirect_dashboard).origin
+              `${new URL(state.redirect_dashboard).origin
               }/auth?social_error=email_exists`
             );
           }
@@ -173,43 +172,42 @@ module.exports = function (app) {
           );
         }
 
-    if (action === "signin") {
-  if (!user) {
-    return res.redirect(
-      `${new URL(state.redirect_dashboard).origin}/auth?social_error=account_not_found`
-    );
-  }
+        if (action === "signin") {
+          if (!user) {
+            return res.redirect(
+              `${new URL(state.redirect_dashboard).origin}/auth?social_error=account_not_found`
+            );
+          }
 
-  // For signin, only allow if email is verified
-  if (!user.is_email_verified) {
-    return res.redirect(
-      `${new URL(state.redirect_dashboard).origin}/auth?social_error=account_not_verified`
-    );
-  }
+          // For signin, only allow if email is verified
+          if (!user.is_email_verified) {
+            return res.redirect(
+              `${new URL(state.redirect_dashboard).origin}/auth?social_error=account_not_verified`
+            );
+          }
 
-  if (user.is_deleted) {
-    return res.redirect(
-      `${new URL(state.redirect_dashboard).origin}/auth?social_error=account_blocked`
-    );
-  }
+          if (user.is_deleted) {
+            return res.redirect(
+              `${new URL(state.redirect_dashboard).origin}/auth?social_error=account_blocked`
+            );
+          }
 
-  user.avatar_url = profile.picture || user.avatar_url;
-  user.full_name = profile.name;
-  user.user_fname = profile.given_name;
-  user.user_lname = profile.family_name;
-  user.active_status = true;
-  await user.save();
-}
+          user.avatar_url = profile.picture || user.avatar_url;
+          user.full_name = profile.name;
+          user.user_fname = profile.given_name;
+          user.user_lname = profile.family_name;
+          user.active_status = true;
+          await user.save();
+        }
 
         const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
-          expiresIn: process.env.JWT_EXPIRES_IN || "7d",
+          expiresIn: "12h",
         });
 
         const dashboard = state.redirect_dashboard || "/dashboard";
 
         return res.redirect(
-          `${dashboard}${
-            dashboard.includes("?") ? "&" : "?"
+          `${dashboard}${dashboard.includes("?") ? "&" : "?"
           }token=${encodeURIComponent(token)}&success=true`
         );
       } catch (err) {

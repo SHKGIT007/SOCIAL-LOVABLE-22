@@ -116,9 +116,22 @@ function App() {
       handleSocketConnection();
     });
 
+    // Check token expiration periodically
+    const authCheckInterval = setInterval(() => {
+      const authData = getAuthData();
+      if (authData?.token) {
+        // We import isTokenExpired from auth.js if available, or just check isAuthenticated
+        if (!isAuthenticated()) {
+          // isAuthenticated internally clears data if expired
+          window.location.href = "/auth";
+        }
+      }
+    }, 60000); // Check every minute
+
     return () => {
       cleanup();
       socket.disconnect();
+      clearInterval(authCheckInterval);
     };
   }, []);
 

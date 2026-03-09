@@ -1335,3 +1335,5 @@
 {"level":"info","message":"Post updated","postId":"745","service":"social-lovable-api","timestamp":"2026-03-09T08:58:33.870Z","userId":2}
 {"level":"info","message":"Post updated","postId":"745","service":"social-lovable-api","timestamp":"2026-03-09T09:02:02.171Z","userId":2}
 {"ai_prompt":"Title: Roddies fashion 2\nDetails: Business/Creator: Roddies fashion 2\nDescription: Relatable caption in points also give hastags.\nPlatforms: Facebook\nBrand Voice: professional\nHashtags: Trending\nFestival/Event: Halloween","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2026-03-09T10:03:52.555Z","userId":2}
+{"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-03-09T12:14:44.524Z","userId":1,"username":"admin"}
+{"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-03-09T12:23:05.683Z","userId":1,"username":"admin"}

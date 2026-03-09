@@ -13,7 +13,7 @@ module.exports = function (app) {
       const app_id =
         (settings && settings.facebook_app_id) ||
         process.env.FACEBOOK_APP_ID;
-      
+
       if (!app_id) {
         return res.status(500).json({
           error: "Facebook App ID not configured",
@@ -37,7 +37,7 @@ module.exports = function (app) {
         if (!process.env.BACKEND_URL && reqHost === "socialvibe.tradestreet.in") {
           backendBase = `https://${reqHost}/backend`;
         }
-      } catch (e) {}
+      } catch (e) { }
 
       const redirect_uri = `${backendBase}/auth/facebook/callback`;
 
@@ -75,7 +75,7 @@ module.exports = function (app) {
     ["/auth/facebook/callback", "/backend/auth/facebook/callback"],
     async (req, res) => {
       try {
-        
+
         const code = req.query.code;
         const error = req.query.error;
         const error_description = req.query.error_description;
@@ -145,7 +145,7 @@ module.exports = function (app) {
           ) {
             backendBase = `https://${reqHost}/backend`;
           }
-        } catch (e) {}
+        } catch (e) { }
 
         const redirect_uri = `${backendBase}/auth/facebook/callback`;
 
@@ -190,7 +190,7 @@ module.exports = function (app) {
         const action = state.action || "signup";
 
         if (action === "signup") {
-          
+
           // For signup, reject if there's a VERIFIED user with this email
           if (user && user.is_email_verified) {
             const frontendBase = state.redirect_dashboard || process.env.FRONTEND_URL || "http://localhost:3000";
@@ -277,7 +277,7 @@ module.exports = function (app) {
 
           // Generate authentication token
           const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
-            expiresIn: process.env.JWT_EXPIRES_IN || "7d",
+            expiresIn: "12h",
           });
 
           logger.info("User logged in via Facebook OAuth", {
@@ -286,9 +286,8 @@ module.exports = function (app) {
           });
 
           const dashboard = state.redirect_dashboard || "/dashboard";
-          const redirectUrl = `${dashboard}${
-            dashboard.includes("?") ? "&" : "?"
-          }token=${encodeURIComponent(token)}&success=true`;
+          const redirectUrl = `${dashboard}${dashboard.includes("?") ? "&" : "?"
+            }token=${encodeURIComponent(token)}&success=true`;
 
           return res.redirect(redirectUrl);
         } else {
@@ -301,7 +300,7 @@ module.exports = function (app) {
       } catch (err) {
         if (err.response?.data) {
         }
-        
+
         logger.error("Facebook OAuth callback error", {
           error: err.message,
           details: err.response?.data,
