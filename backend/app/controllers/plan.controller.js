@@ -3,6 +3,7 @@ const { Op } = require("sequelize");
 const { asyncHandler } = require("../middleware/error.middleware");
 const logger = require("../config/logger");
 const moment = require("moment-timezone");
+const notificationService = require("../services/notification.service");
 
 const createPlan = asyncHandler(async (req, res) => {
   const {
@@ -29,6 +30,11 @@ const createPlan = asyncHandler(async (req, res) => {
     monthly_posts,
     is_active: is_active == 0 || is_active === false ? 0 : 1,
   });
+
+  // 🔔 BROADCAST NOTIFICATION - NEW PLAN CREATED
+  if (plan.is_active) {
+    await notificationService.planCreated(name, price);
+  }
 
   logger.info("Plan created", { planId: plan.id, createdBy: req.user.id });
 

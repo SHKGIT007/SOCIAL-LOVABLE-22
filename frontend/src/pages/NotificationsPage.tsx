@@ -9,7 +9,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Swal from "sweetalert2";
-import { isAuthenticated } from "@/utils/auth";
+import { isAuthenticated, getUserRole } from "@/utils/auth";
+
+import socket from "@/utils/socket";
 
 export default function NotificationsPage() {
   const navigate = useNavigate();
@@ -29,7 +31,7 @@ export default function NotificationsPage() {
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["notifications", currentPage, filter],
     queryFn: async () => {
-      const queryParams = {
+      const queryParams: any = {
         page: currentPage,
         limit: 10,
       };
@@ -42,9 +44,11 @@ export default function NotificationsPage() {
         queryParams,
       });
     },
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
   });
 
-  // Fetch unread count
+  // Fetch unread count & Listen for real-time notifications
   useEffect(() => {
     const fetchUnreadCount = async () => {
       try {
@@ -57,8 +61,19 @@ export default function NotificationsPage() {
     };
 
     fetchUnreadCount();
-    const interval = setInterval(fetchUnreadCount, 10000);
-    return () => clearInterval(interval);
+
+    // Listen for new notifications to refetch
+    const handleNotification = () => {
+      refetch();
+      fetchUnreadCount();
+    };
+
+    socket.on("receive_notification", handleNotification);
+
+    return () => {
+      socket.off("receive_notification", handleNotification);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -145,7 +160,7 @@ export default function NotificationsPage() {
 
   if (isLoading) {
     return (
-      <DashboardLayout userRole="user">
+      <DashboardLayout userRole={getUserRole() as any}>
         <div className="flex justify-center items-center min-h-screen">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
         </div>
@@ -154,7 +169,7 @@ export default function NotificationsPage() {
   }
 
   return (
-    <DashboardLayout userRole="user">
+    <DashboardLayout userRole={getUserRole() as any}>
       <div className="space-y-8">
         {/* Header */}
         <div className="sticky top-0 z-10 -mx-2 px-4 py-4 bg-gradient-to-b from-white/90 to-white/70 backdrop-blur border-b border-indigo-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -168,9 +183,8 @@ export default function NotificationsPage() {
             </h1>
             <p className="text-gray-600 text-sm mt-1">
               {unreadCount > 0
-                ? `${unreadCount} unread notification${
-                    unreadCount !== 1 ? "s" : ""
-                  }`
+                ? `${unreadCount} unread notification${unreadCount !== 1 ? "s" : ""
+                }`
                 : "All notifications read"}
             </p>
           </div>
@@ -196,11 +210,10 @@ export default function NotificationsPage() {
                     setFilter("all");
                     setCurrentPage(1);
                   }}
-                  className={`px-4 py-2 rounded-lg font-medium transition ${
-                    filter === "all"
-                      ? "bg-indigo-600 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
+                  className={`px-4 py-2 rounded-lg font-medium transition ${filter === "all"
+                    ? "bg-indigo-600 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
                 >
                   All
                 </button>
@@ -209,11 +222,10 @@ export default function NotificationsPage() {
                     setFilter("unread");
                     setCurrentPage(1);
                   }}
-                  className={`px-4 py-2 rounded-lg font-medium transition ${
-                    filter === "unread"
-                      ? "bg-indigo-600 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
+                  className={`px-4 py-2 rounded-lg font-medium transition ${filter === "unread"
+                    ? "bg-indigo-600 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
                 >
                   Unread ({unreadCount})
                 </button>
@@ -222,11 +234,10 @@ export default function NotificationsPage() {
                     setFilter("read");
                     setCurrentPage(1);
                   }}
-                  className={`px-4 py-2 rounded-lg font-medium transition ${
-                    filter === "read"
-                      ? "bg-indigo-600 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
+                  className={`px-4 py-2 rounded-lg font-medium transition ${filter === "read"
+                    ? "bg-indigo-600 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
                 >
                   Read
                 </button>
@@ -252,8 +263,8 @@ export default function NotificationsPage() {
                     {filter === "unread"
                       ? "No unread notifications"
                       : filter === "read"
-                      ? "No read notifications"
-                      : "No notifications"}
+                        ? "No read notifications"
+                        : "No notifications"}
                   </p>
                   <p className="text-gray-400 text-xs mt-1">
                     Your notifications will appear here
@@ -265,11 +276,10 @@ export default function NotificationsPage() {
                     key={notification.id}
                     className={`border-l-4 p-3 rounded-lg shadow-sm hover:shadow transition ${getNotificationColor(
                       notification.notification_type
-                    )} ${
-                      !notification.is_read
-                        ? "border-l-indigo-600 bg-indigo-50/50"
-                        : "border-l-gray-300"
-                    }`}
+                    )} ${!notification.is_read
+                      ? "border-l-indigo-600 bg-indigo-50/50"
+                      : "border-l-gray-300"
+                      }`}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-start gap-3 flex-1">

@@ -20,6 +20,8 @@ import { API_CONFIG } from "@/utils/config";
 import { Button } from "@/components/ui/button";
 import Swal from "sweetalert2";
 
+import socket from "@/utils/socket";
+
 interface Notification {
   id: string;
   title: string;
@@ -58,8 +60,23 @@ export default function Header({
         queryParams: { limit: 5 },
       });
     },
-    refetchInterval: 10000,
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
   });
+
+  // Listen for real-time notifications to refetch header unread count
+  useEffect(() => {
+    const handleNotification = () => {
+      refetch();
+    };
+
+    socket.on("receive_notification", handleNotification);
+
+    return () => {
+      socket.off("receive_notification", handleNotification);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (data) {
@@ -273,11 +290,9 @@ export default function Header({
                     notifications.map((notification, idx) => (
                       <div
                         key={notification.id}
-                        className={`border-b border-gray-100 p-3 hover:bg-gray-50 transition-colors ${
-                          !notification.is_read ? "bg-indigo-50" : ""
-                        } ${
-                          idx === notifications.length - 1 ? "border-b-0" : ""
-                        }`}
+                        className={`border-b border-gray-100 p-3 hover:bg-gray-50 transition-colors ${!notification.is_read ? "bg-indigo-50" : ""
+                          } ${idx === notifications.length - 1 ? "border-b-0" : ""
+                          }`}
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1 min-w-0">

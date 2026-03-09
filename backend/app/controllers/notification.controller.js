@@ -2,44 +2,11 @@ const { Notification, User } = require("../models");
 const { asyncHandler } = require("../middleware/error.middleware");
 const logger = require("../config/logger");
 const socket = require("../../socket");
+const notificationService = require("../services/notification.service");
 
 // Create notification (internal function)
 const createNotification = async (data) => {
-  try {
-    const notification = await Notification.create({
-      for_user_id: data.for_user_id || null,
-      for_admin: data.for_admin || false,
-      notification_type: data.notification_type,
-      title: data.title,
-      message: data.message,
-      metadata: data.metadata || null,
-    });
-
-    // Send real-time notification via socket
-    if (data.for_user_id) {
-      socket.sendNotification(data.for_user_id, {
-        title: data.title,
-        message: data.message,
-        type: data.notification_type,
-        metadata: data.metadata,
-      });
-    }
-
-    if (data.for_admin) {
-      // Send to all connected admins (broadcast to admin room)
-      socket.sendAdminNotification({
-        title: data.title,
-        message: data.message,
-        type: data.notification_type,
-        metadata: data.metadata,
-      });
-    }
-
-    return notification;
-  } catch (error) {
-    logger.error("Error creating notification", { error: error.message });
-    throw error;
-  }
+  return await notificationService.create(data);
 };
 
 // Get notifications for current user or admin

@@ -1,5 +1,5 @@
 let io;
-let onlineUsers = {};
+let onlineUsers = {}; // userId -> Set of socket IDs
 let adminSockets = new Set(); // Track all connected admin sockets
 
 module.exports = {
@@ -13,9 +13,11 @@ module.exports = {
     });
 
     io.on("connection", (socket) => {
-
       socket.on("register", (userId, userType) => {
-        onlineUsers[userId] = socket.id;
+        if (!onlineUsers[userId]) {
+          onlineUsers[userId] = new Set();
+        }
+        onlineUsers[userId].add(socket.id);
 
         // If admin, add to admin sockets set
         if (userType === "admin") {
@@ -24,9 +26,12 @@ module.exports = {
       });
 
       socket.on("disconnect", () => {
-        for (let user in onlineUsers) {
-          if (onlineUsers[user] === socket.id) {
-            delete onlineUsers[user];
+        for (let userId in onlineUsers) {
+          if (onlineUsers[userId].has(socket.id)) {
+            onlineUsers[userId].delete(socket.id);
+            if (onlineUsers[userId].size === 0) {
+              delete onlineUsers[userId];
+            }
           }
         }
         adminSockets.delete(socket.id);
@@ -37,21 +42,17 @@ module.exports = {
   },
 
   sendNotification: (userId, data) => {
-
-    if (!io) {
+    if (!io || !onlineUsers[userId]) {
       return;
     }
 
-    const socketId = onlineUsers[userId];
-
-    if (socketId) {
+    // Send to all connected sockets for this user
+    onlineUsers[userId].forEach((socketId) => {
       io.to(socketId).emit("receive_notification", data);
-    } else {
-    }
+    });
   },
 
   sendAdminNotification: (data) => {
-
     if (!io) {
       return;
     }
@@ -60,5 +61,14 @@ module.exports = {
     adminSockets.forEach((socketId) => {
       io.to(socketId).emit("receive_notification", data);
     });
+  },
+
+  sendBroadcastNotification: (data) => {
+    if (!io) {
+      return;
+    }
+
+    // Send to all connected users
+    io.emit("receive_notification", data);
   },
 };

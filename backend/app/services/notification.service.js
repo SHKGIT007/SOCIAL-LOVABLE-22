@@ -1,12 +1,59 @@
-/**
- * Notification Service
- * Centralized service for creating all types of notifications
- */
-
 const { User, Notification } = require("../models");
 const logger = require("../config/logger");
+const socket = require("../../socket");
 
 const notificationService = {
+  /**
+   * Core Create Notification - Internal and External use
+   */
+  async create(data) {
+    try {
+      const notification = await Notification.create({
+        for_user_id: data.for_user_id || null,
+        for_admin: data.for_admin || false,
+        notification_type: data.notification_type,
+        title: data.title,
+        message: data.message,
+        metadata: data.metadata || null,
+      });
+
+      // Send real-time notification via socket
+      if (data.for_user_id) {
+        socket.sendNotification(data.for_user_id, {
+          title: data.title,
+          message: data.message,
+          type: data.notification_type,
+          metadata: data.metadata,
+        });
+      }
+
+      if (data.for_admin) {
+        // Send to all connected admins
+        socket.sendAdminNotification({
+          title: data.title,
+          message: data.message,
+          type: data.notification_type,
+          metadata: data.metadata,
+        });
+      }
+
+      if (data.for_all) {
+        // Send to all connected users
+        socket.sendBroadcastNotification({
+          title: data.title,
+          message: data.message,
+          type: data.notification_type,
+          metadata: data.metadata,
+        });
+      }
+
+      return notification;
+    } catch (error) {
+      logger.error("Error creating notification", { error: error.message });
+      throw error;
+    }
+  },
+
   // ========== ADMIN NOTIFICATIONS ==========
 
   /**
@@ -18,7 +65,7 @@ const notificationService = {
       const user = await User.findByPk(userId);
       const userName = `${user.user_fname} ${user.user_lname}`;
 
-      await Notification.create({
+      await this.create({
         for_admin: true,
         notification_type: "user_registered",
         title: "User Registered",
@@ -47,7 +94,7 @@ const notificationService = {
       const userName = `${user.user_fname} ${user.user_lname}`;
 
       // Admin notification
-      await Notification.create({
+      await this.create({
         for_admin: true,
         notification_type: "user_post_created",
         title: "User Post Created",
@@ -61,8 +108,8 @@ const notificationService = {
         },
       });
 
-      // User notification (optional - just confirmation)
-      await Notification.create({
+      // User notification
+      await this.create({
         for_user_id: userId,
         notification_type: "post_created",
         title: "Post Created",
@@ -85,7 +132,6 @@ const notificationService = {
   /**
    * User Post Published
    * Post Published: A new AI-Post was published by {UserName}.
-   * Post Published: A new Manual-Post was published by {UserName}.
    */
   async userPostPublished(userId, postId, postTitle, postType = "manual") {
     try {
@@ -93,7 +139,7 @@ const notificationService = {
       const userName = `${user.user_fname} ${user.user_lname}`;
 
       // Admin notification
-      await Notification.create({
+      await this.create({
         for_admin: true,
         notification_type: "user_post_published",
         title: "User Post Published",
@@ -108,7 +154,7 @@ const notificationService = {
       });
 
       // User notification
-      await Notification.create({
+      await this.create({
         for_user_id: userId,
         notification_type: "post_published",
         title: "Post Published",
@@ -130,7 +176,6 @@ const notificationService = {
 
   /**
    * User Scheduled AI-Post
-   * Scheduled Post: {UserName} scheduled a "Post Name" for {DateTime}.
    */
   async userScheduledPost(userId, postId, postTitle, scheduledTime, postType = "manual") {
     try {
@@ -139,7 +184,7 @@ const notificationService = {
       const dateTime = new Date(scheduledTime).toLocaleString();
 
       // Admin notification
-      await Notification.create({
+      await this.create({
         for_admin: true,
         notification_type: "user_scheduled_post",
         title: "User Scheduled Post",
@@ -155,7 +200,7 @@ const notificationService = {
       });
 
       // User notification
-      await Notification.create({
+      await this.create({
         for_user_id: userId,
         notification_type: "schedule_reminder",
         title: "Schedule Reminder",
@@ -178,8 +223,6 @@ const notificationService = {
 
   /**
    * Post Pending for Review
-   * Attention: AI-Post from "User Name" was pending for review.
-   * (Sent 1 hour before and 30 minutes before)
    */
   async postPendingReview(userId, postId, postTitle, postType = "manual") {
     try {
@@ -187,7 +230,7 @@ const notificationService = {
       const userName = `${user.user_fname} ${user.user_lname}`;
 
       // Admin notification
-      await Notification.create({
+      await this.create({
         for_admin: true,
         notification_type: "post_pending_review",
         title: "Post Pending for Review",
@@ -202,7 +245,7 @@ const notificationService = {
       });
 
       // User notification
-      await Notification.create({
+      await this.create({
         for_user_id: userId,
         notification_type: "review_mode_enabled",
         title: "Review Mode Enabled",
@@ -223,8 +266,7 @@ const notificationService = {
   },
 
   /**
-   * User Draft AI-Post
-   * Draft Post- {UserName} draft a AI-Post.
+   * User Draft Post
    */
   async userDraftPost(userId, postId, postTitle, postType = "manual") {
     try {
@@ -232,7 +274,7 @@ const notificationService = {
       const userName = `${user.user_fname} ${user.user_lname}`;
 
       // Admin notification
-      await Notification.create({
+      await this.create({
         for_admin: true,
         notification_type: "user_draft_post",
         title: "User Draft Post",
@@ -247,7 +289,7 @@ const notificationService = {
       });
 
       // User notification
-      await Notification.create({
+      await this.create({
         for_user_id: userId,
         notification_type: "draft_post",
         title: "Draft Post",
@@ -269,10 +311,6 @@ const notificationService = {
 
   /**
    * User Reached AI Limit
-   * Alert: {UserName} has reached 50% of their AI post limit.
-   * Alert: {UserName} has reached 75% of their AI post limit.
-   * Alert: {UserName} has reached 90% of their AI post limit.
-   * Alert: {UserName} has reached 100% of their AI post limit.
    */
   async userAILimitAlert(userId, limitPercentage, plan) {
     try {
@@ -280,7 +318,7 @@ const notificationService = {
       const userName = `${user.user_fname} ${user.user_lname}`;
 
       // Admin notification
-      await Notification.create({
+      await this.create({
         for_admin: true,
         notification_type: "user_reached_ai_limit",
         title: "User Reached AI Limit",
@@ -294,13 +332,12 @@ const notificationService = {
       });
 
       // User notification
-      await Notification.create({
+      await this.create({
         for_user_id: userId,
         notification_type: "ai_limit_low",
         title: "AI Limit Low",
-        message: `Notice: Your AI post limit has been reached ${limitPercentage}%. ${
-          limitPercentage === 100 ? "Please upgrade your plan." : "Please upgrade your plan to continue."
-        }`,
+        message: `Notice: Your AI post limit has been reached ${limitPercentage}%. ${limitPercentage === 100 ? "Please upgrade your plan." : "Please upgrade your plan to continue."
+          }`,
         metadata: {
           limit_percentage: limitPercentage,
           plan_name: plan?.name,
@@ -316,7 +353,7 @@ const notificationService = {
   },
 
   /**
-   * Plan Purchase (already in subscription controller, but can be used here too)
+   * Plan Purchase
    */
   async planPurchase(userId, planId, planName, amount = 0) {
     try {
@@ -324,7 +361,7 @@ const notificationService = {
       const userName = `${user.user_fname} ${user.user_lname}`;
 
       // User notification
-      await Notification.create({
+      await this.create({
         for_user_id: userId,
         notification_type: "plan_purchase_success",
         title: "Plan Purchase Success",
@@ -338,7 +375,7 @@ const notificationService = {
       });
 
       // Admin notification
-      await Notification.create({
+      await this.create({
         for_admin: true,
         notification_type: "plan_purchase",
         title: "New Plan Purchase",
@@ -361,12 +398,11 @@ const notificationService = {
   },
 
   /**
-   * Bulk draft post reminder
-   * Reminder: You still have X draft posts pending.
+   * Draft post reminder
    */
   async draftPostReminder(userId, draftCount) {
     try {
-      await Notification.create({
+      await this.create({
         for_user_id: userId,
         notification_type: "draft_post",
         title: "Draft Post",
@@ -380,6 +416,29 @@ const notificationService = {
         error: error.message,
         userId,
         draftCount,
+      });
+    }
+  },
+
+  /**
+   * New Plan Created - Broadcast to all users
+   */
+  async planCreated(planName, price) {
+    try {
+      await this.create({
+        for_all: true,
+        notification_type: "plan_created",
+        title: "New Plan Available",
+        message: `Excellent news! A new plan "${planName}" starting at tylko ₹${price} is now available. Upgrade now!`,
+        metadata: {
+          plan_name: planName,
+          price: price,
+        },
+      });
+    } catch (error) {
+      logger.error("Error creating planCreated notification", {
+        error: error.message,
+        planName,
       });
     }
   },
