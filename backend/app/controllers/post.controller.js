@@ -428,6 +428,51 @@ const updatePost = asyncHandler(async (req, res) => {
   if (tags) updateData.tags = tags;
   if (media_urls) updateData.media_urls = media_urls;
   if (review_status) updateData.review_status = review_status;
+  if (image_url) updateData.image_url = image_url;
+
+  // Handle file uploads during update
+  if (req.files) {
+    const cloudinarySetting = await SystemSetting.findOne({ where: { id: 1 } });
+    cloudinary.config({
+      cloud_name: cloudinarySetting?.cloudinary_cloud_name || "",
+      api_key: cloudinarySetting?.cloudinary_api_key || "",
+      api_secret: cloudinarySetting?.cloudinary_api_secret || "",
+    });
+
+    const user = await User.findByPk(userId);
+    const userFolder = user ? `user_${userId}_${user.user_name}` : `user_${userId}`;
+    const UPLOAD_DIR = process.env.UPLOAD_DIR || "/var/www/socialvibe/uploads";
+
+    if (req.files.image_file) {
+      const img = req.files.image_file;
+      let imgPath = img.tempFilePath || undefined;
+      if (!imgPath) {
+        imgPath = `${UPLOAD_DIR}/temp_${Date.now()}_${img.name}`;
+        await img.mv(imgPath);
+      }
+      const uploadRes = await cloudinary.uploader.upload(imgPath, {
+        resource_type: "image",
+        folder: `${userFolder}`,
+        transformation: [{ quality: "auto" }],
+      });
+      updateData.image_url = uploadRes.secure_url;
+    }
+
+    if (req.files.video_file) {
+      const vid = req.files.video_file;
+      let vidPath = vid.tempFilePath || undefined;
+      if (!vidPath) {
+        vidPath = `${UPLOAD_DIR}/temp_${Date.now()}_${vid.name}`;
+        await vid.mv(vidPath);
+      }
+      const uploadRes = await cloudinary.uploader.upload(vidPath, {
+        resource_type: "video",
+        folder: `${userFolder}`,
+        transformation: [{ quality: "auto" }],
+      });
+      updateData.video_url = uploadRes.secure_url;
+    }
+  }
 
   await Post.update(updateData, { where: { id } });
 

@@ -81,7 +81,7 @@ const Users = () => {
   useEffect(() => {
     const times = setTimeout(() => {
       setDebouncedSearch(search);
-    }, 1000);
+    }, 500);
     return () => clearTimeout(times);
   }, [search]);
 
@@ -411,10 +411,11 @@ const Users = () => {
                 </Button>
 
                 <Button
-                  className="bg-green-600 hover:bg-green-700 w-full sm:w-auto px-6"
+                  className="bg-emerald-600 hover:bg-emerald-700 w-full sm:w-auto px-6 flex items-center gap-2"
                   onClick={exportExcel}
+                  disabled={exportLoading}
                 >
-                  Export Excel
+                  {exportLoading ? "Exporting..." : "Export Excel"}
                 </Button>
 
                 <Button

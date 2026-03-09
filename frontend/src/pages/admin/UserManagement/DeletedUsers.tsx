@@ -8,7 +8,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Swal from "sweetalert2";
-import { X } from "lucide-react";
+import { X, Download } from "lucide-react";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 interface User {
   id: string;
@@ -26,13 +28,22 @@ const DeletedUsers = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [totalRows, setTotalRows] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [exportLoading, setExportLoading] = useState(false);
 
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
 
   const primaryGradient = "from-red-600 to-rose-500";
   const primaryGradientClass = `bg-gradient-to-r ${primaryGradient}`;
+
+  useEffect(() => {
+    const times = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 500);
+    return () => clearTimeout(times);
+  }, [search]);
 
   const fetchDeletedUsers = async () => {
     setLoading(true);
@@ -41,7 +52,7 @@ const DeletedUsers = () => {
         page,
         limit: perPage,
       };
-      if (search.trim()) params.search = search.trim();
+      if (debouncedSearch.trim()) params.search = debouncedSearch.trim();
 
       const data = await apiService.getDeletedUsers(params);
 
@@ -67,12 +78,64 @@ const DeletedUsers = () => {
     }
   };
 
+  const exportExcel = async () => {
+    try {
+      setExportLoading(true);
+      const params: any = {
+        page: 1,
+        limit: 100000,
+      };
+      if (debouncedSearch.trim()) params.search = debouncedSearch.trim();
+
+      const data = await apiService.getDeletedUsers(params);
+
+      if (!data.status || !data.data.users || data.data.users.length === 0) {
+        Swal.fire({
+          icon: "warning",
+          title: "No Data Found",
+          text: "There is no data to export.",
+          confirmButtonColor: "#6366f1",
+        });
+        return;
+      }
+
+      const excelData = data.data.users.map((u: User, index: number) => ({
+        "S.No": index + 1,
+        Username: u.user_name || "N/A",
+        "First Name": u.user_fname || "N/A",
+        "Last Name": u.user_lname || "N/A",
+        Email: u.email || "N/A",
+        Phone: u.user_phone || "N/A",
+        "Deleted At": u.deleted_at ? new Date(u.deleted_at).toLocaleString() : "-",
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(excelData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Deleted Users");
+
+      const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+      saveAs(
+        new Blob([buf]),
+        debouncedSearch ? "filtered-deleted-users.xlsx" : "all-deleted-users.xlsx"
+      );
+    } catch (error: any) {
+      Swal.fire({
+        icon: "error",
+        title: "Export Failed",
+        text: error.message || "Something went wrong while exporting.",
+        confirmButtonColor: "#6366f1",
+      });
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!isAuthenticated()) return navigate("/auth");
     if (!isAdmin()) return navigate("/dashboard");
 
     fetchDeletedUsers();
-  }, [page, perPage, search]);
+  }, [page, perPage, debouncedSearch]);
 
   const handleRefresh = () => {
     fetchDeletedUsers();
@@ -191,6 +254,21 @@ const DeletedUsers = () => {
                 disabled={loading}
               >
                 {loading ? "Refreshing..." : "Refresh"}
+              </Button>
+
+              <Button
+                className="bg-emerald-600 hover:bg-emerald-700 w-full sm:w-auto flex items-center gap-2"
+                onClick={exportExcel}
+                disabled={exportLoading}
+              >
+                {exportLoading ? (
+                  "Exporting..."
+                ) : (
+                  <>
+                    <Download className="h-4 w-4" />
+                    Export Excel
+                  </>
+                )}
               </Button>
             </div>
 

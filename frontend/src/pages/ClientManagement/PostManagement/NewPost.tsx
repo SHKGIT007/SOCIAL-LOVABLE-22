@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import Swal from "sweetalert2";
 import {
@@ -26,6 +27,8 @@ import {
   Sparkles,
   Image as ImageIcon,
   AlertCircle,
+  Facebook,
+  Instagram,
 } from "lucide-react";
 import { apiService } from "@/services/api";
 import { isAuthenticated } from "@/utils/auth";
@@ -148,11 +151,10 @@ const NewPost = () => {
             <p style="color: #dc2626; font-weight: 600; margin-bottom: 10px;">
               ${errorMessage}
             </p>
-            ${
-              errorMessage.includes("subscription")
-                ? '<p style="color: #6b7280; font-size: 14px;"></p>'
-                : ""
-            }
+            ${errorMessage.includes("subscription")
+            ? '<p style="color: #6b7280; font-size: 14px;"></p>'
+            : ""
+          }
           </div>
         `,
         confirmButtonColor: "#6366f1",
@@ -182,8 +184,8 @@ const NewPost = () => {
         text: !title
           ? "Please update your profile first to set a business name."
           : !content
-          ? "Please generate or enter content for your post."
-          : "Please select at least one platform.",
+            ? "Please generate or enter content for your post."
+            : "Please select at least one platform.",
         confirmButtonColor: "#6366f1",
       });
       return;
@@ -257,8 +259,8 @@ const NewPost = () => {
           status === "published"
             ? "Post published successfully!"
             : status === "scheduled"
-            ? "Post scheduled successfully!"
-            : "Post saved as draft!";
+              ? "Post scheduled successfully!"
+              : "Post saved as draft!";
 
         Swal.fire({
           icon: "success",
@@ -313,11 +315,10 @@ const NewPost = () => {
                 setMode(m as "ai" | "manual");
                 if (m === "manual") setContent("");
               }}
-              className={`flex-1 py-3 text-sm font-semibold rounded-xl transition-all ${
-                mode === m
-                  ? "bg-gradient-to-r from-indigo-600 to-cyan-500 text-white shadow-md"
-                  : "text-indigo-700 hover:bg-indigo-50"
-              }`}
+              className={`flex-1 py-3 text-sm font-semibold rounded-xl transition-all ${mode === m
+                ? "bg-gradient-to-r from-indigo-600 to-cyan-500 text-white shadow-md"
+                : "text-indigo-700 hover:bg-indigo-50"
+                }`}
             >
               {m === "ai" ? "🤖 AI Generate" : "✍️ Manual Create"}
             </button>
@@ -561,59 +562,98 @@ const NewPost = () => {
           </CardHeader>
           <CardContent className="space-y-6 mt-6">
             {/* Platforms */}
-            <div>
-              <Label className="text-gray-900 font-semibold mb-3 block">
-                Select Platforms *
-              </Label>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Label className="text-gray-900 font-bold text-lg flex items-center gap-2">
+                  <div className="w-1.5 h-6 bg-indigo-600 rounded-full" />
+                  Select Platforms
+                </Label>
+                {platforms.length > 0 && (
+                  <Badge variant="secondary" className="bg-indigo-50 text-indigo-700 border-indigo-200">
+                    {platforms.length} Selected
+                  </Badge>
+                )}
+              </div>
+
               {connectedAccounts.length === 0 ? (
-                <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                  <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-amber-900">
-                      No social accounts connected
-                    </p>
-                    <p className="text-sm text-amber-700 mt-1">
-                      Please connect your social media accounts first
-                    </p>
+                <div className="relative overflow-hidden p-6 bg-amber-50/50 border border-amber-200 rounded-2xl group transition-all hover:shadow-md">
+                  <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:scale-110 transition-transform">
+                    <AlertCircle className="h-24 w-24 text-amber-600 rotate-12" />
                   </div>
-                  <Button
-                    size="sm"
-                    onClick={() => navigate("/social-accounts")}
-                    className="bg-amber-600 hover:bg-amber-700"
-                  >
-                    Connect Accounts
-                  </Button>
+                  <div className="relative flex flex-col sm:flex-row items-center gap-4">
+                    <div className="p-3 bg-amber-100 rounded-xl">
+                      <AlertCircle className="h-6 w-6 text-amber-600" />
+                    </div>
+                    <div className="flex-1 text-center sm:text-left">
+                      <p className="text-lg font-bold text-amber-900">
+                        No social accounts connected
+                      </p>
+                      <p className="text-sm text-amber-700 mt-1 max-w-md">
+                        Your post needs a destination. Connect your Facebook or Instagram accounts to start sharing.
+                      </p>
+                    </div>
+                    <Button
+                      size="lg"
+                      onClick={() => navigate("/social-accounts")}
+                      className="bg-amber-600 hover:bg-amber-700 text-white font-bold shadow-lg shadow-amber-200/50 whitespace-nowrap"
+                    >
+                      Connect Now
+                    </Button>
+                  </div>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  {connectedAccounts.map((acc) => (
-                    <div
-                      key={acc.id}
-                      className={`flex items-center space-x-3 p-3 border-2 rounded-lg cursor-pointer transition-all ${
-                        platforms.includes(acc.platform)
-                          ? "border-indigo-500 bg-indigo-50"
-                          : "border-gray-200 hover:border-indigo-300"
-                      }`}
-                      onClick={() => handlePlatformToggle(acc.platform)}
-                    >
-                      <Checkbox
-                        checked={platforms.includes(acc.platform)}
-                        onCheckedChange={() =>
-                          handlePlatformToggle(acc.platform)
-                        }
-                      />
-                      <div className="flex-1">
-                        <label className="text-sm font-semibold text-gray-900 cursor-pointer">
-                          {acc.platform}
-                        </label>
-                        {acc.account_name && (
-                          <p className="text-xs text-gray-600">
-                            {acc.account_name}
-                          </p>
-                        )}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {connectedAccounts.map((acc) => {
+                    const isSelected = platforms.includes(acc.platform);
+                    const isFacebook = acc.platform.toLowerCase() === "facebook";
+                    const isInstagram = acc.platform.toLowerCase() === "instagram";
+
+                    return (
+                      <div
+                        key={acc.id}
+                        onClick={() => handlePlatformToggle(acc.platform)}
+                        className={`group relative flex flex-col p-4 border-2 rounded-2xl cursor-pointer transition-all duration-300 transform hover:-translate-y-1 ${isSelected
+                          ? isFacebook
+                            ? "border-blue-500 bg-blue-50/50 shadow-lg shadow-blue-100"
+                            : "border-pink-500 bg-pink-50/50 shadow-lg shadow-pink-100"
+                          : "border-gray-200 hover:border-indigo-300 hover:bg-gray-50 bg-white"
+                          }`}
+                      >
+                        <div className="flex items-start justify-between mb-3">
+                          <div className={`p-2.5 rounded-xl transition-colors ${isSelected
+                            ? isFacebook ? "bg-blue-600 text-white" : "bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600 text-white"
+                            : "bg-gray-100 text-gray-500 group-hover:bg-indigo-100 group-hover:text-indigo-600"
+                            }`}>
+                            {isFacebook ? <Facebook className="h-5 w-5" /> : <Instagram className="h-5 w-5" />}
+                          </div>
+
+                          <div className={`w-6 h-6 rounded-full flex items-center justify-center border-2 transition-all ${isSelected
+                            ? isFacebook ? "bg-blue-600 border-blue-600" : "bg-pink-600 border-pink-600"
+                            : "border-gray-300"
+                            }`}>
+                            {isSelected && <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
+                          </div>
+                        </div>
+
+                        <div className="space-y-1">
+                          <h3 className={`font-bold text-base transition-colors ${isSelected ? "text-gray-900" : "text-gray-700"}`}>
+                            {acc.platform}
+                          </h3>
+                          {acc.account_name && (
+                            <p className={`text-xs font-medium transition-colors ${isSelected ? "text-indigo-600" : "text-gray-500"}`}>
+                              @{acc.account_name}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Status Indicator */}
+                        <div className="mt-3 pt-3 border-t border-gray-100 flex items-center gap-1.5">
+                          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          <span className="text-[10px] uppercase tracking-wider font-bold text-gray-400">Connected</span>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -669,14 +709,12 @@ const NewPost = () => {
                   <button
                     type="button"
                     onClick={() => setAutoToggle(!autoToggle)}
-                    className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${
-                      autoToggle ? "bg-indigo-600" : "bg-gray-300"
-                    }`}
+                    className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${autoToggle ? "bg-indigo-600" : "bg-gray-300"
+                      }`}
                   >
                     <span
-                      className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-md ${
-                        autoToggle ? "translate-x-6" : "translate-x-1"
-                      }`}
+                      className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-md ${autoToggle ? "translate-x-6" : "translate-x-1"
+                        }`}
                     />
                   </button>
                 </div>
@@ -702,8 +740,8 @@ const NewPost = () => {
                 {status === "published"
                   ? "🚀 Publish Now"
                   : status === "scheduled"
-                  ? "📅 Schedule Post"
-                  : "💾 Save Draft"}
+                    ? "📅 Schedule Post"
+                    : "💾 Save Draft"}
               </Button>
             </div>
           </CardContent>

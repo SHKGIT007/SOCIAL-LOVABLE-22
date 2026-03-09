@@ -43,7 +43,7 @@ const Plans = () => {
   useEffect(() => {
     const times = setTimeout(() => {
       setDebouncedSearch(search);
-    }, 1000);
+    }, 500);
     return () => clearTimeout(times);
   }, [search]);
 
@@ -176,8 +176,13 @@ const Plans = () => {
         search: debouncedSearch,
       });
 
-      if (!res.status || !res.data.plans.length) {
-        Swal.fire("No Data", "Export ke liye data nahi hai", "warning");
+      if (!res.status || !res.data.plans || res.data.plans.length === 0) {
+        Swal.fire({
+          icon: "warning",
+          title: "No Data Found",
+          text: "There is no data to export.",
+          confirmButtonColor: "#6366f1",
+        });
         return;
       }
 

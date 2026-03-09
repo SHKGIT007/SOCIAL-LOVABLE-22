@@ -38,7 +38,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Save, Image as ImageIcon } from "lucide-react";
 import Swal from "sweetalert2";
 import {
   Select,
@@ -92,6 +92,7 @@ interface FormData {
   scheduled_at: string;
   category: string;
   tags: string;
+  is_ai_generated: boolean;
   image_prompt: string | null;
   image_url: string | null;
 }
@@ -110,9 +111,12 @@ const EditPost = () => {
     scheduled_at: "",
     category: "",
     tags: "",
+    is_ai_generated: false,
     image_prompt: "",
     image_url: "",
   });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState("");
   const [connectedAccounts, setConnectedAccounts] = useState<any[]>([]);
 
   useEffect(() => {
@@ -176,9 +180,11 @@ const EditPost = () => {
           : "",
         category: dataPost.category || "",
         tags: normalizedTags.join(", "),
+        is_ai_generated: dataPost.is_ai_generated,
         image_prompt: dataPost.image_prompt || null,
         image_url: dataPost.image_url || null,
       });
+      setImagePreview(dataPost.image_url || "");
       // Set autoToggle based on review_status
       if (dataPost.status === "scheduled") {
         setAutoToggle(dataPost.review_status === "pending");
@@ -227,18 +233,34 @@ const EditPost = () => {
       if (formData.status === "scheduled")
         reviewStatus = autoToggle ? "pending" : "approved";
 
-      const updateData = {
-        title: formData.title,
-        content: formData.content,
-        platforms: formData.platforms,
-        status: formData.status,
-        scheduled_at: formData.scheduled_at || null,
-        image_prompt: formData.image_prompt || null,
-        image_url: formData.image_url,
-        review_status: reviewStatus,
-      };
+      let res;
+      if (imageFile) {
+        // Use FormData for file upload
+        const multipartData = new FormData();
+        multipartData.append("title", formData.title);
+        multipartData.append("content", formData.content);
+        multipartData.append("platforms", JSON.stringify(formData.platforms));
+        multipartData.append("status", formData.status);
+        if (formData.scheduled_at) multipartData.append("scheduled_at", formData.scheduled_at);
+        if (formData.image_prompt) multipartData.append("image_prompt", formData.image_prompt);
+        if (formData.image_url) multipartData.append("image_url", formData.image_url);
+        multipartData.append("review_status", reviewStatus);
+        multipartData.append("image_file", imageFile);
 
-      const res = await apiService.updatePost(id, updateData);
+        res = await apiService.updatePost(id, multipartData, true);
+      } else {
+        const updateData = {
+          title: formData.title,
+          content: formData.content,
+          platforms: formData.platforms,
+          status: formData.status,
+          scheduled_at: formData.scheduled_at || null,
+          image_prompt: formData.image_prompt || null,
+          image_url: formData.image_url,
+          review_status: reviewStatus,
+        };
+        res = await apiService.updatePost(id, updateData);
+      }
 
       // ✅ IMPORTANT: Validate API response
       if (!res.status) {
@@ -356,10 +378,10 @@ const EditPost = () => {
                   className="min-h-[200px] border-gray-300 focus-visible:ring-indigo-500"
                   required
                 />
-                {formData.image_url && (
-                  <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
+                {imagePreview && (
+                  <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm relative group">
                     <img
-                      src={formData.image_url}
+                      src={imagePreview}
                       alt="Post Image"
                       className="w-auto max-h-72 object-contain "
                       onError={(e) => {
@@ -367,9 +389,41 @@ const EditPost = () => {
                         e.currentTarget.src = "/no-image.png";
                       }}
                     />
+                    {formData.image_url && imagePreview !== formData.image_url && (
+                      <div className="absolute top-2 right-2 px-2 py-1 bg-indigo-600 text-white text-[10px] rounded font-bold">New Image</div>
+                    )}
                   </div>
                 )}
               </div>
+
+              {/* Image Upload for Manual Posts */}
+              {!formData.is_ai_generated && (
+                <div className="space-y-3 p-4 bg-indigo-50/50 border border-indigo-100 rounded-2xl">
+                  <Label className="flex items-center gap-2">
+                    <ImageIcon className="h-4 w-4 text-indigo-600" />
+                    Upload New Image
+                  </Label>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      setImageFile(file || null);
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (ev) => setImagePreview(ev.target?.result as string);
+                        reader.readAsDataURL(file);
+                      } else {
+                        setImagePreview(formData.image_url || "");
+                      }
+                    }}
+                    className="cursor-pointer bg-white"
+                  />
+                  <p className="text-[10px] text-gray-500 font-medium italic">
+                    Tip: Changing the image will overwrite the previous one once you save.
+                  </p>
+                </div>
+              )}
 
               {/* Platforms */}
               <div className="space-y-2">
@@ -386,11 +440,10 @@ const EditPost = () => {
                         <label
                           key={acc.id}
                           htmlFor={`pf-${acc.platform}`}
-                          className={`flex items-center gap-2 rounded-xl border p-3 cursor-pointer transition ${
-                            checked
-                              ? "border-indigo-300 bg-indigo-50"
-                              : "border-gray-200 hover:bg-gray-50"
-                          }`}
+                          className={`flex items-center gap-2 rounded-xl border p-3 cursor-pointer transition ${checked
+                            ? "border-indigo-300 bg-indigo-50"
+                            : "border-gray-200 hover:bg-gray-50"
+                            }`}
                         >
                           <Checkbox
                             id={`pf-${acc.platform}`}
@@ -462,11 +515,10 @@ const EditPost = () => {
                 )}
 
                 <div
-                  className={`space-y-2 ${
-                    formData.status === "scheduled"
-                      ? "md:col-span-8"
-                      : "md:col-span-12"
-                  }`}
+                  className={`space-y-2 ${formData.status === "scheduled"
+                    ? "md:col-span-8"
+                    : "md:col-span-12"
+                    }`}
                 >
                   <Label htmlFor="image_prompt">Image Title / Prompt</Label>
                   <Input
@@ -477,7 +529,7 @@ const EditPost = () => {
                     }
                     placeholder="Optional prompt or title for image"
                     className="border-gray-300 focus-visible:ring-indigo-500"
-                    disabled
+                    disabled={formData.is_ai_generated}
                   />
                 </div>
               </div>
@@ -493,14 +545,12 @@ const EditPost = () => {
                   <button
                     type="button"
                     onClick={() => setAutoToggle(!autoToggle)}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                      autoToggle ? "bg-indigo-600" : "bg-gray-300"
-                    }`}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${autoToggle ? "bg-indigo-600" : "bg-gray-300"
+                      }`}
                   >
                     <span
-                      className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${
-                        autoToggle ? "translate-x-5" : "translate-x-1"
-                      }`}
+                      className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${autoToggle ? "translate-x-5" : "translate-x-1"
+                        }`}
                     />
                   </button>
                 </div>
@@ -517,7 +567,7 @@ const EditPost = () => {
                   }
                   placeholder="https://..."
                   className="border-gray-300 focus-visible:ring-indigo-500"
-                  disabled
+                  disabled={formData.is_ai_generated}
                 />
               </div>
 

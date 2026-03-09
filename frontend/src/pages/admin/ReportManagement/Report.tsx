@@ -34,6 +34,7 @@ const Report = () => {
   const [users, setUsers] = useState<UserData[]>([]);
   const [totalRows, setTotalRows] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [exportLoading, setExportLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
   const [search, setSearch] = useState("");
@@ -45,7 +46,7 @@ const Report = () => {
   useEffect(() => {
     const times = setTimeout(() => {
       setDebouncedSearch(search)
-    }, 1000)
+    }, 500)
     return () => clearTimeout(times)
   }, [search])
 
@@ -96,23 +97,51 @@ const Report = () => {
   }, [page, perPage, debouncedSearch]);
 
   /* -------------------- Excel Export -------------------- */
-  const exportExcel = () => {
-    const excelData = users.map((u, index) => ({
-      "S.No": index + 1,
-      Name: u.user_name || "N/A",
-      Email: u.email,
-      Phone: u.user_phone || "N/A",
-      "Plan Name": u.subscription?.plan?.name || "N/A",
-      "Plan Status": u.subscription?.status || "N/A",
-      "AI Used": u.subscription?.ai_posts_used ?? "N/A",
-      "AI Total": u.subscription?.plan_ai_posts ?? "N/A",
-    }));
+  const exportExcel = async () => {
+    try {
+      setExportLoading(true);
+      const data = await apiService.getAllUsers({
+        page: 1,
+        limit: 1000000,
+        search: debouncedSearch,
+      });
 
-    const ws = XLSX.utils.json_to_sheet(excelData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Report");
-    const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    saveAs(new Blob([buf]), "user-report.xlsx");
+      if (!data.status || !data.data.users || data.data.users.length === 0) {
+        Swal.fire({
+          icon: "warning",
+          title: "No Data Found",
+          text: "There is no data to export.",
+          confirmButtonColor: "#6366f1",
+        });
+        return;
+      }
+
+      const excelData = data.data.users.map((u: UserData, index: number) => ({
+        "S.No": index + 1,
+        Name: u.user_name || "N/A",
+        Email: u.email,
+        Phone: u.user_phone || "N/A",
+        "Plan Name": u.subscription?.plan?.name || "N/A",
+        "Plan Status": u.subscription?.status || "N/A",
+        "AI Used": u.subscription?.ai_posts_used ?? "N/A",
+        "AI Total": u.subscription?.plan_ai_posts ?? "N/A",
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(excelData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Report");
+      const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+      saveAs(new Blob([buf]), "user-report.xlsx");
+    } catch (error: any) {
+      Swal.fire({
+        icon: "error",
+        title: "Export Failed",
+        text: error.message || "Something went wrong while exporting.",
+        confirmButtonColor: "#6366f1",
+      });
+    } finally {
+      setExportLoading(false);
+    }
   };
 
   /* -------------------- DataTable Columns -------------------- */
@@ -258,12 +287,13 @@ const Report = () => {
                 >
                   {loading ? "Refreshing..." : "Refresh"}
                 </Button>
-
                 <Button
-                  className="bg-green-600 hover:bg-green-700 w-full sm:w-auto px-6"
+                  variant="outline"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white border-none flex items-center gap-2"
                   onClick={exportExcel}
+                  disabled={exportLoading}
                 >
-                  Export Excel
+                  {exportLoading ? "Exporting..." : "Export Excel"}
                 </Button>
               </div>
             </div>

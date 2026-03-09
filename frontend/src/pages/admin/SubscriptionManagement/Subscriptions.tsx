@@ -39,6 +39,7 @@ const Subscriptions = () => {
   const [subscriptions, setSubscriptions] = useState<SubscriptionData[]>([]);
   const [totalRows, setTotalRows] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [exportLoading, setExportLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
   const [search, setSearch] = useState("");
@@ -51,7 +52,7 @@ const Subscriptions = () => {
   useEffect(() => {
     const times = setTimeout(() => {
       setDebouncedSearch(search);
-    }, 1000);
+    }, 500);
     return () => clearTimeout(times);
   }, [search]);
 
@@ -103,24 +104,52 @@ const Subscriptions = () => {
   }, [page, perPage, debouncedSearch]);
 
   // Export to Excel
-  const exportExcel = () => {
-    const excelData = subscriptions.map((s, index) => ({
-      "S.No": index + 1,
-      User: s.User?.user_name || "N/A",
-      Email: s.User?.email || "N/A",
-      Plan: s.Plan?.name || "N/A",
-      Price: s.Plan?.price || 0,
-      "AI Posts Used": `${s.ai_posts_used}/${s.Plan?.ai_posts}`,
-      "Linked Accounts": s.Plan?.linked_accounts || 0,
-      Status: s.payment_status,
-      "Start Date": new Date(s.start_date).toLocaleDateString(),
-    }));
+  const exportExcel = async () => {
+    try {
+      setExportLoading(true);
+      const data = await apiService.getAllSubscriptions({
+        page: 1,
+        limit: 1000000,
+        search: debouncedSearch,
+      });
 
-    const ws = XLSX.utils.json_to_sheet(excelData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Subscriptions");
-    const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    saveAs(new Blob([buf]), "subscriptions.xlsx");
+      if (!data.status || !data.data.subscriptions || data.data.subscriptions.length === 0) {
+        Swal.fire({
+          icon: "warning",
+          title: "No Data Found",
+          text: "There is no data to export.",
+          confirmButtonColor: "#6366f1",
+        });
+        return;
+      }
+
+      const excelData = data.data.subscriptions.map((s: SubscriptionData, index: number) => ({
+        "S.No": index + 1,
+        User: s.User?.user_name || "N/A",
+        Email: s.User?.email || "N/A",
+        Plan: s.Plan?.name || "N/A",
+        Price: s.Plan?.price || 0,
+        "AI Posts Used": `${s.ai_posts_used}/${s.Plan?.ai_posts}`,
+        "Linked Accounts": s.Plan?.linked_accounts || 0,
+        Status: s.payment_status,
+        "Start Date": new Date(s.start_date).toLocaleDateString(),
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(excelData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Subscriptions");
+      const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+      saveAs(new Blob([buf]), "subscriptions.xlsx");
+    } catch (error: any) {
+      Swal.fire({
+        icon: "error",
+        title: "Export Failed",
+        text: error.message || "Something went wrong while exporting.",
+        confirmButtonColor: "#6366f1",
+      });
+    } finally {
+      setExportLoading(false);
+    }
   };
 
   // Columns for DataTable
@@ -269,12 +298,13 @@ const Subscriptions = () => {
                 >
                   {loading ? "Refreshing..." : "Refresh"}
                 </Button>
-
                 <Button
-                  className="bg-green-600 hover:bg-green-700 w-full sm:w-auto px-6"
+                  variant="outline"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white border-none flex items-center gap-2"
                   onClick={exportExcel}
+                  disabled={exportLoading}
                 >
-                  Export Excel
+                  {exportLoading ? "Exporting..." : "Export Excel"}
                 </Button>
               </div>
             </div>

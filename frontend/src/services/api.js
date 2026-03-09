@@ -327,11 +327,38 @@ class ApiService {
     return this.request(`${API_CONFIG.ENDPOINTS.POSTS.GET_BY_ID}/${id}`);
   }
 
-  async updatePost(id, postData) {
-    return this.request(`${API_CONFIG.ENDPOINTS.POSTS.UPDATE}/${id}`, {
-      method: "PUT",
-      body: postData,
-    });
+  async updatePost(id, postData, isMultipart = false) {
+    if (isMultipart) {
+      const token = getAuthToken();
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      let url = `${API_CONFIG.ENDPOINTS.POSTS.UPDATE}/${id}`;
+      if (!/^https?:\/\//.test(url)) {
+        url = API_CONFIG.BASE_URL + url;
+      }
+      const response = await fetch(url, {
+        method: "PUT", // Use PUT as per original implementation
+        headers,
+        body: postData,
+      });
+      const data = await response.json();
+      if (response.status === 401) {
+        logout();
+        throw new Error("Authentication failed");
+      }
+      if (!response.ok) {
+        return {
+          status: false,
+          message: data.message || "API request failed",
+          ...data,
+        };
+      }
+      return data;
+    } else {
+      return this.request(`${API_CONFIG.ENDPOINTS.POSTS.UPDATE}/${id}`, {
+        method: "PUT",
+        body: postData,
+      });
+    }
   }
 
   async deletePost(id) {

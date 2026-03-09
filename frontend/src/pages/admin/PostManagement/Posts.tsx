@@ -51,7 +51,7 @@ const AdminPosts = () => {
   useEffect(() => {
     const times = setTimeout(() => {
       setDebouncedSearch(search);
-    }, 1000);
+    }, 500);
     return () => clearTimeout(times);
   }, [search]);
 
@@ -67,7 +67,7 @@ const AdminPosts = () => {
         limit: perPage,
       };
 
-      if (search.trim()) params.search = search.trim();
+      if (debouncedSearch.trim()) params.search = debouncedSearch.trim();
       if (statusFilter !== "all") params.status = statusFilter;
 
       const data = await apiService.getAllPosts(params);

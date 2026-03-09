@@ -60,11 +60,13 @@ const UserPostsReport = () => {
 
   const [loading, setLoading] = useState(false);
   const [totalRows, setTotalRows] = useState(0);
+  const [exportLoading, setExportLoading] = useState(false);
 
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
 
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
   const [year, setYear] = useState("all");
   const [month, setMonth] = useState("all");
   const [date, setDate] = useState("");
@@ -72,8 +74,15 @@ const UserPostsReport = () => {
   const primaryGradientClass = "bg-gradient-to-r from-indigo-600 to-cyan-500";
 
   useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 500);
+    return () => clearTimeout(timeoutId);
+  }, [search]);
+
+  useEffect(() => {
     fetchUserPosts();
-  }, [page, perPage, search, year, month, date]);
+  }, [page, perPage, debouncedSearch, year, month, date]);
 
   const handleRefresh = () => {
     fetchUserPosts();
@@ -87,7 +96,7 @@ const UserPostsReport = () => {
         limit: perPage,
       };
 
-      if (search) params.search = search;
+      if (debouncedSearch) params.search = debouncedSearch;
       if (year !== "all") params.year = year;
       if (month !== "all") params.month = month;
       if (date) params.date = date;
@@ -122,16 +131,25 @@ const UserPostsReport = () => {
 
   const exportExcel = async () => {
     try {
+      setExportLoading(true);
       const response = await apiService.getUserPostHistory(userId, {
         page: 1,
         limit: 10000,
-        search,
+        search: debouncedSearch,
         year: year !== "all" ? year : undefined,
         month: month !== "all" ? month : undefined,
         date: date || undefined,
       });
 
-      if (!response.status) return;
+      if (!response.status || !response.data.posts || response.data.posts.length === 0) {
+        Swal.fire({
+          icon: "warning",
+          title: "No Data Found",
+          text: "There is no data to export.",
+          confirmButtonColor: "#6366f1",
+        });
+        return;
+      }
 
       const data = response.data.posts.map((p: Post, i: number) => ({
         "S.No": i + 1,
@@ -152,6 +170,8 @@ const UserPostsReport = () => {
       saveAs(new Blob([buf]), `${user?.user_name || "user"}-posts-report.xlsx`);
     } catch {
       Swal.fire("Error", "Export failed", "error");
+    } finally {
+      setExportLoading(false);
     }
   };
 
@@ -403,12 +423,13 @@ const UserPostsReport = () => {
                     Reset
                   </Button>
                 </div>
-
                 <Button
-                  className="bg-green-600 hover:bg-green-700 w-full sm:w-auto px-6"
+                  variant="outline"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white border-none flex items-center gap-2"
                   onClick={exportExcel}
+                  disabled={exportLoading}
                 >
-                  Export Excel
+                  {exportLoading ? "Exporting..." : "Export Excel"}
                 </Button>
               </div>
             </div>
