@@ -98,7 +98,6 @@ exports.getSchedules = async (req, res) => {
       };
     });
 
-    console.log("Parsed Schedules:", parsedSchedules);
     res.json({ success: true, schedules: parsedSchedules });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });

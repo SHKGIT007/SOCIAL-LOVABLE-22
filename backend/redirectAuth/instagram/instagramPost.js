@@ -12,18 +12,15 @@ async function instagramPost(accessToken, content, imageUrl, videoUrl) {
     // Basic video validation
    
     if (videoUrl && typeof videoUrl === 'string' && videoUrl.trim() !== '') {
-      console.log("Adding videoUrl to mediaPayload:", videoUrl);
       mediaPayload.video_url = videoUrl;
     }
     if (imageUrl && typeof imageUrl === 'string' && imageUrl.trim() !== '') {
-      console.log("Adding imageUrl to mediaPayload:", imageUrl);
       mediaPayload.image_url = imageUrl;
     }
     let mediaRes;
     try {
       mediaRes = await axios.post('https://graph.instagram.com/me/media', mediaPayload);
     } catch (err) {
-      console.error('Instagram media creation error:', err.response?.data || err.message);
       throw new Error('Instagram media creation failed: ' + (err.response?.data?.error?.message || err.message));
     }
     const creationId = mediaRes.data.id;
@@ -35,7 +32,6 @@ async function instagramPost(accessToken, content, imageUrl, videoUrl) {
       await new Promise(res => setTimeout(res, 1000)); // wait 1s
       const statusRes = await axios.get(`https://graph.instagram.com/${creationId}?fields=status_code&access_token=${accessToken}`);
       status = statusRes.data.status_code;
-      console.log(`Instagram media status: ${status}`);
       pollCount++;
     }
     if (status !== 'FINISHED') {
@@ -49,7 +45,6 @@ async function instagramPost(accessToken, content, imageUrl, videoUrl) {
     });
     return publishRes.data;
   } catch (error) {
-    console.error('Instagram post error:', error.response?.data || error.message);
     throw new Error(error.response?.data?.error?.message || error.message);
   }
 }

@@ -2,12 +2,10 @@ const { Role } = require('../app/models');
 
 const seedRoles = async () => {
     try {
-        console.log('Starting role seeding...');
 
         // Check if roles already exist
         const existingRoles = await Role.count();
         if (existingRoles > 0) {
-            console.log('Roles already exist, skipping seeding');
             return;
         }
 
@@ -40,9 +38,7 @@ const seedRoles = async () => {
         ];
 
         await Role.bulkCreate(roles);
-        console.log('Roles seeded successfully');
     } catch (error) {
-        console.error('Error seeding roles:', error);
         throw error;
     }
 };

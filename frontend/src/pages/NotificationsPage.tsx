@@ -53,7 +53,6 @@ export default function NotificationsPage() {
         );
         setUnreadCount(response.data?.unreadCount || 0);
       } catch (error) {
-        console.error("Error fetching unread count", error);
       }
     };
 
@@ -77,7 +76,6 @@ export default function NotificationsPage() {
       );
       refetch();
     } catch (error) {
-      console.error("Error marking as read", error);
       Swal.fire("Error", "Failed to mark notification as read", "error");
     }
   };
@@ -93,7 +91,6 @@ export default function NotificationsPage() {
       refetch();
       Swal.fire("Success", "All notifications marked as read", "success");
     } catch (error) {
-      console.error("Error marking all as read", error);
       Swal.fire("Error", "Failed to mark notifications as read", "error");
     }
   };

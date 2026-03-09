@@ -154,7 +154,7 @@ async function processSchedule(scheduleId) {
     }
   }
 
-  // console.log("Parsed parsedSchedule.times:", parsedSchedule.times);
+  
 
   const isDue = await matchesSchedule(parsedSchedule, now);
   if (!isDue) return;
@@ -248,7 +248,7 @@ async function processSchedule(scheduleId) {
 (async () => {
   try {
     const scheduleId = workerData.scheduleId;
-    //console.log("scheduleId",scheduleId)
+    
     await processSchedule(scheduleId);
     parentPort.postMessage({ status: 'done', scheduleId });
     process.exit(0);

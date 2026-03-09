@@ -132,10 +132,8 @@ const UserAnalytics = () => {
       if (response.status) {
         setPostData(response.data.post);
       } else {
-        console.error("Failed to fetch post");
       }
     } catch (error) {
-      console.error("Error fetching post:", error);
     }
   };
 
@@ -149,7 +147,6 @@ const UserAnalytics = () => {
         setDashboardStats(res.data);
       }
     } catch (err) {
-      console.error("Failed to load dashboard stats");
     }
   };
 

@@ -59,7 +59,6 @@ const Posts = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const filter = location.state?.filter;
-  console.log("Admin filter", filter);
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [deletePostId, setDeletePostId] = useState<number | null>(null);
@@ -292,7 +291,6 @@ const Posts = () => {
     );
   }
 
-  console.log("post", posts);
 
   return (
     <DashboardLayout userRole="client">

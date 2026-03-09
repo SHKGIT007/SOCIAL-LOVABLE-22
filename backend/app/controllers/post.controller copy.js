@@ -18,10 +18,6 @@ const cloudinary = require('cloudinary').v2;
 
 const createPost = asyncHandler(async (req, res) => {
     // Debug: Log incoming form data and files
-    console.log("req.body:", req.body);
-    console.log("req.files:", req.files);
-    console.log("platforms:", req.body.platforms);
-    console.log("platforms:",typeof req.body.platforms);
 
 
     // Support for file uploads (image/video)
@@ -155,7 +151,6 @@ const createPost = asyncHandler(async (req, res) => {
     if (status === 'published' && Array.isArray(platforms)) {
 
 
-        console.log("Publishing to platformsLLLLLLLLLLLLLLLLLLL:", platforms);
         let publishResults = {};
         // Facebook
         if (platforms.includes('Facebook')) {
@@ -180,7 +175,6 @@ const createPost = asyncHandler(async (req, res) => {
         // Instagram
         if (platforms.includes('Instagram')) {
 
-            console.log("Publishing to Instagram INSIDEEEEE");
             const igAccount = await SocialAccount.findOne({
                 where: { user_id: userId, platform: 'Instagram', is_active: 1 }
             });
@@ -253,7 +247,6 @@ const getAllPosts = asyncHandler(async (req, res) => {
         order: [['created_at', 'DESC']]
     });
 
-    console.log("post",posts)
 
     res.json({
         status: true,
@@ -483,7 +476,6 @@ async function generateAIContent(prompt, options = {}) {
             maxTokens = 1024
         } = options;
 
-        console.log('🚀 Groq AI se request bhej rahe hain...\n');
 
         // Fetch Groq API key and URL from DB
         const groqConfig = await getGroqConfig();
@@ -516,21 +508,13 @@ async function generateAIContent(prompt, options = {}) {
         const content = response.data.choices[0].message.content;
         const usage = response.data.usage;
 
-        console.log('✅ Response mil gaya!\n');
-        console.log('📊 Token Usage:', {
-            prompt: usage.prompt_tokens,
-            completion: usage.completion_tokens,
-            total: usage.total_tokens
-        });
 
       return {status:true,content: content};
 
     } catch (error) {
         if (error.response) {
-            console.log('❌ API Error:', error.response.data);
             return {status:false,msg:error.response.data};
         } else {
-            console.log('❌ Error:', error.message);
             return {status:false,msg:error.message};
         }
         throw error;
@@ -565,12 +549,9 @@ async function chatWithAI(messages) {
             }
     );
 
-    console.log('✅ Chat response mil gaya!\n');
-    console.log('Response:', response.data);
 
     return response.data.choices[0].message.content;
   } catch (error) {
-    console.error('Chat Error:', error.response?.data || error.message);
     throw error;
   }
 }
@@ -579,8 +560,6 @@ async function chatWithAI(messages) {
 async function generateImagePollinations(prompt, retries = 3) {
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
-      console.log(`🎨 Image generating... (Attempt ${attempt}/${retries})`);
-      console.log('Prompt:', prompt);
       
     // Replace spaces with underscores for better Pollinations API compatibility
     const cleanPrompt = prompt.trim().replace(/\s+/g, '_');
@@ -593,7 +572,6 @@ async function generateImagePollinations(prompt, retries = 3) {
       ];
       
       const imageUrl = urls[attempt - 1] || urls[0];
-      console.log('Requesting URL:', imageUrl);
       
       const response = await axios.get(imageUrl, { 
         responseType: 'arraybuffer',
@@ -612,7 +590,6 @@ async function generateImagePollinations(prompt, retries = 3) {
      // fs.writeFileSync(filename, response.data);
       
       const sizeKB = (response.data.length / 1024).toFixed(2);
-      console.log(`✅ Image saved: ${filename} (${sizeKB} KB)`);
       
       return { 
         url: imageUrl, 
@@ -622,15 +599,12 @@ async function generateImagePollinations(prompt, retries = 3) {
       };
       
     } catch (error) {
-      console.error(`❌ Attempt ${attempt} failed:`, error.message);
       
       if (attempt === retries) {
-        console.error('All attempts failed. Using fallback...');
         return await generateImageFallback(prompt);
       }
       
       const waitTime = attempt * 2000;
-      console.log(`⏳ Waiting ${waitTime/1000}s before retry...`);
       await new Promise(resolve => setTimeout(resolve, waitTime));
     }
   }
@@ -639,7 +613,6 @@ async function generateImagePollinations(prompt, retries = 3) {
 // ⚠️ YE FUNCTION ADD KARNA PADEGA (missing hai)
 async function generateImageFallback(prompt) {
   try {
-    console.log('🔄 Using fallback API...');
     
     // Option 1: Picsum (random image based on seed)
     const seed = prompt.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
@@ -653,8 +626,6 @@ async function generateImageFallback(prompt) {
     const filename = `fallback_${Date.now()}.jpg`;
    // fs.writeFileSync(filename, response.data);
     
-    console.log(`✅ Fallback image saved: ${filename}`);
-    console.log('⚠️ Note: Stock photo (not AI-generated)');
     
     return {
       url: imageUrl,
@@ -663,7 +634,6 @@ async function generateImageFallback(prompt) {
       isFallback: true
     };
   } catch (error) {
-    console.error('❌ Fallback failed:', error.message);
     throw new Error('All image generation methods failed');
   }
 }

@@ -71,7 +71,6 @@ const getLocalUserId = () => {
     const parsed = JSON.parse(raw);
     return parsed?.user?.id ?? null;
   } catch (err) {
-    console.error("Error parsing auth:", err);
     return null;
   }
 };

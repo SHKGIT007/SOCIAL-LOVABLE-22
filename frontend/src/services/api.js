@@ -136,7 +136,6 @@ class ApiService {
     try {
       const response = await fetch(url, config);
       const data = await response.json();
-      console.log("API Response:", data);
 
       // Handle authentication errors
       // FIXED: Only logout if it's an authenticated request AND not login/register
@@ -157,7 +156,6 @@ class ApiService {
 
       return data;
     } catch (error) {
-      console.error("API request error:", error);
 
       // If it's a network error, return a structured response
       if (error.message === "Failed to fetch" || error.name === "TypeError") {

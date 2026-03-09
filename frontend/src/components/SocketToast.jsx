@@ -7,7 +7,6 @@ export default function SocketToast() {
   const listenerRef = useRef(null);
 
   useEffect(() => {
-    console.log("🔔 SocketToast mounted, listening for notifications");
 
     // Remove previous listener if it exists to prevent duplicates
     if (listenerRef.current) {
@@ -16,7 +15,6 @@ export default function SocketToast() {
 
     // Create new listener function
     const handleNotification = (data) => {
-      console.log("📨 Notification received:", data);
       toast.success(data.message, {
         position: "top-right",
         autoClose: 5000,

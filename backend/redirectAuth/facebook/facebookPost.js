@@ -21,13 +21,13 @@
 //           }
 //         );
     
-//     console.log("✅ Posted Successfully:", responsePost.data);
+
 
 //     return responsePost.data;
 
    
 //   } catch (error) {
-//     console.error("❌ Error fetching page token:", error.response?.data || error.message);
+
 //    return res.status(500).send("Error fetching page token");
 //   }
 
@@ -85,13 +85,8 @@ async function facebookPost(userAccessToken, content, imageUrl = "", videoUrl = 
       );
     }
 
-    console.log("✅ Posted Successfully:", responsePost.data);
     return responsePost.data;
   } catch (error) {
-    console.error(
-      "❌ Error posting to Facebook:",
-      error.response?.data || error.message
-    );
     throw new Error("Facebook post failed");
   }
 }

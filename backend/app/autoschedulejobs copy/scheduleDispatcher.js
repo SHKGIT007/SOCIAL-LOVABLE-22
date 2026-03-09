@@ -49,10 +49,8 @@ function spawnWorker(schedule) {
     });
     worker.on('message', (msg) => {
       // msg could be { status: 'done' }
-      console.log('Worker message', msg);
     });
     worker.on('error', (err) => {
-      console.error('Worker error', err);
       reject(err);
     });
     worker.on('exit', (code) => {
@@ -84,9 +82,8 @@ async function claimAndDispatchDueSchedules() {
         try { parsedSch.times = JSON.parse(parsedSch.times); } catch(e){ parsedSch.times = {}; }
       }
       // spawn worker to evaluate & publish (non-blocking)
-      spawnWorker(parsedSch).catch(err => console.error('Worker failed', err));
+      spawnWorker(parsedSch).catch(err => {});
     } catch (err) {
-      console.error('Error claiming schedule', sch.id, err);
     }
   }
 }

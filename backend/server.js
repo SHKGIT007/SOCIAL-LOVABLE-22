@@ -70,7 +70,6 @@ require("./app/autoschedulejobs/runScheduler");
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
   res.status(500).json({
     status: false,
     message: "Something went wrong!",
@@ -99,31 +98,23 @@ const {
 sequelize
   .sync({ force: false })
   .then(async () => {
-    console.log("Database & tables created!");
     // Run seeders after sync
     try {
-      console.log("Running seeders...");
       const seedRoles = require("./seeders/seed-roles");
       await seedRoles();
-      console.log("✅ Roles seeded");
 
       const seedPlans = require("./seeders/seed-plans");
       await seedPlans();
-      console.log("✅ Plans seeded");
 
       const seedAdminUser = require("./seeders/seed-admin-user");
       await seedAdminUser();
-      console.log("✅ Admin user seeded");
 
-      console.log("All seeders completed successfully!");
     } catch (e) {
-      console.log("Seeder error:", e);
     }
     server.listen(PORT, () => {
-      console.log(`Server running on http://localhost:${PORT}`);
     });
   })
-  .catch((error) => console.log(error));
+  .catch((error) => {});
 
 //     response.data {
 //    access_token: 'IGAAVmGeDYcJ9BZAFFrZAVNwMkIweGlQUVhYa1ZAVZAnpSbi1vbVBPVVE2ZA1REckV0Q3duUi1BaFVHYkItX2xiWjRKMlo3Nk1aRm5zc1ZAhSDNOdC1idHp2TTZAkSURuOUh5amdJRVFQTmtDbVQ2ZAnppOVdySGpKeWVFU29ndjF4aDR4VjBLOXltQ2NxQ1NNNzR1UXhKNFJrSgZDZD',

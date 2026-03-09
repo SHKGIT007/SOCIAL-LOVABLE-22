@@ -87,7 +87,6 @@ useEffect(() => {
   socket.connect();
 
   socket.on("connect", () => {
-    console.log("Socket connected:", socket.id);
 
     if (userId) {
       socket.emit("register", userId, userType);

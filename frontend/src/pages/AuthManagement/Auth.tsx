@@ -116,7 +116,6 @@ const Auth = () => {
             }
           }
         } catch (err) {
-          console.error("Google login handling failed", err);
         } finally {
           const url = new URL(window.location.href);
           url.searchParams.delete("token");
@@ -443,8 +442,6 @@ const Auth = () => {
       if (error?.response?.data) {
         const data = error.response.data;
 
-        console.log("Data errors:", data.errors);
-        console.log("Data message:", data.message);
 
         if (
           data.errors &&
@@ -452,16 +449,13 @@ const Auth = () => {
           data.errors.length > 0
         ) {
           errorMessage = data.errors[0].msg || data.errors[0].message;
-          console.log("Using error from array:", errorMessage);
         } else if (data.message) {
           errorMessage = data.message;
-          console.log("Using general message:", errorMessage);
         }
       } else if (error?.message) {
         errorMessage = error.message;
       }
 
-      console.log("Final error message:", errorMessage);
 
       Swal.fire({
         icon: "error",

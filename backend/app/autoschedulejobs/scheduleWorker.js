@@ -119,7 +119,7 @@ async function processSchedule(scheduleId) {
     const timeSlots = Array.isArray(timesObj[dayKey]) ? timesObj[dayKey] : [];
     for (const timeStr of timeSlots) {
       
-     // console.log("Processing auto-post for schedule:", scheduleId, "at parsedSchedule:", parsedSchedule);
+     
 
       
 
@@ -131,7 +131,7 @@ async function processSchedule(scheduleId) {
          if(!['',null,undefined].includes(parsedSchedule.content_ai_prompt)){
        generatedContent = await generateAIContent(parsedSchedule.content_ai_prompt);
        }else{
-       // console.log("profileAiPrompt--->>>>:", profileAiPrompt);
+       
         generatedContent = await generateAIContent(profileAiPrompt);
        }
 
@@ -147,7 +147,7 @@ async function processSchedule(scheduleId) {
         }
       }
 
-      //  console.log("generatedContent--->>>>:", generatedContent);
+      
       
 
 
@@ -198,7 +198,7 @@ async function processSchedule(scheduleId) {
     }
   }
 
-  //console.log("Parsed parsedSchedule.times:", parsedSchedule.times);
+  
 
   const isDue = await matchesSchedule(parsedSchedule, now);
   if (!isDue) return;
@@ -293,7 +293,7 @@ async function processSchedule(scheduleId) {
 (async () => {
   try {
     const scheduleId = workerData.scheduleId;
-    //console.log("scheduleId",scheduleId)
+    
     await processSchedule(scheduleId);
     parentPort.postMessage({ status: 'done', scheduleId });
     process.exit(0);
@@ -325,15 +325,14 @@ async function generateAIContent1(prompt, options = {}) {
             maxTokens = 1024
         } = options;
 
-        console.log('🚀 Groq AI se request bhej rahe hain...\n');
 
         // Fetch Groq API key and URL from DB
         const groqConfig = await getGroqConfig();
         const groqApiKey = groqConfig.api_key;
         const groqApiUrl = groqConfig.api_url;
 
-       // console.log("groqApiKey:", groqApiKey);
-       // console.log("groqApiUrl:", groqApiUrl);
+       
+       
 
         const response = await axios.post(
             groqApiUrl,
@@ -361,21 +360,15 @@ async function generateAIContent1(prompt, options = {}) {
         const content = response.data.choices[0].message.content;
         const usage = response.data.usage;
 
-        // console.log('✅ Response mil gaya!\n');
-        // console.log('📊 Token Usage:', {
-        //     prompt: usage.prompt_tokens,
-        //     completion: usage.completion_tokens,
-        //     total: usage.total_tokens
-        // });
+        
+        
 
         return { status: true, content: content };
 
     } catch (error) {
         if (error.response) {
-            console.log('❌ API Error:', error.response.data);
             return { status: false, msg: error.response.data };
         } else {
-            console.log('❌ Error:', error.message);
             return { status: false, msg: error.message };
         }
         throw error;
@@ -391,7 +384,6 @@ async function generateAIContent(prompt, options = {}) {
   } = options;
 
   try {
-    console.log('🚀 Groq AI se request bhej rahe hain...\n');
 
     // Get API config
     const groqConfig = await getGroqConfig();
@@ -421,12 +413,8 @@ async function generateAIContent(prompt, options = {}) {
     const content = response.data.choices[0].message.content;
     const usage = response.data.usage;
 
-    // console.log('✅ Response mil gaya!\n');
-    // console.log('📊 Token Usage:', {
-    //   prompt: usage.prompt_tokens,
-    //   completion: usage.completion_tokens,
-    //   total: usage.total_tokens
-    // });
+    
+    
 
     return { status: true, content };
 
@@ -435,17 +423,14 @@ async function generateAIContent(prompt, options = {}) {
     if (error.response?.data?.error?.code === 'rate_limit_exceeded' && retries > 0) {
       const waitTime =
         (error.response.data.error.message.match(/in (\d+m?\d*\.?\d*)s/)?.[1] || 90) * 1000;
-      console.warn(`⚠️ Rate limit reached. Waiting ${waitTime / 1000}s before retry...`);
       await new Promise(r => setTimeout(r, waitTime));
       return generateAIContent(prompt, { ...options, retries: retries - 1 });
     }
 
     // Other API or network errors
     if (error.response) {
-      console.error('❌ API Error:', error.response.data);
       return { status: false, msg: error.response.data };
     } else {
-      console.error('❌ Error:', error.message);
       return { status: false, msg: error.message };
     }
   }
@@ -455,8 +440,8 @@ async function generateAIContent(prompt, options = {}) {
 async function generateImagePollinations(prompt, retries = 3) {
     for (let attempt = 1; attempt <= retries; attempt++) {
         try {
-            // console.log(`🎨 Image generating... (Attempt ${attempt}/${retries})`);
-            // console.log('Prompt:', prompt);
+            
+            
 
             // Replace spaces with underscores for better Pollinations API compatibility
             const cleanPrompt = prompt.trim().replace(/\s+/g, '_');
@@ -469,7 +454,7 @@ async function generateImagePollinations(prompt, retries = 3) {
             ];
 
             const imageUrl = urls[attempt - 1] || urls[0];
-            // console.log('Requesting URL:', imageUrl);
+            
 
             const response = await axios.get(imageUrl, {
                 responseType: 'arraybuffer',
@@ -488,7 +473,7 @@ async function generateImagePollinations(prompt, retries = 3) {
             // fs.writeFileSync(filename, response.data);
 
             const sizeKB = (response.data.length / 1024).toFixed(2);
-            // console.log(`✅ Image saved: ${filename} (${sizeKB} KB)`);
+            
 
             return {
                 url: imageUrl,
@@ -498,15 +483,13 @@ async function generateImagePollinations(prompt, retries = 3) {
             };
 
         } catch (error) {
-            console.error(`❌ Attempt ${attempt} failed:`, error.message);
 
             if (attempt === retries) {
-                console.error('All attempts failed. Using fallback...');
                 return await generateImageFallback(prompt);
             }
 
             const waitTime = attempt * 2000;
-            // console.log(`⏳ Waiting ${waitTime / 1000}s before retry...`);
+            
             await new Promise(resolve => setTimeout(resolve, waitTime));
         }
     }
@@ -514,7 +497,7 @@ async function generateImagePollinations(prompt, retries = 3) {
 
 async function generateImageFallback(prompt) {
     try {
-        // console.log('🔄 Using fallback API...');
+        
 
         // Option 1: Picsum (random image based on seed)
         const seed = prompt.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
@@ -528,8 +511,8 @@ async function generateImageFallback(prompt) {
         const filename = `fallback_${Date.now()}.jpg`;
         // fs.writeFileSync(filename, response.data);
 
-        // console.log(`✅ Fallback image saved: ${filename}`);
-        // console.log('⚠️ Note: Stock photo (not AI-generated)');
+        
+        
 
         return {
             url: imageUrl,
@@ -538,7 +521,6 @@ async function generateImageFallback(prompt) {
             isFallback: true
         };
     } catch (error) {
-        console.error('❌ Fallback failed:', error.message);
         throw new Error('All image generation methods failed');
     }
 }

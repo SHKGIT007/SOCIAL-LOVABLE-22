@@ -7,7 +7,6 @@ export const getAuthData = () => {
     const authData = localStorage.getItem(AUTH_STORAGE_KEY);
     return authData ? JSON.parse(authData) : null;
   } catch (error) {
-    console.error("Error getting auth data:", error);
     return null;
   }
 };
@@ -17,7 +16,6 @@ export const setAuthData = (authData) => {
   try {
     localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authData));
   } catch (error) {
-    console.error("Error setting auth data:", error);
   }
 };
 
@@ -26,7 +24,6 @@ export const removeAuthData = () => {
   try {
     localStorage.removeItem(AUTH_STORAGE_KEY);
   } catch (error) {
-    console.error("Error removing auth data:", error);
   }
 };
 

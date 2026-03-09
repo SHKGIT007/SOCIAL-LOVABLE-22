@@ -10,7 +10,6 @@ module.exports = function (app) {
 app.get('/instagram/callback', async (req, res) => {
 
 // Webhook verification (if Instagram supports it, similar to Facebook)
-console.log('req.query',req.query);
 const mode = req.query['hub.mode'];
 
 if (mode !== undefined && mode === 'subscribe') {
@@ -25,7 +24,6 @@ if (mode && token) {
 
 if (mode === 'subscribe' && token === VERIFY_TOKEN) {
 
-console.log("✅ Instagram Webhook verified successfully");
 
 return res.status(200).send(challenge);
 
@@ -148,17 +146,14 @@ fields: 'id,username,account_type,media_count'
 // });
 
 
-console.log("response.data", response.data);
 
-console.log("userResponse", userResponse.data);
 
-// console.log("mediaResponse", mediaResponse.data);
+
 
 return res.redirect(redirect_dashboard + "?success=true");
 
 } catch (error) {
 
-console.error("❌ Error generating access token:", error.response?.data || error.message);
 
 res.status(500).send("Error getting access token");
 

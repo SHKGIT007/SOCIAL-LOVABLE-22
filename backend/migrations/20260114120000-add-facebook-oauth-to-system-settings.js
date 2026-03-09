@@ -27,12 +27,9 @@ module.exports = {
       
       if (changes.length > 0) {
         await Promise.all(changes);
-        console.log('✅ Facebook OAuth fields added to system_settings');
       } else {
-        console.log('⚠️ Facebook OAuth fields already exist');
       }
     } catch (error) {
-      console.error('❌ Migration error:', error);
       throw error;
     }
   },
@@ -57,10 +54,8 @@ module.exports = {
       
       if (changes.length > 0) {
         await Promise.all(changes);
-        console.log('✅ Facebook OAuth fields removed');
       }
     } catch (error) {
-      console.error('❌ Rollback error:', error);
       throw error;
     }
   }

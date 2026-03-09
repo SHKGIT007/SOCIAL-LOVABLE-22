@@ -31,31 +31,20 @@ const CompleteSocialSignup = () => {
     const token = searchParams.get("social_token");
     const emailParam = searchParams.get("email");
 
-    console.log("[CompleteSocialSignup] URL Params received:");
-    console.log("  - social_token:", token);
-    console.log("  - email:", emailParam);
 
     if (!token || !emailParam) {
-      console.error("[CompleteSocialSignup] Missing required params!");
       Swal.fire({
         icon: "error",
         title: "Invalid Link",
         text: "Social token or email missing. Please sign up again.",
       }).then(() => navigate("/auth"));
     } else {
-      console.log("[CompleteSocialSignup] Params valid, setting state");
       setSocialToken(token);
       setEmail(emailParam);
     }
   }, [searchParams, navigate]);
 
   const handleCompleteSignup = async () => {
-    console.log("[CompleteSocialSignup] handleCompleteSignup called");
-    console.log("[CompleteSocialSignup] State:", {
-      email,
-      socialToken: socialToken ? "✓" : "✗",
-      passwordLength: userPassword.length,
-    });
 
     if (!userPassword || !confirmPassword) {
       Swal.fire("Error", "Please enter password", "error");
@@ -92,17 +81,14 @@ const CompleteSocialSignup = () => {
 
     setIsLoading(true);
     try {
-      console.log("[CompleteSocialSignup] Posting to /auth/complete-social-signup");
       const response = await apiService.post("/auth/complete-social-signup", {
         token: socialToken,
         email: email,
         password: userPassword,
       });
 
-      console.log("[CompleteSocialSignup] API Response:", response);
 
       if (response.status) {
-        console.log("[CompleteSocialSignup] Signup successful!");
         // Set auth data
         setAuthData({
           token: response.data.token,
@@ -115,20 +101,13 @@ const CompleteSocialSignup = () => {
           text: "Your account has been created successfully.",
           didClose: () => {
             // Redirect to dashboard
-            console.log("[CompleteSocialSignup] Redirecting to dashboard");
             navigate("/dashboard", { replace: true });
           },
         });
       } else {
-        console.error("[CompleteSocialSignup] Signup failed:", response.message);
         Swal.fire("Error", response.message || "Failed to complete signup", "error");
       }
     } catch (error: any) {
-      console.error("[CompleteSocialSignup] Exception:", error);
-      console.error("[CompleteSocialSignup] Error details:", {
-        message: error.message,
-        response: error.response?.data,
-      });
       Swal.fire(
         "Error",
         error.response?.data?.message || "Failed to complete signup",

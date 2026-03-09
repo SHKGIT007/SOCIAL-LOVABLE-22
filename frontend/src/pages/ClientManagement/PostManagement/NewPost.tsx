@@ -74,7 +74,6 @@ const NewPost = () => {
           setProfileLoaded(true);
         }
       } catch (error) {
-        console.error("Error fetching data:", error);
       }
     };
     fetchData();
@@ -129,7 +128,6 @@ const NewPost = () => {
         throw new Error(res.message || "Failed to generate post");
       }
     } catch (err: any) {
-      console.error("AI Generation Error:", err);
 
       // Extract error message
       let errorMessage = "Failed to generate post. Please try again.";
@@ -273,7 +271,6 @@ const NewPost = () => {
         navigate("/posts");
       }
     } catch (err: any) {
-      console.error("Submit Error:", err);
 
       const errorMessage =
         err?.response?.data?.message ||

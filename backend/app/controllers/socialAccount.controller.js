@@ -447,7 +447,6 @@ const getconnnectedAccounts = asyncHandler(async (req, res) => {
     //     });
     // }
 
-    console.log("Current Subscription:", current_subscription);
     const activeLinkedCount = await SocialAccount.count({
         where: {
             user_id: userId,

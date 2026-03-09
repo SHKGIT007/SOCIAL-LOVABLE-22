@@ -70,7 +70,6 @@ Generate an engaging post that fits these requirements perfectly. Make it compel
         );
       }
       const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
       throw new Error("AI gateway error");
     }
 
@@ -82,7 +81,6 @@ Generate an engaging post that fits these requirements perfectly. Make it compel
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error: any) {
-    console.error("Error in generate-ai-post function:", error);
     return new Response(
       JSON.stringify({ error: error.message || "Unknown error occurred" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }

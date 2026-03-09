@@ -2,12 +2,10 @@ const { Plan } = require('../app/models');
 
 const seedPlans = async () => {
     try {
-        console.log('Starting plan seeding...');
 
         // Check if plans already exist
         const existingPlans = await Plan.count();
         if (existingPlans > 0) {
-            console.log('Plans already exist, skipping seeding');
             return;
         }
 
@@ -89,9 +87,7 @@ const seedPlans = async () => {
         ];
 
         await Plan.bulkCreate(plans);
-        console.log('Plans seeded successfully');
     } catch (error) {
-        console.error('Error seeding plans:', error);
         throw error;
     }
 };

@@ -71,7 +71,6 @@ const SystemSettings = () => {
         });
       }
     } catch (error) {
-      console.error('Error fetching credentials:', error);
     }
     setLoading(false);
   };

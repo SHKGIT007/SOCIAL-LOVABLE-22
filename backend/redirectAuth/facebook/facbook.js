@@ -11,7 +11,6 @@ module.exports = function (app) {
 
 
 
-        console.log("req.query", req.query);
         //const mode = req.query['hub.mode'];
         const mode = req.query['hub.mode'];
         if (mode !== undefined && mode === 'subscribe') {
@@ -22,7 +21,6 @@ module.exports = function (app) {
             if (mode && token) {
 
                 if (mode === 'subscribe' && token === VERIFY_TOKEN) {
-                    console.log("✅ Webhook verified successfully");
                     res.status(200).send(challenge);
                 } else {
                     res.sendStatus(403); // token mismatch
@@ -44,7 +42,7 @@ module.exports = function (app) {
 
             const state = JSON.parse(decodeURIComponent(req.query.state));
 
-            // console.log("Decoded State:", state);
+            
             const existingAccount = await SocialAccount.findOne({
                 where: { user_id: state.user_id, platform: 'Facebook' }
             });
@@ -127,10 +125,6 @@ module.exports = function (app) {
                     await existingAccount.save();
                 }
 
-                console.log("response.data", response.data);
-                console.log("userResponse", userResponse.data);
-                console.log("pagesResponse", pagesResponse.data);
-                console.log("groupsResponse", groupsResponse.data);
                 return res.redirect(redirect_dashboard + "?success=true");
 
                 // return res.json({
@@ -144,7 +138,6 @@ module.exports = function (app) {
                 // });
 
             } catch (error) {
-                console.error("❌ Error generating access token:", error.response?.data || error.message);
                 res.status(500).send("Error getting access token");
             }
 
@@ -194,15 +187,15 @@ module.exports = function (app) {
 
 //     const instagramBusinessId = igRes.data.instagram_business_account?.id;
 
-//     console.log("✅ Facebook Access Token:", accessToken);
-//     console.log("✅ Instagram Business ID:", instagramBusinessId);
+
+
 
 //     res.json({
 //       access_token: accessToken,
 //       instagram_business_id: instagramBusinessId,
 //     });
 //   } catch (error) {
-//     console.error("Facebook Auth Error:", error.response?.data || error.message);
+
 //     res.status(500).json({ error: error.response?.data || error.message });
 //   }
 // });

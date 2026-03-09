@@ -35,16 +35,13 @@ const createOrder = async ({ amount, currency = 'INR', receipt, notes = {} }) =>
         }
 
         const client = getClient();
-        console.log('Creating Razorpay order with:', { amount, currency, receipt });
         const order = await client.orders.create({ amount, currency, receipt, notes });
         if (!order || !order.id) {
             throw new Error('Razorpay API returned invalid order response');
         }
-        console.log('Razorpay order created:', { id: order.id, amount: order.amount });
         return order;
     } catch (error) {
         const errorMsg = error.response?.data?.error?.description || error.response?.data?.error?.message || error.message || 'Unknown error';
-        console.error('Razorpay createOrder error:', errorMsg, error.response?.data);
         throw new Error(`Razorpay Error: ${errorMsg}`);
     }
 };

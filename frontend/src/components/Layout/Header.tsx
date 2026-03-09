@@ -101,7 +101,6 @@ export default function Header({
       );
       refetch();
     } catch (error) {
-      console.error("Error marking as read", error);
     }
   };
 
@@ -115,7 +114,6 @@ export default function Header({
       );
       refetch();
     } catch (error) {
-      console.error("Error marking all as read", error);
     }
   };
 

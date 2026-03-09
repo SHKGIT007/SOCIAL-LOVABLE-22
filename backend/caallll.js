@@ -2,7 +2,6 @@ app.get('/facebook/callback',async (req, res) => {
  
   const axios = require('axios');
 
-  console.log("req.query",req.query);
 
 
   const code = req.query.code;
@@ -21,7 +20,6 @@ app.get('/facebook/callback',async (req, res) => {
       }
     });
 
-    console.log("response",response.data);
 
     // {"success":true,"data":{"access_token":"EAAptLvXKRLYBPmUlznDzojZB9Duqjm73wbbHZA8ZCY4gmZBRZBapSp2cjknZCxeqMZAVCXPUc1A7tEszL0jNZAp7q4bRum8VkO2Qs7l0hLpQcbO4OFqZBkvIKIaSzZCz0c2u2zrS7UEiblSfeTjP19f9n6jKWUZC2EZAgY8sXLZC8MgxieewPomUasHLNGoB1gHiCZB5ZCyu5TWC7k3lgAGxAwaM7isdjCSMf9ZCpngaeMqu62pJfWGTvzZAIIopw7zUsIQxK","userInfo":{"id":"690347610768915","name":"Shankar Charan Sahu","email":"shankarcharansahu07@gmail.com","picture":{"data":{"height":50,"is_silhouette":false,"url":"https://platform-lookaside.fbsbx.com/platform/profilepic/?asid=690347610768915&height=50&width=50&ext=1763014940&hash=AT9t4ofWs-RgHAMmauXUPyAQ","width":50}}},"pages":{"data":[{"access_token":"EAAptLvXKRLYBPmIXnj3pDS0iwEN9xgpm8thTacuO35fC1XF77aE2rmWulxOZBQJJpe9VRBY4cbPZAzAZBNle4ivkKkHLHWBUbFVSZBXkqZCbuSaMKMlWazB12LEeJZCqOWgDMTTQEGIPhgiz83j7PSrcN5CaT6XZCPkpavbYMBZCM7qw3xpOjF3jmrNC8LM2gZCrTMKrkVUEX","category":"Product/service","category_list":[{"id":"2201","name":"Product/service"}],"name":"ShankarPage","id":"832087889989519","tasks":["MODERATE","MESSAGING","ANALYZE","ADVERTISE","CREATE_CONTENT","MANAGE"]}],"paging":{"cursors":{"before":"QVFIU01VTF9zUlduZATlnb001aHJPTmJjX2VFUE91R2poS2NVYXBWXzMwOXFWd1o2Xzg5SmlJWl83VGVoaTNZAUlkyZAEdJSVY2U0xvRUhRSm50RXlJTFFkZAFNn","after":"QVFIU01VTF9zUlduZATlnb001aHJPTmJjX2VFUE91R2poS2NVYXBWXzMwOXFWd1o2Xzg5SmlJWl83VGVoaTNZAUlkyZAEdJSVY2U0xvRUhRSm50RXlJTFFkZAFNn"}}}}}
 
@@ -70,11 +68,9 @@ app.get('/facebook/callback',async (req, res) => {
 
 
 
-    console.log("✅ Access Token:", access_token);
 
     res.send("Access Token generated successfully!");
   } catch (error) {
-    console.error("❌ Error generating access token:", error.response?.data || error.message);
     res.status(500).send("Error getting access token");
   }
 
@@ -83,14 +79,14 @@ app.get('/facebook/callback',async (req, res) => {
 
 
 //  const VERIFY_TOKEN = "nilesh"; // same as console wali
-//  console.log("dgg",req.query);
+
 // const mode = req.query['hub.mode'];
 // const token = req.query['hub.verify_token'];
 // const challenge = req.query['hub.challenge'];
 // if (mode && token) {
 
 // if (mode === 'subscribe' && token === VERIFY_TOKEN) {
-// console.log("✅ Webhook verified successfully");
+
 // res.status(200).send(challenge);
 // } else {
 // res.sendStatus(403); // token mismatch
@@ -111,10 +107,8 @@ app.get("/pageToken", async (req, res) => {
       `https://graph.facebook.com/me/accounts?access_token=${userAccessToken}`
     );
 
-    console.log("📄 Page List:", response.data);
     res.json(response.data);
   } catch (error) {
-    console.error("❌ Error fetching page token:", error.response?.data || error.message);
     res.status(500).send("Error fetching page token");
   }
 });
@@ -140,11 +134,9 @@ app.get("/postToPage", async (req, res) => {
       }
     );
 
-    console.log("✅ Posted Successfully:", response.data);
     res.json(response.data);
 
   } catch (error) {
-    console.error("❌ Error Posting:", error.response?.data || error.message);
     res.status(500).send("Failed to post on Facebook");
   }
 });
@@ -156,7 +148,6 @@ async function postOnFacebook() {
   const password = "shankar@321";
   const postText = "IGAAAAAAAA from ! 🚀";
 
-  console.log("🚀 Starting Facebook Auto Poster...");
 
   const browser = await puppeteer.launch({
     headless: "new",
@@ -181,12 +172,10 @@ async function postOnFacebook() {
     await page.type("#pass", password, { delay: 50 });
     await page.keyboard.press("Enter");
 
-    console.log("🔐 Logging in...");
 
     // 3️⃣ Wait for feed container (more reliable than "Create a post")
     await page.waitForSelector('[role="feed"]', { visible: true, timeout: 30000 });
 
-    console.log("✅ Logged in successfully!");
 
     // 4️⃣ Click on post box using evaluate (works even if aria-label changes)
     await page.evaluate(() => {
@@ -211,9 +200,7 @@ async function postOnFacebook() {
 
     // 8️⃣ Wait to ensure post is published
     await page.waitForTimeout(5000);
-    console.log("✅ Post published successfully!");
   } catch (error) {
-    console.error("❌ Error posting on Facebook:", error);
   } finally {
     await browser.close();
   }

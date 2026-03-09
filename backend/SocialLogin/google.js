@@ -27,10 +27,6 @@ module.exports = function (app) {
       const reqHost = (req.get("host") || "").toLowerCase();
       if (!process.env.BACKEND_URL && reqHost === "socialvibe.tradestreet.in") {
         backendBase = `https://${reqHost}/backend`;
-        console.log(
-          `[Google OAuth] forcing backendBase for known host ${reqHost}:`,
-          backendBase
-        );
       }
     } catch (e) {}
 
@@ -97,10 +93,6 @@ module.exports = function (app) {
             reqHost === "socialvibe.tradestreet.in"
           ) {
             backendBase = `https://${reqHost}/backend`;
-            console.log(
-              `[Google OAuth] forcing backendBase for known host ${reqHost}:`,
-              backendBase
-            );
           }
         } catch (e) {}
 
@@ -221,7 +213,6 @@ module.exports = function (app) {
           }token=${encodeURIComponent(token)}&success=true`
         );
       } catch (err) {
-        console.error("Google OAuth Error:", err.response?.data || err.message);
 
         // const frontend =
         //   process.env.FRONTEND_URL || `${req.protocol}://${req.get("host")}`;

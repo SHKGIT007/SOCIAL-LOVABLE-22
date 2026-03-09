@@ -53,7 +53,6 @@ const Profile = () => {
           setOriginalProfile(fetched);
         }
       } catch (error) {
-        console.error(error);
       } finally {
         setIsLoading(false);
       }

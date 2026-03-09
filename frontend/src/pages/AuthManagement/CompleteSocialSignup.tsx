@@ -94,7 +94,6 @@ const CompleteSocialSignup = () => {
         Swal.fire("Error", res.message || "Failed to complete signup", "error");
       }
     } catch (err: any) {
-      console.error("Social signup error:", err);
       let msg = "Something went wrong. Please try again.";
       if (err?.response?.data?.message) msg = err.response.data.message;
       Swal.fire("Error", msg, "error");
