@@ -6,6 +6,7 @@ const {
   SystemSetting,
   AiGenratePost,
   Notification,
+  Profile,
 } = require("../models");
 
 const { Op } = require("sequelize");
@@ -315,6 +316,13 @@ const getAllPosts = asyncHandler(async (req, res) => {
         model: User,
         as: "User",
         attributes: ["id", "user_name", "email", "user_fname", "user_lname"],
+        include: [
+          {
+            model: Profile,
+            as: "Profile",
+            attributes: ["business_name"],
+          },
+        ],
       },
     ],
     limit: parseInt(limit),
@@ -350,6 +358,13 @@ const getPostById = asyncHandler(async (req, res) => {
         model: User,
         as: "User",
         attributes: ["id", "user_name", "email", "user_fname", "user_lname"],
+        include: [
+          {
+            model: Profile,
+            as: "Profile",
+            attributes: ["business_name"],
+          },
+        ],
       },
     ],
   });

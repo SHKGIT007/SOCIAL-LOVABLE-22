@@ -150,15 +150,26 @@ const AdminViewPost = () => {
 
           {/* Header */}
           <CardHeader className={`pt-6 ${post.image_url ? "pl-28" : ""}`}>
-            <div className="space-y-2">
-              <CardTitle className="text-3xl tracking-tight text-gray-900 flex items-center gap-2">
-                <Zap className="h-6 w-6 text-indigo-600" />
+            <div className="space-y-4">
+              {/* Creator Info Above Title */}
+              <div className="flex flex-col gap-1">
+                <span className="text-xs font-bold uppercase tracking-wider text-indigo-600">
+                  Business / Creator Name
+                </span>
+                <span className="text-xl font-extrabold text-gray-900">
+                  {post.User?.Profile?.business_name || post.User?.user_name || "Unknown Creator"}
+                </span>
+                <span className="text-xs text-gray-500 font-medium italic">
+                  ({post.User?.email})
+                </span>
+              </div>
+
+              <div className="h-px bg-gray-100" />
+
+              <CardTitle className="text-2xl tracking-tight text-gray-800 flex items-center gap-2">
+                <Zap className="h-5 w-5 text-indigo-500" />
                 {post.title || "Untitled Post"}
               </CardTitle>
-
-              <CardDescription className="text-gray-600">
-                Posted by {post.User?.user_name} ({post.User?.email})
-              </CardDescription>
 
               {/* Badges */}
               <div className="flex flex-wrap gap-2 pt-2">

@@ -23,6 +23,9 @@ interface Post {
   User?: {
     email: string;
     user_name: string | null;
+    Profile?: {
+      business_name: string;
+    };
   };
   review_status: string;
   scheduled_at: string | null;
@@ -180,10 +183,10 @@ const AdminPosts = () => {
 
         return {
           "S.No": index + 1,
+          "Business/Creator": post.User?.Profile?.business_name || post.User?.user_name || "N/A",
+          Email: post.User?.email || "N/A",
           Title: post.title,
           Content: post.content,
-          User: post.User?.user_name || "N/A",
-          Email: post.User?.email || "N/A",
 
           Platforms: Array.isArray(platforms)
             ? platforms.join(", ")
@@ -231,30 +234,27 @@ const AdminPosts = () => {
           page === 1 ? index + 1 : (page - 1) * perPage + (index + 1),
       },
       {
-        name: "Title",
+        name: "Business/Creator",
         width: "180px",
-        selector: (row) => row.title || "N/A",
+        selector: (row) => row.User?.Profile?.business_name || row.User?.user_name || "N/A",
         sortable: true,
-      },
-      {
-        name: "Content",
-        width: "300px",
-        cell: (row) => (
-          <div className="text-xs text-gray-600 line-clamp-2">
-            {row.content || "N/A"}
-          </div>
-        ),
-      },
-      {
-        name: "User",
-        width: "150px",
-        selector: (row) => row.User?.user_name || "N/A",
       },
       {
         name: "Email",
         width: "200px",
         selector: (row) => row.User?.email || "N/A",
       },
+      {
+        name: "Content",
+        width: "300px",
+        cell: (row) => (
+          <div className="text-xs text-gray-600 line-clamp-2">
+         
+            {row.content || "N/A"}
+          </div>
+        ),
+      },
+
       // {
       //   name: "Platforms",
       //   width: "150px",

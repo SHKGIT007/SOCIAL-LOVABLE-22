@@ -109,6 +109,10 @@ User.associate = (models) => {
     foreignKey: "user_id",
     as: "SocialAccounts",
   });
+  User.hasOne(models.Profile, {
+    foreignKey: "user_id",
+    as: "Profile",
+  });
 };
 
 module.exports = User;
