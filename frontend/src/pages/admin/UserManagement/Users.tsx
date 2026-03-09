@@ -370,23 +370,6 @@ const Users = () => {
 
           {/* Right Actions */}
           <div className="flex items-center gap-2 flex-wrap">
-            {/* Back Button */}
-
-            <Button
-              className="bg-red-600 hover:bg-red-700"
-              onClick={() => navigate("/admin/deleted-users")}
-            >
-              <User className="mr-2 h-4 w-4" />
-              Deleted Users
-            </Button>
-
-            <Button
-              className="bg-indigo-600 hover:bg-indigo-700"
-              onClick={() => navigate("/admin/create-user")}
-            >
-              <User className="mr-2 h-4 w-4" />
-              Create User
-            </Button>
             <button
               onClick={() => navigate(-1)}
               className="px-4 py-2 text-sm rounded-md border bg-white hover:bg-indigo-50 transition"
@@ -399,26 +382,26 @@ const Users = () => {
         {/* Search + Table */}
         <Card className="shadow-xl border border-indigo-100/50 rounded-2xl">
           <CardContent className="pt-6">
-            {/* Search Bar */}
-            <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-              <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-                <div className="relative w-full sm:w-72">
-                  <input
-                    type="text"
-                    placeholder="Search name, email..."
-                    className="border px-3 py-2 rounded-lg w-full shadow-sm focus:ring-indigo-300 focus:border-indigo-400 pr-9"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
+            {/* Search + Actions */}
+            <div className="mb-6 flex flex-wrap items-center gap-3">
+              <div className="relative w-full sm:w-72">
+                <input
+                  type="text"
+                  placeholder="Search name, email..."
+                  className="border px-3 py-2 rounded-lg w-full shadow-sm focus:ring-indigo-300 focus:border-indigo-400 pr-9"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+
+                {search && (
+                  <X
+                    className="absolute right-3 top-2.5 h-4 w-4 cursor-pointer text-gray-400 hover:text-gray-600"
+                    onClick={() => setSearch("")}
                   />
+                )}
+              </div>
 
-                  {search && (
-                    <X
-                      className="absolute right-3 top-2.5 h-4 w-4 cursor-pointer text-gray-400 hover:text-gray-600"
-                      onClick={() => setSearch("")}
-                    />
-                  )}
-                </div>
-
+              <div className="flex items-center gap-3 w-full sm:w-auto">
                 <Button
                   className="bg-blue-500 hover:bg-blue-600 w-full sm:w-auto"
                   onClick={handleRefresh}
@@ -426,14 +409,30 @@ const Users = () => {
                 >
                   {tableLoading ? "Refreshing..." : "Refresh"}
                 </Button>
-              </div>
 
-              <Button
-                className="bg-green-600 hover:bg-green-700 px-6"
-                onClick={exportExcel}
-              >
-                Export Excel
-              </Button>
+                <Button
+                  className="bg-green-600 hover:bg-green-700 w-full sm:w-auto px-6"
+                  onClick={exportExcel}
+                >
+                  Export Excel
+                </Button>
+
+                <Button
+                  className="bg-red-600 hover:bg-red-700 w-full sm:w-auto"
+                  onClick={() => navigate("/admin/deleted-users")}
+                >
+                  <User className="mr-2 h-4 w-4" />
+                  Deleted Users
+                </Button>
+
+                <Button
+                  className="bg-indigo-600 hover:bg-indigo-700 w-full sm:w-auto"
+                  onClick={() => navigate("/admin/create-user")}
+                >
+                  <User className="mr-2 h-4 w-4" />
+                  Create User
+                </Button>
+              </div>
             </div>
 
             {/* Data Table */}

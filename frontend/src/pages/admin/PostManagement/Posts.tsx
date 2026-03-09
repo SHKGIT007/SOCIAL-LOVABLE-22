@@ -410,25 +410,25 @@ const AdminPosts = () => {
         {/* Filters + Table */}
         <Card className="shadow-xl border border-indigo-100 rounded-2xl">
           <CardContent className="pt-6">
-            {/* Search + Filter */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-              <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-                <div className="relative w-full sm:w-72">
-                  <input
-                    type="text"
-                    placeholder="Search title..."
-                    className="border px-3 py-2 rounded-lg w-full shadow-sm focus:ring-indigo-300 focus:border-indigo-400 pr-9"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
+            {/* Search + Actions */}
+            <div className="mb-6 flex flex-wrap items-center gap-3">
+              <div className="relative w-full sm:w-72">
+                <input
+                  type="text"
+                  placeholder="Search title..."
+                  className="border px-3 py-2 rounded-lg w-full shadow-sm focus:ring-indigo-300 focus:border-indigo-400 pr-9"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+                {search && (
+                  <X
+                    className="absolute right-3 top-2.5 h-4 w-4 text-gray-500 cursor-pointer hover:text-gray-700"
+                    onClick={() => setSearch("")}
                   />
-                  {search && (
-                    <X
-                      className="absolute right-3 top-2.5 h-4 w-4 text-gray-500 cursor-pointer hover:text-gray-700"
-                      onClick={() => setSearch("")}
-                    />
-                  )}
-                </div>
+                )}
+              </div>
 
+              <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
                 <Button
                   className="bg-blue-500 hover:bg-blue-600 w-full sm:w-auto"
                   onClick={handleRefresh}
@@ -436,17 +436,15 @@ const AdminPosts = () => {
                 >
                   {tableLoading ? "Refreshing..." : "Refresh"}
                 </Button>
-              </div>
 
-              {/* Status Filter */}
-              <div className="flex items-center gap-3 flex-wrap">
+                {/* Status Filter */}
                 <select
                   value={statusFilter}
                   onChange={(e) => {
                     setStatusFilter(e.target.value);
                     setPage(1);
                   }}
-                  className="px-3 py-2 rounded-lg border bg-white shadow-sm focus:ring-indigo-300 focus:border-indigo-400"
+                  className="px-3 py-2 rounded-lg border bg-white shadow-sm focus:ring-indigo-300 focus:border-indigo-400 w-full sm:w-auto"
                 >
                   <option value="all">All Status</option>
                   <option value="draft">Draft</option>
@@ -455,7 +453,7 @@ const AdminPosts = () => {
                 </select>
 
                 <Button
-                  className="bg-green-600 hover:bg-green-700 px-6"
+                  className="bg-green-600 hover:bg-green-700 w-full sm:w-auto px-6"
                   onClick={exportExcel}
                   disabled={exportLoading}
                 >

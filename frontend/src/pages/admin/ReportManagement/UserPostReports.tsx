@@ -317,27 +317,28 @@ const UserPostsReport = () => {
 
         <Card className="shadow-xl border border-indigo-100 rounded-2xl">
           <CardContent className="pt-6">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
-              <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-                <div className="relative w-full sm:w-72">
-                  <input
-                    type="text"
-                    placeholder="Search title..."
-                    className="border px-3 py-2 rounded-lg w-full shadow-sm focus:ring-indigo-300 focus:border-indigo-400 pr-9"
-                    value={search}
-                    onChange={(e) => {
-                      setSearch(e.target.value);
-                      setPage(1);
-                    }}
+            {/* Search + Filters + Actions */}
+            <div className="mb-6 flex flex-wrap items-center gap-4">
+              <div className="relative w-full sm:w-72">
+                <input
+                  type="text"
+                  placeholder="Search title..."
+                  className="border px-3 py-2 rounded-lg w-full shadow-sm focus:ring-indigo-300 focus:border-indigo-400 pr-9"
+                  value={search}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setPage(1);
+                  }}
+                />
+                {search && (
+                  <X
+                    className="absolute right-3 top-2.5 h-4 w-4 text-gray-500 cursor-pointer"
+                    onClick={() => setSearch("")}
                   />
-                  {search && (
-                    <X
-                      className="absolute right-3 top-2.5 h-4 w-4 text-gray-500 cursor-pointer"
-                      onClick={() => setSearch("")}
-                    />
-                  )}
-                </div>
+                )}
+              </div>
 
+              <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
                 <Button
                   className="bg-blue-500 hover:bg-blue-600 w-full sm:w-auto"
                   onClick={handleRefresh}
@@ -345,70 +346,71 @@ const UserPostsReport = () => {
                 >
                   {loading ? "Refreshing..." : "Refresh"}
                 </Button>
-              </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 w-full lg:w-auto">
-                <Select
-                  value={year}
-                  onValueChange={(v) => {
-                    setYear(v);
-                    setPage(1);
-                  }}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 w-full sm:w-auto">
+                  <Select
+                    value={year}
+                    onValueChange={(v) => {
+                      setYear(v);
+                      setPage(1);
+                    }}
+                  >
+                    <SelectTrigger className="w-full sm:w-28">
+                      <SelectValue placeholder="Year" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Years</SelectItem>
+                      <SelectItem value="2024">2024</SelectItem>
+                      <SelectItem value="2025">2025</SelectItem>
+                      <SelectItem value="2026">2026</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Select
+                    value={month}
+                    onValueChange={(v) => {
+                      setMonth(v);
+                      setPage(1);
+                    }}
+                  >
+                    <SelectTrigger className="w-full sm:w-28">
+                      <SelectValue placeholder="Month" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Months</SelectItem>
+                      {monthNames.map((m, i) => (
+                        <SelectItem
+                          key={i}
+                          value={(i + 1).toString().padStart(2, "0")}
+                        >
+                          {m}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  <Input
+                    type="date"
+                    className="w-full sm:w-36"
+                    value={date}
+                    onChange={(e) => {
+                      setDate(e.target.value);
+                      setPage(1);
+                    }}
+                  />
+
+                  <Button variant="outline" onClick={resetFilters} className="w-full sm:w-auto">
+                    Reset
+                  </Button>
+                </div>
+
+                <Button
+                  className="bg-green-600 hover:bg-green-700 w-full sm:w-auto px-6"
+                  onClick={exportExcel}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Year" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Years</SelectItem>
-                    <SelectItem value="2024">2024</SelectItem>
-                    <SelectItem value="2025">2025</SelectItem>
-                    <SelectItem value="2026">2026</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                <Select
-                  value={month}
-                  onValueChange={(v) => {
-                    setMonth(v);
-                    setPage(1);
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Month" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Months</SelectItem>
-                    {monthNames.map((m, i) => (
-                      <SelectItem
-                        key={i}
-                        value={(i + 1).toString().padStart(2, "0")}
-                      >
-                        {m}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                <Input
-                  type="date"
-                  value={date}
-                  onChange={(e) => {
-                    setDate(e.target.value);
-                    setPage(1);
-                  }}
-                />
-
-                <Button variant="outline" onClick={resetFilters}>
-                  Reset
+                  Export Excel
                 </Button>
               </div>
-
-              <Button
-                className="bg-green-600 hover:bg-green-700 px-6"
-                onClick={exportExcel}
-              >
-                Export Excel
-              </Button>
             </div>
 
             <div className="rounded-xl border border-gray-200 shadow overflow-hidden">

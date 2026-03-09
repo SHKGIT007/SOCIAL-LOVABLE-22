@@ -20,13 +20,16 @@ const UpdateProfile = () => {
   });
   const [originalData, setOriginalData] = useState<any>(null);
   const navigate = useNavigate();
- const primaryGradient = "from-indigo-600 to-cyan-500";
+  const primaryGradient = "from-indigo-600 to-cyan-500";
   const primaryGradientClass = `bg-gradient-to-r ${primaryGradient}`;
   const [passForm, setPassForm] = useState({
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   useEffect(() => {
     fetchProfile();
@@ -80,21 +83,27 @@ const UpdateProfile = () => {
     {
       name: "currentPassword",
       label: "Current Password",
-      type: "password",
+      type: "passwordWithToggle",
+      show: showCurrent,
+      onToggle: () => setShowCurrent(!showCurrent),
       required: true,
       placeholder: "Enter current password",
     },
     {
       name: "newPassword",
       label: "New Password",
-      type: "password",
+      type: "passwordWithToggle",
+      show: showNew,
+      onToggle: () => setShowNew(!showNew),
       required: true,
       placeholder: "Enter new password",
     },
     {
       name: "confirmPassword",
       label: "Confirm Password",
-      type: "password",
+      type: "passwordWithToggle",
+      show: showConfirm,
+      onToggle: () => setShowConfirm(!showConfirm),
       required: true,
       placeholder: "Confirm new password",
     },
@@ -196,7 +205,7 @@ const UpdateProfile = () => {
   return (
     <DashboardLayout userRole="client">
       <div className="space-y-8">
-       <div
+        <div
           className="
     sticky top-0 z-10
     -mx-2 px-4 py-4

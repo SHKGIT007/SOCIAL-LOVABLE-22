@@ -337,25 +337,25 @@ const Plans = () => {
 
         <Card className="shadow-xl border border-indigo-100/50 rounded-2xl">
           <CardContent className="pt-6">
-            {/* Search + Buttons */}
-            <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-              <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-                <div className="relative w-full sm:w-72">
-                  <input
-                    type="text"
-                    placeholder="Search name, description..."
-                    className="border px-3 py-2 rounded-lg w-full shadow-sm focus:ring-indigo-300 focus:border-indigo-400 pr-9"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
+            {/* Search + Actions */}
+            <div className="mb-6 flex flex-wrap items-center gap-3">
+              <div className="relative w-full sm:w-72">
+                <input
+                  type="text"
+                  placeholder="Search name, description..."
+                  className="border px-3 py-2 rounded-lg w-full shadow-sm focus:ring-indigo-300 focus:border-indigo-400 pr-9"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+                {search && (
+                  <X
+                    className="absolute right-3 top-2.5 cursor-pointer text-gray-400 hover:text-gray-600"
+                    onClick={() => setSearch("")}
                   />
-                  {search && (
-                    <X
-                      className="absolute right-3 top-2.5 cursor-pointer text-gray-400 hover:text-gray-600"
-                      onClick={() => setSearch("")}
-                    />
-                  )}
-                </div>
+                )}
+              </div>
 
+              <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
                 <Button
                   className="bg-blue-500 hover:bg-blue-600 w-full sm:w-auto"
                   onClick={handleRefresh}
@@ -363,18 +363,16 @@ const Plans = () => {
                 >
                   {tableLoading || exportLoading ? "Refreshing..." : "Refresh"}
                 </Button>
-              </div>
 
-              <div className="flex gap-3">
                 <Button
-                  className="bg-green-600 hover:bg-green-700"
+                  className="bg-green-600 hover:bg-green-700 w-full sm:w-auto px-6"
                   onClick={exportExcel}
                 >
                   Export Excel
                 </Button>
 
                 <Button
-                  className="bg-indigo-600 hover:bg-indigo-700"
+                  className="bg-indigo-600 hover:bg-indigo-700 w-full sm:w-auto"
                   onClick={() => navigate("/admin/create-plan")}
                 >
                   <Plus size={16} className="mr-2" /> Create Plan
