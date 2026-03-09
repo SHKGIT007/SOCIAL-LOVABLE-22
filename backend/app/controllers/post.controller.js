@@ -24,14 +24,15 @@ const cloudinary = require("cloudinary").v2;
 const moment = require("moment-timezone");
 const { log } = require("console");
 const { createNotification } = require("./notification.controller");
+const notificationService = require("../services/notification.service");
 const socket = require("../../socket");
 
 const createPost = asyncHandler(async (req, res) => {
   // Debug: Log incoming form data and files
-  
-  
-  
-  
+
+
+
+
 
   // Support for file uploads (image/video)
 
@@ -181,36 +182,16 @@ const createPost = asyncHandler(async (req, res) => {
     });
     const userName = user.user_fname + " " + user.user_lname;
 
-    // 🔔 SEND NOTIFICATIONS - POST CREATED
-    // Socket notification sent internally by createNotification
+    // 🔔 Trigger Notification
+    const postType = req.body.is_ai_generated ? "ai" : "manual";
     if (req.body.status === "draft") {
-      // Draft post notification
-      await createNotification({
-        for_admin: true,
-        notification_type: "post_draft",
-        title: "User Draft Post",
-        message: `${userName} draft a ${req.body.is_ai_generated ? "AI-Post" : "Manual-Post"}.`,
-        metadata: {
-          user_id: userId,
-          user_name: userName,
-          post_id: post.id,
-          post_title: req.body.title,
-        },
-      });
+      await notificationService.userDraftPost(userId, postType);
+    } else if (req.body.status === "scheduled") {
+      await notificationService.userScheduledPost(userId, req.body.title, req.body.scheduled_at, postType);
+    } else if (req.body.status === "published") {
+      await notificationService.userPostPublished(userId, postType);
     } else {
-      // Post created notification
-      await createNotification({
-        for_admin: true,
-        notification_type: "post_created",
-        title: "User Post Created",
-        message: `Post Created: A new post was created by ${userName}.`,
-        metadata: {
-          user_id: userId,
-          user_name: userName,
-          post_id: post.id,
-          post_title: req.body.title,
-        },
-      });
+      await notificationService.userPostCreated(userId, postType);
     }
 
     // Update subscription usage
@@ -292,22 +273,22 @@ const createPost = asyncHandler(async (req, res) => {
 });
 
 const getAllPosts = asyncHandler(async (req, res) => {
- 
 
 
-  const { page = 1, limit = 10, search, status, user_id,generation} = req.query;
+
+  const { page = 1, limit = 10, search, status, user_id, generation } = req.query;
   const offset = (page - 1) * limit;
   const userId = req.user.id;
   const userType = req.user.user_type;
 
   const whereClause = {};
-if (generation === "ai") {
-  whereClause.is_ai_generated = true;
-}
+  if (generation === "ai") {
+    whereClause.is_ai_generated = true;
+  }
 
-if (generation === "manual") {
-  whereClause.is_ai_generated = false;
-}
+  if (generation === "manual") {
+    whereClause.is_ai_generated = false;
+  }
 
   // If not admin, only show user's own posts
   if (userType !== "admin") {
@@ -597,21 +578,35 @@ const generateAIPost = asyncHandler(async (req, res) => {
   logger.info("AI post generated", { userId, ai_prompt });
 
   // 🔥 Increment AI posts used count
+  const newUsage = subscription.ai_posts_used + 1;
+  const totalLimit = subscription.Plan.ai_posts;
+
   await Subscription.update(
-    {
-      ai_posts_used: subscription.ai_posts_used + 1,
-    },
+    { ai_posts_used: newUsage },
     { where: { id: subscription.id } }
   );
 
+  // 🔔 Check AI Limit Thresholds (50%, 70%, 90%, 100%)
+  const percentages = [100, 90, 70, 50];
+  for (const p of percentages) {
+    if (newUsage >= (totalLimit * p) / 100) {
+      // Check if we already notified for this level (could store in metadata, but for now we trigger on reaching it)
+      // To prevent multiple alerts, ideally we track 'last_notified_percentage'
+      if (newUsage === Math.ceil((totalLimit * p) / 100)) {
+        await notificationService.userAILimitAlert(userId, p);
+      }
+      break;
+    }
+  }
+
   // 🔥 Check if limit reached after increment and mark as inactive
-  if (subscription.ai_posts_used + 1 >= subscription.Plan.ai_posts) {
+  if (newUsage >= totalLimit) {
     await Subscription.update(
-      { status: "inactive" },
+      { status: "expired" }, // changed to expired for consistency with subscription logic
       { where: { id: subscription.id } }
     );
 
-    logger.info("Subscription marked as inactive - AI post limit reached", {
+    logger.info("Subscription marked as expired - AI post limit reached", {
       subscriptionId: subscription.id,
       userId,
     });
@@ -678,21 +673,21 @@ async function generateAIContent1(prompt, options = {}) {
     const content = response.data.choices[0].message.content;
     const usage = response.data.usage;
 
-    
-    
+
+
 
     return { status: true, content: content };
   } catch (error) {
-    
+
 
     if (error.response) {
-      
+
       return {
         status: false,
         msg: error.response.data.error.message || "API Error",
       };
     } else {
-      
+
       return { status: false, msg: error.message };
     }
     throw error;
@@ -738,8 +733,8 @@ async function generateAIContent(prompt, options = {}) {
     const content = response.data.choices[0].message.content;
     const usage = response.data.usage;
 
-    
-    
+
+
 
     return { status: true, content };
   } catch (error) {
@@ -793,7 +788,7 @@ async function chatWithAI(messages) {
     );
 
     //.log('✅ Chat response mil gaya!\n');
-    
+
 
     return response.data.choices[0].message.content;
   } catch (error) {
@@ -992,8 +987,8 @@ const approvePost = asyncHandler(async (req, res) => {
     });
   }
 
-  
-  
+
+
 
   // ✅ Check scheduled time (only if scheduled_at exists)
   if (post.scheduled_at) {

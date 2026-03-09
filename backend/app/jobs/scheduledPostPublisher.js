@@ -1,11 +1,9 @@
-// Scheduled Post Publisher Job
-// Run this job periodically (e.g. with node-cron or setInterval)
-
 const { Post, SocialAccount } = require('../models');
 const { facebookPost } = require('../../redirectAuth/facebook/facebookPost');
 const { instagramPost } = require('../../redirectAuth/instagram/instagramPost');
 const logger = require('../config/logger');
 const { Op } = require('sequelize');
+const notificationService = require('../services/notification.service');
 
 async function publishScheduledPosts() {
   // Find all scheduled posts whose scheduled_at time has passed and are not published
@@ -19,9 +17,9 @@ async function publishScheduledPosts() {
   });
 
   for (const post of posts) {
-    
+
     let publishedToPlatform = false;
-    let platforms=post.platforms;
+    let platforms = post.platforms;
     if (typeof post.platforms === "string") {
       try {
         platforms = JSON.parse(post.platforms);
@@ -35,7 +33,7 @@ async function publishScheduledPosts() {
         where: { user_id: post.user_id, platform: 'Facebook', is_active: 1 }
       });
 
-      
+
       if (fbAccount && fbAccount.access_token) {
         try {
           await facebookPost(fbAccount.access_token, post.content, post.image_url);
@@ -73,6 +71,9 @@ async function publishScheduledPosts() {
       { status: 'published', published_at: new Date() },
       { where: { id: post.id } }
     );
+
+    // 🔔 Trigger Notification
+    await notificationService.userPostPublished(post.user_id, post.is_ai_generated ? "ai" : "manual");
   }
 }
 

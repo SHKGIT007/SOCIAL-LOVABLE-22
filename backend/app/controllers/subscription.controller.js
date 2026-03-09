@@ -4,6 +4,7 @@ const { asyncHandler } = require("../middleware/error.middleware");
 const logger = require("../config/logger");
 const moment = require("moment-timezone");
 const razorpayService = require("../services/razorpay.service");
+const notificationService = require("../services/notification.service");
 const { createNotification } = require("./notification.controller");
 const socket = require("../../socket");
 
@@ -109,39 +110,8 @@ const createSubscription = asyncHandler(async (req, res) => {
     },
   });
 
-  // 🔔 SEND NOTIFICATIONS - FREE PLAN PURCHASE SUCCESS
-  const user = await User.findByPk(userId);
-  const userName = user.user_fname + " " + user.user_lname;
-
-  // User notification
-  await createNotification({
-    for_user_id: userId,
-    notification_type: "plan_purchase",
-    title: "Plan Purchase Success",
-    message: `Congratulations! You have successfully purchased the plan "${plan.name}".`,
-    metadata: {
-      user_id: userId,
-      plan_id: plan_id,
-      plan_name: plan.name,
-      subscription_id: subscription.id,
-    },
-  });
-
-  // Admin notification
-  await createNotification({
-    for_admin: true,
-    notification_type: "plan_purchase",
-    title: "New Plan Purchase",
-    message: `Congratulations! "${userName}" successfully purchased "${plan.name}" plan.`,
-    metadata: {
-      user_id: userId,
-      user_name: userName,
-      plan_id: plan_id,
-      plan_name: plan.name,
-      subscription_id: subscription.id,
-      amount: 0,
-    },
-  });
+  // 🔔 Trigger Notification
+  await notificationService.planPurchase(userId, plan.name);
 
   res.status(201).json({
     status: true,
@@ -393,38 +363,8 @@ const verifyRazorpayPayment = asyncHandler(async (req, res) => {
     ],
   });
 
-  // 🔔 SEND NOTIFICATIONS - PLAN PURCHASE SUCCESS
-  const userName = subscription.User.user_fname + " " + subscription.User.user_lname;
-
-  // User notification
-  await createNotification({
-    for_user_id: userId,
-    notification_type: "plan_purchase",
-    title: "Plan Purchase Success",
-    message: `Congratulations! You have successfully purchased the plan "${subscription.Plan.name}".`,
-    metadata: {
-      user_id: userId,
-      plan_id: plan_id,
-      plan_name: subscription.Plan.name,
-      subscription_id: subscription.id,
-    },
-  });
-
-  // Admin notification
-  await createNotification({
-    for_admin: true,
-    notification_type: "plan_purchase",
-    title: "New Plan Purchase",
-    message: `Congratulations! "${userName}" successfully purchased "${subscription.Plan.name}" plan.`,
-    metadata: {
-      user_id: userId,
-      user_name: userName,
-      plan_id: plan_id,
-      plan_name: subscription.Plan.name,
-      subscription_id: subscription.id,
-      amount: subscription.amount_paid,
-    },
-  });
+  // 🔔 Trigger Notification
+  await notificationService.planPurchase(userId, subscription.Plan.name);
 
   logger.info("Razorpay payment verified and subscription activated", {
     orderId: razorpay_order_id,

@@ -5,6 +5,7 @@ const { asyncHandler } = require("../middleware/error.middleware");
 const logger = require("../config/logger");
 const { Op } = require("sequelize");
 const nodemailer = require("nodemailer");
+const notificationService = require("../services/notification.service");
 
 const generateToken = (userId) => {
   return jwt.sign({ userId }, process.env.JWT_SECRET, {
@@ -104,7 +105,7 @@ const login = asyncHandler(async (req, res) => {
       message: "Invalid email/username or password",
     });
   }
-  
+
   // If user is marked deleted/blocked, prevent login
   if (user.is_deleted) {
     return res.status(403).json({
@@ -485,6 +486,9 @@ const register = asyncHandler(async (req, res) => {
 
   logger.info("User registered", { userId: user.id });
 
+  // 🔔 Trigger Notification
+  await notificationService.userRegistered(user.id);
+
   res.status(201).json({
     status: true,
     message: "User registered successfully",
@@ -749,6 +753,9 @@ const completeSocialSignupV2 = asyncHandler(async (req, res) => {
   const token = generateToken(updatedUser.id);
 
   logger.info('Social signup completed', { userId: updatedUser.id, email: updatedUser.email });
+
+  // 🔔 Trigger Notification
+  await notificationService.userRegistered(updatedUser.id);
 
   res.json({
     status: true,
