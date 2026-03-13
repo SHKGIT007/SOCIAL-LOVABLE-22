@@ -5,13 +5,15 @@ const {
   updateSystemSettings,
   getAIProviderCredentials,
   getCloudinaryCredentials,
-  getGoogleOAuthCredentials
+  getGoogleOAuthCredentials,
+  getFacebookCredentials
 } = require('../controllers/systemSetting.controller');
 
 router.get('/', getSystemSettings);
 router.get('/ai-provider', getAIProviderCredentials);
 router.get('/cloudinary', getCloudinaryCredentials);
 router.get('/google-oauth', getGoogleOAuthCredentials);
+router.get('/facebook', getFacebookCredentials);
 router.post('/update', updateSystemSettings);
 
 module.exports = router;

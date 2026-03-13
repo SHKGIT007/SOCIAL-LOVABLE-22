@@ -52,6 +52,10 @@ class ApiService {
     return this.request("/system-settings/google-oauth");
   }
 
+  async getFacebookCredentials() {
+    return this.request("/system-settings/facebook");
+  }
+
   async updateSystemSettings(settings) {
     return this.request("/system-settings/update", {
       method: "POST",

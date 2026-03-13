@@ -4,11 +4,12 @@ import DashboardLayout from '../../../components/Layout/DashboardLayout';
 import Swal from 'sweetalert2';
 
 const SystemSettings = () => {
-  const [activeTab, setActiveTab] = useState<'ai-provider' | 'cloudinary' | 'google-oauth'>('ai-provider');
+  const [activeTab, setActiveTab] = useState<'ai-provider' | 'cloudinary' | 'google-oauth' | 'facebook-oauth'>('ai-provider');
   const [loading, setLoading] = useState(false);
   const [showAIProviderGuide, setShowAIProviderGuide] = useState(false);
   const [showCloudinaryGuide, setShowCloudinaryGuide] = useState(false);
   const [showGoogleOAuthGuide, setShowGoogleOAuthGuide] = useState(false);
+  const [showFacebookGuide, setShowFacebookGuide] = useState(false);
   
   // AI Provider form state
   const [aiProviderForm, setAIProviderForm] = useState<{
@@ -32,6 +33,12 @@ const SystemSettings = () => {
     google_redirect_uri?: string;
   }>({});
 
+  // Facebook OAuth form state
+  const [facebookForm, setFacebookForm] = useState<{
+    facebook_app_id?: string;
+    facebook_app_secret?: string;
+  }>({});
+
   useEffect(() => { 
     fetchAllCredentials(); 
   }, []);
@@ -40,10 +47,11 @@ const SystemSettings = () => {
     setLoading(true);
     try {
       // Fetch all credentials in parallel
-      const [aiRes, cloudinaryRes, googleRes] = await Promise.all([
+      const [aiRes, cloudinaryRes, googleRes, facebookRes] = await Promise.all([
         apiService.getAIProviderCredentials(),
         apiService.getCloudinaryCredentials(),
-        apiService.getGoogleOAuthCredentials()
+        apiService.getGoogleOAuthCredentials(),
+        apiService.getFacebookCredentials()
       ]);
 
       if (aiRes.status && aiRes.data) {
@@ -68,6 +76,13 @@ const SystemSettings = () => {
           google_client_id: googleRes.data.google_client_id || '',
           google_client_secret: googleRes.data.google_client_secret || '',
           google_redirect_uri: googleRes.data.google_redirect_uri || '',
+        });
+      }
+
+      if (facebookRes.status && facebookRes.data) {
+        setFacebookForm({
+          facebook_app_id: facebookRes.data.facebook_app_id || '',
+          facebook_app_secret: facebookRes.data.facebook_app_secret || '',
         });
       }
     } catch (error) {
@@ -98,6 +113,10 @@ const SystemSettings = () => {
 
   const handleGoogleOAuthChange = (key, value) => {
     setGoogleOAuthForm({ ...googleOAuthForm, [key]: value });
+  };
+
+  const handleFacebookChange = (key, value) => {
+    setFacebookForm({ ...facebookForm, [key]: value });
   };
 
   // Function to get AI Provider specific guide content
@@ -240,7 +259,8 @@ const SystemSettings = () => {
         cloudinary_api_secret: current.cloudinary_api_secret || '',
         google_client_id: current.google_client_id || '',
         google_client_secret: current.google_client_secret || '',
-        google_redirect_uri: current.google_redirect_uri || '',
+        facebook_app_id: current.facebook_app_id || '',
+        facebook_app_secret: current.facebook_app_secret || '',
       };
       
       const updateData = await apiService.updateSystemSettings({ settings: updates });
@@ -289,7 +309,9 @@ const SystemSettings = () => {
         // Preserve Google OAuth settings
         google_client_id: current.google_client_id || '',
         google_client_secret: current.google_client_secret || '',
-        google_redirect_uri: current.google_redirect_uri || '',
+        // Preserve Facebook settings
+        facebook_app_id: current.facebook_app_id || '',
+        facebook_app_secret: current.facebook_app_secret || '',
       };
       
       const updateData = await apiService.updateSystemSettings({ settings: updates });
@@ -338,7 +360,10 @@ const SystemSettings = () => {
         // Update Google OAuth settings
         google_client_id: googleOAuthForm.google_client_id || '',
         google_client_secret: googleOAuthForm.google_client_secret || '',
-        google_redirect_uri: googleOAuthForm.google_redirect_uri || '',
+      
+        // Preserve Facebook settings
+        facebook_app_id: current.facebook_app_id || '',
+        facebook_app_secret: current.facebook_app_secret || '',
       };
       
       const updateData = await apiService.updateSystemSettings({ settings: updates });
@@ -362,6 +387,57 @@ const SystemSettings = () => {
         icon: 'error',
         title: 'Error',
         text: 'Failed to update Google OAuth settings.'
+      });
+    }
+    setLoading(false);
+  };
+
+  const handleUpdateFacebook = async () => {
+    setLoading(true);
+    try {
+      // Get current settings to preserve other fields
+      const currentSettings = await apiService.getSystemSettings();
+      const current = currentSettings.data && currentSettings.data.length > 0 ? currentSettings.data[0] : {};
+      
+      const updates = {
+        // Preserve AI Provider settings
+        type: current.type || '',
+        is_active: current.is_active || false,
+        api_url: current.api_url || '',
+        api_key: current.api_key || '',
+        // Preserve Cloudinary settings
+        cloudinary_cloud_name: current.cloudinary_cloud_name || '',
+        cloudinary_api_key: current.cloudinary_api_key || '',
+        cloudinary_api_secret: current.cloudinary_api_secret || '',
+        // Preserve Google OAuth settings
+        google_client_id: current.google_client_id || '',
+        google_client_secret: current.google_client_secret || '',
+        // Update Facebook settings
+        facebook_app_id: facebookForm.facebook_app_id || '',
+        facebook_app_secret: facebookForm.facebook_app_secret || '',
+      };
+      
+      const updateData = await apiService.updateSystemSettings({ settings: updates });
+
+      if(updateData.status === true) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: 'Facebook OAuth settings updated successfully.'
+        });
+        fetchAllCredentials();
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: updateData.message || 'Failed to update settings.'
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Failed to update Facebook OAuth settings.'
       });
     }
     setLoading(false);
@@ -404,6 +480,16 @@ const SystemSettings = () => {
             }`}
           >
             Google OAuth
+          </button>
+          <button
+            onClick={() => setActiveTab('facebook-oauth')}
+            className={`px-6 py-3 font-semibold text-sm transition-all ${
+              activeTab === 'facebook-oauth'
+                ? 'border-b-2 border-indigo-600 text-indigo-600'
+                : 'text-gray-600 hover:text-indigo-600'
+            }`}
+          >
+            Facebook OAuth
           </button>
         </div>
 
@@ -675,15 +761,7 @@ const SystemSettings = () => {
                 onChange={e => handleGoogleOAuthChange('google_client_secret', e.target.value)}
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Redirect URI (Optional)</label>
-              <input
-                className="w-full mb-4 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400 transition-all"
-                placeholder="Redirect URI"
-                value={googleOAuthForm.google_redirect_uri ?? ''}
-                onChange={e => handleGoogleOAuthChange('google_redirect_uri', e.target.value)}
-              />
-            </div>
+           
             <button
               className={`w-full py-3 bg-green-600 text-white font-bold rounded-lg transition-all ${
                 (!googleOAuthForm.google_client_id || !googleOAuthForm.google_client_secret || loading) 
@@ -694,6 +772,92 @@ const SystemSettings = () => {
               onClick={handleUpdateGoogleOAuth}
             >
               {loading ? 'Updating...' : 'Update Google OAuth Settings'}
+            </button>
+          </div>
+        )}
+
+        {/* Facebook OAuth Tab Content */}
+        {activeTab === 'facebook-oauth' && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-800">Facebook OAuth Configuration</h3>
+              <button
+                onClick={() => setShowFacebookGuide(!showFacebookGuide)}
+                className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {showFacebookGuide ? 'Hide Guide' : 'How to Get Credentials?'}
+              </button>
+            </div>
+
+            {/* Facebook OAuth Guide */}
+            {showFacebookGuide && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                <h4 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  How to Get Facebook OAuth Credentials
+                </h4>
+                <ol className="list-decimal list-inside space-y-2 text-sm text-gray-700">
+                  <li>
+                    <strong>Go to Meta for Developers:</strong> Visit <a href="https://developers.facebook.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">developers.facebook.com</a> and log in
+                  </li>
+                  <li>
+                    <strong>Create App:</strong> Click <strong>"My Apps"</strong> → <strong>"Create App"</strong>
+                  </li>
+                  <li>
+                    <strong>Select Use Case:</strong> Choose <strong>"Authenticate and read data with Facebook Login"</strong>
+                  </li>
+                  <li>
+                    <strong>App Settings:</strong> Go to <strong>"App settings"</strong> → <strong>"Basic"</strong>
+                    <ul className="list-disc list-inside ml-4 mt-1">
+                      <li>Copy <strong>App ID</strong> and <strong>App Secret</strong></li>
+                    </ul>
+                  </li>
+                  <li>
+                    <strong>Configure Facebook Login:</strong> Go to <strong>"Product"</strong> → <strong>"Facebook Login"</strong> → <strong>"Settings"</strong>
+                    <ul className="list-disc list-inside ml-4 mt-1">
+                      <li>Add Valid OAuth Redirect URIs: <code className="bg-gray-100 px-1 rounded">http://localhost:8080/social-accounts/oauth/facebook/callback</code></li>
+                    </ul>
+                  </li>
+                  <li>
+                    <strong>Paste Credentials:</strong> Paste <strong>App ID</strong> and <strong>App Secret</strong> below
+                  </li>
+                </ol>
+              </div>
+            )}
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Facebook App ID</label>
+              <input
+                className="w-full mb-4 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
+                placeholder="Facebook App ID"
+                value={facebookForm.facebook_app_id ?? ''}
+                onChange={e => handleFacebookChange('facebook_app_id', e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Facebook App Secret</label>
+              <input
+                className="w-full mb-4 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
+                placeholder="Facebook App Secret"
+                value={facebookForm.facebook_app_secret ?? ''}
+                onChange={e => handleFacebookChange('facebook_app_secret', e.target.value)}
+              />
+            </div>
+            <button
+              className={`w-full py-3 bg-blue-600 text-white font-bold rounded-lg transition-all ${
+                (!facebookForm.facebook_app_id || !facebookForm.facebook_app_secret || loading) 
+                  ? 'opacity-50 cursor-not-allowed' 
+                  : 'hover:bg-blue-700'
+              }`}
+              disabled={loading || !facebookForm.facebook_app_id || !facebookForm.facebook_app_secret}
+              onClick={handleUpdateFacebook}
+            >
+              {loading ? 'Updating...' : 'Update Facebook OAuth Settings'}
             </button>
           </div>
         )}

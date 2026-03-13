@@ -89,6 +89,31 @@ exports.getGoogleOAuthCredentials = async (req, res) => {
   }
 };
 
+// Get Facebook OAuth credentials
+exports.getFacebookCredentials = async (req, res) => {
+  try {
+    const setting = await SystemSetting.findOne({ where: { id: 1 } });
+    if (!setting) {
+      return res.json({ 
+        status: true, 
+        data: { 
+          facebook_app_id: '', 
+          facebook_app_secret: '' 
+        } 
+      });
+    }
+    res.json({ 
+      status: true, 
+      data: { 
+        facebook_app_id: setting.facebook_app_id || '', 
+        facebook_app_secret: setting.facebook_app_secret || '' 
+      } 
+    });
+  } catch (error) {
+    res.status(500).json({ status: false, message: error.message });
+  }
+};
+
 // Update system settings (bulk)
 exports.updateSystemSettings = async (req, res) => {
   const updates = req.body.settings; // {type, api_url, api_key, ...}
@@ -102,6 +127,8 @@ exports.updateSystemSettings = async (req, res) => {
   let google_client_id = updates.google_client_id;
   let google_client_secret = updates.google_client_secret;
   let google_redirect_uri = updates.google_redirect_uri;
+  let facebook_app_id = updates.facebook_app_id;
+  let facebook_app_secret = updates.facebook_app_secret;
 
   // Only single record exists for system settings
   const [affectedRows] = await SystemSetting.update(
@@ -115,7 +142,9 @@ exports.updateSystemSettings = async (req, res) => {
       cloudinary_api_secret,
       google_client_id,
       google_client_secret,
-      google_redirect_uri
+      google_redirect_uri,
+      facebook_app_id,
+      facebook_app_secret
     },
     { where: { id: 1 } }
   );
@@ -133,7 +162,9 @@ exports.updateSystemSettings = async (req, res) => {
       cloudinary_api_secret,
       google_client_id,
       google_client_secret,
-      google_redirect_uri
+      google_redirect_uri,
+      facebook_app_id,
+      facebook_app_secret
     });
   }
   res.json({ status: true, message: 'Settings updated successfully' });
