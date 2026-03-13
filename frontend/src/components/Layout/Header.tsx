@@ -151,38 +151,6 @@ export default function Header({
     });
   };
 
-  const handleDeleteAccount = async () => {
-    Swal.fire({
-      title: "Are you sure?",
-      text: "Do you really want to delete your account? This action cannot be undone.",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#EF4444",
-      cancelButtonColor: "#6B7280",
-      confirmButtonText: "Yes, Delete My Account",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          await apiService.deleteMyAccount();
-          logout();
-          navigate("/auth");
-          Swal.fire({
-            title: "Account Deleted",
-            text: "Your account has been permanently deleted.",
-            icon: "success",
-            timer: 1500,
-            showConfirmButton: false,
-          });
-        } catch (error) {
-          Swal.fire({
-            title: "Error",
-            text: "Something went wrong while deleting your account.",
-            icon: "error",
-          });
-        }
-      }
-    });
-  };
 
   const goToNotifications = () => {
     navigate(
@@ -384,11 +352,11 @@ export default function Header({
                       className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
                     >
                       <User className="h-4 w-4" />
-                      Update Profile
+                      Profile
                     </button>
                   </div>
                 )}
-                {/* Logout & Delete */}
+                {/* Logout */}
                 <div className="border-t border-gray-200 p-2">
                   <button
                     onClick={handleSignOut}
@@ -397,16 +365,6 @@ export default function Header({
                     <LogOut className="h-4 w-4" />
                     Sign Out
                   </button>
-
-                  {getUserRole() === "client" && (
-                    <button
-                      onClick={handleDeleteAccount}
-                      className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors rounded-md"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      Delete Account
-                    </button>
-                  )}
                 </div>
               </div>
             )}
