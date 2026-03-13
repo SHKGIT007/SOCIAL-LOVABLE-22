@@ -29,6 +29,21 @@ const authenticateToken = async (req, res, next) => {
             });
         }
 
+        // Check if user account is deleted or deactivated
+        if (user.is_deleted) {
+            return res.status(401).json({
+                status: false,
+                message: 'Your account has been deleted'
+            });
+        }
+
+        if (!user.active_status) {
+            return res.status(401).json({
+                status: false,
+                message: 'Your account has been deactivated'
+            });
+        }
+
         req.user = user;
         next();
     } catch (error) {

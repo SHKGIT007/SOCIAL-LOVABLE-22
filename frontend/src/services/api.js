@@ -141,7 +141,7 @@ class ApiService {
       // FIXED: Only logout if it's an authenticated request AND not login/register
       if (response.status === 401 && includeAuth && !skipAuthLogout) {
         logout();
-        throw new Error("Session expired. Please login again.");
+        throw new Error(data.message || "Session expired. Please login again.");
       }
 
       // For login/register errors, just return the error response
@@ -583,6 +583,15 @@ class ApiService {
       {
         method: "PUT",
         body: statusData,
+      }
+    );
+  }
+
+  async recoverUser(id) {
+    return this.request(
+      API_CONFIG.ENDPOINTS.USERS.RECOVER.replace(":id", id),
+      {
+        method: "PUT",
       }
     );
   }

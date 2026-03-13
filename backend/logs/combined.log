@@ -1337,3 +1337,14 @@
 {"ai_prompt":"Title: Roddies fashion 2\nDetails: Business/Creator: Roddies fashion 2\nDescription: Relatable caption in points also give hastags.\nPlatforms: Facebook\nBrand Voice: professional\nHashtags: Trending\nFestival/Event: Halloween","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2026-03-09T10:03:52.555Z","userId":2}
 {"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-03-09T12:14:44.524Z","userId":1,"username":"admin"}
 {"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-03-09T12:23:05.683Z","userId":1,"username":"admin"}
+{"deletedBy":1,"level":"info","message":"User soft-deleted by admin","service":"social-lovable-api","timestamp":"2026-03-13T06:02:08.227Z","userId":"2"}
+{"level":"info","message":"User recovered by admin","recoveredBy":1,"service":"social-lovable-api","timestamp":"2026-03-13T06:02:25.593Z","userId":"2"}
+{"level":"info","message":"User status updated Successfully","service":"social-lovable-api","timestamp":"2026-03-13T06:07:47.217Z","updatedBy":1,"userId":"2"}
+{"level":"info","message":"User status updated Successfully","service":"social-lovable-api","timestamp":"2026-03-13T06:08:00.266Z","updatedBy":1,"userId":"2"}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-03-13T06:08:13.512Z","userId":2,"username":"test21"}
+{"level":"info","message":"User status updated Successfully","service":"social-lovable-api","timestamp":"2026-03-13T06:08:25.384Z","updatedBy":1,"userId":"2"}
+{"level":"info","message":"User status updated Successfully","service":"social-lovable-api","timestamp":"2026-03-13T06:08:34.796Z","updatedBy":1,"userId":"2"}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-03-13T06:08:45.589Z","userId":2,"username":"test21"}
+{"deletedBy":1,"level":"info","message":"User soft-deleted by admin","service":"social-lovable-api","timestamp":"2026-03-13T06:08:54.880Z","userId":"2"}
+{"level":"info","message":"User recovered by admin","recoveredBy":1,"service":"social-lovable-api","timestamp":"2026-03-13T06:09:14.626Z","userId":"2"}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-03-13T06:09:34.143Z","userId":2,"username":"test21"}

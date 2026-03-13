@@ -22,6 +22,7 @@ router.get('/:id', requireAdmin, userController.getUserById);
 router.put('/:id', requireAdmin, validateId, userController.updateUser);
 router.delete('/:id', requireAdmin, validateId, userController.deleteUser);
 router.put('/:id/status', requireAdmin, validateId, userController.updateUserStatus);
+router.put('/:id/recover', requireAdmin, validateId, userController.recoverUser);
 router.get('/deleted/list', requireAdmin, validatePagination, userController.getDeletedUsers);
 router.post('/deletemyaccount', userController.deleteMyAccount);
 router.get('/user-plan-history/:id', requireAdmin, validateId, validatePagination,userController.getUserPlanHistory);

@@ -141,6 +141,35 @@ const DeletedUsers = () => {
     fetchDeletedUsers();
   };
 
+  const handleRecover = async (id: string, name: string) => {
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: `You want to recover user "${name}"?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#10b981",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Yes, Recover!",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        setLoading(true);
+        const data = await apiService.recoverUser(id);
+        if (data.status) {
+          Swal.fire("Recovered!", "User has been recovered.", "success");
+          fetchDeletedUsers();
+        } else {
+          Swal.fire("Error", data.message || "Failed to recover user", "error");
+        }
+      } catch (err: any) {
+        Swal.fire("Error", err.message || "Something went wrong", "error");
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
   const columns: TableColumn<User>[] = useMemo(
     () => [
       {
@@ -180,6 +209,21 @@ const DeletedUsers = () => {
         selector: (row) =>
           row.deleted_at ? new Date(row.deleted_at).toLocaleString() : "-",
         width: "180px",
+      },
+      {
+        name: "Actions",
+        width: "150px",
+        cell: (row) => (
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white"
+              onClick={() => handleRecover(row.id, row.user_name || row.email || "")}
+            >
+              Recover
+            </Button>
+          </div>
+        ),
       },
     ],
     [page, perPage]

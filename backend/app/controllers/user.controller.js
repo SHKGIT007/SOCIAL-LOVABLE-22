@@ -720,6 +720,37 @@ const getUserPostDashboardStats = asyncHandler(async (req, res) => {
   });
 });
 
+const recoverUser = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const user = await User.findByPk(id);
+  if (!user) {
+    return res.status(404).json({
+      status: false,
+      message: "User not found",
+    });
+  }
+
+  // Restore user → set is_deleted = false and deleted_at = null
+  await User.update(
+    {
+      is_deleted: false,
+      deleted_at: null,
+    },
+    { where: { id } }
+  );
+
+  logger.info("User recovered by admin", {
+    userId: id,
+    recoveredBy: req.user.id,
+  });
+
+  res.json({
+    status: true,
+    message: "User recovered successfully",
+  });
+});
+
 const getMe = asyncHandler(async (req, res) => {
   const userId = req.user.id;
 
@@ -768,5 +799,6 @@ module.exports = {
   getUserPlanHistory,
   getUserPostHistory,
   getUserPostDashboardStats,
+  recoverUser,
   getMe,
 };

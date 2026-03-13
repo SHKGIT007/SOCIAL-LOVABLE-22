@@ -30,6 +30,7 @@ export const API_CONFIG = {
       UPDATE: "/users",
       DELETE: "/users",
       UPDATE_STATUS: "/users/:id/status",
+      RECOVER: "/users/:id/recover",
       DELETED_LIST: "/users/deleted/list",
       MY_PROFILE: "/users/profile/me",
       UPDATE_MY_PROFILE: "/users/profile/me",
