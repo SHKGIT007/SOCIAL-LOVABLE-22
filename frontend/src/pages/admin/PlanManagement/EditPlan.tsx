@@ -18,7 +18,6 @@ const EditPlanPage = () => {
     linked_accounts: 0,
     is_active: false,
     description: "",
-    // duration_months: 0,
   });
 
   const originalValuesRef = useRef(initialValues);
@@ -30,7 +29,6 @@ const EditPlanPage = () => {
     price: Yup.number().required("Price required"),
     ai_posts: Yup.number().required("AI Posts required"),
     linked_accounts: Yup.number().required("Linked accounts required"),
-    // duration_months: Yup.number().required("Duration required"),
   });
 
   const fields = [
@@ -53,12 +51,6 @@ const EditPlanPage = () => {
       type: "number",
       required: true,
     },
-    // {
-    //   name: "duration_months",
-    //   label: "Duration (Months)",
-    //   type: "number",
-    //   required: true,
-    // },
   ];
 
   useEffect(() => {

@@ -31,7 +31,6 @@ interface Plan {
   linked_accounts: number;
   features?: any;
   description: string;
-  duration_months: number;
 }
 
 const ClientPlans = () => {

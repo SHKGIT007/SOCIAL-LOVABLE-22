@@ -38,11 +38,6 @@ const Plan = sequelize.define(
     },
 
     // NEW FIELDS
-    // duration_months: {
-    //   type: DataTypes.INTEGER,
-    //   allowNull: false,
-    //   defaultValue: 1,
-    // },
     is_active: {
       type: DataTypes.BOOLEAN,
       allowNull: false,

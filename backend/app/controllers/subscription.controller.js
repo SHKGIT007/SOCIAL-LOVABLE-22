@@ -40,12 +40,8 @@ const createSubscriptionRecord = async ({
     startDate = currentDate.clone();
   }
 
-  // ✅ Calculate end_date only if duration_months exists
+  // No fixed end date (lifetime/managed manually)
   let endDateMoment = null;
-  if (plan.duration_months && plan.duration_months > 0) {
-    const durationDays = plan.duration_months * 30;
-    endDateMoment = startDate.clone().add(durationDays, "days").endOf("day");
-  }
 
   const subscription = await Subscription.create({
     user_id: userId,
@@ -207,12 +203,8 @@ const createRazorpayOrder = asyncHandler(async (req, res) => {
 
   const startDate = moment().tz("Asia/Kolkata").startOf("day");
 
-  // ✅ Calculate end_date only if duration_months exists
+  // No fixed end date
   let endDate = null;
-  if (plan.duration_months && plan.duration_months > 0) {
-    const durationDays = plan.duration_months * 30;
-    endDate = startDate.clone().add(durationDays, "days").endOf("day");
-  }
 
   const pendingSubscription = await Subscription.create({
     user_id: userId,
@@ -300,12 +292,8 @@ const verifyRazorpayPayment = asyncHandler(async (req, res) => {
 
   const startDate = moment().tz("Asia/Kolkata").startOf("day");
 
-  // ✅ Calculate end_date only if duration_months exists
+  // No fixed end date
   let endDate = null;
-  if (plan.duration_months && plan.duration_months > 0) {
-    const durationDays = plan.duration_months * 30;
-    endDate = startDate.clone().add(durationDays, "days").endOf("day");
-  }
 
   const updateData = {
     status: "active",
@@ -423,7 +411,6 @@ const getAllSubscriptions = asyncHandler(async (req, res) => {
           "monthly_posts",
           "ai_posts",
           "linked_accounts",
-          "duration_months",
         ],
       },
     ],
@@ -672,19 +659,8 @@ const renewSubscription = asyncHandler(async (req, res) => {
     ai_posts_used: 0,
   };
 
-  // ✅ Only update end_date if plan has duration_months
-  if (
-    subscription.Plan.duration_months &&
-    subscription.Plan.duration_months > 0
-  ) {
-    const currentDate = moment().tz("Asia/Kolkata").startOf("day");
-    const durationDays = subscription.Plan.duration_months * 30;
-    const newEndDate = currentDate
-      .clone()
-      .add(durationDays, "days")
-      .endOf("day");
-    updateData.end_date = newEndDate.format("YYYY-MM-DD HH:mm:ss");
-  }
+  // No fixed end date on renewal
+  updateData.end_date = null;
 
   await Subscription.update(updateData, { where: { id } });
 

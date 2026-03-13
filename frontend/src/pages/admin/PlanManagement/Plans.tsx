@@ -21,7 +21,6 @@ interface Plan {
   linked_accounts: number;
   is_active: boolean;
   description: string;
-  duration_months: number;
   created_at: string;
 }
 
