@@ -21,6 +21,10 @@ import {
   Clock,
   CheckCircle2,
   FileText,
+  Flame,
+  Sparkles,
+  ArrowRight,
+  ImageIcon,
 } from "lucide-react";
 import Swal from "sweetalert2";
 import { apiService } from "@/services/api";
@@ -47,6 +51,7 @@ interface Post {
   is_ai_generated: boolean;
   created_at: string;
   review_status: "pending" | "approved" | "rejected";
+  image_url?: string | null;
 }
 
 function filteredPosts(posts: Post[], status: string) {
@@ -237,9 +242,9 @@ const Posts = () => {
       case "published":
         return "bg-emerald-50 text-emerald-700 border-emerald-200";
       case "scheduled":
-        return "bg-blue-50 text-blue-700 border-blue-200";
+        return "bg-indigo-50 text-indigo-700 border-indigo-200";
       case "draft":
-        return "bg-slate-50 text-slate-700 border-slate-200";
+        return "bg-amber-50 text-amber-700 border-amber-200";
       default:
         return "bg-gray-50 text-gray-700 border-gray-200";
     }
@@ -248,11 +253,11 @@ const Posts = () => {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "published":
-        return <CheckCircle2 className="h-3.5 w-3.5" />;
+        return <CheckCircle2 className="h-3 w-3" />;
       case "scheduled":
-        return <Clock className="h-3.5 w-3.5" />;
+        return <Clock className="h-3 w-3" />;
       case "draft":
-        return <FileText className="h-3.5 w-3.5" />;
+        return <FileText className="h-3 w-3" />;
       default:
         return null;
     }
@@ -397,71 +402,89 @@ const Posts = () => {
                   !isPastSchedule;
 
                 return (
-                  <Card
+                  <div
                     key={post.id}
-                    className="border-slate-200 hover:border-slate-300 hover:shadow-md transition-all bg-white"
+                    className="group relative bg-white rounded-xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:shadow-indigo-100/50 hover:border-indigo-200/60 transition-all duration-300 overflow-hidden flex flex-col"
                   >
-                    <CardHeader className="pb-3">
-                      <div className="space-y-3">
-                        <div className="flex items-start justify-between gap-2">
-                          <CardTitle className="text-base font-semibold text-slate-900 line-clamp-2 leading-snug">
-                            {post.title}
-                          </CardTitle>
-
-                          {post.is_ai_generated && (
-                            <Badge
-                              variant="outline"
-                              className="shrink-0 text-xs border-indigo-200 text-indigo-700 bg-indigo-50"
-                            >
-                              AI
-                            </Badge>
-                          )}
-
-                          {post.review_status === "pending" &&
-                            isPastSchedule && (
-                              <Badge
-                                variant="outline"
-                                className="shrink-0 text-xs border-red-200 text-red-700 bg-red-50"
-                              >
-                                Expired
-                              </Badge>
-                            )}
+                    {/* Image Section */}
+                    <div className="relative w-full h-48 overflow-hidden bg-gradient-to-br from-indigo-100 via-cyan-50 to-violet-100">
+                      {post.image_url ? (
+                        <img
+                          src={post.image_url}
+                          alt={post.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <div className="text-center">
+                            <ImageIcon className="h-10 w-10 text-indigo-300 mx-auto mb-2" />
+                            <span className="text-xs text-indigo-400 font-medium">No Image</span>
+                          </div>
                         </div>
-
-                        <CardDescription className="line-clamp-2 text-sm text-slate-600 leading-relaxed">
-                          {post.content}
-                        </CardDescription>
-                      </div>
-
-                      <div className="flex flex-wrap gap-2 mt-3">
-                        <Badge
-                          variant="outline"
-                          className={`capitalize text-xs font-medium border ${statusClasses(post.status)} flex items-center gap-1`}
-                        >
+                      )}
+                      {/* Overlay gradient */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      
+                      {/* Status badge on top of image */}
+                      <div className="absolute top-3 left-3">
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold border backdrop-blur-sm ${statusClasses(post.status)}`}>
                           {getStatusIcon(post.status)}
-                          {post.status}
-                        </Badge>
+                          <span className="capitalize">{post.status}</span>
+                        </span>
                       </div>
-                    </CardHeader>
 
-                    <CardContent className="space-y-3 pt-0">
+                      {/* Right-side badges container */}
+                      {(post.is_ai_generated || (post.review_status === "pending" && isPastSchedule)) && (
+                        <div className="absolute top-3 right-3 flex flex-col gap-1.5 items-end">
+                          {post.is_ai_generated && (
+                            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold bg-violet-100/90 border border-violet-300 text-violet-700 backdrop-blur-sm">
+                              <Sparkles className="h-3 w-3" />
+                              AI Generated
+                            </span>
+                          )}
+                          {post.review_status === "pending" && isPastSchedule && (
+                            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold bg-red-100/90 border border-red-300 text-red-700 backdrop-blur-sm">
+                              <Flame className="h-3 w-3" />
+                              Expired
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Content Section - Centered like reference */}
+                    <div className="p-5 text-center flex flex-col flex-1">
+                      {/* Platform badges */}
                       {getPlatformsArray(post.platforms).length > 0 && (
-                        <div className="flex flex-wrap gap-1.5">
+                        <div className="flex flex-wrap gap-1.5 justify-center mb-3">
                           {getPlatformsArray(post.platforms).map((platform) => (
-                            <Badge
+                            <span
                               key={platform}
-                              variant="secondary"
-                              className="capitalize text-xs bg-slate-100 text-slate-700 border-slate-200"
+                              className="inline-flex items-center bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-medium px-2 py-0.5 rounded-md capitalize"
                             >
                               {platform}
-                            </Badge>
+                            </span>
                           ))}
                         </div>
                       )}
 
+                      {/* Title */}
+                      <h5
+                        className="text-lg font-semibold tracking-tight text-slate-900 line-clamp-2 mb-2 group-hover:text-indigo-700 transition-colors cursor-pointer"
+                        onClick={() => navigate(`/posts/${post.id}`)}
+                      >
+                        {post.title}
+                      </h5>
+
+                      {/* Description */}
+                      <p className="text-sm text-slate-500 line-clamp-2 leading-relaxed mb-4">
+                        {post.content}
+                      </p>
+
+                      {/* Schedule info */}
                       {post.scheduled_at && (
-                        <div className="flex items-center gap-2 text-xs text-slate-600 bg-slate-50 rounded-md px-3 py-2 border border-slate-100">
-                          <Calendar className="h-3.5 w-3.5 text-slate-500" />
+                        <div className="inline-flex items-center gap-1.5 text-xs text-slate-500 bg-slate-50 rounded-lg px-3 py-1.5 mx-auto mb-4 border border-slate-100">
+                          <Calendar className="h-3 w-3 text-indigo-400" />
                           <span>
                             {new Date(post.scheduled_at).toLocaleDateString(
                               "en-US",
@@ -476,67 +499,62 @@ const Posts = () => {
                           </span>
                         </div>
                       )}
-                    </CardContent>
 
-                    <CardFooter className="pt-3 flex items-center gap-2 flex-wrap border-t border-slate-100">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-8 text-xs"
-                        onClick={() => navigate(`/posts/${post.id}`)}
-                      >
-                        <Eye className="h-3.5 w-3.5 mr-1.5" />
-                        View
-                      </Button>
+                      {/* Spacer to push buttons to bottom */}
+                      <div className="flex-1" />
 
-                      {!showViewOnly && (
-                        <>
-                          {canApproveReject && (
-                            <>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-8 text-xs text-emerald-700 border-emerald-300 hover:bg-emerald-50"
-                                onClick={() => handleApprove(post.id)}
-                              >
-                                <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
-                                Approve
-                              </Button>
+                      {/* Action buttons */}
+                      <div className="flex items-center justify-center gap-2 flex-wrap pt-4 border-t border-slate-100">
+                        {/* Primary View/Read More button - styled like reference */}
+                        <button
+                          onClick={() => navigate(`/posts/${post.id}`)}
+                          className="inline-flex items-center text-white bg-gradient-to-r from-indigo-600 to-cyan-500 hover:from-indigo-700 hover:to-cyan-600 focus:ring-4 focus:ring-indigo-200 shadow-sm font-medium rounded-lg text-sm px-4 py-2 transition-all duration-200 hover:shadow-md"
+                        >
+                          View Post
+                          <ArrowRight className="w-4 h-4 ml-1.5 -mr-0.5" />
+                        </button>
 
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-8 text-xs text-red-700 border-red-300 hover:bg-red-50"
-                                onClick={() => handleReject(post.id)}
-                              >
-                                Reject
-                              </Button>
-                            </>
-                          )}
+                        {!showViewOnly && (
+                          <>
+                            {canApproveReject && (
+                              <>
+                                <button
+                                  onClick={() => handleApprove(post.id)}
+                                  className="inline-flex items-center text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 font-medium rounded-lg text-sm px-3 py-2 transition-all duration-200"
+                                >
+                                  <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
+                                  Approve
+                                </button>
 
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-8 text-xs"
-                            onClick={() => navigate(`/posts/edit/${post.id}`)}
-                          >
-                            <Edit className="h-3.5 w-3.5 mr-1.5" />
-                            Edit
-                          </Button>
+                                <button
+                                  onClick={() => handleReject(post.id)}
+                                  className="inline-flex items-center text-red-700 bg-red-50 border border-red-200 hover:bg-red-100 font-medium rounded-lg text-sm px-3 py-2 transition-all duration-200"
+                                >
+                                  Reject
+                                </button>
+                              </>
+                            )}
 
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-8 text-xs text-red-700 border-red-300 hover:bg-red-50"
-                            onClick={() => setDeletePostId(post.id)}
-                          >
-                            <Trash2 className="h-3.5 w-3.5 mr-1.5" />
-                            Delete
-                          </Button>
-                        </>
-                      )}
-                    </CardFooter>
-                  </Card>
+                            <button
+                              onClick={() => navigate(`/posts/edit/${post.id}`)}
+                              className="inline-flex items-center text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 font-medium rounded-lg text-sm px-3 py-2 transition-all duration-200"
+                            >
+                              <Edit className="h-3.5 w-3.5 mr-1" />
+                              Edit
+                            </button>
+
+                            <button
+                              onClick={() => setDeletePostId(post.id)}
+                              className="inline-flex items-center text-red-600 bg-white border border-red-200 hover:bg-red-50 hover:border-red-300 font-medium rounded-lg text-sm px-3 py-2 transition-all duration-200"
+                            >
+                              <Trash2 className="h-3.5 w-3.5 mr-1" />
+                              Delete
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 );
               })}
             </div>
