@@ -160,7 +160,12 @@ export default function Header({
   };
 
   const goToProfile = () => {
-    navigate("/update-profile");
+    const role = getUserRole();
+    if (role === "admin") {
+      navigate("/admin/update-profile");
+    } else {
+      navigate("/update-profile");
+    }
     setIsProfileOpen(false);
   };
 
@@ -345,7 +350,7 @@ export default function Header({
                 </div>
 
                 {/* Menu Items */}
-                {getUserRole() === "client" && (
+                {["client", "admin"].includes(getUserRole() as string) && (
                   <div className="py-2">
                     <button
                       onClick={goToProfile}

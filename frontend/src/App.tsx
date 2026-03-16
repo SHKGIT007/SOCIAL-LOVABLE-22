@@ -170,6 +170,7 @@ function App() {
 
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+            <Route path="/admin/update-profile" element={<AdminRoute><UpdateProfile /></AdminRoute>} />
             <Route path="/admin/notifications" element={<AdminRoute><NotificationsPage /></AdminRoute>} />
             <Route path="/admin/plans" element={<AdminRoute><AdminPlans /></AdminRoute>} />
             <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />

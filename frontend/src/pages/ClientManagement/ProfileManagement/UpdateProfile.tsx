@@ -6,13 +6,14 @@ import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ReusableForm from "@/components/ReusableForm";
 import { apiService } from "@/services/api";
-import { logout } from "@/utils/auth";
+import { logout, getUserRole } from "@/utils/auth";
 import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
 import { User, Shield, Key, AlertTriangle, Trash2, ArrowLeft } from "lucide-react";
 
 const UpdateProfile = () => {
   const [loading, setLoading] = useState(false);
+  const userRole = getUserRole();
   const [formValues, setFormValues] = useState({
     user_name: "",
     user_fname: "",
@@ -266,7 +267,7 @@ const UpdateProfile = () => {
   };
 
   return (
-    <DashboardLayout userRole="client">
+    <DashboardLayout userRole={userRole}>
       <div className="space-y-6">
         {/* Header Section */}
         <div
@@ -336,6 +337,7 @@ const UpdateProfile = () => {
                 </CardContent>
               </Card>
 
+              {userRole !== "admin" && (
               <Card className="border-red-100 bg-red-50/20 shadow-sm rounded-2xl overflow-hidden border">
                 <CardHeader className="pb-3 flex flex-row items-center gap-2 text-red-700 border-b border-red-100/30">
                   <AlertTriangle className="h-5 w-5" />
@@ -356,6 +358,7 @@ const UpdateProfile = () => {
                   </Button>
                 </CardContent>
               </Card>
+              )}
             </div>
 
             {/* Main Content Area */}

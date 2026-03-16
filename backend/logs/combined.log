@@ -1348,3 +1348,4 @@
 {"deletedBy":1,"level":"info","message":"User soft-deleted by admin","service":"social-lovable-api","timestamp":"2026-03-13T06:08:54.880Z","userId":"2"}
 {"level":"info","message":"User recovered by admin","recoveredBy":1,"service":"social-lovable-api","timestamp":"2026-03-13T06:09:14.626Z","userId":"2"}
 {"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-03-13T06:09:34.143Z","userId":2,"username":"test21"}
+{"level":"info","message":"User password changed","service":"social-lovable-api","timestamp":"2026-03-16T08:27:26.075Z","userId":1}
