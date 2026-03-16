@@ -1,26 +1,23 @@
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
 
+const { SystemSetting } = require('../models');
+
 let razorpayInstance;
 
-const getClient = () => {
-    if (razorpayInstance) {
-        return razorpayInstance;
-    }
-
-    const keyId = process.env.RAZORPAY_KEY_ID;
-    const keySecret = process.env.RAZORPAY_KEY_SECRET;
+const getClient = async () => {
+    const settings = await SystemSetting.findOne({ where: { id: 1 } });
+    const keyId = settings?.razorpay_key_id || process.env.RAZORPAY_KEY_ID;
+    const keySecret = settings?.razorpay_key_secret || process.env.RAZORPAY_KEY_SECRET;
 
     if (!keyId || !keySecret) {
         throw new Error('Razorpay keys are not configured');
     }
 
-    razorpayInstance = new Razorpay({
+    return new Razorpay({
         key_id: keyId,
         key_secret: keySecret
     });
-
-    return razorpayInstance;
 };
 
 const createOrder = async ({ amount, currency = 'INR', receipt, notes = {} }) => {
@@ -28,13 +25,13 @@ const createOrder = async ({ amount, currency = 'INR', receipt, notes = {} }) =>
         if (!amount || amount <= 0) {
             throw new Error('Invalid amount: amount must be greater than 0');
         }
-        
+
         // Check if Razorpay is in test/demo mode with invalid credentials
         if (process.env.RAZORPAY_KEY_SECRET && process.env.RAZORPAY_KEY_SECRET.length < 20) {
             throw new Error('Invalid Razorpay SECRET key. Please update it with your actual Razorpay test key from dashboard (Settings > API Keys)');
         }
 
-        const client = getClient();
+        const client = await getClient();
         const order = await client.orders.create({ amount, currency, receipt, notes });
         if (!order || !order.id) {
             throw new Error('Razorpay API returned invalid order response');
@@ -46,12 +43,15 @@ const createOrder = async ({ amount, currency = 'INR', receipt, notes = {} }) =>
     }
 };
 
-const verifySignature = (orderId, paymentId, signature) => {
-    if (!process.env.RAZORPAY_KEY_SECRET) {
+const verifySignature = async (orderId, paymentId, signature) => {
+    const settings = await SystemSetting.findOne({ where: { id: 1 } });
+    const keySecret = settings?.razorpay_key_secret || process.env.RAZORPAY_KEY_SECRET;
+
+    if (!keySecret) {
         throw new Error('Razorpay key secret is not configured');
     }
 
-    const hmac = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET);
+    const hmac = crypto.createHmac('sha256', keySecret);
     hmac.update(`${orderId}|${paymentId}`);
     const expectedSignature = hmac.digest('hex');
 

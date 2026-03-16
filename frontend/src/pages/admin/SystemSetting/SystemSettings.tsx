@@ -4,12 +4,14 @@ import DashboardLayout from '../../../components/Layout/DashboardLayout';
 import Swal from 'sweetalert2';
 
 const SystemSettings = () => {
-  const [activeTab, setActiveTab] = useState<'ai-provider' | 'cloudinary' | 'google-oauth' | 'facebook-oauth'>('ai-provider');
+  const [activeTab, setActiveTab] = useState<'ai-provider' | 'cloudinary' | 'google-oauth' | 'facebook-oauth' | 'razorpay' | 'smtp'>('ai-provider');
   const [loading, setLoading] = useState(false);
   const [showAIProviderGuide, setShowAIProviderGuide] = useState(false);
   const [showCloudinaryGuide, setShowCloudinaryGuide] = useState(false);
   const [showGoogleOAuthGuide, setShowGoogleOAuthGuide] = useState(false);
   const [showFacebookGuide, setShowFacebookGuide] = useState(false);
+  const [showRazorpayGuide, setShowRazorpayGuide] = useState(false);
+  const [showSMTPGuide, setShowSMTPGuide] = useState(false);
   
   // AI Provider form state
   const [aiProviderForm, setAIProviderForm] = useState<{
@@ -39,6 +41,21 @@ const SystemSettings = () => {
     facebook_app_secret?: string;
   }>({});
 
+  // Razorpay form state
+  const [razorpayForm, setRazorpayForm] = useState<{
+    razorpay_key_id?: string;
+    razorpay_key_secret?: string;
+  }>({});
+
+  // SMTP form state
+  const [smtpForm, setSMTPForm] = useState<{
+    smtp_host?: string;
+    smtp_port?: string;
+    smtp_user?: string;
+    smtp_pass?: string;
+    smtp_from?: string;
+  }>({});
+
   useEffect(() => { 
     fetchAllCredentials(); 
   }, []);
@@ -47,11 +64,13 @@ const SystemSettings = () => {
     setLoading(true);
     try {
       // Fetch all credentials in parallel
-      const [aiRes, cloudinaryRes, googleRes, facebookRes] = await Promise.all([
+      const [aiRes, cloudinaryRes, googleRes, facebookRes, razorpayRes, smtpRes] = await Promise.all([
         apiService.getAIProviderCredentials(),
         apiService.getCloudinaryCredentials(),
         apiService.getGoogleOAuthCredentials(),
-        apiService.getFacebookCredentials()
+        apiService.getFacebookCredentials(),
+        apiService.getRazorpayCredentials(),
+        apiService.getSMTPCredentials()
       ]);
 
       if (aiRes.status && aiRes.data) {
@@ -83,6 +102,23 @@ const SystemSettings = () => {
         setFacebookForm({
           facebook_app_id: facebookRes.data.facebook_app_id || '',
           facebook_app_secret: facebookRes.data.facebook_app_secret || '',
+        });
+      }
+
+      if (razorpayRes.status && razorpayRes.data) {
+        setRazorpayForm({
+          razorpay_key_id: razorpayRes.data.razorpay_key_id || '',
+          razorpay_key_secret: razorpayRes.data.razorpay_key_secret || '',
+        });
+      }
+
+      if (smtpRes.status && smtpRes.data) {
+        setSMTPForm({
+          smtp_host: smtpRes.data.smtp_host || '',
+          smtp_port: smtpRes.data.smtp_port || '',
+          smtp_user: smtpRes.data.smtp_user || '',
+          smtp_pass: smtpRes.data.smtp_pass || '',
+          smtp_from: smtpRes.data.smtp_from || '',
         });
       }
     } catch (error) {
@@ -117,6 +153,14 @@ const SystemSettings = () => {
 
   const handleFacebookChange = (key, value) => {
     setFacebookForm({ ...facebookForm, [key]: value });
+  };
+
+  const handleRazorpayChange = (key, value) => {
+    setRazorpayForm({ ...razorpayForm, [key]: value });
+  };
+
+  const handleSMTPChange = (key, value) => {
+    setSMTPForm({ ...smtpForm, [key]: value });
   };
 
   // Function to get AI Provider specific guide content
@@ -242,203 +286,235 @@ const SystemSettings = () => {
   };
 
   const handleUpdateAIProvider = async () => {
+    const result = await Swal.fire({
+      title: 'Update AI Provider?',
+      text: "Are you sure you want to save these changes?",
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#4f46e5',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, update it!'
+    });
+
+    if (!result.isConfirmed) return;
+
     setLoading(true);
     try {
-      // Get current settings to preserve other fields
       const currentSettings = await apiService.getSystemSettings();
       const current = currentSettings.data && currentSettings.data.length > 0 ? currentSettings.data[0] : {};
       
       const updates = {
+        ...current,
         type: aiProviderForm.type || '',
         is_active: Boolean(aiProviderForm.is_active),
         api_url: aiProviderForm.api_url || '',
         api_key: aiProviderForm.api_key || '',
-        // Preserve other settings
-        cloudinary_cloud_name: current.cloudinary_cloud_name || '',
-        cloudinary_api_key: current.cloudinary_api_key || '',
-        cloudinary_api_secret: current.cloudinary_api_secret || '',
-        google_client_id: current.google_client_id || '',
-        google_client_secret: current.google_client_secret || '',
-        facebook_app_id: current.facebook_app_id || '',
-        facebook_app_secret: current.facebook_app_secret || '',
       };
       
-      const updateData = await apiService.updateSystemSettings({ settings: updates });
+      const updateData = await apiService.updateSystemSettings(updates);
 
       if(updateData.status === true) {
-        Swal.fire({
-          icon: 'success',
-          title: 'Success',
-          text: 'AI Provider settings updated successfully.'
-        });
+        Swal.fire({ icon: 'success', title: 'Success', text: 'AI Provider settings updated successfully.' });
         fetchAllCredentials();
       } else {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: updateData.message || 'Failed to update settings.'
-        });
+        Swal.fire({ icon: 'error', title: 'Error', text: updateData.message || 'Failed to update settings.' });
       }
     } catch (error) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Failed to update AI Provider settings.'
-      });
+      Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to update AI Provider settings.' });
     }
     setLoading(false);
   };
 
   const handleUpdateCloudinary = async () => {
+    const result = await Swal.fire({
+      title: 'Update Cloudinary?',
+      text: "Are you sure you want to save these changes?",
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#0891b2',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, update it!'
+    });
+
+    if (!result.isConfirmed) return;
+
     setLoading(true);
     try {
-      // Get current settings to preserve other fields
       const currentSettings = await apiService.getSystemSettings();
       const current = currentSettings.data && currentSettings.data.length > 0 ? currentSettings.data[0] : {};
       
       const updates = {
-        // Preserve AI Provider settings
-        type: current.type || '',
-        is_active: current.is_active || false,
-        api_url: current.api_url || '',
-        api_key: current.api_key || '',
-        // Update Cloudinary settings
+        ...current,
         cloudinary_cloud_name: cloudinaryForm.cloudinary_cloud_name || '',
         cloudinary_api_key: cloudinaryForm.cloudinary_api_key || '',
         cloudinary_api_secret: cloudinaryForm.cloudinary_api_secret || '',
-        // Preserve Google OAuth settings
-        google_client_id: current.google_client_id || '',
-        google_client_secret: current.google_client_secret || '',
-        // Preserve Facebook settings
-        facebook_app_id: current.facebook_app_id || '',
-        facebook_app_secret: current.facebook_app_secret || '',
       };
       
-      const updateData = await apiService.updateSystemSettings({ settings: updates });
+      const updateData = await apiService.updateSystemSettings(updates);
 
       if(updateData.status === true) {
-        Swal.fire({
-          icon: 'success',
-          title: 'Success',
-          text: 'Cloudinary settings updated successfully.'
-        });
+        Swal.fire({ icon: 'success', title: 'Success', text: 'Cloudinary settings updated successfully.' });
         fetchAllCredentials();
       } else {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: updateData.message || 'Failed to update settings.'
-        });
+        Swal.fire({ icon: 'error', title: 'Error', text: updateData.message || 'Failed to update settings.' });
       }
     } catch (error) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Failed to update Cloudinary settings.'
-      });
+      Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to update Cloudinary settings.' });
     }
     setLoading(false);
   };
 
   const handleUpdateGoogleOAuth = async () => {
+    const result = await Swal.fire({
+      title: 'Update Google OAuth?',
+      text: "Are you sure you want to save these changes?",
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#16a34a',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, update it!'
+    });
+
+    if (!result.isConfirmed) return;
+
     setLoading(true);
     try {
-      // Get current settings to preserve other fields
       const currentSettings = await apiService.getSystemSettings();
       const current = currentSettings.data && currentSettings.data.length > 0 ? currentSettings.data[0] : {};
       
       const updates = {
-        // Preserve AI Provider settings
-        type: current.type || '',
-        is_active: current.is_active || false,
-        api_url: current.api_url || '',
-        api_key: current.api_key || '',
-        // Preserve Cloudinary settings
-        cloudinary_cloud_name: current.cloudinary_cloud_name || '',
-        cloudinary_api_key: current.cloudinary_api_key || '',
-        cloudinary_api_secret: current.cloudinary_api_secret || '',
-        // Update Google OAuth settings
+        ...current,
         google_client_id: googleOAuthForm.google_client_id || '',
         google_client_secret: googleOAuthForm.google_client_secret || '',
-      
-        // Preserve Facebook settings
-        facebook_app_id: current.facebook_app_id || '',
-        facebook_app_secret: current.facebook_app_secret || '',
       };
       
-      const updateData = await apiService.updateSystemSettings({ settings: updates });
+      const updateData = await apiService.updateSystemSettings(updates);
 
       if(updateData.status === true) {
-        Swal.fire({
-          icon: 'success',
-          title: 'Success',
-          text: 'Google OAuth settings updated successfully.'
-        });
+        Swal.fire({ icon: 'success', title: 'Success', text: 'Google OAuth settings updated successfully.' });
         fetchAllCredentials();
       } else {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: updateData.message || 'Failed to update settings.'
-        });
+        Swal.fire({ icon: 'error', title: 'Error', text: updateData.message || 'Failed to update settings.' });
       }
     } catch (error) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Failed to update Google OAuth settings.'
-      });
+      Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to update Google OAuth settings.' });
     }
     setLoading(false);
   };
 
   const handleUpdateFacebook = async () => {
+    const result = await Swal.fire({
+      title: 'Update Facebook OAuth?',
+      text: "Are you sure you want to save these changes?",
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#2563eb',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, update it!'
+    });
+
+    if (!result.isConfirmed) return;
+
     setLoading(true);
     try {
-      // Get current settings to preserve other fields
       const currentSettings = await apiService.getSystemSettings();
       const current = currentSettings.data && currentSettings.data.length > 0 ? currentSettings.data[0] : {};
       
       const updates = {
-        // Preserve AI Provider settings
-        type: current.type || '',
-        is_active: current.is_active || false,
-        api_url: current.api_url || '',
-        api_key: current.api_key || '',
-        // Preserve Cloudinary settings
-        cloudinary_cloud_name: current.cloudinary_cloud_name || '',
-        cloudinary_api_key: current.cloudinary_api_key || '',
-        cloudinary_api_secret: current.cloudinary_api_secret || '',
-        // Preserve Google OAuth settings
-        google_client_id: current.google_client_id || '',
-        google_client_secret: current.google_client_secret || '',
-        // Update Facebook settings
+        ...current,
         facebook_app_id: facebookForm.facebook_app_id || '',
         facebook_app_secret: facebookForm.facebook_app_secret || '',
       };
       
-      const updateData = await apiService.updateSystemSettings({ settings: updates });
+      const updateData = await apiService.updateSystemSettings(updates);
 
       if(updateData.status === true) {
-        Swal.fire({
-          icon: 'success',
-          title: 'Success',
-          text: 'Facebook OAuth settings updated successfully.'
-        });
+        Swal.fire({ icon: 'success', title: 'Success', text: 'Facebook OAuth settings updated successfully.' });
         fetchAllCredentials();
       } else {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: updateData.message || 'Failed to update settings.'
-        });
+        Swal.fire({ icon: 'error', title: 'Error', text: updateData.message || 'Failed to update settings.' });
       }
     } catch (error) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Failed to update Facebook OAuth settings.'
-      });
+      Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to update Facebook OAuth settings.' });
+    }
+    setLoading(false);
+  };
+
+  const handleUpdateRazorpay = async () => {
+    const result = await Swal.fire({
+      title: 'Update Razorpay Settings?',
+      text: "Are you sure you want to save these changes?",
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#4f46e5',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, update it!'
+    });
+
+    if (!result.isConfirmed) return;
+
+    setLoading(true);
+    try {
+      const currentSettings = await apiService.getSystemSettings();
+      const current = currentSettings.data && currentSettings.data.length > 0 ? currentSettings.data[0] : {};
+      
+      const updates = {
+        ...current,
+        razorpay_key_id: razorpayForm.razorpay_key_id || '',
+        razorpay_key_secret: razorpayForm.razorpay_key_secret || '',
+      };
+      
+      const updateData = await apiService.updateSystemSettings(updates);
+
+      if(updateData.status === true) {
+        Swal.fire({ icon: 'success', title: 'Success', text: 'Razorpay settings updated successfully.' });
+        fetchAllCredentials();
+      } else {
+        Swal.fire({ icon: 'error', title: 'Error', text: updateData.message || 'Failed to update settings.' });
+      }
+    } catch (error) {
+      Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to update Razorpay settings.' });
+    }
+    setLoading(false);
+  };
+
+  const handleUpdateSMTP = async () => {
+    const result = await Swal.fire({
+      title: 'Update SMTP Settings?',
+      text: "Are you sure you want to save these changes?",
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#4f46e5',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, update it!'
+    });
+
+    if (!result.isConfirmed) return;
+
+    setLoading(true);
+    try {
+      const currentSettings = await apiService.getSystemSettings();
+      const current = currentSettings.data && currentSettings.data.length > 0 ? currentSettings.data[0] : {};
+      
+      const updates = {
+        ...current,
+        smtp_host: smtpForm.smtp_host || '',
+        smtp_port: smtpForm.smtp_port || '',
+        smtp_user: smtpForm.smtp_user || '',
+        smtp_pass: smtpForm.smtp_pass || '',
+        smtp_from: smtpForm.smtp_from || '',
+      };
+      
+      const updateData = await apiService.updateSystemSettings(updates);
+
+      if(updateData.status === true) {
+        Swal.fire({ icon: 'success', title: 'Success', text: 'SMTP settings updated successfully.' });
+        fetchAllCredentials();
+      } else {
+        Swal.fire({ icon: 'error', title: 'Error', text: updateData.message || 'Failed to update settings.' });
+      }
+    } catch (error) {
+      Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to update SMTP settings.' });
     }
     setLoading(false);
   };
@@ -490,6 +566,26 @@ const SystemSettings = () => {
             }`}
           >
             Facebook OAuth
+          </button>
+          <button
+            onClick={() => setActiveTab('razorpay')}
+            className={`px-6 py-3 font-semibold text-sm transition-all ${
+              activeTab === 'razorpay'
+                ? 'border-b-2 border-indigo-600 text-indigo-600'
+                : 'text-gray-600 hover:text-indigo-600'
+            }`}
+          >
+            Razorpay
+          </button>
+          <button
+            onClick={() => setActiveTab('smtp')}
+            className={`px-6 py-3 font-semibold text-sm transition-all ${
+              activeTab === 'smtp'
+                ? 'border-b-2 border-indigo-600 text-indigo-600'
+                : 'text-gray-600 hover:text-indigo-600'
+            }`}
+          >
+            SMTP (Email)
           </button>
         </div>
 
@@ -858,6 +954,167 @@ const SystemSettings = () => {
               onClick={handleUpdateFacebook}
             >
               {loading ? 'Updating...' : 'Update Facebook OAuth Settings'}
+            </button>
+          </div>
+        )}
+
+        {/* Razorpay Tab Content */}
+        {activeTab === 'razorpay' && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-800">Razorpay Configuration</h3>
+              <button
+                onClick={() => setShowRazorpayGuide(!showRazorpayGuide)}
+                className="text-sm text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {showRazorpayGuide ? 'Hide Guide' : 'How to Get Credentials?'}
+              </button>
+            </div>
+
+            {showRazorpayGuide && (
+              <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 mb-4">
+                <h4 className="font-semibold text-indigo-900 mb-3 flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  How to Get Razorpay Credentials
+                </h4>
+                <ol className="list-decimal list-inside space-y-2 text-sm text-gray-700">
+                  <li>Log in to your <strong>Razorpay Dashboard</strong>.</li>
+                  <li>Go to <strong>Settings</strong> → <strong>API Keys</strong>.</li>
+                  <li>Click on <strong>Generate Key</strong> (or use existing ones).</li>
+                  <li>Copy <strong>Key ID</strong> and <strong>Key Secret</strong>.</li>
+                </ol>
+              </div>
+            )}
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Razorpay Key ID</label>
+              <input
+                className="w-full mb-4 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all"
+                placeholder="rzp_test_..."
+                value={razorpayForm.razorpay_key_id ?? ''}
+                onChange={e => handleRazorpayChange('razorpay_key_id', e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Razorpay Key Secret</label>
+              <input
+                className="w-full mb-4 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all"
+                placeholder="Key Secret"
+                type="password"
+                value={razorpayForm.razorpay_key_secret ?? ''}
+                onChange={e => handleRazorpayChange('razorpay_key_secret', e.target.value)}
+              />
+            </div>
+            <button
+              className={`w-full py-3 bg-indigo-600 text-white font-bold rounded-lg transition-all ${
+                (!razorpayForm.razorpay_key_id || !razorpayForm.razorpay_key_secret || loading) 
+                  ? 'opacity-50 cursor-not-allowed' 
+                  : 'hover:bg-indigo-700'
+              }`}
+              disabled={loading || !razorpayForm.razorpay_key_id || !razorpayForm.razorpay_key_secret}
+              onClick={handleUpdateRazorpay}
+            >
+              {loading ? 'Updating...' : 'Update Razorpay Settings'}
+            </button>
+          </div>
+        )}
+
+        {/* SMTP Tab Content */}
+        {activeTab === 'smtp' && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-800">SMTP Configuration</h3>
+              <button
+                onClick={() => setShowSMTPGuide(!showSMTPGuide)}
+                className="text-sm text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {showSMTPGuide ? 'Hide Guide' : 'How to Get Credentials?'}
+              </button>
+            </div>
+
+            {showSMTPGuide && (
+              <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 mb-4">
+                <h4 className="font-semibold text-indigo-900 mb-3 flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  SMTP Configuration Guide (Gmail)
+                </h4>
+                <ol className="list-decimal list-inside space-y-2 text-sm text-gray-700">
+                  <li>Use <strong>smtp.gmail.com</strong> as Host.</li>
+                  <li>Use Port <strong>587</strong> (TLS) or <strong>465</strong> (SSL).</li>
+                  <li>Generate an <strong>App Password</strong> from your Google Account settings (Security → 2-Step Verification → App Passwords).</li>
+                  <li>Use your Full Email as User and the App Password as Pass.</li>
+                </ol>
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">SMTP Host</label>
+                <input
+                  className="w-full mb-4 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all"
+                  placeholder="smtp.gmail.com"
+                  value={smtpForm.smtp_host ?? ''}
+                  onChange={e => handleSMTPChange('smtp_host', e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">SMTP Port</label>
+                <input
+                  className="w-full mb-4 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all"
+                  placeholder="587"
+                  value={smtpForm.smtp_port ?? ''}
+                  onChange={e => handleSMTPChange('smtp_port', e.target.value)}
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">SMTP User (Email)</label>
+              <input
+                className="w-full mb-4 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all"
+                placeholder="example@gmail.com"
+                value={smtpForm.smtp_user ?? ''}
+                onChange={e => handleSMTPChange('smtp_user', e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">SMTP Password</label>
+              <input
+                className="w-full mb-4 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all"
+                placeholder="App Password"
+                type="password"
+                value={smtpForm.smtp_pass ?? ''}
+                onChange={e => handleSMTPChange('smtp_pass', e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">From Email Address</label>
+              <input
+                className="w-full mb-4 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all"
+                placeholder="noreply@example.com"
+                value={smtpForm.smtp_from ?? ''}
+                onChange={e => handleSMTPChange('smtp_from', e.target.value)}
+              />
+            </div>
+            <button
+              className={`w-full py-3 bg-indigo-600 text-white font-bold rounded-lg transition-all ${
+                (!smtpForm.smtp_host || !smtpForm.smtp_user || !smtpForm.smtp_pass || loading) 
+                  ? 'opacity-50 cursor-not-allowed' 
+                  : 'hover:bg-indigo-700'
+              }`}
+              disabled={loading || !smtpForm.smtp_host || !smtpForm.smtp_user || !smtpForm.smtp_pass}
+              onClick={handleUpdateSMTP}
+            >
+              {loading ? 'Updating...' : 'Update SMTP Settings'}
             </button>
           </div>
         )}

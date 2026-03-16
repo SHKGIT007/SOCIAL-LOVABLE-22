@@ -1,4 +1,4 @@
-const { Subscription, Plan, User, Notification } = require("../models");
+const { Subscription, Plan, User, Notification, SystemSetting } = require("../models");
 const { Op } = require("sequelize");
 const { asyncHandler } = require("../middleware/error.middleware");
 const logger = require("../config/logger");
@@ -120,7 +120,11 @@ const createRazorpayOrder = asyncHandler(async (req, res) => {
   const { plan_id } = req.body;
   const userId = req.user.id;
 
-  if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+  const settings = await SystemSetting.findOne({ where: { id: 1 } });
+  const keyId = settings?.razorpay_key_id || process.env.RAZORPAY_KEY_ID;
+  const keySecret = settings?.razorpay_key_secret || process.env.RAZORPAY_KEY_SECRET;
+
+  if (!keyId || !keySecret) {
     return res.status(500).json({
       status: false,
       message: "Razorpay credentials are not configured",
@@ -235,7 +239,7 @@ const createRazorpayOrder = asyncHandler(async (req, res) => {
       order_id: order.id,
       amount: order.amount,
       currency: order.currency,
-      key: process.env.RAZORPAY_KEY_ID,
+      key: keyId,
     },
   });
 });
@@ -249,7 +253,7 @@ const verifyRazorpayPayment = asyncHandler(async (req, res) => {
   } = req.body;
   const userId = req.user.id;
 
-  const isValid = razorpayService.verifySignature(
+  const isValid = await razorpayService.verifySignature(
     razorpay_order_id,
     razorpay_payment_id,
     razorpay_signature

@@ -114,9 +114,65 @@ exports.getFacebookCredentials = async (req, res) => {
   }
 };
 
+// Get Razorpay credentials
+exports.getRazorpayCredentials = async (req, res) => {
+  try {
+    const setting = await SystemSetting.findOne({ where: { id: 1 } });
+    if (!setting) {
+      return res.json({ 
+        status: true, 
+        data: { 
+          razorpay_key_id: '', 
+          razorpay_key_secret: '' 
+        } 
+      });
+    }
+    res.json({ 
+      status: true, 
+      data: { 
+        razorpay_key_id: setting.razorpay_key_id || '', 
+        razorpay_key_secret: setting.razorpay_key_secret || '' 
+      } 
+    });
+  } catch (error) {
+    res.status(500).json({ status: false, message: error.message });
+  }
+};
+
+// Get SMTP credentials
+exports.getSMTPCredentials = async (req, res) => {
+  try {
+    const setting = await SystemSetting.findOne({ where: { id: 1 } });
+    if (!setting) {
+      return res.json({ 
+        status: true, 
+        data: { 
+          smtp_host: '', 
+          smtp_port: '', 
+          smtp_user: '', 
+          smtp_pass: '', 
+          smtp_from: '' 
+        } 
+      });
+    }
+    res.json({ 
+      status: true, 
+      data: { 
+        smtp_host: setting.smtp_host || '', 
+        smtp_port: setting.smtp_port || '', 
+        smtp_user: setting.smtp_user || '', 
+        smtp_pass: setting.smtp_pass || '', 
+        smtp_from: setting.smtp_from || '' 
+      } 
+    });
+  } catch (error) {
+    res.status(500).json({ status: false, message: error.message });
+  }
+};
+
 // Update system settings (bulk)
 exports.updateSystemSettings = async (req, res) => {
-  const updates = req.body.settings; // {type, api_url, api_key, ...}
+  const updates = req.body.settings || req.body; // Handle both wrapped and direct payloads
   let type = updates.type;
   let is_active = updates.is_active;
   let api_url = updates.api_url;
@@ -129,6 +185,17 @@ exports.updateSystemSettings = async (req, res) => {
   let google_redirect_uri = updates.google_redirect_uri;
   let facebook_app_id = updates.facebook_app_id;
   let facebook_app_secret = updates.facebook_app_secret;
+  
+  // Razorpay
+  let razorpay_key_id = updates.razorpay_key_id;
+  let razorpay_key_secret = updates.razorpay_key_secret;
+
+  // SMTP
+  let smtp_host = updates.smtp_host;
+  let smtp_port = updates.smtp_port;
+  let smtp_user = updates.smtp_user;
+  let smtp_pass = updates.smtp_pass;
+  let smtp_from = updates.smtp_from;
 
   // Only single record exists for system settings
   const [affectedRows] = await SystemSetting.update(
@@ -144,7 +211,14 @@ exports.updateSystemSettings = async (req, res) => {
       google_client_secret,
       google_redirect_uri,
       facebook_app_id,
-      facebook_app_secret
+      facebook_app_secret,
+      razorpay_key_id,
+      razorpay_key_secret,
+      smtp_host,
+      smtp_port,
+      smtp_user,
+      smtp_pass,
+      smtp_from
     },
     { where: { id: 1 } }
   );
@@ -164,7 +238,14 @@ exports.updateSystemSettings = async (req, res) => {
       google_client_secret,
       google_redirect_uri,
       facebook_app_id,
-      facebook_app_secret
+      facebook_app_secret,
+      razorpay_key_id,
+      razorpay_key_secret,
+      smtp_host,
+      smtp_port,
+      smtp_user,
+      smtp_pass,
+      smtp_from
     });
   }
   res.json({ status: true, message: 'Settings updated successfully' });

@@ -9,7 +9,7 @@ const SystemSetting = sequelize.define(
     // Unique type of setting
     type: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
       unique: true,
     },
 
@@ -35,6 +35,17 @@ const SystemSetting = sequelize.define(
     // Facebook OAuth
     facebook_app_id: { type: DataTypes.TEXT },
     facebook_app_secret: { type: DataTypes.TEXT },
+
+    // Razorpay
+    razorpay_key_id: { type: DataTypes.TEXT },
+    razorpay_key_secret: { type: DataTypes.TEXT },
+
+    // SMTP / Email
+    smtp_host: { type: DataTypes.TEXT },
+    smtp_port: { type: DataTypes.TEXT },
+    smtp_user: { type: DataTypes.TEXT },
+    smtp_pass: { type: DataTypes.TEXT },
+    smtp_from: { type: DataTypes.TEXT },
   },
   {
     tableName: "system_settings",

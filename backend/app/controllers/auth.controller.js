@@ -1,6 +1,6 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { User, Role } = require("../models");
+const { User, Role, SystemSetting } = require("../models");
 const { asyncHandler } = require("../middleware/error.middleware");
 const logger = require("../config/logger");
 const { Op } = require("sequelize");
@@ -511,18 +511,31 @@ const generateOTP = () => {
 };
 
 const sendOTPEmail = async (email, otp) => {
+  const settings = await SystemSetting.findOne({ where: { id: 1 } });
+  
+  const host = settings?.smtp_host || process.env.EMAIL_HOST;
+  const port = settings?.smtp_port || process.env.EMAIL_PORT;
+  const user = settings?.smtp_user || process.env.EMAIL_USER;
+  const pass = settings?.smtp_pass || process.env.EMAIL_PASS;
+  const from = settings?.smtp_from || process.env.EMAIL_FROM;
+
+  if (!host || !user || !pass) {
+    logger.error("SMTP Error: Credentials missing", { host, user });
+    throw new Error("Email configuration is missing. Please contact admin.");
+  }
+
   const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,
-    port: process.env.EMAIL_PORT,
-    secure: false,
+    host: host,
+    port: parseInt(port),
+    secure: parseInt(port) === 465,
     auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
+      user: user,
+      pass: pass,
     },
   });
 
   await transporter.sendMail({
-    from: process.env.EMAIL_FROM,
+    from: from,
     to: email,
     subject: "Your OTP Code",
     html: `

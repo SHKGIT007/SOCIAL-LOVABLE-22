@@ -56,10 +56,18 @@ class ApiService {
     return this.request("/system-settings/facebook");
   }
 
-  async updateSystemSettings(settings) {
+  async getRazorpayCredentials() {
+    return this.request("/system-settings/razorpay");
+  }
+
+  async getSMTPCredentials() {
+    return this.request("/system-settings/smtp");
+  }
+
+  async updateSystemSettings(updates) {
     return this.request("/system-settings/update", {
       method: "POST",
-      body: { settings },
+      body: { settings: updates },
     });
   }
 
