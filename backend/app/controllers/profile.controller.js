@@ -15,7 +15,7 @@ exports.getProfile = async (req, res) => {
 // Create or update profile for logged-in user
 exports.saveProfile = async (req, res) => {
   try {
-    const { business_name, description, platforms, brand_voice, hashtags, image_style, festival } = req.body;
+    const { business_name, description, platforms, brand_voice, hashtags, image_style } = req.body;
     let profile = await Profile.findOne({ where: { user_id: req.user.id } });
     if (!profile) {
       // If not found, create new profile
@@ -27,7 +27,6 @@ exports.saveProfile = async (req, res) => {
         brand_voice,
         hashtags,
         image_style,
-        festival,
       });
     } else {
       // Update existing profile
@@ -38,7 +37,6 @@ exports.saveProfile = async (req, res) => {
         brand_voice,
         hashtags,
         image_style,
-        festival,
       });
     }
     res.json({ status: true, data: { profile } });

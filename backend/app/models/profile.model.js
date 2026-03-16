@@ -36,10 +36,6 @@ const Profile = sequelize.define('Profile', {
     type: DataTypes.STRING,
     allowNull: true,
   },
-  festival: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
 }, {
   tableName: 'profiles',
   timestamps: true,

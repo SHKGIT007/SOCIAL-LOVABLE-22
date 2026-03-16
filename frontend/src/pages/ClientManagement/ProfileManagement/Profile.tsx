@@ -13,7 +13,6 @@ const initialProfile = {
   brand_voice: "",
   hashtags: "",
   image_style: "",
-  festival: "",
 };
 
 const profileSchema = Yup.object().shape({
@@ -23,7 +22,6 @@ const profileSchema = Yup.object().shape({
   brand_voice: Yup.string().required("Brand Voice is required"),
   hashtags: Yup.string().required("Default Hashtags are required"),
   image_style: Yup.string().required("Image Prompt is required"),
-  festival: Yup.string().required("Current Festival/Event is required"),
 });
 
 const Profile = () => {
@@ -47,7 +45,6 @@ const Profile = () => {
             brand_voice: res.data.profile.brand_voice || "",
             hashtags: res.data.profile.hashtags || "",
             image_style: res.data.profile.image_style || "",
-            festival: res.data.profile.festival || "",
           };
           setProfile(fetched);
           setOriginalProfile(fetched);
@@ -165,13 +162,6 @@ const Profile = () => {
       label: "Default Hashtags",
       type: "text",
       placeholder: "#marketing, #socialmedia",
-      required: true,
-    },
-    {
-      name: "festival",
-      label: "Current Festival/Event",
-      type: "text",
-      placeholder: "e.g. Diwali, Christmas, Eid",
       required: true,
     },
   ];
