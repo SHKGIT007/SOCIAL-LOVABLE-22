@@ -11,6 +11,7 @@ import { Plus, Pencil, Trash2, X } from "lucide-react";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { Card, CardContent } from "@/components/ui/card";
+import { formatDate } from "@/utils/dateFormatter";
 
 interface Plan {
   id: string;
@@ -193,7 +194,7 @@ const Plans = () => {
         Accounts: p.linked_accounts || "N/A",
         Status: p.is_active ? "Active" : "Inactive",
         Description: p.description || "N/A",
-        Created: new Date(p.created_at).toLocaleDateString(),
+        Created: formatDate(p.created_at),
       }));
 
       const ws = XLSX.utils.json_to_sheet(excelData);
@@ -283,7 +284,7 @@ const Plans = () => {
       },
       {
         name: "Created",
-        selector: (row) => new Date(row.created_at).toLocaleDateString() || "N/A",
+        selector: (row) => formatDate(row.created_at),
         sortable: true,
         width: "120px",
       },

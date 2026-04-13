@@ -11,6 +11,7 @@ import { Eye, X, Calendar, Trash2 } from "lucide-react";
 import Swal from "sweetalert2";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import { formatDate, formatDateTime } from "@/utils/dateFormatter";
 
 interface Post {
   id: string;
@@ -195,10 +196,8 @@ const AdminPosts = () => {
           Status: post.status,
           "Review Status": post.review_status,
           Type: post.is_ai_generated ? "AI Generated" : "Manual",
-          "Scheduled At": post.scheduled_at
-            ? new Date(post.scheduled_at).toLocaleString()
-            : "N/A",
-          "Created At": new Date(post.created_at).toLocaleDateString(),
+          "Scheduled At": formatDate(post.scheduled_at),
+          "Created At": formatDate(post.created_at),
         };
       });
 
@@ -370,7 +369,7 @@ const AdminPosts = () => {
           row.scheduled_at ? (
             <div className="flex items-center text-xs text-gray-600">
               <Calendar className="h-3 w-3 mr-1" />
-              {new Date(row.scheduled_at).toLocaleString()}
+              {formatDateTime(row.scheduled_at)}
             </div>
           ) : (
             <span className="text-gray-400 text-xs">Not scheduled</span>
@@ -379,7 +378,7 @@ const AdminPosts = () => {
       {
         name: "Created",
         width: "130px",
-        selector: (row) => new Date(row.created_at).toLocaleDateString(),
+        selector: (row) => formatDate(row.created_at),
       },
       {
         name: "Actions",

@@ -6,6 +6,7 @@ declare global {
 
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { formatDate } from "@/utils/dateFormatter";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import {
@@ -269,9 +270,7 @@ const ClientPlans = () => {
                 <div className="flex justify-between">
                   <span className="font-medium">Subsciption Date:</span>
                   <span>
-                    {new Date(
-                      currentSubscription.start_date
-                    ).toLocaleDateString("en-IN")}
+                      {formatDate(currentSubscription.start_date)}
                   </span>
                 </div>
 
@@ -279,9 +278,7 @@ const ClientPlans = () => {
                   <span className="font-medium">End Date:</span>
                   <span>
                     {currentSubscription.end_date
-                      ? new Date(
-                          currentSubscription.end_date
-                        ).toLocaleDateString("en-IN")
+                      ? formatDate(currentSubscription.end_date)
                       : "No End Date"}
                   </span>
                 </div> */}

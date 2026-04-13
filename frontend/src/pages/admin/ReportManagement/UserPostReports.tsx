@@ -17,6 +17,7 @@ import {
 import Swal from "sweetalert2";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import { formatDate, formatDateTime } from "@/utils/dateFormatter";
 import { Filter, X, Calendar, Trash2, Eye } from "lucide-react";
 
 interface Post {
@@ -156,10 +157,13 @@ const UserPostsReport = () => {
         Title: p.title || "Untitled",
         Status: p.status,
         Type: p.is_ai_generated ? "AI Generated" : "Manual",
-        "Created Date": new Date(p.created_at).toLocaleDateString(),
+        "Created Date": formatDate(p.created_at),
         "Published Date": p.published_at
-          ? new Date(p.published_at).toLocaleDateString()
-          : "N/A",
+          ? formatDate(p.published_at)
+          : "-",
+        "Scheduled Date": p.scheduled_at
+          ? formatDate(p.scheduled_at)
+          : "-",
       }));
 
       const ws = XLSX.utils.json_to_sheet(data);
@@ -295,7 +299,7 @@ const UserPostsReport = () => {
           row.scheduled_at ? (
             <div className="flex items-center text-xs text-gray-600">
               <Calendar className="h-3 w-3 mr-1" />
-              {new Date(row.scheduled_at).toLocaleString()}
+              {formatDateTime(row.scheduled_at)}
             </div>
           ) : (
             <span className="text-gray-400 text-xs">Not scheduled</span>
@@ -304,7 +308,7 @@ const UserPostsReport = () => {
       {
         name: "Created",
         width: "130px",
-        selector: (row) => new Date(row.created_at).toLocaleDateString(),
+        selector: (row) => formatDate(row.created_at),
       },
       {
         name: "Action",

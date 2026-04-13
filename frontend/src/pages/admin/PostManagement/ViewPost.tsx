@@ -10,8 +10,9 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import Swal from "sweetalert2";
+import { formatDate, formatDateTime } from "@/utils/dateFormatter";
 import { Zap } from "lucide-react";
+import Swal from "sweetalert2";
 
 const AdminViewPost = () => {
   const { id } = useParams();
@@ -54,19 +55,7 @@ const AdminViewPost = () => {
     }
   };
 
-  const formatDate = (date: string) => {
-    if (!date) return "—";
-    return new Date(date).toLocaleString("en-IN", {
-      timeZone: "Asia/Kolkata",
-      year: "numeric",
-      month: "short",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: true,
-    });
-  };
+  // Utility will be used directly in JSX
 
   if (isLoading) {
     return (
@@ -247,7 +236,7 @@ const AdminViewPost = () => {
               <div className="rounded-xl border p-4 bg-white shadow-sm">
                 <h4 className="font-semibold text-gray-900 mb-1">Created At</h4>
                 <p className="text-sm text-gray-600">
-                  {formatDate(post.created_at)}
+                  {formatDateTime(post.created_at)}
                 </p>
               </div>
 
@@ -257,7 +246,7 @@ const AdminViewPost = () => {
                     Scheduled At
                   </h4>
                   <p className="text-sm text-gray-600">
-                    {formatDate(post.scheduled_at)}
+                    {formatDateTime(post.scheduled_at)}
                   </p>
                 </div>
               )}
@@ -268,7 +257,7 @@ const AdminViewPost = () => {
                     Published At
                   </h4>
                   <p className="text-sm text-gray-600">
-                    {formatDate(post.published_at)}
+                    {formatDateTime(post.published_at)}
                   </p>
                 </div>
               )}

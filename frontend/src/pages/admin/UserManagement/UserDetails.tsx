@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { apiService } from "@/services/api";
+import { formatDate, formatDateTime } from "@/utils/dateFormatter";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,17 +28,7 @@ import {
   Crown,
 } from "lucide-react";
 
-const formatDateTime = (d: string) => {
-  if (!d) return "---";
-  return new Date(d).toLocaleString("en-IN", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true,
-  });
-};
+// Using utility functions from @/utils/dateFormatter
 
 const UserDetails = () => {
   const { id } = useParams();
@@ -286,7 +277,7 @@ const UserDetails = () => {
                             </div>
                             <div>
                                 <p className="text-xs text-gray-400 font-bold uppercase">Valid Since</p>
-                                <p className="text-sm font-black text-gray-800">{new Date(activeSubscription.start_date).toLocaleDateString()}</p>
+                                <p className="text-sm font-black text-gray-800">{formatDate(activeSubscription.start_date)}</p>
                             </div>
                         </div>
                       </div>
@@ -345,7 +336,7 @@ const UserDetails = () => {
                                             <p className="text-[10px] text-gray-400 font-bold uppercase">ID: {plan.id}</p>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <p className="text-sm font-semibold text-gray-700">{new Date(plan.start_date).toLocaleDateString()}</p>
+                                            <p className="text-sm font-semibold text-gray-700">{formatDate(plan.start_date)}</p>
                                         </td>
                                         <td className="px-6 py-4">
                                             <p className="text-sm font-black text-indigo-600">₹{plan.amount_paid}</p>

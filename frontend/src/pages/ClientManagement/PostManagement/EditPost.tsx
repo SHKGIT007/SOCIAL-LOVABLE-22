@@ -40,6 +40,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, Save, Image as ImageIcon } from "lucide-react";
 import Swal from "sweetalert2";
+import { formatDateTime } from "@/utils/dateFormatter";
 import {
   Select,
   SelectContent,
@@ -526,11 +527,7 @@ const EditPost = () => {
                     />
                     {formData.scheduled_at && (
                       <div className="text-xs text-gray-500 mt-1">
-                        India Time:{" "}
-                        {new Date(formData.scheduled_at).toLocaleString(
-                          "en-IN",
-                          { timeZone: "Asia/Kolkata" }
-                        )}
+                        Formatted: {formatDateTime(formData.scheduled_at)}
                       </div>
                     )}
                   </div>

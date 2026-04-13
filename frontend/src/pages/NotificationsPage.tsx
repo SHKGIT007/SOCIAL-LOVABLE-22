@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Bell, Check, CheckCheck } from "lucide-react";
+import { Bell, Check, CheckCheck, Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { formatDateTime } from "@/utils/dateFormatter";
 import { apiService } from "@/services/api";
 import { API_CONFIG } from "@/utils/config";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
@@ -309,14 +310,9 @@ export default function NotificationsPage() {
                           <p className="text-gray-700 mt-1 text-xs leading-relaxed">
                             {notification.message}
                           </p>
-                          <p className="text-xs text-gray-500 mt-2">
-                            {new Date(
-                              notification.created_at
-                            ).toLocaleDateString()}{" "}
-                            at{" "}
-                            {new Date(
-                              notification.created_at
-                            ).toLocaleTimeString()}
+                          <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {formatDateTime(notification.created_at)}
                           </p>
                         </div>
                       </div>

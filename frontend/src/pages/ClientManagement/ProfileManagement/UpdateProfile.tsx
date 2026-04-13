@@ -10,6 +10,7 @@ import { logout, getUserRole } from "@/utils/auth";
 import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
 import { User, Shield, Key, AlertTriangle, Trash2, ArrowLeft } from "lucide-react";
+import { formatDate } from "@/utils/dateFormatter";
 
 const UpdateProfile = () => {
   const [loading, setLoading] = useState(false);
@@ -55,7 +56,7 @@ const UpdateProfile = () => {
         setFormValues(userData);
         setOriginalData(userData);
         if (u.created_at) {
-          setMemberSince(new Date(u.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }));
+          setMemberSince(formatDate(u.created_at));
         }
       }
     } catch (err) {

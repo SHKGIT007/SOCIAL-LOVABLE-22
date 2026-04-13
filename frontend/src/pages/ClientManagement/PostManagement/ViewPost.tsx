@@ -14,6 +14,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Edit, Calendar, Sparkles } from "lucide-react";
 import Swal from "sweetalert2";
+import { formatDate, formatDateTime } from "@/utils/dateFormatter";
 
 interface Post {
   id: string;
@@ -330,7 +331,7 @@ const ViewPost = () => {
                     Scheduled For
                   </h4>
                   <p className="text-sm text-gray-600">
-                    {new Date(post.scheduled_at).toLocaleString()}
+                    {formatDateTime(post.scheduled_at)}
                   </p>
                 </div>
               )}
@@ -341,7 +342,7 @@ const ViewPost = () => {
                     Published At
                   </h4>
                   <p className="text-sm text-gray-600">
-                    {new Date(post.published_at).toLocaleString()}
+                    {formatDateTime(post.published_at)}
                   </p>
                 </div>
               )}
@@ -349,7 +350,7 @@ const ViewPost = () => {
               <div className="rounded-xl border border-gray-200 p-4 bg-white shadow-sm">
                 <h4 className="font-semibold mb-1 text-gray-900">Created</h4>
                 <p className="text-sm text-gray-600">
-                  {new Date(post.created_at).toLocaleString()}
+                  {formatDateTime(post.created_at)}
                 </p>
               </div>
 
@@ -358,7 +359,7 @@ const ViewPost = () => {
                   Last Updated
                 </h4>
                 <p className="text-sm text-gray-600">
-                  {new Date(post.updated_at).toLocaleString()}
+                  {formatDateTime(post.updated_at)}
                 </p>
               </div>
             </section>

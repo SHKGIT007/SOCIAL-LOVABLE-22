@@ -40,6 +40,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useLocation } from "react-router-dom";
+import { formatDate, formatDateTime } from "@/utils/dateFormatter";
 
 interface Post {
   id: number;
@@ -486,16 +487,7 @@ const Posts = () => {
                         <div className="inline-flex items-center gap-1.5 text-xs text-slate-500 bg-slate-50 rounded-lg px-3 py-1.5 mx-auto mb-4 border border-slate-100">
                           <Calendar className="h-3 w-3 text-indigo-400" />
                           <span>
-                            {new Date(post.scheduled_at).toLocaleDateString(
-                              "en-US",
-                              {
-                                month: "short",
-                                day: "numeric",
-                                year: "numeric",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              },
-                            )}
+                            {formatDateTime(post.scheduled_at)}
                           </span>
                         </div>
                       )}

@@ -12,6 +12,7 @@ import { User, X } from "lucide-react";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { Card, CardContent } from "@/components/ui/card";
+import { formatDate } from "@/utils/dateFormatter";
 
 interface UserData {
   id: string;
@@ -214,7 +215,7 @@ const Users = () => {
         Phone: u.user_phone || "N/A",
         Plan: u.subscription?.plan?.name || "N/A",
         Status: u.active_status ? "Active" : "Inactive",
-        Joined: new Date(u.created_at).toLocaleDateString(),
+        Joined: formatDate(u.created_at),
       }));
 
       const ws = XLSX.utils.json_to_sheet(excelData);
@@ -329,7 +330,7 @@ const Users = () => {
       },
       {
         name: "Joined",
-        selector: (row) => new Date(row.created_at).toLocaleDateString(),
+        selector: (row) => formatDate(row.created_at),
         sortable: true,
         width: "120px",
       },

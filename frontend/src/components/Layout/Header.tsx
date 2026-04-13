@@ -19,6 +19,7 @@ import { apiService } from "@/services/api";
 import { API_CONFIG } from "@/utils/config";
 import { Button } from "@/components/ui/button";
 import Swal from "sweetalert2";
+import { formatDateTime } from "@/utils/dateFormatter";
 
 import socket from "@/utils/socket";
 
@@ -276,15 +277,7 @@ export default function Header({
                               {notification.message}
                             </p>
                             <p className="text-xs text-gray-400 mt-2">
-                              {new Date(
-                                notification.created_at
-                              ).toLocaleDateString()}{" "}
-                              {new Date(
-                                notification.created_at
-                              ).toLocaleTimeString([], {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}
+                              {formatDateTime(notification.created_at)}
                             </p>
                           </div>
                           <div className="flex items-center gap-1 flex-shrink-0">

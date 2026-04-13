@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import Swal from "sweetalert2";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import { formatDate } from "@/utils/dateFormatter";
 import { Card, CardContent } from "@/components/ui/card";
 import { X } from "lucide-react";
 
@@ -132,7 +133,7 @@ const Subscriptions = () => {
         "AI Posts Used": `${s.ai_posts_used}/${s.Plan?.ai_posts}`,
         "Linked Accounts": s.Plan?.linked_accounts || 0,
         Status: s.payment_status,
-        "Start Date": new Date(s.start_date).toLocaleDateString(),
+        "Start Date": formatDate(s.start_date),
       }));
 
       const ws = XLSX.utils.json_to_sheet(excelData);
@@ -225,7 +226,7 @@ const Subscriptions = () => {
       {
         name: "Start Date",
         width: "120px",
-        selector: (row) => new Date(row.start_date).toLocaleDateString(),
+        selector: (row) => formatDate(row.start_date),
         sortable: true,
       },
     ],

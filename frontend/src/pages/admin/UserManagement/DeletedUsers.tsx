@@ -11,6 +11,7 @@ import Swal from "sweetalert2";
 import { X, Download } from "lucide-react";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import { formatDateTime } from "@/utils/dateFormatter";
 
 interface User {
   id: string;
@@ -106,7 +107,7 @@ const DeletedUsers = () => {
         "Last Name": u.user_lname || "N/A",
         Email: u.email || "N/A",
         Phone: u.user_phone || "N/A",
-        "Deleted At": u.deleted_at ? new Date(u.deleted_at).toLocaleString() : "-",
+        "Deleted At": formatDateTime(u.deleted_at),
       }));
 
       const ws = XLSX.utils.json_to_sheet(excelData);
@@ -206,8 +207,7 @@ const DeletedUsers = () => {
       },
       {
         name: "Deleted At",
-        selector: (row) =>
-          row.deleted_at ? new Date(row.deleted_at).toLocaleString() : "-",
+        cell: (row) => formatDateTime(row.deleted_at),
         width: "180px",
       },
       {

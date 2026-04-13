@@ -23,6 +23,7 @@ import {
 } from "recharts";
 import Swal from "sweetalert2";
 import { apiService } from "@/services/api";
+import { formatDate, formatDateTime } from "@/utils/dateFormatter";
 import { isAdmin, isAuthenticated } from "@/utils/auth";
 import {
   ArrowLeft,
@@ -245,7 +246,7 @@ const UserAnalytics = () => {
                 { icon: Mail, label: "Email", value: userData.email, color: "bg-blue-50 text-blue-600" },
                 { icon: Phone, label: "Phone", value: userData.user_phone || "N/A", color: "bg-emerald-50 text-emerald-600" },
                 { icon: User, label: "Type", value: userData.user_type, color: "bg-purple-50 text-purple-600" },
-                { icon: Calendar, label: "Joined", value: new Date(userData.created_at).toLocaleDateString(), color: "bg-amber-50 text-amber-600" },
+                { icon: Calendar, label: "Joined", value: formatDate(userData.created_at), color: "bg-amber-50 text-amber-600" },
             ].map((item, i) => (
                 <Card key={i} className="border-none shadow-sm bg-white/60 hover:shadow-md transition-all">
                     <CardContent className="p-4 flex items-center gap-4">
@@ -458,18 +459,18 @@ const UserAnalytics = () => {
                                         <div className="space-y-2">
                                             <div className="flex justify-between items-center text-sm">
                                                 <span className="text-gray-400">Created:</span>
-                                                <span className="font-bold">{new Date(postData.created_at).toLocaleString()}</span>
+                                                <span className="font-bold">{formatDateTime(postData.created_at)}</span>
                                             </div>
                                             {postData.scheduled_at && (
                                                 <div className="flex justify-between items-center text-sm">
                                                     <span className="text-gray-400">Scheduled:</span>
-                                                    <span className="font-bold text-cyan-400">{new Date(postData.scheduled_at).toLocaleString()}</span>
+                                                    <span className="font-bold text-cyan-400">{formatDateTime(postData.scheduled_at)}</span>
                                                 </div>
                                             )}
                                             {postData.published_at && (
                                                 <div className="flex justify-between items-center text-sm">
                                                     <span className="text-gray-400">Published:</span>
-                                                    <span className="font-bold text-emerald-400">{new Date(postData.published_at).toLocaleString()}</span>
+                                                    <span className="font-bold text-emerald-400">{formatDateTime(postData.published_at)}</span>
                                                 </div>
                                             )}
                                         </div>
