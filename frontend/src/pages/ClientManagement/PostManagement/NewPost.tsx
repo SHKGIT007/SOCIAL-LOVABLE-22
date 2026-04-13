@@ -29,6 +29,7 @@ import {
   AlertCircle,
   Facebook,
   Instagram,
+  ArrowLeft,
 } from "lucide-react";
 import { apiService } from "@/services/api";
 import { isAuthenticated } from "@/utils/auth";
@@ -314,18 +315,43 @@ const NewPost = () => {
 
   return (
     <DashboardLayout userRole="client">
-      <div className="max-w-4xl mx-auto space-y-8 pb-8">
-        {/* Header */}
-        <div className="px-2 sm:px-0">
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-            <span className="bg-gradient-to-r from-indigo-600 to-cyan-500 bg-clip-text text-transparent">
-              Create New Post
-            </span>
-          </h1>
-          <p className="text-muted-foreground text-sm sm:text-base mt-1">
-            Generate AI posts or create manually
-          </p>
+      <div className="min-h-screen bg-slate-50">
+        <div
+          className="
+    sticky top-0 z-10
+    px-4 sm:px-6 py-5 mb-6
+    bg-gradient-to-b from-white/90 to-white/70
+    backdrop-blur
+    border-b border-indigo-100
+    flex flex-col sm:flex-row sm:items-center sm:justify-between
+    gap-4
+  "
+        >
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+              <span className="bg-gradient-to-r from-indigo-600 to-cyan-500 bg-clip-text text-transparent">
+                Create New Post
+              </span>
+            </h1>
+            <p className="text-gray-600 text-sm sm:text-base mt-1">
+              Generate AI posts or create manually
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              onClick={() => navigate(-1)}
+              className="border-indigo-200 text-indigo-700 hover:bg-indigo-50 font-medium"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back
+            </Button>
+          </div>
         </div>
+
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 pb-8 space-y-8">
+
 
         {/* Mode Tabs */}
         <div className="rounded-2xl border bg-white p-1 flex shadow-sm mx-2 sm:mx-0">
@@ -767,6 +793,7 @@ const NewPost = () => {
             </div>
           </CardContent>
         </Card>
+      </div>
       </div>
     </DashboardLayout>
   );
