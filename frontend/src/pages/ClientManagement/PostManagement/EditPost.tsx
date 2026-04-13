@@ -220,6 +220,18 @@ const EditPost = () => {
     e.preventDefault();
     setIsSaving(true);
 
+    const wordCount = formData.content.trim().split(/\s+/).filter(Boolean).length;
+    if (wordCount > 1000) {
+      Swal.fire({
+        icon: "warning",
+        title: "Content Too Long",
+        text: `Your post content is ${wordCount} words. Please keep it under 1000 words.`,
+        confirmButtonColor: "#6366f1",
+      });
+      setIsSaving(false);
+      return;
+    }
+
     // Check if any platforms are connected when publishing or scheduling
     if ((formData.status === "published" || formData.status === "scheduled") && connectedAccounts.length === 0) {
       Swal.fire({

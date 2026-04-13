@@ -179,7 +179,6 @@ const NewPost = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     // Check if any platforms are connected when publishing or scheduling
     if ((status === "published" || status === "scheduled") && connectedAccounts.length === 0) {
       Swal.fire({
@@ -198,6 +197,7 @@ const NewPost = () => {
       return;
     }
 
+
     // Validation
     if (!title || !content || ((status === "published" || status === "scheduled") && platforms.length === 0)) {
       Swal.fire({
@@ -212,6 +212,19 @@ const NewPost = () => {
       });
       return;
     }
+
+    // Word count validation (1000 words limit)
+    const wordCount = content.trim().split(/\s+/).filter(Boolean).length;
+    if (wordCount > 1000) {
+      Swal.fire({
+        icon: "warning",
+        title: "Content Too Long",
+        text: `Your post content is ${wordCount} words. Please keep it under 1000 words.`,
+        confirmButtonColor: "#6366f1",
+      });
+      return;
+    }
+
 
     if (status === "scheduled") {
       if (!scheduledAt) {
