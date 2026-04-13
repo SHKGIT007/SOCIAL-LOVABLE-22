@@ -1360,3 +1360,10 @@
 {"level":"info","message":"Post updated","postId":"741","service":"social-lovable-api","timestamp":"2026-04-13T05:15:37.745Z","userId":2}
 {"ai_prompt":"Title: Roddies fashion 2\nDetails: Business/Creator: Roddies fashion 2\nDescription: Relatable caption in points also give hastags.\nPlatforms: Facebook\nBrand Voice: professional\nHashtags: Trending","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2026-04-13T05:15:46.915Z","userId":2}
 {"createdBy":1,"email":"shaktijatp@gmail.com","level":"info","message":"User created by admin","service":"social-lovable-api","timestamp":"2026-04-13T05:17:06.541Z","userId":75}
+{"level":"info","message":"User status updated Successfully","service":"social-lovable-api","timestamp":"2026-04-13T05:30:15.883Z","updatedBy":1,"userId":"40"}
+{"ai_prompt":"Title: Roddies fashion 2\nDetails: Business/Creator: Roddies fashion 2\nDescription: Relatable caption in points also give hastags.\nPlatforms: Facebook\nBrand Voice: professional\nHashtags: Trending","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2026-04-13T05:30:24.114Z","userId":2}
+{"level":"info","message":"User status updated Successfully","service":"social-lovable-api","timestamp":"2026-04-13T05:30:32.533Z","updatedBy":1,"userId":"40"}
+{"level":"info","message":"User status updated Successfully","service":"social-lovable-api","timestamp":"2026-04-13T05:30:36.928Z","updatedBy":1,"userId":"2"}
+{"level":"info","message":"User status updated Successfully","service":"social-lovable-api","timestamp":"2026-04-13T05:30:54.924Z","updatedBy":1,"userId":"2"}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-04-13T05:30:57.306Z","userId":2,"username":"test21"}
+{"deletedBy":1,"level":"info","message":"User soft-deleted by admin","service":"social-lovable-api","timestamp":"2026-04-13T05:39:07.199Z","userId":"2"}

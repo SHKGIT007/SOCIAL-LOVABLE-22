@@ -555,6 +555,21 @@ const sendOTPforgotPassword = asyncHandler(async (req, res) => {
   if (!user) {
     return res.status(404).json({ status: false, message: "Email not found" });
   }
+
+  // Check if user is deleted or deactivated
+  if (user.is_deleted) {
+    return res.status(403).json({
+      status: false,
+      message: "Your account is blocked by admin. Please contact support.",
+    });
+  }
+
+  if (Number(user.active_status) === 0) {
+    return res.status(403).json({
+      status: false,
+      message: "Your account is deactivated. Please contact admin.",
+    });
+  }
   const otp = generateOTP();
   const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
   await User.update({ otp, otp_expiry: otpExpiry }, { where: { email } });
@@ -568,9 +583,24 @@ const verifyOTPforgotPassword = asyncHandler(async (req, res) => {
   if (!email || !otp) {
     return res.status(400).json({ status: false, message: "Email and OTP are required" });
   }
-  const user = await User.findOne({ where: { email } });
+  const user = await User.findOne({ where: { email, is_email_verified: true } });
   if (!user) {
     return res.status(404).json({ status: false, message: "Email not found" });
+  }
+
+  // Check if user is deleted or deactivated
+  if (user.is_deleted) {
+    return res.status(403).json({
+      status: false,
+      message: "Your account is blocked by admin.",
+    });
+  }
+
+  if (Number(user.active_status) === 0) {
+    return res.status(403).json({
+      status: false,
+      message: "Your account is deactivated.",
+    });
   }
   if (new Date() > new Date(user.otp_expiry)) {
     return res.status(400).json({ status: false, message: "OTP expired" });
@@ -591,9 +621,24 @@ const resetPassword = asyncHandler(async (req, res) => {
   if (new_password !== confirm_password) {
     return res.status(400).json({ status: false, message: "Passwords do not match" });
   }
-  const user = await User.findOne({ where: { email } });
+  const user = await User.findOne({ where: { email, is_email_verified: true } });
   if (!user) {
     return res.status(404).json({ status: false, message: "Email not found" });
+  }
+
+  // Check if user is deleted or deactivated
+  if (user.is_deleted) {
+    return res.status(403).json({
+      status: false,
+      message: "Your account is blocked by admin.",
+    });
+  }
+
+  if (Number(user.active_status) === 0) {
+    return res.status(403).json({
+      status: false,
+      message: "Your account is deactivated.",
+    });
   }
   if (new Date() > new Date(user.otp_expiry)) {
     return res.status(400).json({ status: false, message: "OTP expired" });
