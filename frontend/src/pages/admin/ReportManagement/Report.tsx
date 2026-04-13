@@ -19,10 +19,11 @@ interface UserData {
   created_at: string;
   role: string;
   subscription: {
-    plan: { name: string } | null;
+    plan: string | null;
     status: string;
     plan_ai_posts: number | null;
     ai_posts_used: number | null;
+    amount_paid: number | null;
   } | null;
   active_status: boolean;
 }
@@ -121,7 +122,7 @@ const Report = () => {
         Name: u.user_name || "N/A",
         Email: u.email,
         Phone: u.user_phone || "N/A",
-        "Plan Name": u.subscription?.plan?.name || "N/A",
+        "Plan Name": u.subscription?.plan || "N/A",
         "Plan Status": u.subscription?.status || "N/A",
         "AI Used": u.subscription?.ai_posts_used ?? "N/A",
         "AI Total": u.subscription?.plan_ai_posts ?? "N/A",
@@ -168,7 +169,7 @@ const Report = () => {
       },
       {
         name: "Plan",
-        selector: (row) => row.subscription?.plan?.name || "N/A",
+        selector: (row) => row.subscription?.plan || "N/A",
         width: "100px",
       },
       {

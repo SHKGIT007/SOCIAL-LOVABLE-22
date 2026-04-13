@@ -295,8 +295,8 @@ const ClientPlans = () => {
                   </div>
                   <div>
                     <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Current Plan</p>
-                    <h3 className="text-xl font-bold text-slate-800">{currentSubscription.Plan?.name}</h3>
-                    <p className="text-sm font-semibold text-indigo-600">₹{currentSubscription.amount_paid} / term</p>
+                    <h3 className="text-xl font-bold text-slate-800">{currentSubscription.plan_name || currentSubscription.Plan?.name}</h3>
+                    <p className="text-sm font-semibold text-indigo-600">₹{currentSubscription.plan_price || currentSubscription.amount_paid} / term</p>
                   </div>
                 </div>
 
@@ -445,8 +445,7 @@ const ClientPlans = () => {
                     <TableRow key={sub.id} className="hover:bg-slate-50/50 transition-colors">
                       <TableCell className="font-medium">
                         <div className="flex flex-col">
-                          <span className="text-slate-900 font-bold">{sub.Plan?.name || "Premium Plan"}</span>
-                          {/* <span className="text-[10px] text-slate-400">Ref: {sub.payment_id || sub.id}</span> */}
+                          <span className="text-slate-900 font-bold">{sub.plan_name || sub.Plan?.name || "Premium Plan"}</span>
                         </div>
                       </TableCell>
                       <TableCell className="font-semibold text-slate-700">₹{sub.amount_paid}</TableCell>

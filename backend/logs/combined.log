@@ -1377,3 +1377,14 @@
 {"amountPaid":0,"hasEndDate":false,"level":"info","message":"Subscription created","paymentStatus":"success","planId":24,"service":"social-lovable-api","subscriptionId":12,"timestamp":"2026-04-13T07:53:49.744Z","userId":2}
 {"level":"info","message":"Plan updated","planId":"24","service":"social-lovable-api","timestamp":"2026-04-13T07:54:06.503Z","updatedBy":1}
 {"level":"info","message":"Plan updated","planId":"24","service":"social-lovable-api","timestamp":"2026-04-13T07:54:35.265Z","updatedBy":1}
+{"amountPaid":0,"hasEndDate":false,"level":"info","message":"Subscription created","paymentStatus":"success","planId":29,"service":"social-lovable-api","subscriptionId":15,"timestamp":"2026-04-13T08:35:46.363Z","userId":2}
+{"level":"info","message":"Plan updated","planId":"29","service":"social-lovable-api","timestamp":"2026-04-13T08:36:05.164Z","updatedBy":1}
+{"ai_prompt":"Title: Roddies fashion 2\nDetails: Business/Creator: Roddies fashion 2\nDescription: Relatable caption in points also give hastags.\nPlatforms: Facebook\nBrand Voice: professional\nHashtags: Trending","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2026-04-13T08:37:53.546Z","userId":2}
+{"ai_prompt":"Title: Roddies fashion 2\nDetails: Business/Creator: Roddies fashion 2\nDescription: Relatable caption in points also give hastags.\nPlatforms: Facebook\nBrand Voice: professional\nHashtags: Trending","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2026-04-13T08:37:57.551Z","userId":2}
+{"level":"info","message":"Subscription marked as expired - AI post limit reached","service":"social-lovable-api","subscriptionId":15,"timestamp":"2026-04-13T08:37:57.595Z","userId":2}
+{"amount":100000,"currency":"INR","level":"info","message":"Creating Razorpay order","plan_id":29,"service":"social-lovable-api","timestamp":"2026-04-13T08:42:03.756Z","userId":2}
+{"level":"info","message":"Razorpay order created successfully","orderId":"order_Scumfa71ifmIpB","service":"social-lovable-api","timestamp":"2026-04-13T08:42:04.083Z"}
+{"hasEndDate":false,"level":"info","message":"Razorpay order created with pending subscription","orderId":"order_Scumfa71ifmIpB","planId":29,"service":"social-lovable-api","subscriptionId":16,"timestamp":"2026-04-13T08:42:04.105Z","userId":2}
+{"level":"info","message":"Razorpay payment verified and subscription activated","orderId":"order_Scumfa71ifmIpB","paymentId":"pay_ScumiVHWZ45YiC","service":"social-lovable-api","subscriptionId":16,"timestamp":"2026-04-13T08:42:21.252Z"}
+{"level":"info","message":"Plan updated","planId":"29","service":"social-lovable-api","timestamp":"2026-04-13T08:43:07.339Z","updatedBy":1}
+{"level":"info","message":"Plan updated","planId":"29","service":"social-lovable-api","timestamp":"2026-04-13T08:44:08.868Z","updatedBy":1}

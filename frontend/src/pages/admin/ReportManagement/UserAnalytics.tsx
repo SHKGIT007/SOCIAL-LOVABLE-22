@@ -55,6 +55,11 @@ interface SubscriptionData {
   ai_posts_used: number;
   payment_status: string;
   amount_paid: number;
+  monthly_posts: number;
+  ai_posts: number;
+  linked_accounts: number;
+  plan_name: string | null;
+  plan_price: string | number | null;
   Plan?: {
     name: string;
     ai_posts: number;
@@ -203,7 +208,7 @@ const UserAnalytics = () => {
   ] : [];
 
   const aiPostsUsed = activeSubscription?.ai_posts_used ?? 0;
-  const totalAiPosts = activeSubscription?.Plan?.ai_posts ?? 1;
+  const totalAiPosts = activeSubscription?.ai_posts ?? 1;
   const usagePercentage = Math.min(100, (aiPostsUsed / totalAiPosts) * 100);
 
   return (
@@ -363,7 +368,7 @@ const UserAnalytics = () => {
 
                             <div className="pt-4 border-t border-dashed">
                                 <p className="text-indigo-700 bg-indigo-50 p-3 rounded-xl text-xs font-bold text-center border border-indigo-100">
-                                    Current Plan: <span className="underline decoration-indigo-300 font-black">{activeSubscription.Plan?.name}</span>
+                                    Current Plan: <span className="underline decoration-indigo-300 font-black">{activeSubscription.plan_name || activeSubscription.Plan?.name}</span>
                                 </p>
                             </div>
                         </>

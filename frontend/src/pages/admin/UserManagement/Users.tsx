@@ -21,8 +21,9 @@ interface UserData {
   created_at: string;
   role: string;
   subscription: {
-    plan: { name: string } | null;
+    plan: string | null;
     status: string;
+    amount_paid: number;
   } | null;
   active_status: boolean;
 }
@@ -212,7 +213,7 @@ const Users = () => {
         Name: u.user_name || "N/A",
         Email: u.email,
         Phone: u.user_phone || "N/A",
-        Plan: u.subscription?.plan?.name || "N/A",
+        Plan: u.subscription?.plan || "N/A",
         Status: u.active_status ? "Active" : "Inactive",
         Joined: formatDate(u.created_at),
       }));
@@ -261,7 +262,7 @@ const Users = () => {
       },
       {
         name: "Plan",
-        selector: (row) => row.subscription?.plan?.name || "N/A",
+        selector: (row) => row.subscription?.plan || "N/A",
         width: "100px",
       },
       {

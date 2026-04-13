@@ -162,16 +162,18 @@ const getAllUsers = asyncHandler(async (req, res) => {
     active_status: user.active_status,
     subscription: user.Subscriptions?.[0]
       ? {
-          plan: user.Subscriptions[0].Plan?.name,
+          plan: user.Subscriptions[0].plan_name || user.Subscriptions[0].Plan?.name,
           status: user.Subscriptions[0].status,
-          plan_ai_posts: Number(user.Subscriptions[0].ai_posts || 0),
+          plan_ai_posts: Number(user.Subscriptions[0].ai_posts || user.Subscriptions[0].Plan?.ai_posts || 0),
           ai_posts_used: Number(user.Subscriptions[0].ai_posts_used || 0),
+          amount_paid: user.Subscriptions[0].plan_price || user.Subscriptions[0].amount_paid,
         }
       : {
           plan: null,
           status: null,
           plan_ai_posts: 0,
           ai_posts_used: 0,
+          amount_paid: 0,
         },
     created_at: user.created_at,
   }));
@@ -218,6 +220,11 @@ const getUserById = asyncHandler(async (req, res) => {
           "ai_posts_used",
           "payment_status",
           "amount_paid",
+          "monthly_posts",
+          "ai_posts",
+          "linked_accounts",
+          "plan_name",
+          "plan_price",
         ],
         include: [
           {
@@ -413,7 +420,7 @@ const getAdminStats = asyncHandler(async (req, res) => {
   });
 
   const totalRevenue = activeSubs.reduce(
-    (sum, s) => sum + Number(s?.Plan?.price || 0),
+    (sum, s) => sum + Number(s.plan_price || s?.Plan?.price || 0),
     0
   );
 

@@ -21,6 +21,11 @@ interface SubscriptionData {
   posts_used: number;
   ai_posts_used: number;
   payment_status: string;
+  monthly_posts: number;
+  ai_posts: number;
+  linked_accounts: number;
+  plan_name: string | null;
+  plan_price: string | number | null;
   User?: {
     email: string;
     user_name: string | null;
@@ -128,10 +133,10 @@ const Subscriptions = () => {
         "S.No": index + 1,
         User: s.User?.user_name || "N/A",
         Email: s.User?.email || "N/A",
-        Plan: s.Plan?.name || "N/A",
-        Price: s.Plan?.price || 0,
-        "AI Posts Used": `${s.ai_posts_used}/${s.Plan?.ai_posts}`,
-        "Linked Accounts": s.Plan?.linked_accounts || 0,
+        Plan: s.plan_name || s.Plan?.name || "N/A",
+        Price: s.plan_price || s.Plan?.price || 0,
+        "AI Posts Used": `${s.ai_posts_used}/${s.ai_posts}`,
+        "Linked Accounts": s.linked_accounts || 0,
         Status: s.payment_status,
         "Start Date": formatDate(s.start_date),
       }));
@@ -171,24 +176,24 @@ const Subscriptions = () => {
       },
       {
         name: "Plan",
-        selector: (row) => row.Plan?.name || "N/A",
+        selector: (row) => row.plan_name || row.Plan?.name || "N/A",
         sortable: true,
         width: "100px",
       },
       {
         name: "Plan Price",
-        selector: (row) => row.Plan?.price || "N/A",
+        selector: (row) => row.plan_price || row.Plan?.price || "N/A",
         sortable: true,
         width: "140px",
       },
       {
         name: "AI Posts Used",
         width: "150px",
-        selector: (row) => `${row.ai_posts_used} / ${row.Plan?.ai_posts || 0}`,
+        selector: (row) => `${row.ai_posts_used} / ${row.ai_posts || 0}`,
       },
       {
         name: "Linked Accounts",
-        selector: (row) => row.Plan?.linked_accounts || 0,
+        selector: (row) => row.linked_accounts || 0,
         width: "150px",
       },
       {

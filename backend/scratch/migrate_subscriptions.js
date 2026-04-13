@@ -1,5 +1,6 @@
 const { Subscription, Plan } = require("../app/models");
 const sequelize = require("../app/config/db.config");
+require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
 
 async function migrate() {
   try {
@@ -16,8 +17,10 @@ async function migrate() {
           monthly_posts: sub.Plan.monthly_posts,
           ai_posts: sub.Plan.ai_posts,
           linked_accounts: sub.Plan.linked_accounts,
+          plan_name: sub.Plan.name,
+          plan_price: sub.Plan.price,
         });
-        console.log(`Updated subscription ${sub.id} with plan ${sub.Plan.name} limits: ${sub.Plan.monthly_posts}, ${sub.Plan.ai_posts}, ${sub.Plan.linked_accounts}`);
+        console.log(`Updated subscription ${sub.id} with plan ${sub.Plan.name} limits: ${sub.Plan.monthly_posts}, ${sub.Plan.ai_posts}, ${sub.Plan.linked_accounts}, Price: ${sub.Plan.price}`);
       } else {
           console.log(`Subscription ${sub.id} has no associated plan.`);
       }

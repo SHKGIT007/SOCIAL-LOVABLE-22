@@ -57,6 +57,8 @@ const createSubscriptionRecord = async ({
     monthly_posts: plan.monthly_posts || 0,
     ai_posts: plan.ai_posts || 0,
     linked_accounts: plan.linked_accounts || 1,
+    plan_name: plan.name,
+    plan_price: plan.price,
 
     payment_status: paymentDetails.payment_status || "success",
     amount_paid:
@@ -225,6 +227,8 @@ const createRazorpayOrder = asyncHandler(async (req, res) => {
     monthly_posts: plan.monthly_posts || 0,
     ai_posts: plan.ai_posts || 0,
     linked_accounts: plan.linked_accounts || 1,
+    plan_name: plan.name,
+    plan_price: plan.price,
     payment_status: "pending",
     amount_paid: plan.price,
     payment_id: null,

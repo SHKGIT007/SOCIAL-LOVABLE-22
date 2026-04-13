@@ -96,6 +96,14 @@ const Subscription = sequelize.define(
       allowNull: false,
       defaultValue: 1,
     },
+    plan_name: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    plan_price: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: true,
+    },
   },
   {
     tableName: "subscriptions",

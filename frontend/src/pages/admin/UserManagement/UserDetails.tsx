@@ -213,7 +213,7 @@ const UserDetails = () => {
                         <div className="space-y-1">
                           <CardTitle className="text-2xl font-black text-gray-900 flex items-center gap-2">
                             <Crown className="h-6 w-6 text-yellow-500" />
-                            Premium Subscription
+                            {activeSubscription.plan_name || activeSubscription.Plan?.name || "Subscription"}
                           </CardTitle>
                           <CardDescription>Managed enterprise-level features</CardDescription>
                         </div>
@@ -226,11 +226,11 @@ const UserDetails = () => {
                       <div className="bg-indigo-50/50 p-6 rounded-2xl border border-indigo-100 flex items-center justify-between">
                         <div>
                           <p className="text-xs font-black text-indigo-500 uppercase tracking-widest mb-1">Current Plan</p>
-                          <p className="text-3xl font-black text-indigo-900">{activeSubscription.Plan?.name}</p>
+                          <p className="text-3xl font-black text-indigo-900">{activeSubscription.plan_name || activeSubscription.Plan?.name}</p>
                         </div>
                         <div className="text-right">
                           <p className="text-xs font-black text-indigo-500 uppercase tracking-widest mb-1">Monthly Cost</p>
-                          <p className="text-3xl font-black text-gray-900">₹{activeSubscription.amount_paid}</p>
+                          <p className="text-3xl font-black text-gray-900">₹{activeSubscription.plan_price || activeSubscription.amount_paid}</p>
                         </div>
                       </div>
 
@@ -246,17 +246,17 @@ const UserDetails = () => {
                             <div className="text-right">
                                 <span className="text-2xl font-black text-indigo-600">{activeSubscription.ai_posts_used}</span>
                                 <span className="text-gray-400 mx-1">/</span>
-                                <span className="text-lg font-bold text-gray-600">{activeSubscription.Plan?.ai_posts}</span>
+                                <span className="text-lg font-bold text-gray-600">{activeSubscription.ai_posts}</span>
                             </div>
                         </div>
                         <div className="space-y-2">
                             <Progress 
-                                value={(activeSubscription.ai_posts_used / (activeSubscription.Plan?.ai_posts || 1)) * 100} 
+                                value={(activeSubscription.ai_posts_used / (activeSubscription.ai_posts || 1)) * 100} 
                                 className="h-3 bg-indigo-100 [&>div]:bg-indigo-600"
                             />
                             <div className="flex justify-between text-xs font-bold text-gray-400 uppercase">
                                 <span>Used</span>
-                                <span>Remaining: {(activeSubscription.Plan?.ai_posts || 0) - activeSubscription.ai_posts_used}</span>
+                                <span>Remaining: {(activeSubscription.ai_posts || 0) - activeSubscription.ai_posts_used}</span>
                             </div>
                         </div>
                       </div>
@@ -332,8 +332,7 @@ const UserDetails = () => {
                                 planHistory.slice(0, 5).map((plan, i) => (
                                     <tr key={i} className="hover:bg-gray-50/50 transition-colors">
                                         <td className="px-6 py-4">
-                                            <p className="font-bold text-gray-900">{plan.Plan?.name || "Standard Plan"}</p>
-                                            {/* <p className="text-[10px] text-gray-400 font-bold uppercase">ID: {plan.id}</p> */}
+                                            <p className="font-bold text-gray-900">{plan.plan_name || plan.Plan?.name || "Standard Plan"}</p>
                                         </td>
                                         <td className="px-6 py-4">
                                             <p className="text-sm font-semibold text-gray-700">{formatDate(plan.start_date)}</p>
