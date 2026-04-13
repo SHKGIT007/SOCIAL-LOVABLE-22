@@ -9,8 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import Swal from "sweetalert2";
 import { User, X } from "lucide-react";
-import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
+import { downloadExcel } from "@/utils/exportUtils";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatDate } from "@/utils/dateFormatter";
 
@@ -194,8 +193,8 @@ const Users = () => {
 
       const data = await apiService.getAllUsers({
         page: 1,
-        limit: 100000, // large number to get all
-        search: debouncedSearch, // agar search hai to wahi lagega
+        limit: 1000000,
+        search: debouncedSearch,
       });
 
       if (!data.status || !data.data.users || data.data.users.length === 0) {
@@ -218,14 +217,10 @@ const Users = () => {
         Joined: formatDate(u.created_at),
       }));
 
-      const ws = XLSX.utils.json_to_sheet(excelData);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Users");
-
-      const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-      saveAs(
-        new Blob([buf]),
-        debouncedSearch ? "filtered-users.xlsx" : "all-users.xlsx",
+      downloadExcel(
+        excelData,
+        debouncedSearch ? "filtered-users" : "all-users",
+        "Users"
       );
     } catch (error: any) {
       Swal.fire({
@@ -411,13 +406,15 @@ const Users = () => {
                   {tableLoading ? "Refreshing..." : "Refresh"}
                 </Button>
 
-                <Button
-                  className="bg-emerald-600 hover:bg-emerald-700 w-full sm:w-auto px-6 flex items-center gap-2"
-                  onClick={exportExcel}
-                  disabled={exportLoading}
-                >
-                  {exportLoading ? "Exporting..." : "Export Excel"}
-                </Button>
+                {totalRows > 0 && (
+                  <Button
+                    className="bg-emerald-600 hover:bg-emerald-700 w-full sm:w-auto px-6 flex items-center gap-2"
+                    onClick={exportExcel}
+                    disabled={exportLoading}
+                  >
+                    {exportLoading ? "Exporting..." : "Export Excel"}
+                  </Button>
+                )}
 
                 <Button
                   className="bg-red-600 hover:bg-red-700 w-full sm:w-auto"

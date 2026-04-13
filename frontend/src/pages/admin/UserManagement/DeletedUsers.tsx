@@ -9,8 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Swal from "sweetalert2";
 import { X, Download } from "lucide-react";
-import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
+import { downloadExcel } from "@/utils/exportUtils";
 import { formatDateTime } from "@/utils/dateFormatter";
 
 interface User {
@@ -82,9 +81,10 @@ const DeletedUsers = () => {
   const exportExcel = async () => {
     try {
       setExportLoading(true);
+
       const params: any = {
         page: 1,
-        limit: 100000,
+        limit: 1000000,
       };
       if (debouncedSearch.trim()) params.search = debouncedSearch.trim();
 
@@ -110,14 +110,10 @@ const DeletedUsers = () => {
         "Deleted At": formatDateTime(u.deleted_at),
       }));
 
-      const ws = XLSX.utils.json_to_sheet(excelData);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Deleted Users");
-
-      const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-      saveAs(
-        new Blob([buf]),
-        debouncedSearch ? "filtered-deleted-users.xlsx" : "all-deleted-users.xlsx"
+      downloadExcel(
+        excelData,
+        debouncedSearch ? "filtered-deleted-users" : "all-deleted-users",
+        "Deleted Users"
       );
     } catch (error: any) {
       Swal.fire({
@@ -300,20 +296,22 @@ const DeletedUsers = () => {
                 {loading ? "Refreshing..." : "Refresh"}
               </Button>
 
-              <Button
-                className="bg-emerald-600 hover:bg-emerald-700 w-full sm:w-auto flex items-center gap-2"
-                onClick={exportExcel}
-                disabled={exportLoading}
-              >
-                {exportLoading ? (
-                  "Exporting..."
-                ) : (
-                  <>
-                    <Download className="h-4 w-4" />
-                    Export Excel
-                  </>
-                )}
-              </Button>
+              {totalRows > 0 && (
+                <Button
+                  className="bg-emerald-600 hover:bg-emerald-700 w-full sm:w-auto flex items-center gap-2"
+                  onClick={exportExcel}
+                  disabled={exportLoading}
+                >
+                  {exportLoading ? (
+                    "Exporting..."
+                  ) : (
+                    <>
+                      <Download className="h-4 w-4" />
+                      Export Excel
+                    </>
+                  )}
+                </Button>
+              )}
             </div>
 
             {/* Table */}

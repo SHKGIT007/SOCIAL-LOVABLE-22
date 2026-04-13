@@ -8,8 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import Swal from "sweetalert2";
 import { Plus, Pencil, Trash2, X } from "lucide-react";
-import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
+import { downloadExcel } from "@/utils/exportUtils";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatDate } from "@/utils/dateFormatter";
 
@@ -197,12 +196,7 @@ const Plans = () => {
         Created: formatDate(p.created_at),
       }));
 
-      const ws = XLSX.utils.json_to_sheet(excelData);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Plans");
-
-      const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-      saveAs(new Blob([buf]), "plans.xlsx");
+      downloadExcel(excelData, "plans", "Plans");
     } catch (error: any) {
       Swal.fire("Export Failed", error.message, "error");
     } finally {
@@ -369,12 +363,15 @@ const Plans = () => {
                   {tableLoading || exportLoading ? "Refreshing..." : "Refresh"}
                 </Button>
 
-                <Button
-                  className="bg-green-600 hover:bg-green-700 w-full sm:w-auto px-6"
-                  onClick={exportExcel}
-                >
-                  Export Excel
-                </Button>
+                {totalRows > 0 && (
+                  <Button
+                    className="bg-green-600 hover:bg-green-700 w-full sm:w-auto px-6"
+                    onClick={exportExcel}
+                    disabled={exportLoading}
+                  >
+                    {exportLoading ? "Exporting..." : "Export Excel"}
+                  </Button>
+                )}
 
                 <Button
                   className="bg-indigo-600 hover:bg-indigo-700 w-full sm:w-auto"

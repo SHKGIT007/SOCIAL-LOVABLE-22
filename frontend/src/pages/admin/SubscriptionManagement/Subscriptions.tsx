@@ -7,8 +7,7 @@ import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Swal from "sweetalert2";
-import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
+import { downloadExcel } from "@/utils/exportUtils";
 import { formatDate } from "@/utils/dateFormatter";
 import { Card, CardContent } from "@/components/ui/card";
 import { X } from "lucide-react";
@@ -108,6 +107,7 @@ const Subscriptions = () => {
   const exportExcel = async () => {
     try {
       setExportLoading(true);
+
       const data = await apiService.getAllSubscriptions({
         page: 1,
         limit: 1000000,
@@ -136,11 +136,7 @@ const Subscriptions = () => {
         "Start Date": formatDate(s.start_date),
       }));
 
-      const ws = XLSX.utils.json_to_sheet(excelData);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Subscriptions");
-      const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-      saveAs(new Blob([buf]), "subscriptions.xlsx");
+      downloadExcel(excelData, "subscriptions", "Subscriptions");
     } catch (error: any) {
       Swal.fire({
         icon: "error",
@@ -299,14 +295,16 @@ const Subscriptions = () => {
                 >
                   {loading ? "Refreshing..." : "Refresh"}
                 </Button>
-                <Button
-                  variant="outline"
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white border-none flex items-center gap-2"
-                  onClick={exportExcel}
-                  disabled={exportLoading}
-                >
-                  {exportLoading ? "Exporting..." : "Export Excel"}
-                </Button>
+                {totalRows > 0 && (
+                  <Button
+                    variant="outline"
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white border-none flex items-center gap-2"
+                    onClick={exportExcel}
+                    disabled={exportLoading}
+                  >
+                    {exportLoading ? "Exporting..." : "Export Excel"}
+                  </Button>
+                )}
               </div>
             </div>
 

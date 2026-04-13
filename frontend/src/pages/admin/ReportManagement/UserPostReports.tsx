@@ -15,8 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import Swal from "sweetalert2";
-import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
+import { downloadExcel } from "@/utils/exportUtils";
 import { formatDate, formatDateTime } from "@/utils/dateFormatter";
 import { Filter, X, Calendar, Trash2, Eye } from "lucide-react";
 
@@ -133,9 +132,10 @@ const UserPostsReport = () => {
   const exportExcel = async () => {
     try {
       setExportLoading(true);
+
       const response = await apiService.getUserPostHistory(userId, {
         page: 1,
-        limit: 10000,
+        limit: 1000000,
         search: debouncedSearch,
         year: year !== "all" ? year : undefined,
         month: month !== "all" ? month : undefined,
@@ -158,20 +158,15 @@ const UserPostsReport = () => {
         Status: p.status,
         Type: p.is_ai_generated ? "AI Generated" : "Manual",
         "Created Date": formatDate(p.created_at),
-        "Published Date": p.published_at
-          ? formatDate(p.published_at)
-          : "-",
-        "Scheduled Date": p.scheduled_at
-          ? formatDate(p.scheduled_at)
-          : "-",
+        "Published Date": p.published_at ? formatDate(p.published_at) : "-",
+        "Scheduled Date": p.scheduled_at ? formatDate(p.scheduled_at) : "-",
       }));
 
-      const ws = XLSX.utils.json_to_sheet(data);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Posts");
-
-      const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-      saveAs(new Blob([buf]), `${user?.user_name || "user"}-posts-report.xlsx`);
+      downloadExcel(
+        data,
+        `${user?.user_name || "user"}-posts-report`,
+        "Posts"
+      );
     } catch {
       Swal.fire("Error", "Export failed", "error");
     } finally {
@@ -470,14 +465,16 @@ const UserPostsReport = () => {
                     Reset
                   </Button>
                 </div>
-                <Button
-                  variant="outline"
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white border-none flex items-center gap-2"
-                  onClick={exportExcel}
-                  disabled={exportLoading}
-                >
-                  {exportLoading ? "Exporting..." : "Export Excel"}
-                </Button>
+                {totalRows > 0 && (
+                  <Button
+                    variant="outline"
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white border-none flex items-center gap-2"
+                    onClick={exportExcel}
+                    disabled={exportLoading}
+                  >
+                    {exportLoading ? "Exporting..." : "Export Excel"}
+                  </Button>
+                )}
               </div>
             </div>
 

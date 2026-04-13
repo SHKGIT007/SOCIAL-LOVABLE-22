@@ -7,8 +7,7 @@ import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Swal from "sweetalert2";
-import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
+import { downloadExcel } from "@/utils/exportUtils";
 import { Card, CardContent } from "@/components/ui/card";
 import { X } from "lucide-react";
 
@@ -100,6 +99,7 @@ const Report = () => {
   const exportExcel = async () => {
     try {
       setExportLoading(true);
+
       const data = await apiService.getAllUsers({
         page: 1,
         limit: 1000000,
@@ -127,11 +127,7 @@ const Report = () => {
         "AI Total": u.subscription?.plan_ai_posts ?? "N/A",
       }));
 
-      const ws = XLSX.utils.json_to_sheet(excelData);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Report");
-      const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-      saveAs(new Blob([buf]), "user-report.xlsx");
+      downloadExcel(excelData, "user-report", "Report");
     } catch (error: any) {
       Swal.fire({
         icon: "error",
@@ -287,14 +283,16 @@ const Report = () => {
                 >
                   {loading ? "Refreshing..." : "Refresh"}
                 </Button>
-                <Button
-                  variant="outline"
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white border-none flex items-center gap-2"
-                  onClick={exportExcel}
-                  disabled={exportLoading}
-                >
-                  {exportLoading ? "Exporting..." : "Export Excel"}
-                </Button>
+                {users.length > 0 && (
+                  <Button
+                    variant="outline"
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white border-none flex items-center gap-2"
+                    onClick={exportExcel}
+                    disabled={exportLoading}
+                  >
+                    {exportLoading ? "Exporting..." : "Export Excel"}
+                  </Button>
+                )}
               </div>
             </div>
 

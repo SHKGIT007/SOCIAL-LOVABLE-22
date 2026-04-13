@@ -9,8 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Eye, X, Calendar, Trash2 } from "lucide-react";
 import Swal from "sweetalert2";
-import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
+import { downloadExcel } from "@/utils/exportUtils";
 import { formatDate, formatDateTime } from "@/utils/dateFormatter";
 
 interface Post {
@@ -144,30 +143,17 @@ const AdminPosts = () => {
     try {
       setExportLoading(true);
 
-      let allPosts: Post[] = [];
-      let pageNo = 1;
-      const limit = 1000000;
-      let totalPages = 1;
+      const params: any = {
+        page: 1,
+        limit: 1000000,
+      };
 
-      do {
-        const params: any = {
-          page: pageNo,
-          limit,
-        };
+      if (debouncedSearch.trim()) params.search = debouncedSearch.trim();
+      if (statusFilter !== "all") params.status = statusFilter;
 
-        if (debouncedSearch.trim()) params.search = debouncedSearch.trim();
-        if (statusFilter !== "all") params.status = statusFilter;
+      const res = await apiService.getAllPosts(params);
 
-        const res = await apiService.getAllPosts(params);
-
-        if (!res.status) break;
-
-        const postsChunk = res.data.posts || [];
-        allPosts = [...allPosts, ...postsChunk];
-
-        totalPages = res.data.pagination.totalPages;
-        pageNo++;
-      } while (pageNo <= totalPages);
+      const allPosts = res.data.posts || [];
 
       if (allPosts.length === 0) {
         Swal.fire({
@@ -179,39 +165,19 @@ const AdminPosts = () => {
         return;
       }
 
-      const excelData = allPosts.map((post, index) => {
-        const platforms = getPlatformsArray(post.platforms);
+      const excelData = allPosts.map((p: Post, index: number) => ({
+        "S.No": index + 1,
+        Title: p.title || "Untitled",
+        Content: p.content || "",
+        Status: p.status,
+        User: p.User?.user_name || "N/A",
+        Email: p.User?.email || "N/A",
+        Platforms: getPlatformsArray(p.platforms).join(", "),
+        Type: p.is_ai_generated ? "AI" : "Manual",
+        Created: formatDate(p.created_at),
+      }));
 
-        return {
-          "S.No": index + 1,
-          "Business/Creator": post.User?.Profile?.business_name || post.User?.user_name || "N/A",
-          Email: post.User?.email || "N/A",
-          Title: post.title,
-          Content: post.content,
-
-          Platforms: Array.isArray(platforms)
-            ? platforms.join(", ")
-            : platforms || "N/A",
-
-          Status: post.status,
-          "Review Status": post.review_status,
-          Type: post.is_ai_generated ? "AI Generated" : "Manual",
-          "Scheduled At": formatDate(post.scheduled_at),
-          "Created At": formatDate(post.created_at),
-        };
-      });
-
-      const ws = XLSX.utils.json_to_sheet(excelData);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Posts");
-
-      const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-      saveAs(
-        new Blob([buf]),
-        debouncedSearch || statusFilter !== "all"
-          ? "filtered-posts.xlsx"
-          : "all-posts.xlsx",
-      );
+      downloadExcel(excelData, "posts", "Posts");
     } catch (error: any) {
       Swal.fire({
         icon: "error",
@@ -441,7 +407,7 @@ const AdminPosts = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={() => navigate(-1)}
-              className="px-4 py-2text-sm rounded-md border bg-white hover:bg-indigo-50 transition"
+              className="px-4 py-2 text-sm rounded-md border bg-white hover:bg-indigo-50 transition flex items-center gap-2 text-gray-700"
             >
               ← Back
             </button>
@@ -493,13 +459,15 @@ const AdminPosts = () => {
                   <option value="published">Published</option>
                 </select>
 
-                <Button
-                  className="bg-green-600 hover:bg-green-700 w-full sm:w-auto px-6"
-                  onClick={exportExcel}
-                  disabled={exportLoading}
-                >
-                  {exportLoading ? "Exporting..." : "Export Excel"}
-                </Button>
+                {totalRows > 0 && (
+                  <Button
+                    className="bg-green-600 hover:bg-green-700 w-full sm:w-auto px-6"
+                    onClick={exportExcel}
+                    disabled={exportLoading}
+                  >
+                    {exportLoading ? "Exporting..." : "Export Excel"}
+                  </Button>
+                )}
               </div>
             </div>
 
