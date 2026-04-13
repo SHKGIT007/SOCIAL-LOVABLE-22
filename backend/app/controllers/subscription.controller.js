@@ -54,6 +54,9 @@ const createSubscriptionRecord = async ({
     posts_used: 0,
     ai_posts_used: 0,
     auto_renew: false,
+    monthly_posts: plan.monthly_posts || 0,
+    ai_posts: plan.ai_posts || 0,
+    linked_accounts: plan.linked_accounts || 1,
 
     payment_status: paymentDetails.payment_status || "success",
     amount_paid:
@@ -219,6 +222,9 @@ const createRazorpayOrder = asyncHandler(async (req, res) => {
     posts_used: 0,
     ai_posts_used: 0,
     auto_renew: false,
+    monthly_posts: plan.monthly_posts || 0,
+    ai_posts: plan.ai_posts || 0,
+    linked_accounts: plan.linked_accounts || 1,
     payment_status: "pending",
     amount_paid: plan.price,
     payment_id: null,
@@ -529,7 +535,7 @@ const getUserSubscription = asyncHandler(async (req, res) => {
   let expiryReason = null;
 
   // ✅ Check 1: AI posts limit reached
-  if (subscription.ai_posts_used >= subscription.Plan.ai_posts) {
+  if (subscription.ai_posts_used >= subscription.ai_posts) {
     shouldExpire = true;
     expiryReason = "AI posts limit reached";
   }

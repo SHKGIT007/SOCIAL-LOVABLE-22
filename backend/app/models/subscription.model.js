@@ -81,6 +81,21 @@ const Subscription = sequelize.define(
       allowNull: false,
       defaultValue: true,
     },
+    monthly_posts: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+    },
+    ai_posts: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+    },
+    linked_accounts: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 1,
+    },
   },
   {
     tableName: "subscriptions",

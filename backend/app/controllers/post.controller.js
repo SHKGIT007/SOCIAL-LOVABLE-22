@@ -601,7 +601,7 @@ const generateAIPost = asyncHandler(async (req, res) => {
   });
 
   // ✅ Check if user has an active subscription
-  if (!subscription || !subscription.Plan) {
+  if (!subscription) {
     return res.status(400).json({
       status: false,
       message:
@@ -609,8 +609,8 @@ const generateAIPost = asyncHandler(async (req, res) => {
     });
   }
 
-  // 🔥 Check AI post limit (AI posts used >= Plan limit)
-  if (subscription.ai_posts_used >= subscription.Plan.ai_posts) {
+  // 🔥 Check AI post limit (AI posts used >= snapshotted limit)
+  if (subscription.ai_posts_used >= subscription.ai_posts) {
     // 🔥 Automatically mark subscription as inactive
     await Subscription.update(
       { status: "inactive" },
@@ -647,7 +647,7 @@ const generateAIPost = asyncHandler(async (req, res) => {
 
   // 🔥 Increment AI posts used count
   const newUsage = subscription.ai_posts_used + 1;
-  const totalLimit = subscription.Plan.ai_posts;
+  const totalLimit = subscription.ai_posts;
 
   await Subscription.update(
     { ai_posts_used: newUsage },

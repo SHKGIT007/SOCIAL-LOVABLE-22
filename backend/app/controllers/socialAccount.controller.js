@@ -435,6 +435,9 @@ const getconnnectedAccounts = asyncHandler(async (req, res) => {
         order: [["end_date", "DESC"]],
         attributes: [
             "id",
+            "monthly_posts",
+            "ai_posts",
+            "linked_accounts"
         ],
     });
     
@@ -443,7 +446,7 @@ const getconnnectedAccounts = asyncHandler(async (req, res) => {
     //         status: false,
     //         message: "No active subscription found",
     //         limitcount: 0,
-    //         activecount: 0
+    //         connected_accounts_count: 0
     //     });
     // }
 
@@ -456,8 +459,8 @@ const getconnnectedAccounts = asyncHandler(async (req, res) => {
 
     return res.json({
         status: true,
-        limitcount: current_subscription.Plan ? current_subscription.Plan.linked_accounts : 0,
-        activecount: activeLinkedCount
+        limitcount: current_subscription ? current_subscription.linked_accounts : 0,
+        connected_accounts_count: activeLinkedCount
     });
 });
 

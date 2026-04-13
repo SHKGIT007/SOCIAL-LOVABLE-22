@@ -1367,3 +1367,13 @@
 {"level":"info","message":"User status updated Successfully","service":"social-lovable-api","timestamp":"2026-04-13T05:30:54.924Z","updatedBy":1,"userId":"2"}
 {"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-04-13T05:30:57.306Z","userId":2,"username":"test21"}
 {"deletedBy":1,"level":"info","message":"User soft-deleted by admin","service":"social-lovable-api","timestamp":"2026-04-13T05:39:07.199Z","userId":"2"}
+{"createdBy":1,"level":"info","message":"Plan created","planId":28,"service":"social-lovable-api","timestamp":"2026-04-13T07:29:02.653Z"}
+{"level":"info","message":"Plan updated","planId":"28","service":"social-lovable-api","timestamp":"2026-04-13T07:29:46.176Z","updatedBy":1}
+{"level":"info","message":"Subscription expired","reason":"AI posts limit reached","service":"social-lovable-api","subscriptionId":2,"timestamp":"2026-04-13T07:32:34.769Z","userId":2}
+{"amountPaid":0,"hasEndDate":false,"level":"info","message":"Subscription created","paymentStatus":"success","planId":24,"service":"social-lovable-api","subscriptionId":11,"timestamp":"2026-04-13T07:32:56.860Z","userId":2}
+{"level":"info","message":"Plan updated","planId":"24","service":"social-lovable-api","timestamp":"2026-04-13T07:33:12.384Z","updatedBy":1}
+{"level":"info","message":"Plan updated","planId":"24","service":"social-lovable-api","timestamp":"2026-04-13T07:50:41.870Z","updatedBy":1}
+{"level":"info","message":"Plan updated","planId":"24","service":"social-lovable-api","timestamp":"2026-04-13T07:51:20.681Z","updatedBy":1}
+{"amountPaid":0,"hasEndDate":false,"level":"info","message":"Subscription created","paymentStatus":"success","planId":24,"service":"social-lovable-api","subscriptionId":12,"timestamp":"2026-04-13T07:53:49.744Z","userId":2}
+{"level":"info","message":"Plan updated","planId":"24","service":"social-lovable-api","timestamp":"2026-04-13T07:54:06.503Z","updatedBy":1}
+{"level":"info","message":"Plan updated","planId":"24","service":"social-lovable-api","timestamp":"2026-04-13T07:54:35.265Z","updatedBy":1}

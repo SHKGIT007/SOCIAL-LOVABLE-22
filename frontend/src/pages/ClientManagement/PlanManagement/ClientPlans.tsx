@@ -141,7 +141,7 @@ const ClientPlans = () => {
   // 🔥 Check if AI posts limit reached
   const isPostLimitReached =
     currentSubscription &&
-    currentSubscription.ai_posts_used >= currentSubscription.Plan?.ai_posts;
+    currentSubscription.ai_posts_used >= currentSubscription.ai_posts;
 
   const hasActiveSubscription =
     currentSubscription &&
@@ -305,7 +305,7 @@ const ClientPlans = () => {
                     <span className="font-medium">AI Posts Used:</span>
                     <span>
                       {currentSubscription.ai_posts_used} /{" "}
-                      {currentSubscription.Plan?.ai_posts}
+                      {currentSubscription.ai_posts}
                     </span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
@@ -316,7 +316,7 @@ const ClientPlans = () => {
                       style={{
                         width: `${Math.min(
                           (currentSubscription.ai_posts_used /
-                            currentSubscription.Plan?.ai_posts) *
+                            currentSubscription.ai_posts) *
                             100,
                           100
                         )}%`,

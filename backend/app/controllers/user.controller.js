@@ -164,7 +164,7 @@ const getAllUsers = asyncHandler(async (req, res) => {
       ? {
           plan: user.Subscriptions[0].Plan?.name,
           status: user.Subscriptions[0].status,
-          plan_ai_posts: Number(user.Subscriptions[0].Plan?.ai_posts || 0),
+          plan_ai_posts: Number(user.Subscriptions[0].ai_posts || 0),
           ai_posts_used: Number(user.Subscriptions[0].ai_posts_used || 0),
         }
       : {
