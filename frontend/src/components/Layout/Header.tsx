@@ -220,8 +220,12 @@ export default function Header({
           <div className="relative" ref={notificationRef}>
             <button
               onClick={() => {
-                setIsNotificationOpen(!isNotificationOpen);
+                const newOpenState = !isNotificationOpen;
+                setIsNotificationOpen(newOpenState);
                 setIsProfileOpen(false);
+                if (newOpenState && unreadCount > 0) {
+                  handleMarkAllAsRead();
+                }
               }}
               className="relative p-2 hover:bg-white/20 rounded-lg transition-colors duration-200"
               aria-label="Notifications"
@@ -281,17 +285,6 @@ export default function Header({
                             </p>
                           </div>
                           <div className="flex items-center gap-1 flex-shrink-0">
-                            {!notification.is_read && (
-                              <button
-                                onClick={() =>
-                                  handleMarkAsRead(notification.id)
-                                }
-                                className="p-1 hover:bg-indigo-100 rounded transition-colors"
-                                title="Mark as read"
-                              >
-                                <Check className="h-4 w-4 text-indigo-600" />
-                              </button>
-                            )}
                           </div>
                         </div>
                       </div>

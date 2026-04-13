@@ -81,6 +81,11 @@ export default function NotificationsPage() {
     if (data) {
       setNotifications(data.data?.notifications || []);
       setUnreadCount(data.data?.unreadCount || 0);
+
+      // Automatically mark all as read when page is loaded if there are unread items
+      if (data.data?.unreadCount > 0) {
+        handleMarkAllAsRead();
+      }
     }
   }, [data]);
 
@@ -318,15 +323,6 @@ export default function NotificationsPage() {
                       </div>
 
                       <div className="flex items-center gap-1 flex-shrink-0">
-                        {!notification.is_read && (
-                          <button
-                            onClick={() => handleMarkAsRead(notification.id)}
-                            className="p-1.5 hover:bg-indigo-200 rounded-lg transition"
-                            title="Mark as read"
-                          >
-                            <Check className="w-4 h-4 text-indigo-600" />
-                          </button>
-                        )}
                       </div>
                     </div>
                   </div>
