@@ -709,6 +709,26 @@ const renewSubscription = asyncHandler(async (req, res) => {
   });
 });
 
+const getUserSubscriptionHistory = asyncHandler(async (req, res) => {
+  const userId = req.user.id;
+
+  const subscriptions = await Subscription.findAll({
+    where: { user_id: userId },
+    include: [
+      {
+        model: Plan,
+        as: "Plan",
+      },
+    ],
+    order: [["created_at", "DESC"]],
+  });
+
+  res.json({
+    status: true,
+    data: { subscriptions },
+  });
+});
+
 module.exports = {
   createSubscription,
   createRazorpayOrder,
@@ -716,6 +736,7 @@ module.exports = {
   getAllSubscriptions,
   getSubscriptionById,
   getUserSubscription,
+  getUserSubscriptionHistory,
   updateSubscription,
   cancelSubscription,
   renewSubscription,

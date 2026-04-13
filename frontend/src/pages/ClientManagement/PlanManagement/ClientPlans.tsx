@@ -18,7 +18,15 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check } from "lucide-react";
+import { Check, History, CreditCard, Calendar, ArrowRight, Clock, Zap, ShieldCheck, AlertCircle } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import Swal from "sweetalert2";
 import { apiService } from "@/services/api";
 import { isAuthenticated, logout } from "@/utils/auth";
@@ -38,6 +46,7 @@ const ClientPlans = () => {
   const navigate = useNavigate();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [currentSubscription, setCurrentSubscription] = useState<any>(null);
+  const [history, setHistory] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const primaryGradient = "from-indigo-600 to-cyan-500";
@@ -76,6 +85,11 @@ const ClientPlans = () => {
         setCurrentSubscription(subscriptionResponse.data.subscription);
       } else {
         setCurrentSubscription(null);
+      }
+
+      const historyResponse = await apiService.getMySubscriptionHistory();
+      if (historyResponse.status) {
+        setHistory(historyResponse.data.subscriptions || []);
       }
     } catch (error: any) {
       if (error.message === "Authentication failed") {
@@ -246,115 +260,104 @@ const ClientPlans = () => {
           </div>
         </div>
 
-        {/* Current Subscription */}
+        {/* Subscription Insights */}
         {currentSubscription && (
-          <Card className="border-indigo-200 shadow-sm">
-            <CardHeader>
-              <CardTitle>Current Subscription</CardTitle>
+          <Card className="overflow-hidden border-none shadow-xl bg-white rounded-2xl transition-all duration-300 hover:shadow-2xl">
+            <div className={`h-2 ${currentSubscription.status === 'active' && !isPostLimitReached ? 'bg-gradient-to-r from-emerald-500 to-teal-400' : 'bg-gradient-to-r from-rose-500 to-orange-400'}`} />
+            <CardHeader className="pb-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-2xl font-bold bg-gradient-to-r from-indigo-700 to-cyan-600 bg-clip-text text-transparent">
+                    Subscription Insights
+                  </CardTitle>
+                  <CardDescription className="text-slate-500 font-medium">
+                    Overview of your current plan and usage
+                  </CardDescription>
+                </div>
+                <Badge 
+                  className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm ${
+                    currentSubscription.status === "active" && !isPostLimitReached
+                      ? "bg-emerald-100 text-emerald-700 border-emerald-200"
+                      : "bg-rose-100 text-rose-700 border-rose-200"
+                  }`}
+                  variant="outline"
+                >
+                  {isPostLimitReached ? "Limit Exhausted" : currentSubscription.status}
+                </Badge>
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="font-medium">Plan Name:</span>
-                  <Badge>{currentSubscription.Plan?.name}</Badge>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Plan Info */}
+                <div className="p-5 rounded-2xl bg-slate-50 border border-slate-100 flex items-start gap-4 transition-colors hover:bg-slate-100">
+                  <div className="p-3 rounded-xl bg-indigo-100 text-indigo-600 shadow-sm">
+                    <ShieldCheck className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Current Plan</p>
+                    <h3 className="text-xl font-bold text-slate-800">{currentSubscription.Plan?.name}</h3>
+                    <p className="text-sm font-semibold text-indigo-600">₹{currentSubscription.amount_paid} / term</p>
+                  </div>
                 </div>
 
-                <div className="flex justify-between">
-                  <span className="font-medium">Amount Paid:</span>
-                  <span className="font-semibold">
-                    ₹{currentSubscription.amount_paid}
-                  </span>
+                {/* Date Info */}
+                <div className="p-5 rounded-2xl bg-slate-50 border border-slate-100 flex items-start gap-4 transition-colors hover:bg-slate-100">
+                  <div className="p-3 rounded-xl bg-cyan-100 text-cyan-600 shadow-sm">
+                    <Calendar className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Activation Date</p>
+                    <h3 className="text-lg font-bold text-slate-800">{formatDate(currentSubscription.start_date)}</h3>
+                    <p className="text-sm text-slate-500 font-medium flex items-center gap-1">
+                      <Clock className="h-3.5 w-3.5" /> 
+                      {currentSubscription.status === 'active' ? "Active now" : "Status: " + currentSubscription.status}
+                    </p>
+                  </div>
                 </div>
 
-                <div className="flex justify-between">
-                  <span className="font-medium">Status:</span>
-                  <Badge 
-                    variant="outline" 
-                    className={
-                      currentSubscription.status === "cancelled" || currentSubscription.payment_status === "failed"
-                        ? "bg-red-100 text-red-700 border-red-300"
-                        : currentSubscription.status === "active"
-                        ? "bg-green-100 text-green-700 border-green-300"
-                        : "bg-yellow-100 text-yellow-700 border-yellow-300"
-                    }
-                  >
-                    {currentSubscription.status === "cancelled" ? "Cancelled" : currentSubscription.status.charAt(0).toUpperCase() + currentSubscription.status.slice(1)}
-                  </Badge>
-                </div>
-
-                {/* 🔥 Display Start & End Date */}
-                <div className="flex justify-between">
-                  <span className="font-medium">Subsciption Date:</span>
-                  <span>
-                      {formatDate(currentSubscription.start_date)}
-                  </span>
-                </div>
-
-                {/* <div className="flex justify-between">
-                  <span className="font-medium">End Date:</span>
-                  <span>
-                    {currentSubscription.end_date
-                      ? formatDate(currentSubscription.end_date)
-                      : "No End Date"}
-                  </span>
-                </div> */}
-
-                {/* 🔥 AI Posts with Progress Bar */}
-                <div className="space-y-1">
-                  <div className="flex justify-between">
-                    <span className="font-medium">AI Posts Used:</span>
-                    <span>
-                      {currentSubscription.ai_posts_used} /{" "}
-                      {currentSubscription.ai_posts}
+                {/* Usage Stats (AI) */}
+                <div className="p-5 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col justify-center transition-colors hover:bg-slate-100">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                       <Zap className={`h-5 w-5 ${isPostLimitReached ? 'text-rose-500' : 'text-amber-500'}`} />
+                       <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">AI Credits Used</p>
+                    </div>
+                    <span className="text-sm font-black text-slate-700">
+                      {currentSubscription.ai_posts_used} <span className="text-slate-400 font-medium">/ {currentSubscription.ai_posts}</span>
                     </span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden shadow-inner">
                     <div
-                      className={`h-2 rounded-full transition-all ${
-                        isPostLimitReached ? "bg-red-500" : "bg-indigo-600"
+                      className={`h-full rounded-full transition-all duration-1000 ease-out ${
+                        isPostLimitReached ? "bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.5)]" : "bg-gradient-to-r from-indigo-600 to-cyan-500"
                       }`}
                       style={{
                         width: `${Math.min(
-                          (currentSubscription.ai_posts_used /
-                            currentSubscription.ai_posts) *
-                            100,
+                          (currentSubscription.ai_posts_used / currentSubscription.ai_posts) * 100 || 0,
                           100
                         )}%`,
                       }}
                     />
                   </div>
-                </div>
-
-                {/* Status */}
-                <div className="flex justify-between">
-                  <span className="font-medium">Status:</span>
-                  <Badge
-                    style={{
-                      backgroundColor: isPostLimitReached
-                        ? "red"
-                        : hasActiveSubscription
-                        ? "green"
-                        : "gray",
-                    }}
-                  >
-                    {isPostLimitReached
-                      ? "Limit Reached"
-                      : hasActiveSubscription
-                      ? "Active"
-                      : "Inactive"}
-                  </Badge>
-                </div>
-
-                {/* Warning when limit reached */}
-                {isPostLimitReached && (
-                  <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
-                    <p className="text-sm text-red-700">
-                      ⚠️ Your AI post limit has been reached. Please subscribe
-                      to a new plan to continue creating AI posts.
+                  {isPostLimitReached && (
+                    <p className="text-[10px] font-bold text-rose-500 mt-2 flex items-center gap-1 animate-pulse">
+                      <AlertCircle className="h-3 w-3" /> Upgrade plan to restore credits
                     </p>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
+
+              {/* Status Message */}
+              {isPostLimitReached && (
+                <div className="mt-6 p-4 rounded-xl bg-rose-50 border border-rose-100 flex items-center gap-3">
+                  <div className="p-2 rounded-full bg-rose-200 text-rose-600">
+                    <AlertCircle className="h-5 w-5" />
+                  </div>
+                  <p className="text-sm text-rose-800 font-semibold leading-snug">
+                    Your AI post limit has been reached. Select a new plan below to continue generating amazing content without interruption.
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         )}
@@ -415,6 +418,66 @@ const ClientPlans = () => {
             );
           })}
         </div>
+
+        {/* Subscription History */}
+        {history.length > 0 && (
+          <Card className="mt-12 border-indigo-100 shadow-lg overflow-hidden rounded-2xl">
+            <CardHeader className="bg-slate-50/50 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <History className="h-5 w-5 text-indigo-600" />
+                <CardTitle className="text-xl font-bold text-slate-800">Subscription History</CardTitle>
+              </div>
+              <CardDescription>Track your past plans and payment status</CardDescription>
+            </CardHeader>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-slate-50/30">
+                    <TableHead className="font-bold text-slate-600">Plan</TableHead>
+                    <TableHead className="font-bold text-slate-600">Amount</TableHead>
+                    <TableHead className="font-bold text-slate-600">Date</TableHead>
+                    <TableHead className="font-bold text-slate-600">Status</TableHead>
+                    <TableHead className="font-bold text-slate-600 text-right pr-6">Payment</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {history.map((sub) => (
+                    <TableRow key={sub.id} className="hover:bg-slate-50/50 transition-colors">
+                      <TableCell className="font-medium">
+                        <div className="flex flex-col">
+                          <span className="text-slate-900 font-bold">{sub.Plan?.name || "Premium Plan"}</span>
+                          {/* <span className="text-[10px] text-slate-400">Ref: {sub.payment_id || sub.id}</span> */}
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-semibold text-slate-700">₹{sub.amount_paid}</TableCell>
+                      <TableCell className="text-slate-500 text-sm whitespace-nowrap">{formatDate(sub.start_date)}</TableCell>
+                      <TableCell>
+                        <Badge 
+                          variant="outline"
+                          className={`${
+                            sub.status === 'active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                            sub.status === 'expired' ? 'bg-slate-100 text-slate-600 border-slate-200' :
+                            'bg-rose-50 text-rose-700 border-rose-200'
+                          } font-black text-[10px] uppercase px-3 py-1 rounded-full`}
+                        >
+                          {sub.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right pr-6">
+                         <Badge 
+                          variant="secondary"
+                          className="bg-indigo-50 text-indigo-700 text-[10px] font-bold px-2 py-0.5"
+                        >
+                          {sub.payment_status?.toUpperCase() || "SUCCESS"}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </DashboardLayout>
   );

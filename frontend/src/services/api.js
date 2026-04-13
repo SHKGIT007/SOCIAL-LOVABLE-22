@@ -447,6 +447,10 @@ class ApiService {
   async getMySubscription() {
     return this.request(API_CONFIG.ENDPOINTS.SUBSCRIPTIONS.GET_MY);
   }
+  
+  async getMySubscriptionHistory() {
+    return this.request(API_CONFIG.ENDPOINTS.SUBSCRIPTIONS.GET_MY_HISTORY);
+  }
 
   async getAllSubscriptions(queryParams = {}) {
     return this.request(API_CONFIG.ENDPOINTS.SUBSCRIPTIONS.GET_ALL, {

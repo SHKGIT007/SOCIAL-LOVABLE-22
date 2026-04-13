@@ -71,6 +71,7 @@ export const API_CONFIG = {
       RENEW: "/subscriptions",
       CREATE_ORDER: "/subscriptions/razorpay/order",
       VERIFY_PAYMENT: "/subscriptions/razorpay/verify",
+      GET_MY_HISTORY: "/subscriptions/my-history",
     },
     // Notification endpoints
     NOTIFICATIONS: {

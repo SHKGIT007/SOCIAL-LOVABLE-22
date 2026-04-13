@@ -15,6 +15,7 @@ router.use(authenticateToken);
 
 // User subscription routes
 router.get('/my-subscription', subscriptionController.getUserSubscription);
+router.get('/my-history', subscriptionController.getUserSubscriptionHistory);
 router.post('/', validateSubscriptionCreation, subscriptionController.createSubscription);
 router.post('/razorpay/order', validateRazorpayOrder, subscriptionController.createRazorpayOrder);
 router.post('/razorpay/verify', validateRazorpayVerification, subscriptionController.verifyRazorpayPayment);
