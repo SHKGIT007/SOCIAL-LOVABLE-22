@@ -7,7 +7,7 @@ import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Eye, X, Calendar } from "lucide-react";
+import { Eye, X, Calendar, Trash2 } from "lucide-react";
 import Swal from "sweetalert2";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
@@ -225,6 +225,35 @@ const AdminPosts = () => {
     }
   };
 
+  const handleDelete = async (id: string) => {
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#6366f1",
+      confirmButtonText: "Yes, delete it!",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        setLoading(true);
+        const data = await apiService.deletePost(id);
+        if (data.status) {
+          Swal.fire("Deleted!", "Post has been deleted.", "success");
+          fetchPosts();
+        } else {
+          Swal.fire("Error", data.message || "Failed to delete post", "error");
+        }
+      } catch (error: any) {
+        Swal.fire("Error", error.message || "Something went wrong", "error");
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
   const columns: TableColumn<Post>[] = useMemo(
     () => [
       {
@@ -306,7 +335,7 @@ const AdminPosts = () => {
               variant="outline"
               className={
                 row.status === "published"
-                  ? "bg-green-100 text-green-700 border-green-300"
+                   ? "bg-green-100 text-green-700 border-green-300"
                   : row.status === "scheduled"
                     ? "bg-blue-100 text-blue-700 border-blue-300"
                     : "bg-gray-100 text-gray-700 border-gray-300"
@@ -354,15 +383,28 @@ const AdminPosts = () => {
       },
       {
         name: "Actions",
-        width: "130px",
+        width: "150px",
         cell: (row) => (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => navigate(`/admin/posts/${row.id}`)}
-          >
-            View
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate(`/admin/posts/${row.id}`)}
+              title="View Post"
+            >
+              <Eye className="h-4 w-4" />
+            </Button>
+            {row.status !== "published" && (
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => handleDelete(row.id)}
+                title="Delete Post"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
         ),
       },
     ],

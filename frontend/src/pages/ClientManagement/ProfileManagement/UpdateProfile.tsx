@@ -70,19 +70,26 @@ const UpdateProfile = () => {
     { name: "user_name", label: "Username", type: "text", required: true },
     { name: "email", label: "Email", type: "email", required: true },
     { name: "user_phone", label: "Phone", type: "text", required: true },
-    { name: "user_fname", label: "First Name", type: "text", required: true },
-    { name: "user_lname", label: "Last Name", type: "text", required: true },
+    { name: "user_fname", label: "First Name", type: "alpha", required: true },
+    { name: "user_lname", label: "Last Name", type: "alpha", required: true },
   ];
 
   // Profile Validation Schema
   const profileSchema = Yup.object().shape({
-    user_name: Yup.string().required("Username is required"),
-    email: Yup.string().email("Invalid email").required("Email is required"),
+    user_name: Yup.string().trim().required("Username is required"),
+    email: Yup.string().trim().email("Invalid email").required("Email is required"),
     user_phone: Yup.string()
+      .trim()
       .matches(/^\d{10}$/, "Phone must be 10 digits")
       .required("Phone is required"),
-    user_fname: Yup.string().required("First name is required"),
-    user_lname: Yup.string().required("Last name is required"),
+    user_fname: Yup.string()
+      .trim()
+      .matches(/^[A-Za-z ]+$/, "First name should only contain alphabets")
+      .required("First name is required"),
+    user_lname: Yup.string()
+      .trim()
+      .matches(/^[A-Za-z ]+$/, "Last name should only contain alphabets")
+      .required("Last name is required"),
   });
 
   // Password Fields Configuration

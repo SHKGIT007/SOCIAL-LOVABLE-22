@@ -1349,3 +1349,14 @@
 {"level":"info","message":"User recovered by admin","recoveredBy":1,"service":"social-lovable-api","timestamp":"2026-03-13T06:09:14.626Z","userId":"2"}
 {"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-03-13T06:09:34.143Z","userId":2,"username":"test21"}
 {"level":"info","message":"User password changed","service":"social-lovable-api","timestamp":"2026-03-16T08:27:26.075Z","userId":1}
+{"level":"warn","message":"Scheduled post reached time but was not pushed to any platform","postId":739,"service":"social-lovable-api","timestamp":"2026-04-13T04:30:00.124Z","userId":2}
+{"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-04-13T04:30:49.339Z","userId":1,"username":"admin"}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-04-13T04:31:27.688Z","userId":2,"username":"test21"}
+{"level":"info","message":"Post deleted","postId":"749","service":"social-lovable-api","timestamp":"2026-04-13T04:41:56.017Z","userId":1}
+{"level":"info","message":"Post updated","postId":"745","service":"social-lovable-api","timestamp":"2026-04-13T05:05:09.712Z","userId":2}
+{"level":"info","message":"Post updated","postId":"745","service":"social-lovable-api","timestamp":"2026-04-13T05:09:48.674Z","userId":2}
+{"level":"info","message":"Post updated","postId":"744","service":"social-lovable-api","timestamp":"2026-04-13T05:10:18.507Z","userId":2}
+{"ai_prompt":"Title: Roddies fashion 2\nDetails: Business/Creator: Roddies fashion 2\nDescription: Relatable caption in points also give hastags.\nPlatforms: Facebook\nBrand Voice: professional\nHashtags: Trending","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2026-04-13T05:10:26.717Z","userId":2}
+{"level":"info","message":"Post updated","postId":"741","service":"social-lovable-api","timestamp":"2026-04-13T05:15:37.745Z","userId":2}
+{"ai_prompt":"Title: Roddies fashion 2\nDetails: Business/Creator: Roddies fashion 2\nDescription: Relatable caption in points also give hastags.\nPlatforms: Facebook\nBrand Voice: professional\nHashtags: Trending","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2026-04-13T05:15:46.915Z","userId":2}
+{"createdBy":1,"email":"shaktijatp@gmail.com","level":"info","message":"User created by admin","service":"social-lovable-api","timestamp":"2026-04-13T05:17:06.541Z","userId":75}

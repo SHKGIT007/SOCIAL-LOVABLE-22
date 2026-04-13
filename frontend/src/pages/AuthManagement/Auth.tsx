@@ -43,13 +43,13 @@ const Auth = () => {
   const [otpTimer, setOtpTimer] = useState(0);
 
   const isFormComplete =
-    userName &&
-    userFname &&
-    userLname &&
-    userPhone &&
-    email &&
-    password &&
-    otp &&
+    userName?.trim() &&
+    userFname?.trim() &&
+    userLname?.trim() &&
+    userPhone?.trim() &&
+    email?.trim() &&
+    password?.trim() &&
+    otp?.trim() &&
     isOtpVerified;
 
   useEffect(() => {
@@ -394,13 +394,13 @@ const Auth = () => {
 
     try {
       const response = await apiService.register({
-        user_name: userName,
-        email,
+        user_name: userName.trim(),
+        email: email.trim(),
         password,
-        user_fname: userFname,
-        user_lname: userLname,
-        user_phone: userPhone,
-        otp,
+        user_fname: userFname.trim(),
+        user_lname: userLname.trim(),
+        user_phone: userPhone.trim(),
+        otp: otp.trim(),
       });
 
       if (response && response.status) {

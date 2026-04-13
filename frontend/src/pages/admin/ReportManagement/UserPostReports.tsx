@@ -17,7 +17,7 @@ import {
 import Swal from "sweetalert2";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-import { Filter, X, Calendar } from "lucide-react";
+import { Filter, X, Calendar, Trash2, Eye } from "lucide-react";
 
 interface Post {
   id: string;
@@ -175,6 +175,35 @@ const UserPostsReport = () => {
     }
   };
 
+  const handleDelete = async (id: string) => {
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#6366f1",
+      confirmButtonText: "Yes, delete it!",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        setLoading(true);
+        const data = await apiService.deletePost(id);
+        if (data.status) {
+          Swal.fire("Deleted!", "Post has been deleted.", "success");
+          fetchUserPosts();
+        } else {
+          Swal.fire("Error", data.message || "Failed to delete post", "error");
+        }
+      } catch (error: any) {
+        Swal.fire("Error", error.message || "Something went wrong", "error");
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
   const getPlatformsArray = (platforms: any): string[] => {
     try {
       if (!platforms) return [];
@@ -279,18 +308,32 @@ const UserPostsReport = () => {
       },
       {
         name: "Action",
+        width: "150px",
         cell: (row) => (
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() =>
-              navigate(`/admin/users/${userId}`, {
-                state: { postId: row.id },
-              })
-            }
-          >
-            View
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() =>
+                navigate(`/admin/users/${userId}`, {
+                  state: { postId: row.id },
+                })
+              }
+              title="View Post"
+            >
+              <Eye className="h-4 w-4" />
+            </Button>
+            {row.status !== "published" && (
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => handleDelete(row.id)}
+                title="Delete Post"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
         ),
       },
     ],

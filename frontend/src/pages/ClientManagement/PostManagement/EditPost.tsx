@@ -124,7 +124,10 @@ const EditPost = () => {
       await fetchPost();
       try {
         const accRes = await apiService.getMySocialAccounts();
-        setConnectedAccounts(accRes.data.socialAccounts || []);
+        const activeAccs = (accRes.data.socialAccounts || []).filter(
+          (acc: any) => acc.is_active && acc.access_token
+        );
+        setConnectedAccounts(activeAccs);
         const profileRes = await apiService.request("/profile");
         if (profileRes.status && profileRes.data?.profile) {
           const p = profileRes.data.profile;
@@ -216,12 +219,31 @@ const EditPost = () => {
     e.preventDefault();
     setIsSaving(true);
 
+    // Check if any platforms are connected when publishing or scheduling
+    if ((formData.status === "published" || formData.status === "scheduled") && connectedAccounts.length === 0) {
+      Swal.fire({
+        icon: "warning",
+        title: "No Social Accounts Connected",
+        text: "You must connect at least one social media account (Facebook or Instagram) before you can publish or schedule posts.",
+        confirmButtonColor: "#6366f1",
+        showCancelButton: true,
+        confirmButtonText: "Connect Account",
+        cancelButtonText: "Later",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate("/social-accounts");
+        }
+      });
+      setIsSaving(false);
+      return;
+    }
+
     try {
-      if (formData.platforms.length === 0) {
+      if (formData.status !== "draft" && formData.platforms.length === 0) {
         Swal.fire({
           icon: "error",
           title: "Error",
-          text: "Please select at least one platform.",
+          text: "Please select at least one platform to publish this post.",
           confirmButtonColor: "#6366f1",
         });
         setIsSaving(false);
@@ -321,7 +343,7 @@ const EditPost = () => {
           <Button
             type="submit"
             form="edit-post-form"
-            disabled={isSaving}
+            disabled={isSaving || (formData.status !== "draft" && (!formData.title || !formData.content))}
             className="bg-gradient-to-r from-indigo-600 to-sky-500 hover:from-indigo-500 hover:to-sky-400 text-white shadow-md"
           >
             {isSaving ? (
@@ -583,7 +605,7 @@ const EditPost = () => {
                 </Button>
                 <Button
                   type="submit"
-                  disabled={isSaving}
+                  disabled={isSaving || (formData.status !== "draft" && (!formData.title || !formData.content))}
                   className="flex-1 sm:flex-none sm:w-48 bg-gradient-to-r from-indigo-600 to-sky-500 hover:from-indigo-500 hover:to-sky-400 text-white shadow-md"
                 >
                   {isSaving ? (

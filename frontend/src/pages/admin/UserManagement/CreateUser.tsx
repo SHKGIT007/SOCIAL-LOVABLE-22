@@ -26,16 +26,19 @@ const CreateUser = () => {
 
   const validationSchema = Yup.object({
     user_fname: Yup.string()
+      .trim()
       .matches(/^[A-Za-z ]+$/, "Only alphabets are allowed")
       .required("First name is required"),
     user_lname: Yup.string()
+      .trim()
       .matches(/^[A-Za-z ]+$/, "Only alphabets are allowed")
       .required("Last name is required"),
-    user_name: Yup.string().required("Username is required"),
+    user_name: Yup.string().trim().required("Username is required"),
     user_phone: Yup.string()
+      .trim()
       .matches(/^[0-9]{10}$/, "Phone must be exactly 10 digits")
       .required("Phone is required"),
-    email: Yup.string().email("Invalid email").required("Email required"),
+    email: Yup.string().trim().email("Invalid email").required("Email required"),
     password: Yup.string()
       .required("Password required")
       .matches(

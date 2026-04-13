@@ -22,11 +22,13 @@ const validateSocialAccountCredentialsUpdate = [
 // User validation rules
 const validateUserRegistration = [
   body("user_name")
+    .trim()
     .notEmpty()
     .withMessage("Username is required")
     .isLength({ min: 3, max: 50 })
     .withMessage("Username must be between 3 and 50 characters"),
   body("email")
+    .trim()
     .isEmail()
     .withMessage("Valid email is required")
     .normalizeEmail(),
@@ -38,15 +40,22 @@ const validateUserRegistration = [
       "Password must contain at least one lowercase letter, one uppercase letter, and one number"
     ),
   body("user_fname")
-    .optional()
+    .optional({ checkFalsy: true })
+    .trim()
     .isLength({ max: 50 })
-    .withMessage("First name must be less than 50 characters"),
+    .withMessage("First name must be less than 50 characters")
+    .matches(/^[A-Za-z ]+$/)
+    .withMessage("First name should only contain alphabets"),
   body("user_lname")
-    .optional()
+    .optional({ checkFalsy: true })
+    .trim()
     .isLength({ max: 50 })
-    .withMessage("Last name must be less than 50 characters"),
+    .withMessage("Last name must be less than 50 characters")
+    .matches(/^[A-Za-z ]+$/)
+    .withMessage("Last name should only contain alphabets"),
   body("user_phone")
-    .optional()
+    .optional({ checkFalsy: true })
+    .trim()
     .isMobilePhone()
     .withMessage("Valid phone number is required"),
   handleValidationErrors,
@@ -75,24 +84,33 @@ const validateUserLogin = [
 
 const validateUserUpdate = [
   body("user_name")
-    .optional()
+    .optional({ checkFalsy: true })
+    .trim()
     .isLength({ min: 3, max: 50 })
     .withMessage("Username must be between 3 and 50 characters"),
   body("email")
-    .optional()
+    .optional({ checkFalsy: true })
+    .trim()
     .isEmail()
     .withMessage("Valid email is required")
     .normalizeEmail(),
   body("user_fname")
-    .optional()
+    .optional({ checkFalsy: true })
+    .trim()
     .isLength({ max: 50 })
-    .withMessage("First name must be less than 50 characters"),
+    .withMessage("First name must be less than 50 characters")
+    .matches(/^[A-Za-z ]+$/)
+    .withMessage("First name should only contain alphabets"),
   body("user_lname")
-    .optional()
+    .optional({ checkFalsy: true })
+    .trim()
     .isLength({ max: 50 })
-    .withMessage("Last name must be less than 50 characters"),
+    .withMessage("Last name must be less than 50 characters")
+    .matches(/^[A-Za-z ]+$/)
+    .withMessage("Last name should only contain alphabets"),
   body("user_phone")
-    .optional()
+    .optional({ checkFalsy: true })
+    .trim()
     .isMobilePhone()
     .withMessage("Valid phone number is required"),
   handleValidationErrors,

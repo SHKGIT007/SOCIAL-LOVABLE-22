@@ -552,6 +552,14 @@ const deletePost = asyncHandler(async (req, res) => {
     });
   }
 
+  // Check if post is published
+  if (post.status === "published") {
+    return res.status(400).json({
+      status: false,
+      message: "Published posts cannot be deleted",
+    });
+  }
+
   // Check if user can delete this post
   if (userType !== "admin" && post.user_id !== userId) {
     return res.status(403).json({

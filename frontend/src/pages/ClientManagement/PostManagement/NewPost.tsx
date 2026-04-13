@@ -64,7 +64,10 @@ const NewPost = () => {
     const fetchData = async () => {
       try {
         const accRes = await apiService.getMySocialAccounts();
-        setConnectedAccounts(accRes.data.socialAccounts || []);
+        const activeAccs = (accRes.data.socialAccounts || []).filter(
+          (acc: any) => acc.is_active && acc.access_token
+        );
+        setConnectedAccounts(activeAccs);
 
         const profileRes = await apiService.request("/profile");
         if (profileRes.status && profileRes.data?.profile) {
@@ -176,8 +179,26 @@ const NewPost = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Check if any platforms are connected when publishing or scheduling
+    if ((status === "published" || status === "scheduled") && connectedAccounts.length === 0) {
+      Swal.fire({
+        icon: "warning",
+        title: "No Social Accounts Connected",
+        text: "You must connect at least one social media account (Facebook or Instagram) before you can publish or schedule posts.",
+        confirmButtonColor: "#6366f1",
+        showCancelButton: true,
+        confirmButtonText: "Connect Account",
+        cancelButtonText: "Later",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate("/social-accounts");
+        }
+      });
+      return;
+    }
+
     // Validation
-    if (!title || !content || platforms.length === 0) {
+    if (!title || !content || ((status === "published" || status === "scheduled") && platforms.length === 0)) {
       Swal.fire({
         icon: "error",
         title: "Missing Information",
@@ -185,7 +206,7 @@ const NewPost = () => {
           ? "Please update your profile first to set a business name."
           : !content
             ? "Please generate or enter content for your post."
-            : "Please select at least one platform.",
+            : "Please select at least one platform to publish this post.",
         confirmButtonColor: "#6366f1",
       });
       return;
@@ -733,7 +754,7 @@ const NewPost = () => {
               </Button>
               <Button
                 onClick={handleSubmit}
-                disabled={isLoading || !content || platforms.length === 0}
+                disabled={isLoading || (status !== "draft" && !content)}
                 className="bg-gradient-to-r from-indigo-600 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 text-white font-semibold shadow-md px-8"
               >
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
