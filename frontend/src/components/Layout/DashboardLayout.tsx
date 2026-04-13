@@ -24,6 +24,9 @@ import {
   Menu,
   Trash2,
   Bell,
+  Share2,
+  User,
+  UserCog,
 } from "lucide-react";
 import Swal from "sweetalert2";
 import { apiService } from "@/services/api";
@@ -156,14 +159,14 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
           { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
           { icon: FileText, label: "Posts", path: "/posts" },
           { icon: Zap, label: "Auto Post Schedules", path: "/schedules" },
-          { icon: Settings, label: "Plans", path: "/plans" },
+          { icon: BadgeDollarSign, label: "Plans", path: "/plans" },
           {
-            icon: Settings,
+            icon: Share2,
             label: "Social Accounts",
             path: "/social-accounts",
           },
-          { icon: Settings, label: "Post Setting", path: "/profile" },
-          { icon: Settings, label: "My Profile", path: "/update-profile" },
+          { icon: SlidersHorizontal, label: "Post Setting", path: "/profile" },
+          { icon: User, label: "My Profile", path: "/update-profile" },
           // { icon: Bell, label: "Notifications", path: "/notifications" },
         ];
 
