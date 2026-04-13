@@ -204,13 +204,21 @@ const UserPostsReport = () => {
   };
 
   const getPlatformsArray = (platforms: any): string[] => {
-    try {
-      if (!platforms) return [];
-      if (Array.isArray(platforms)) return platforms;
-      return JSON.parse(platforms);
-    } catch {
-      return [];
+    if (!platforms) return [];
+    if (Array.isArray(platforms)) return platforms;
+    if (typeof platforms === "string") {
+      try {
+        const parsed = JSON.parse(platforms);
+        if (Array.isArray(parsed)) return parsed;
+        return [parsed.toString()];
+      } catch {
+        return platforms
+          .split(",")
+          .map((p: string) => p.trim())
+          .filter(Boolean);
+      }
     }
+    return [];
   };
 
   const columns: TableColumn<Post>[] = useMemo(
