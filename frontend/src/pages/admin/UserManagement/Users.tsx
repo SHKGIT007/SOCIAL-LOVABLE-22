@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import Swal from "sweetalert2";
-import { User, X } from "lucide-react";
+import { User, X, RefreshCw, Download, ArrowLeft, Eye, Edit, Trash, Plus, UserMinus } from "lucide-react";
 import { downloadExcel } from "@/utils/exportUtils";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatDate } from "@/utils/dateFormatter";
@@ -297,29 +297,32 @@ const Users = () => {
       },
       {
         name: "Actions",
-        width: "250px",
+        width: "320px",
         cell: (row) => (
           <div className="flex gap-2 justify-center">
             <Button
               variant="outline"
               size="sm"
               onClick={() => navigate(`/admin/users/details/${row.id}`)}
+              className="font-bold border-indigo-100 hover:bg-indigo-50"
             >
-              View
+              <Eye className="h-4 w-4 mr-2 text-indigo-600" /> View
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={() => navigate(`/admin/edituser/${row.id}`)}
+              className="font-bold border-amber-100 hover:bg-amber-50"
             >
-              Edit
+              <Edit className="h-4 w-4 mr-2 text-amber-600" /> Edit
             </Button>
             <Button
               variant="destructive"
               size="sm"
               onClick={() => handleDeleteUser(row.id)}
+              className="font-bold shadow-sm"
             >
-              Delete
+              <Trash className="h-4 w-4 mr-2" /> Delete
             </Button>
           </div>
         ),
@@ -328,7 +331,7 @@ const Users = () => {
         name: "Joined",
         selector: (row) => formatDate(row.created_at),
         sortable: true,
-        width: "120px",
+        width: "150px",
       },
     ],
     [users, page, perPage],
@@ -367,12 +370,14 @@ const Users = () => {
 
           {/* Right Actions */}
           <div className="flex items-center gap-2 flex-wrap">
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => navigate(-1)}
-              className="px-4 py-2 text-sm rounded-md border bg-white hover:bg-indigo-50 transition"
+              className="rounded-xl font-bold bg-white/50 border-gray-100"
             >
-              ← Back
-            </button>
+              <ArrowLeft className="h-4 w-4 mr-2" /> Back
+            </Button>
           </div>
         </div>
 
@@ -400,36 +405,36 @@ const Users = () => {
 
               <div className="flex items-center gap-3 w-full sm:w-auto">
                 <Button
-                  className="bg-blue-500 hover:bg-blue-600 w-full sm:w-auto"
+                  className="bg-blue-500 hover:bg-blue-600 w-full sm:w-auto font-bold"
                   onClick={handleRefresh}
                   disabled={tableLoading}
                 >
-                  {tableLoading ? "Refreshing..." : "Refresh"}
+                  <RefreshCw className={`h-4 w-4 mr-2 ${tableLoading ? 'animate-spin' : ''}`} /> {tableLoading ? "Refreshing..." : "Refresh"}
                 </Button>
 
                 {totalRows > 0 && (
                   <Button
-                    className="bg-emerald-600 hover:bg-emerald-700 w-full sm:w-auto px-6 flex items-center gap-2"
+                    className="bg-emerald-600 hover:bg-emerald-700 w-full sm:w-auto px-6 flex items-center gap-2 font-bold"
                     onClick={exportExcel}
                     disabled={exportLoading}
                   >
-                    {exportLoading ? "Exporting..." : "Export Excel"}
+                    <Download className="h-4 w-4 mr-2" /> {exportLoading ? "Exporting..." : "Export Excel"}
                   </Button>
                 )}
 
                 <Button
-                  className="bg-red-600 hover:bg-red-700 w-full sm:w-auto"
+                  className="bg-rose-600 hover:bg-rose-700 w-full sm:w-auto font-bold"
                   onClick={() => navigate("/admin/deleted-users")}
                 >
-                  <User className="mr-2 h-4 w-4" />
+                  <UserMinus className="mr-2 h-4 w-4" />
                   Deleted Users
                 </Button>
 
                 <Button
-                  className="bg-indigo-600 hover:bg-indigo-700 w-full sm:w-auto"
+                  className="bg-indigo-600 hover:bg-indigo-700 w-full sm:w-auto font-bold"
                   onClick={() => navigate("/admin/create-user")}
                 >
-                  <User className="mr-2 h-4 w-4" />
+                  <Plus className="mr-2 h-4 w-4" />
                   Create User
                 </Button>
               </div>

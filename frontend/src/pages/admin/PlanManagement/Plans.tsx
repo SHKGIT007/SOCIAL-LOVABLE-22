@@ -7,7 +7,7 @@ import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import Swal from "sweetalert2";
-import { Plus, Pencil, Trash2, X } from "lucide-react";
+import { Plus, Pencil, Trash2, X, RefreshCw, Download, ArrowLeft } from "lucide-react";
 import { downloadExcel } from "@/utils/exportUtils";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatDate } from "@/utils/dateFormatter";
@@ -255,23 +255,25 @@ const Plans = () => {
       },
       {
         name: "Actions",
-        width: "160px",
+        width: "280px",
         cell: (row) => (
           <div className="flex gap-2">
             <Button
               size="sm"
               variant="outline"
               onClick={() => navigate(`/admin/edit-plan/${row.id}`)}
+              className="font-bold border-indigo-100 hover:bg-indigo-50"
             >
-              Edit
+              <Pencil className="h-4 w-4 mr-2 text-indigo-600" /> Edit
             </Button>
 
             <Button
               size="sm"
               variant="destructive"
               onClick={() => handleDelete(row.id)}
+              className="font-bold shadow-sm"
             >
-              Delete
+              <Trash2 className="h-4 w-4 mr-2" /> Delete
             </Button>
           </div>
         ),
@@ -318,19 +320,14 @@ const Plans = () => {
 
           {/* Right: Actions */}
           <div className="flex items-center gap-2">
-            {/* <Button
-              className="bg-green-600 hover:bg-green-700"
-              onClick={exportExcel}
-            >
-              Export Excel
-            </Button> */}
-
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => navigate(-1)}
-              className="px-4 py-2 text-sm rounded-md border bg-white hover:bg-indigo-50 transition"
+              className="rounded-xl font-bold bg-white/50 border-gray-100"
             >
-              ← Back
-            </button>
+              <ArrowLeft className="h-4 w-4 mr-2" /> Back
+            </Button>
           </div>
         </div>
 
@@ -356,25 +353,25 @@ const Plans = () => {
 
               <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
                 <Button
-                  className="bg-blue-500 hover:bg-blue-600 w-full sm:w-auto"
+                  className="bg-blue-500 hover:bg-blue-600 w-full sm:w-auto font-bold"
                   onClick={handleRefresh}
                   disabled={tableLoading || exportLoading}
                 >
-                  {tableLoading || exportLoading ? "Refreshing..." : "Refresh"}
+                  <RefreshCw className={`h-4 w-4 mr-2 ${tableLoading ? 'animate-spin' : ''}`} /> {tableLoading || exportLoading ? "Refreshing..." : "Refresh"}
                 </Button>
 
                 {totalRows > 0 && (
                   <Button
-                    className="bg-green-600 hover:bg-green-700 w-full sm:w-auto px-6"
+                    className="bg-green-600 hover:bg-green-700 w-full sm:w-auto px-6 font-bold flex items-center gap-2"
                     onClick={exportExcel}
                     disabled={exportLoading}
                   >
-                    {exportLoading ? "Exporting..." : "Export Excel"}
+                    <Download className="h-4 w-4 mr-2" /> {exportLoading ? "Exporting..." : "Export Excel"}
                   </Button>
                 )}
 
                 <Button
-                  className="bg-indigo-600 hover:bg-indigo-700 w-full sm:w-auto"
+                  className="bg-indigo-600 hover:bg-indigo-700 w-full sm:w-auto font-bold"
                   onClick={() => navigate("/admin/create-plan")}
                 >
                   <Plus size={16} className="mr-2" /> Create Plan

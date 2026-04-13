@@ -21,11 +21,12 @@ import {
   CheckCircle2,
   XCircle,
   CreditCard,
-  Clock,
   Shield,
   Activity,
   ArrowLeft,
   Crown,
+  Edit,
+  Clock,
 } from "lucide-react";
 
 // Using utility functions from @/utils/dateFormatter
@@ -98,12 +99,14 @@ const UserDetails = () => {
         {/* Modern Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/50 backdrop-blur-md p-6 rounded-2xl border border-indigo-50 shadow-sm sticky top-0 z-20">
           <div className="flex items-center gap-4">
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => navigate("/admin/users")}
-              className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+              className="rounded-full h-10 w-10 p-0 flex items-center justify-center hover:bg-gray-100 transition-colors border-indigo-100"
             >
-              <ArrowLeft className="h-5 w-5 text-gray-500" />
-            </button>
+              <ArrowLeft className="h-5 w-5 text-indigo-600" />
+            </Button>
             <div>
               <h1 className="text-3xl font-black tracking-tight">
                 <span className={`text-transparent bg-clip-text ${primaryGradientClass}`}>
@@ -115,13 +118,13 @@ const UserDetails = () => {
           </div>
           
           <div className="flex items-center gap-3">
-             <Button 
-                variant="outline" 
-                onClick={() => navigate(`/admin/edituser/${user.id}`)}
-                className="hidden sm:flex"
-              >
-                Edit Profile
-             </Button>
+              <Button 
+                 variant="outline" 
+                 onClick={() => navigate(`/admin/edituser/${user.id}`)}
+                 className="hidden sm:flex font-bold border-indigo-100 hover:bg-indigo-50"
+               >
+                 <Edit className="h-4 w-4 mr-2 text-indigo-600" /> Edit Profile
+              </Button>
            
           </div>
         </div>

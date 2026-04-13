@@ -10,7 +10,7 @@ import Swal from "sweetalert2";
 import { downloadExcel } from "@/utils/exportUtils";
 import { formatDate } from "@/utils/dateFormatter";
 import { Card, CardContent } from "@/components/ui/card";
-import { X } from "lucide-react";
+import { X, RefreshCw, Download, ArrowLeft } from "lucide-react";
 
 interface SubscriptionData {
   id: string;
@@ -266,12 +266,14 @@ const Subscriptions = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => navigate(-1)}
-              className="px-4 py-2 text-sm rounded-md border bg-white hover:bg-indigo-50 transition"
+              className="rounded-xl font-bold bg-white/50 border-gray-100"
             >
-              ← Back
-            </button>
+              <ArrowLeft className="h-4 w-4 mr-2" /> Back
+            </Button>
           </div>
         </div>
 
@@ -297,20 +299,20 @@ const Subscriptions = () => {
 
               <div className="flex items-center gap-3 w-full sm:w-auto">
                 <Button
-                  className="bg-blue-500 hover:bg-blue-600 w-full sm:w-auto"
+                  className="bg-blue-500 hover:bg-blue-600 w-full sm:w-auto font-bold"
                   onClick={handleRefresh}
                   disabled={loading}
                 >
-                  {loading ? "Refreshing..." : "Refresh"}
+                  <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} /> {loading ? "Refreshing..." : "Refresh"}
                 </Button>
                 {totalRows > 0 && (
                   <Button
                     variant="outline"
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white border-none flex items-center gap-2"
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white border-none flex items-center gap-2 font-bold"
                     onClick={exportExcel}
                     disabled={exportLoading}
                   >
-                    {exportLoading ? "Exporting..." : "Export Excel"}
+                    <Download className="h-4 w-4 mr-2" /> {exportLoading ? "Exporting..." : "Export Excel"}
                   </Button>
                 )}
               </div>

@@ -17,7 +17,7 @@ import {
 import Swal from "sweetalert2";
 import { downloadExcel } from "@/utils/exportUtils";
 import { formatDate, formatDateTime } from "@/utils/dateFormatter";
-import { Filter, X, Calendar, Trash2, Eye } from "lucide-react";
+import { Filter, X, Calendar, Trash2, Eye, RefreshCw, Download, ArrowLeft, RotateCcw } from "lucide-react";
 
 interface Post {
   id: string;
@@ -315,29 +315,29 @@ const UserPostsReport = () => {
       },
       {
         name: "Action",
-        width: "150px",
+        width: "280px",
         cell: (row) => (
           <div className="flex items-center gap-2">
             <Button
-              size="sm"
               variant="outline"
+              size="sm"
               onClick={() =>
                 navigate(`/admin/users/${userId}`, {
                   state: { postId: row.id },
                 })
               }
-              title="View Post"
+              className="font-bold border-indigo-100 hover:bg-indigo-50"
             >
-              <Eye className="h-4 w-4" />
+              <Eye className="h-4 w-4 mr-2 text-indigo-600" /> View
             </Button>
             {row.status !== "published" && (
               <Button
                 variant="destructive"
                 size="sm"
                 onClick={() => handleDelete(row.id)}
-                title="Delete Post"
+                className="font-bold shadow-sm"
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="h-4 w-4 mr-2" /> Delete
               </Button>
             )}
           </div>
@@ -376,12 +376,14 @@ const UserPostsReport = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => navigate(-1)}
-              className="px-4 py-2 text-sm rounded-md border bg-white hover:bg-indigo-50 transition"
+              className="rounded-xl font-bold bg-white/50 border-gray-100"
             >
-              ← Back
-            </button>
+              <ArrowLeft className="h-4 w-4 mr-2" /> Back
+            </Button>
           </div>
         </div>
 
@@ -410,11 +412,11 @@ const UserPostsReport = () => {
 
               <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
                 <Button
-                  className="bg-blue-500 hover:bg-blue-600 w-full sm:w-auto"
+                  className="bg-blue-500 hover:bg-blue-600 w-full sm:w-auto font-bold"
                   onClick={handleRefresh}
                   disabled={loading}
                 >
-                  {loading ? "Refreshing..." : "Refresh"}
+                  <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} /> {loading ? "Refreshing..." : "Refresh"}
                 </Button>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 w-full sm:w-auto">
@@ -469,18 +471,18 @@ const UserPostsReport = () => {
                     }}
                   />
 
-                  <Button variant="outline" onClick={resetFilters} className="w-full sm:w-auto">
-                    Reset
+                  <Button variant="outline" onClick={resetFilters} className="w-full sm:w-auto font-bold">
+                    <RotateCcw className="h-4 w-4 mr-2" /> Reset
                   </Button>
                 </div>
                 {totalRows > 0 && (
                   <Button
                     variant="outline"
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white border-none flex items-center gap-2"
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white border-none flex items-center gap-2 font-bold"
                     onClick={exportExcel}
                     disabled={exportLoading}
                   >
-                    {exportLoading ? "Exporting..." : "Export Excel"}
+                    <Download className="h-4 w-4 mr-2" /> {exportLoading ? "Exporting..." : "Export Excel"}
                   </Button>
                 )}
               </div>

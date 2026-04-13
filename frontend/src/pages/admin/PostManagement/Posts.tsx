@@ -7,7 +7,7 @@ import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Eye, X, Calendar, Trash2 } from "lucide-react";
+import { Eye, X, Calendar, Trash2, RefreshCw, Download, ArrowLeft } from "lucide-react";
 import Swal from "sweetalert2";
 import { downloadExcel } from "@/utils/exportUtils";
 import { formatDate, formatDateTime } from "@/utils/dateFormatter";
@@ -348,25 +348,25 @@ const AdminPosts = () => {
       },
       {
         name: "Actions",
-        width: "150px",
+        width: "280px",
         cell: (row) => (
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
               size="sm"
               onClick={() => navigate(`/admin/posts/${row.id}`)}
-              title="View Post"
+              className="font-bold border-indigo-100 hover:bg-indigo-50"
             >
-              <Eye className="h-4 w-4" />
+              <Eye className="h-4 w-4 mr-2 text-indigo-600" /> View
             </Button>
             {row.status !== "published" && (
               <Button
                 variant="destructive"
                 size="sm"
                 onClick={() => handleDelete(row.id)}
-                title="Delete Post"
+                className="font-bold shadow-sm"
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="h-4 w-4 mr-2" /> Delete
               </Button>
             )}
           </div>
@@ -405,12 +405,14 @@ const AdminPosts = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => navigate(-1)}
-              className="px-4 py-2 text-sm rounded-md border bg-white hover:bg-indigo-50 transition flex items-center gap-2 text-gray-700"
+              className="rounded-xl font-bold bg-white/50 border-gray-100"
             >
-              ← Back
-            </button>
+              <ArrowLeft className="h-4 w-4 mr-2" /> Back
+            </Button>
           </div>
         </div>
 
@@ -437,11 +439,11 @@ const AdminPosts = () => {
 
               <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
                 <Button
-                  className="bg-blue-500 hover:bg-blue-600 w-full sm:w-auto"
+                  className="bg-blue-500 hover:bg-blue-600 w-full sm:w-auto font-bold"
                   onClick={handleRefresh}
                   disabled={tableLoading}
                 >
-                  {tableLoading ? "Refreshing..." : "Refresh"}
+                  <RefreshCw className={`h-4 w-4 mr-2 ${tableLoading ? 'animate-spin' : ''}`} /> {tableLoading ? "Refreshing..." : "Refresh"}
                 </Button>
 
                 {/* Status Filter */}
@@ -451,7 +453,7 @@ const AdminPosts = () => {
                     setStatusFilter(e.target.value);
                     setPage(1);
                   }}
-                  className="px-3 py-2 rounded-lg border bg-white shadow-sm focus:ring-indigo-300 focus:border-indigo-400 w-full sm:w-auto"
+                  className="px-3 py-2 rounded-lg border bg-white shadow-sm focus:ring-indigo-300 focus:border-indigo-400 w-full sm:w-auto font-bold text-sm"
                 >
                   <option value="all">All Status</option>
                   <option value="draft">Draft</option>
@@ -461,11 +463,11 @@ const AdminPosts = () => {
 
                 {totalRows > 0 && (
                   <Button
-                    className="bg-green-600 hover:bg-green-700 w-full sm:w-auto px-6"
+                    className="bg-green-600 hover:bg-green-700 w-full sm:w-auto px-6 font-bold flex items-center gap-2"
                     onClick={exportExcel}
                     disabled={exportLoading}
                   >
-                    {exportLoading ? "Exporting..." : "Export Excel"}
+                    <Download className="h-4 w-4 mr-2" /> {exportLoading ? "Exporting..." : "Export Excel"}
                   </Button>
                 )}
               </div>

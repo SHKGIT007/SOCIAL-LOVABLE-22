@@ -4,8 +4,10 @@ declare global {
   }
 }
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import DataTable, { TableColumn } from "react-data-table-component";
+import { downloadExcel } from "@/utils/exportUtils";
 import { formatDate } from "@/utils/dateFormatter";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -18,18 +20,11 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, History, CreditCard, Calendar, ArrowRight, Clock, Zap, ShieldCheck, AlertCircle } from "lucide-react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Check, History, CreditCard, Calendar, ArrowRight, Clock, Zap, ShieldCheck, AlertCircle, Search, Download, RefreshCw, ArrowLeft } from "lucide-react";
 import Swal from "sweetalert2";
 import { apiService } from "@/services/api";
 import { isAuthenticated, logout } from "@/utils/auth";
+import { Input } from "@/components/ui/input";
 
 interface Plan {
   id: number;
@@ -48,9 +43,94 @@ const ClientPlans = () => {
   const [currentSubscription, setCurrentSubscription] = useState<any>(null);
   const [history, setHistory] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [exportLoading, setExportLoading] = useState(false);
 
   const primaryGradient = "from-indigo-600 to-cyan-500";
   const primaryGradientClass = `bg-gradient-to-r ${primaryGradient}`;
+
+  const filteredHistory = useMemo(() => {
+    return history.filter(item => 
+      item.plan_name?.toLowerCase().includes(search.toLowerCase()) ||
+      item.Plan?.name?.toLowerCase().includes(search.toLowerCase()) ||
+      item.status?.toLowerCase().includes(search.toLowerCase()) ||
+      item.payment_status?.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [history, search]);
+
+  const exportHistory = () => {
+    setExportLoading(true);
+    try {
+      const data = filteredHistory.map((sub, index) => ({
+        "S.No": index + 1,
+        Plan: sub.plan_name || sub.Plan?.name || "N/A",
+        Amount: sub.amount_paid,
+        Date: formatDate(sub.start_date),
+        Status: sub.status,
+        Payment: sub.payment_status || "SUCCESS"
+      }));
+      downloadExcel(data, "subscription-history", "History");
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
+  const columns: TableColumn<any>[] = [
+    {
+      name: "S.No",
+      width: "70px",
+      cell: (_, index) => index + 1,
+    },
+    {
+      name: "Plan",
+      selector: row => row.plan_name || row.Plan?.name || "Premium Plan",
+      sortable: true,
+      cell: row => (
+        <span className="text-slate-900 font-bold">{row.plan_name || row.Plan?.name || "Premium Plan"}</span>
+      )
+    },
+    {
+      name: "Amount",
+      selector: row => row.amount_paid,
+      sortable: true,
+      cell: row => <span className="font-semibold text-slate-700">₹{row.amount_paid}</span>
+    },
+    {
+      name: "Date",
+      selector: row => row.start_date,
+      sortable: true,
+      cell: row => <span className="text-slate-500 text-sm">{formatDate(row.start_date)}</span>
+    },
+    {
+      name: "Status",
+      selector: row => row.status,
+      sortable: true,
+      cell: row => (
+        <Badge 
+          variant="outline"
+          className={`${
+            row.status === 'active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+            row.status === 'expired' ? 'bg-slate-100 text-slate-600 border-slate-200' :
+            'bg-rose-50 text-rose-700 border-rose-200'
+          } font-black text-[10px] uppercase px-3 py-1 rounded-full`}
+        >
+          {row.status}
+        </Badge>
+      )
+    },
+    {
+      name: "Payment",
+      selector: row => row.payment_status,
+      cell: row => (
+        <Badge 
+          variant="secondary"
+          className="bg-indigo-50 text-indigo-700 text-[10px] font-bold px-2 py-0.5"
+        >
+          {row.payment_status?.toUpperCase() || "SUCCESS"}
+        </Badge>
+      )
+    }
+  ];
 
   useEffect(() => {
     const script = document.createElement("script");
@@ -251,12 +331,14 @@ const ClientPlans = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => navigate(-1)}
-              className="px-4 py-2 text-sm rounded-md border bg-white hover:bg-indigo-50 transition"
+              className="rounded-xl font-bold bg-white/50 border-gray-100"
             >
-              ← Back
-            </button>
+              <ArrowLeft className="h-4 w-4 mr-2" /> Back
+            </Button>
           </div>
         </div>
 
@@ -407,10 +489,10 @@ const ClientPlans = () => {
                 {!hasAnySubscription && (
                   <CardFooter>
                     <Button
-                      className="w-full bg-gradient-to-r from-indigo-600 to-sky-500 text-white"
+                      className="w-full bg-gradient-to-r from-indigo-600 to-sky-500 text-white font-bold"
                       onClick={() => handleSubscribe(plan.id)}
                     >
-                      Subscribe
+                      <CreditCard className="h-4 w-4 mr-2" /> Subscribe Now
                     </Button>
                   </CardFooter>
                 )}
@@ -422,58 +504,81 @@ const ClientPlans = () => {
         {/* Subscription History */}
         {history.length > 0 && (
           <Card className="mt-12 border-indigo-100 shadow-lg overflow-hidden rounded-2xl">
-            <CardHeader className="bg-slate-50/50 border-b border-slate-100">
-              <div className="flex items-center gap-2">
-                <History className="h-5 w-5 text-indigo-600" />
-                <CardTitle className="text-xl font-bold text-slate-800">Subscription History</CardTitle>
+            <CardHeader className="bg-slate-50/50 border-b border-slate-100 px-6 py-4">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 bg-indigo-100 rounded-lg">
+                    <History className="h-5 w-5 text-indigo-600" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-xl font-bold text-slate-800">Subscription History</CardTitle>
+                    <CardDescription>Track your past plans and payment status</CardDescription>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                    <Input 
+                      placeholder="Search history..." 
+                      className="pl-9 h-9 w-64 bg-white border-slate-200"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                    />
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="h-9 border-slate-200 font-bold"
+                    onClick={() => checkAuthAndFetchData()}
+                  >
+                    <RefreshCw className="h-4 w-4 mr-2" /> Refresh
+                  </Button>
+                  <Button 
+                    variant="default" 
+                    size="sm" 
+                    className="h-9 bg-emerald-600 hover:bg-emerald-700 font-bold"
+                    onClick={exportHistory}
+                    disabled={exportLoading}
+                  >
+                    <Download className="h-4 w-4 mr-2" /> {exportLoading ? "Exporting..." : "Export Excel"}
+                  </Button>
+                </div>
               </div>
-              <CardDescription>Track your past plans and payment status</CardDescription>
             </CardHeader>
             <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-slate-50/30">
-                    <TableHead className="font-bold text-slate-600">Plan</TableHead>
-                    <TableHead className="font-bold text-slate-600">Amount</TableHead>
-                    <TableHead className="font-bold text-slate-600">Date</TableHead>
-                    <TableHead className="font-bold text-slate-600">Status</TableHead>
-                    <TableHead className="font-bold text-slate-600 text-right pr-6">Payment</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {history.map((sub) => (
-                    <TableRow key={sub.id} className="hover:bg-slate-50/50 transition-colors">
-                      <TableCell className="font-medium">
-                        <div className="flex flex-col">
-                          <span className="text-slate-900 font-bold">{sub.plan_name || sub.Plan?.name || "Premium Plan"}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="font-semibold text-slate-700">₹{sub.amount_paid}</TableCell>
-                      <TableCell className="text-slate-500 text-sm whitespace-nowrap">{formatDate(sub.start_date)}</TableCell>
-                      <TableCell>
-                        <Badge 
-                          variant="outline"
-                          className={`${
-                            sub.status === 'active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                            sub.status === 'expired' ? 'bg-slate-100 text-slate-600 border-slate-200' :
-                            'bg-rose-50 text-rose-700 border-rose-200'
-                          } font-black text-[10px] uppercase px-3 py-1 rounded-full`}
-                        >
-                          {sub.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right pr-6">
-                         <Badge 
-                          variant="secondary"
-                          className="bg-indigo-50 text-indigo-700 text-[10px] font-bold px-2 py-0.5"
-                        >
-                          {sub.payment_status?.toUpperCase() || "SUCCESS"}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              <div className="rounded-none overflow-hidden">
+                <DataTable
+                  columns={columns}
+                  data={filteredHistory}
+                  pagination
+                  highlightOnHover
+                  responsive
+                  pointerOnHover
+                  customStyles={{
+                    rows: { 
+                      style: { 
+                        minHeight: "60px",
+                        fontSize: "14px"
+                      } 
+                    },
+                    headCells: {
+                      style: {
+                        background: "#f8fafc",
+                        fontWeight: "700",
+                        fontSize: "12px",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.05em",
+                        padding: "16px",
+                        color: "#64748b"
+                      },
+                    },
+                    cells: {
+                      style: { padding: "16px" },
+                    },
+                  }}
+                />
+              </div>
             </CardContent>
           </Card>
         )}

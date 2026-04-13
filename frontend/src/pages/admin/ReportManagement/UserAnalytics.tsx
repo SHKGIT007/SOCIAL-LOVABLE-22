@@ -238,8 +238,13 @@ const UserAnalytics = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => navigate(-1)} className="rounded-xl font-bold bg-white/50 border-gray-100">
-              <ArrowLeft className="h-4 w-4 mr-2" /> Back
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => navigate(-1)} 
+              className="rounded-xl font-bold bg-white/50 border-gray-100 hover:bg-gray-100 transition-all font-bold"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2 text-indigo-600" /> Back
             </Button>
           
           </div>

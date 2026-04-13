@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Swal from "sweetalert2";
-import { X, Download } from "lucide-react";
+import { X, Download, RefreshCw, ArrowLeft, RotateCcw } from "lucide-react";
 import { downloadExcel } from "@/utils/exportUtils";
 import { formatDate } from "@/utils/dateFormatter";
 
@@ -211,13 +211,13 @@ const DeletedUsers = () => {
         width: "150px",
         cell: (row) => (
           <div className="flex items-center gap-2">
-            <Button
-              size="sm"
-              className="bg-emerald-600 hover:bg-emerald-700 text-white"
-              onClick={() => handleRecover(row.id, row.user_name || row.email || "")}
-            >
-              Recover
-            </Button>
+             <Button
+               size="sm"
+               className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
+               onClick={() => handleRecover(row.id, row.user_name || row.email || "")}
+             >
+               <RotateCcw className="h-4 w-4 mr-2" /> Recover
+             </Button>
           </div>
         ),
       },
@@ -254,15 +254,17 @@ const DeletedUsers = () => {
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => navigate(-1)}
-              className="px-4 py-2 text-sm rounded-md border bg-white hover:bg-red-50 transition"
-            >
-              ← Back
-            </button>
-          </div>
-        </div>
+           <div className="flex items-center gap-2">
+             <Button
+               variant="outline"
+               size="sm"
+               onClick={() => navigate(-1)}
+               className="rounded-xl font-bold bg-white/50 border-gray-100"
+             >
+               <ArrowLeft className="h-4 w-4 mr-2" /> Back
+             </Button>
+           </div>
+         </div>
 
         {/* Filters + Table */}
         <Card className="shadow-xl border border-red-200 rounded-2xl">
@@ -288,30 +290,23 @@ const DeletedUsers = () => {
                 )}
               </div>
 
-              <Button
-                className="bg-blue-500 hover:bg-blue-600 w-full sm:w-auto"
-                onClick={handleRefresh}
-                disabled={loading}
-              >
-                {loading ? "Refreshing..." : "Refresh"}
-              </Button>
-
-              {totalRows > 0 && (
-                <Button
-                  className="bg-emerald-600 hover:bg-emerald-700 w-full sm:w-auto flex items-center gap-2"
-                  onClick={exportExcel}
-                  disabled={exportLoading}
-                >
-                  {exportLoading ? (
-                    "Exporting..."
-                  ) : (
-                    <>
-                      <Download className="h-4 w-4" />
-                      Export Excel
-                    </>
-                  )}
-                </Button>
-              )}
+               <Button
+                 className="bg-blue-500 hover:bg-blue-600 w-full sm:w-auto font-bold"
+                 onClick={handleRefresh}
+                 disabled={loading}
+               >
+                 <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} /> {loading ? "Refreshing..." : "Refresh"}
+               </Button>
+ 
+               {totalRows > 0 && (
+                 <Button
+                   className="bg-emerald-600 hover:bg-emerald-700 w-full sm:w-auto flex items-center gap-2 font-bold"
+                   onClick={exportExcel}
+                   disabled={exportLoading}
+                 >
+                   <Download className="h-4 w-4 mr-2" /> {exportLoading ? "Exporting..." : "Export Excel"}
+                 </Button>
+               )}
             </div>
 
             {/* Table */}
