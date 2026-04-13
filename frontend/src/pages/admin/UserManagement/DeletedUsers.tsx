@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import Swal from "sweetalert2";
 import { X, Download } from "lucide-react";
 import { downloadExcel } from "@/utils/exportUtils";
-import { formatDateTime } from "@/utils/dateFormatter";
+import { formatDate } from "@/utils/dateFormatter";
 
 interface User {
   id: string;
@@ -107,7 +107,7 @@ const DeletedUsers = () => {
         "Last Name": u.user_lname || "N/A",
         Email: u.email || "N/A",
         Phone: u.user_phone || "N/A",
-        "Deleted At": formatDateTime(u.deleted_at),
+        "Deleted At": formatDate(u.deleted_at),
       }));
 
       downloadExcel(
@@ -203,7 +203,7 @@ const DeletedUsers = () => {
       },
       {
         name: "Deleted At",
-        cell: (row) => formatDateTime(row.deleted_at),
+        cell: (row) => formatDate(row.deleted_at),
         width: "180px",
       },
       {

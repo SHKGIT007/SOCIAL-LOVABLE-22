@@ -333,7 +333,7 @@ const UserDetails = () => {
                                     <tr key={i} className="hover:bg-gray-50/50 transition-colors">
                                         <td className="px-6 py-4">
                                             <p className="font-bold text-gray-900">{plan.Plan?.name || "Standard Plan"}</p>
-                                            <p className="text-[10px] text-gray-400 font-bold uppercase">ID: {plan.id}</p>
+                                            {/* <p className="text-[10px] text-gray-400 font-bold uppercase">ID: {plan.id}</p> */}
                                         </td>
                                         <td className="px-6 py-4">
                                             <p className="text-sm font-semibold text-gray-700">{formatDate(plan.start_date)}</p>
