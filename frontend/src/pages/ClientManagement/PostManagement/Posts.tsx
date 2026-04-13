@@ -303,7 +303,7 @@ const Posts = () => {
         <div
           className="
     sticky top-0 z-10
-    -mx-6 px-6 py-5 mb-6
+    px-4 sm:px-6 py-5 mb-6
     bg-gradient-to-b from-white/90 to-white/70
     backdrop-blur
     border-b border-indigo-100
@@ -312,13 +312,13 @@ const Posts = () => {
   "
         >
           <div>
-            <h1 className="text-3xl font-extrabold">
+            <h1 className="text-2xl sm:text-3xl font-extrabold">
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-cyan-500">
                 Posts
               </span>{" "}
               Management
             </h1>
-            <p className="text-gray-600 text-lg mt-1">
+            <p className="text-gray-600 text-sm sm:text-lg mt-1">
               Manage and organize your content
             </p>
           </div>
@@ -364,7 +364,7 @@ const Posts = () => {
         </div>
 
         {/* Content */}
-        <div className="px-6 pb-6">
+        <div className="px-4 sm:px-6 pb-6">
           {posts.length === 0 ? (
             <Card className="border-slate-200">
               <CardContent className="flex flex-col items-center justify-center py-16">
@@ -387,7 +387,7 @@ const Posts = () => {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               {posts.map((post) => {
                 const isPastSchedule = post.scheduled_at
                   ? new Date(post.scheduled_at) <= new Date()

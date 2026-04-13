@@ -235,7 +235,7 @@ export default function Header({
 
             {/* Notification Dropdown */}
             {isNotificationOpen && (
-              <div className="absolute right-0 mt-3 w-96 bg-white text-gray-800 rounded-lg shadow-2xl z-50 border border-gray-100 max-h-96 flex flex-col">
+              <div className="absolute right-0 mt-3 w-[calc(100vw-2rem)] sm:w-96 bg-white text-gray-800 rounded-lg shadow-2xl z-50 border border-gray-100 max-h-[70vh] flex flex-col">
                 {/* Header */}
                 <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3 sticky top-0 bg-white rounded-t-lg">
                   <h3 className="font-bold text-gray-900">Notifications</h3>
@@ -338,7 +338,7 @@ export default function Header({
 
             {/* Profile Menu */}
             {isProfileOpen && (
-              <div className="absolute right-0 mt-3 w-72 bg-white text-gray-800 rounded-lg shadow-2xl z-50 border border-gray-100">
+              <div className="absolute right-0 mt-3 w-[calc(100vw-2rem)] sm:w-72 bg-white text-gray-800 rounded-lg shadow-2xl z-50 border border-gray-100">
                 {/* User Info */}
                 <div className="border-b border-gray-200 p-4">
                   <p className="font-semibold text-gray-900 truncate">

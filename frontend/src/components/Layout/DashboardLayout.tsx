@@ -267,11 +267,11 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
 
       {/* Main Content */}
       <main
-        className={`flex-1 transition-all duration-300 overflow-hidden ${
+        className={`flex-1 transition-all duration-300 overflow-x-hidden ${
           isSidebarCollapsed ? "lg:ml-20" : "lg:ml-64"
         }`}
       >
-        <div className="h-[calc(110vh-64px)] overflow-y-auto pt-16 pb-4 px-4 lg:px-4">
+        <div className="min-h-[calc(100vh-64px)] overflow-y-auto pt-16 pb-4 px-3 sm:px-4 lg:px-6">
           {children}
         </div>
       </main>

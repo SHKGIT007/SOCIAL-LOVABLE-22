@@ -316,19 +316,19 @@ const NewPost = () => {
     <DashboardLayout userRole="client">
       <div className="max-w-4xl mx-auto space-y-8 pb-8">
         {/* Header */}
-        <div>
-          <h1 className="text-3xl font-extrabold tracking-tight">
+        <div className="px-2 sm:px-0">
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
             <span className="bg-gradient-to-r from-indigo-600 to-cyan-500 bg-clip-text text-transparent">
               Create New Post
             </span>
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-muted-foreground text-sm sm:text-base mt-1">
             Generate AI posts or create manually
           </p>
         </div>
 
         {/* Mode Tabs */}
-        <div className="rounded-2xl border bg-white p-1 flex shadow-sm">
+        <div className="rounded-2xl border bg-white p-1 flex shadow-sm mx-2 sm:mx-0">
           {["ai", "manual"].map((m) => (
             <button
               key={m}

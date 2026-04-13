@@ -345,7 +345,7 @@ const Users = () => {
         <div
           className="
     sticky top-0 z-10
-    -mx-2 px-4 py-4
+    px-4 py-4
     bg-gradient-to-b from-white/90 to-white/70
     backdrop-blur
     border-b border-indigo-100
@@ -355,7 +355,7 @@ const Users = () => {
         >
           {/* Left */}
           <div>
-            <h1 className="text-3xl font-extrabold">
+            <h1 className="text-2xl sm:text-3xl font-extrabold">
               <span
                 className={`bg-clip-text text-transparent ${primaryGradientClass}`}
               >
@@ -363,7 +363,7 @@ const Users = () => {
               </span>{" "}
               Management
             </h1>
-            <p className="text-gray-600 text-lg mt-1">
+            <p className="text-gray-600 text-sm sm:text-lg mt-1">
               Manage and monitor all platform users.
             </p>
           </div>

@@ -105,16 +105,16 @@ const Index = () => {
           initial={{ y: -50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 1 }}
-          className="text-6xl md:text-8xl font-extrabold tracking-tight mb-6 text-gray-900"
+          className="text-4xl sm:text-6xl md:text-8xl font-extrabold tracking-tight mb-6 text-gray-900 px-2"
         >
-          <span className="block mb-4">Future-Proof Your</span>
-          <span className={`text-transparent bg-clip-text ${primaryGradientClass}`}>Social Media Strategy</span>
+          <span className="block mb-2 sm:mb-4">Future-Proof Your</span>
+          <span className={`text-transparent bg-clip-text ${primaryGradientClass} block sm:inline`}>Social Media Strategy</span>
         </motion.h1>
         <motion.p
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.8 }}
-          className="text-2xl text-gray-700 mb-12 max-w-4xl mx-auto font-light"
+          className="text-lg sm:text-xl md:text-2xl text-gray-700 mb-10 md:mb-12 max-w-4xl mx-auto font-light px-4"
         >
           Create, schedule, and manage your social media posts with the power of **Generative AI**. Save time and boost engagement across all platforms.
         </motion.p>
@@ -122,20 +122,20 @@ const Index = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6, duration: 0.8 }}
-          className="flex gap-4 justify-center"
+          className="flex flex-col sm:flex-row gap-4 justify-center px-6 sm:px-0"
         >
           <Button
             size="lg"
-            className={`${primaryGradientClass} text-white font-extrabold px-10 py-5 text-xl rounded-2xl shadow-2xl shadow-indigo-500/50 hover:scale-[1.03] transition-transform duration-300`}
+            className={`${primaryGradientClass} text-white font-extrabold px-6 sm:px-10 py-6 sm:py-5 text-lg sm:text-xl rounded-2xl shadow-2xl shadow-indigo-500/50 hover:scale-[1.03] transition-transform duration-300`}
             onClick={() => navigate("/auth")}
           >
-            <Sparkles className="mr-2 h-6 w-6 animate-pulse" />
+            <Sparkles className="mr-2 h-5 w-5 sm:h-6 sm:w-6 animate-pulse" />
             Start Free Trial Now
           </Button>
           <Button
             size="lg"
             variant="outline"
-            className="border-2 border-indigo-600 text-indigo-600 px-10 py-5 text-xl rounded-2xl hover:bg-indigo-50 transition-colors"
+            className="border-2 border-indigo-600 text-indigo-600 px-6 sm:px-10 py-6 sm:py-5 text-lg sm:text-xl rounded-2xl hover:bg-indigo-50 transition-colors"
             onClick={() => navigate("/auth")}
           >
             View Demo
@@ -233,17 +233,17 @@ const Index = () => {
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
         >
-          <Card className="max-w-3xl mx-auto p-12 bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl border border-indigo-200/50">
+          <Card className="max-w-3xl mx-auto p-6 sm:p-12 bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl border border-indigo-200/50">
             <CardHeader className="p-0 mb-6">
-              <CardTitle className="text-4xl font-bold text-gray-900">Ready to <span className="text-indigo-600">Elevate</span> Your Strategy?</CardTitle>
-              <CardDescription className="text-xl text-gray-700 mt-2">
+              <CardTitle className="text-2xl sm:text-4xl font-bold text-gray-900 px-2">Ready to <span className="text-indigo-600">Elevate</span> Your Strategy?</CardTitle>
+              <CardDescription className="text-base sm:text-xl text-gray-700 mt-2">
                 Join thousands of creators managing their social media with the most advanced AI platform.
               </CardDescription>
             </CardHeader>
             <CardContent className="p-0">
               <Button
                 size="lg"
-                className={`${primaryGradientClass} text-white font-extrabold px-10 py-5 text-xl rounded-2xl shadow-2xl shadow-indigo-500/40 hover:scale-[1.05] transition-transform duration-300`}
+                className={`${primaryGradientClass} text-white font-extrabold px-8 sm:px-10 py-6 sm:py-5 text-lg sm:text-xl rounded-2xl shadow-2xl shadow-indigo-500/40 hover:scale-[1.05] transition-transform duration-300 w-full sm:w-auto`}
                 onClick={() => navigate("/auth")}
               >
                 <Sparkles className="mr-2 h-6 w-6 animate-spin" />

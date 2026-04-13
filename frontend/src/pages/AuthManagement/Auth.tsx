@@ -469,18 +469,18 @@ const Auth = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-sky-50 px-4">
       <Card className="w-full max-w-md border-indigo-100/70 shadow-xl rounded-2xl">
-        <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-3xl font-extrabold">
+        <CardHeader className="space-y-1 text-center p-4 sm:p-6">
+          <CardTitle className="text-2xl sm:text-3xl font-extrabold">
             <span className="bg-gradient-to-r from-indigo-600 to-sky-400 bg-clip-text text-transparent">
               Welcome
             </span>
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-sm sm:text-base">
             Sign in or create an account to get started
           </CardDescription>
         </CardHeader>
 
-        <CardContent>
+        <CardContent className="p-4 sm:p-6">
           <Tabs
             value={activeTab}
             onValueChange={setActiveTab}
