@@ -235,6 +235,47 @@ export default function UserSchedules() {
           return;
         }
       }
+
+      // Past date/time validation
+      const localNow = new Date();
+      localNow.setMinutes(localNow.getMinutes() - localNow.getTimezoneOffset());
+      const todayStr = localNow.toISOString().split("T")[0];
+      const currentTimeStr = localNow.toISOString().split("T")[1].slice(0, 5); // HH:mm
+
+      // Single Date Validation
+      if (rows[i].days.includes(SINGLE_DATE_KEY) && rows[i].singleDate) {
+        if (rows[i].singleDate < todayStr) {
+          Swal.fire("Validation Error", "Single date cannot be in the past.", "warning");
+          return;
+        }
+        if (rows[i].singleDate === todayStr) {
+          const times = rows[i].times[SINGLE_DATE_KEY] || [];
+          for (const t of times) {
+            if (t && t < currentTimeStr) {
+              Swal.fire("Validation Error", `Time "${t}" is in the past for today.`, "warning");
+              return;
+            }
+          }
+        }
+      }
+
+      // Custom Date Range Validation
+      if (rows[i].days.includes(CUSTOM_DATE_KEY) && rows[i].customDateFrom) {
+        if (rows[i].customDateFrom < todayStr) {
+          Swal.fire("Validation Error", "Custom date range cannot start in the past.", "warning");
+          return;
+        }
+        if (rows[i].customDateFrom === todayStr) {
+          const times = rows[i].times[CUSTOM_DATE_KEY] || [];
+          for (const t of times) {
+            if (t && t < currentTimeStr) {
+              Swal.fire("Validation Error", `Time "${t}" is in the past for today's start range.`, "warning");
+              return;
+            }
+          }
+        }
+      }
+
     }
     try {
       if (editingId !== null) {
@@ -819,7 +860,13 @@ export default function UserSchedules() {
                               onChange={(e) => handleRowChange(idx, e)}
                               className="p-2 rounded border border-slate-200"
                               required
-                              min={new Date().toISOString().split("T")[0]}
+                              min={(() => {
+                                const now = new Date();
+                                now.setMinutes(
+                                  now.getMinutes() - now.getTimezoneOffset()
+                                );
+                                return now.toISOString().split("T")[0];
+                              })()}
                             />
                             <span className="text-xs text-slate-500">To</span>
 
@@ -832,7 +879,13 @@ export default function UserSchedules() {
                               required
                               min={
                                 row.customDateFrom ||
-                                new Date().toISOString().split("T")[0]
+                                (() => {
+                                  const now = new Date();
+                                  now.setMinutes(
+                                    now.getMinutes() - now.getTimezoneOffset()
+                                  );
+                                  return now.toISOString().split("T")[0];
+                                })()
                               }
                               disabled={!row.customDateFrom}
                             />
@@ -862,7 +915,13 @@ export default function UserSchedules() {
                             onChange={(e) => handleRowChange(idx, e)}
                             className="p-2 rounded border border-slate-200"
                             required
-                            min={new Date().toISOString().split("T")[0]}
+                            min={(() => {
+                              const now = new Date();
+                              now.setMinutes(
+                                now.getMinutes() - now.getTimezoneOffset()
+                              );
+                              return now.toISOString().split("T")[0];
+                            })()}
                           />
                         )}
                       </div>

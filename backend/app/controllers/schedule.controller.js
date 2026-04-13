@@ -34,6 +34,38 @@ exports.createSchedule = async (req, res) => {
     singleDate = singleDate == "" ? null : singleDate;
     content_ai_prompt = content_ai_prompt || null;
     image_prompt = image_prompt || null;
+
+    const moment = require('moment-timezone');
+    const now = moment().tz('Asia/Kolkata');
+    const todayStr = now.format('YYYY-MM-DD');
+    const currentTimeStr = now.format('HH:mm');
+
+    // Validation for Single Date
+    if (singleDate === todayStr) {
+      if (typeof times === 'string') times = JSON.parse(times);
+      const dayTimes = times['single_date'] || [];
+      for (const t of dayTimes) {
+        if (t && t < currentTimeStr) {
+          return res.status(400).json({ success: false, message: `Time ${t} is in the past for today.` });
+        }
+      }
+    } else if (singleDate && singleDate < todayStr) {
+       return res.status(400).json({ success: false, message: "Single date cannot be in the past." });
+    }
+
+    // Validation for Custom Date Range
+    if (customDateFrom === todayStr) {
+      if (typeof times === 'string') times = JSON.parse(times);
+      const dayTimes = times['custom_date'] || [];
+      for (const t of dayTimes) {
+        if (t && t < currentTimeStr) {
+          return res.status(400).json({ success: false, message: `Time ${t} is in the past for today's range start.` });
+        }
+      }
+    } else if (customDateFrom && customDateFrom < todayStr) {
+      return res.status(400).json({ success: false, message: "Custom date range cannot start in the past." });
+    }
+
     const schedule = await Schedule.create({
       platforms,
       days,
@@ -133,6 +165,37 @@ exports.updateSchedule = async (req, res) => {
     customDateFrom = customDateFrom == '' ? null : customDateFrom;
     customDateTo = customDateTo == '' ? null : customDateTo;
     singleDate = singleDate == "" ? null : singleDate;
+
+    const moment = require('moment-timezone');
+    const now = moment().tz('Asia/Kolkata');
+    const todayStr = now.format('YYYY-MM-DD');
+    const currentTimeStr = now.format('HH:mm');
+
+    // Validation for Single Date
+    if (singleDate === todayStr) {
+      if (typeof times === 'string') times = JSON.parse(times);
+      const dayTimes = times['single_date'] || [];
+      for (const t of dayTimes) {
+        if (t && t < currentTimeStr) {
+          return res.status(400).json({ success: false, message: `Time ${t} is in the past for today.` });
+        }
+      }
+    } else if (singleDate && singleDate < todayStr) {
+       return res.status(400).json({ success: false, message: "Single date cannot be in the past." });
+    }
+
+    // Validation for Custom Date Range
+    if (customDateFrom === todayStr) {
+      if (typeof times === 'string') times = JSON.parse(times);
+      const dayTimes = times['custom_date'] || [];
+      for (const t of dayTimes) {
+        if (t && t < currentTimeStr) {
+          return res.status(400).json({ success: false, message: `Time ${t} is in the past for today's range start.` });
+        }
+      }
+    } else if (customDateFrom && customDateFrom < todayStr) {
+      return res.status(400).json({ success: false, message: "Custom date range cannot start in the past." });
+    }
 
 
 
