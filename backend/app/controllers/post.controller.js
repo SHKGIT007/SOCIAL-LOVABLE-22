@@ -588,7 +588,7 @@ const generateAIPost = asyncHandler(async (req, res) => {
   let { title, ai_prompt, image_prompt } = req.body;
   const userId = req.user.id;
 
-  ai_prompt = title ? `Title: ${title}\nDetails: ${ai_prompt}` : ai_prompt;
+
 
   // ✅ Find active subscription
   const subscription = await Subscription.findOne({
@@ -625,20 +625,34 @@ const generateAIPost = asyncHandler(async (req, res) => {
   }
 
   // ✅ Generate AI post content & image
-  let generatedContent = "";
+  let generatedContent = { status: true, content: "" };
   let imageUrl = "";
 
+  // Only generate image if prompt is provided
   if (image_prompt && image_prompt.trim() !== "") {
     const imageObj = await generateImagePollinations(image_prompt);
     imageUrl = imageObj.url || "";
   }
 
-  generatedContent = await generateAIContent(ai_prompt);
-  if (generatedContent.status === false) {
-    return res.status(500).json({
+  // Only generate content if ai_prompt is provided
+  if (req.body.ai_prompt && req.body.ai_prompt.trim() !== "") {
+    const fullPrompt = title ? `Title: ${title}\nDetails: ${req.body.ai_prompt}` : req.body.ai_prompt;
+    generatedContent = await generateAIContent(fullPrompt);
+    
+    if (generatedContent.status === false) {
+      return res.status(500).json({
+        status: false,
+        message: JSON.stringify(generatedContent.msg),
+        error: generatedContent.msg,
+      });
+    }
+  }
+
+  // Check if anything was generated
+  if (!imageUrl && !generatedContent.content) {
+    return res.status(400).json({
       status: false,
-      message: JSON.stringify(generatedContent.msg),
-      error: generatedContent.msg,
+      message: "Please provide either a content prompt or an image prompt.",
     });
   }
 

@@ -59,6 +59,7 @@ const NewPost = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [mode, setMode] = useState<"ai" | "manual">("ai");
   const [profileLoaded, setProfileLoaded] = useState(false);
+  const [useProfileSettings, setUseProfileSettings] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -114,11 +115,32 @@ const NewPost = () => {
 
     setIsGenerating(true);
     try {
-      const res = await apiService.generateAIPost({
-        title: optionalTitlePrompt?.trim() || title,
-        ai_prompt: optionalContentPrompt?.trim() || aiPrompt,
-        image_prompt: optionalImagePrompt?.trim() || imagePrompt,
-      });
+      // Build payload based on useProfileSettings and manual overrides
+      const payload: any = {};
+      
+      if (useProfileSettings) {
+        payload.title = optionalTitlePrompt?.trim() || title;
+        payload.ai_prompt = optionalContentPrompt?.trim() || aiPrompt;
+        payload.image_prompt = optionalImagePrompt?.trim() || imagePrompt;
+      } else {
+        payload.title = optionalTitlePrompt?.trim() || "";
+        payload.ai_prompt = optionalContentPrompt?.trim() || "";
+        payload.image_prompt = optionalImagePrompt?.trim() || "";
+
+        // Validation for manual mode
+        if (!payload.ai_prompt && !payload.image_prompt) {
+          setIsGenerating(false);
+          Swal.fire({
+            icon: "warning",
+            title: "Prompt Required",
+            text: "Please provide either a content prompt or an image prompt for manual generation.",
+            confirmButtonColor: "#6366f1",
+          });
+          return;
+        }
+      }
+
+      const res = await apiService.generateAIPost(payload);
 
       if (res.status) {
         setContent(res.data.content || "");
@@ -420,10 +442,37 @@ const NewPost = () => {
                 </div>
               )}
 
-              {/* Optional Title Prompt */}
+              {/* Use Profile Settings Toggle */}
+              <div className="flex items-center justify-between p-4 bg-indigo-50/50 border border-indigo-100 rounded-xl">
+                <div>
+                  <h3 className="text-sm font-bold text-indigo-900">
+                    Auto-use Profile Settings
+                  </h3>
+                  <p className="text-xs text-indigo-600 mt-0.5">
+                    {useProfileSettings 
+                      ? "AI will use your profile details for generation" 
+                      : "AI will only use prompts provided below"}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setUseProfileSettings(!useProfileSettings)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    useProfileSettings ? "bg-indigo-600" : "bg-gray-300"
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      useProfileSettings ? "translate-x-6" : "translate-x-1"
+                    }`}
+                  />
+                </button>
+              </div>
+
+              {/* Custom Title Prompt */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Optional Business/Creator Name
+                  {useProfileSettings ? "Optional Business/Creator Name" : "Business/Creator Name"}
                 </label>
                 <Input
                   type="text"
@@ -432,36 +481,26 @@ const NewPost = () => {
                   className="focus-visible:ring-indigo-500"
                   placeholder={title || "Add custom title for this post..."}
                 />
-                {/* {title && !optionalTitlePrompt && (
-                  <p className="text-xs text-gray-500 mt-1">
-                    Using profile default: {title}
-                  </p>
-                )} */}
               </div>
 
-              {/* Optional Content Prompt */}
+              {/* Custom Content Prompt */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Optional Description / Content Instructions
+                  {useProfileSettings ? "Optional Content Instructions" : "Custom Content Prompt"}
                 </label>
                 <Textarea
                   value={optionalContentPrompt}
                   onChange={(e) => setOptionalContentPrompt(e.target.value)}
                   className="focus-visible:ring-indigo-500"
                   rows={3}
-                  placeholder="Add extra instructions for AI content generation..."
+                  placeholder="What should the post be about?"
                 />
-                {/* {!optionalContentPrompt && aiPrompt && (
-                  <p className="text-xs text-gray-500 mt-1">
-                    Using profile prompt (click to expand)
-                  </p>
-                )} */}
               </div>
 
-              {/* Optional Image Prompt */}
+              {/* Custom Image Prompt */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Optional Image Generation Prompt
+                  {useProfileSettings ? "Optional Image Generation Prompt" : "Custom Image Prompt"}
                 </label>
                 <Textarea
                   value={optionalImagePrompt}
@@ -470,11 +509,6 @@ const NewPost = () => {
                   rows={2}
                   placeholder="Describe the image you want AI to generate..."
                 />
-                {/* {imagePrompt && !optionalImagePrompt && (
-                  <p className="text-xs text-gray-500 mt-1">
-                    Using profile default: {imagePrompt}
-                  </p>
-                )} */}
               </div>
 
               {/* Generate Button */}
@@ -490,18 +524,28 @@ const NewPost = () => {
                   </>
                 ) : (
                   <>
-                    <Sparkles className="mr-2 h-5 w-5" />
-                    Generate Post with AI
+                    {(!useProfileSettings && optionalImagePrompt && !optionalContentPrompt) ? (
+                      <ImageIcon className="mr-2 h-5 w-5" />
+                    ) : (
+                      <Sparkles className="mr-2 h-5 w-5" />
+                    )}
+                    {useProfileSettings 
+                      ? "Generate Post with Profile AI" 
+                      : (!optionalContentPrompt && optionalImagePrompt) 
+                        ? "Generate AI Image Only" 
+                        : (optionalContentPrompt && !optionalImagePrompt)
+                          ? "Generate AI Content Only"
+                          : "Generate Custom AI Post"}
                   </>
                 )}
               </Button>
 
               {/* Generated Content Preview */}
-              {content && (
+              {(content || imageContent) && (
                 <div className="space-y-4 border-t pt-6 mt-6">
                   <div className="flex items-center justify-between">
                     <Label className="text-lg font-semibold text-gray-800">
-                      Generated Content
+                      Generated {imageContent && !content ? "Image" : content && !imageContent ? "Content" : "Post"}
                     </Label>
                     <span className="text-xs text-green-600 font-medium">
                       ✓ Generated Successfully
@@ -518,17 +562,19 @@ const NewPost = () => {
                     </div>
                   )}
 
-                  <div>
-                    <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                      Edit Caption
-                    </Label>
-                    <Textarea
-                      value={content}
-                      onChange={(e) => setContent(e.target.value)}
-                      rows={10}
-                      className="focus-visible:ring-indigo-500"
-                    />
-                  </div>
+                  {content && (
+                    <div>
+                      <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                        Edit Caption
+                      </Label>
+                      <Textarea
+                        value={content}
+                        onChange={(e) => setContent(e.target.value)}
+                        rows={10}
+                        className="focus-visible:ring-indigo-500"
+                      />
+                    </div>
+                  )}
                 </div>
               )}
             </CardContent>
