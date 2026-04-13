@@ -266,6 +266,22 @@ const ClientPlans = () => {
                   </span>
                 </div>
 
+                <div className="flex justify-between">
+                  <span className="font-medium">Status:</span>
+                  <Badge 
+                    variant="outline" 
+                    className={
+                      currentSubscription.status === "cancelled" || currentSubscription.payment_status === "failed"
+                        ? "bg-red-100 text-red-700 border-red-300"
+                        : currentSubscription.status === "active"
+                        ? "bg-green-100 text-green-700 border-green-300"
+                        : "bg-yellow-100 text-yellow-700 border-yellow-300"
+                    }
+                  >
+                    {currentSubscription.status === "cancelled" ? "Cancelled" : currentSubscription.status.charAt(0).toUpperCase() + currentSubscription.status.slice(1)}
+                  </Badge>
+                </div>
+
                 {/* 🔥 Display Start & End Date */}
                 <div className="flex justify-between">
                   <span className="font-medium">Subsciption Date:</span>

@@ -195,13 +195,16 @@ const Subscriptions = () => {
         name: "Status",
         width: "120px",
         cell: (row) => {
-          const status =
+          let statusLabel =
             row.payment_status.charAt(0).toUpperCase() +
             row.payment_status.slice(1);
-
           let badgeClasses = "bg-gray-100 text-gray-700 border-gray-300";
 
-          if (row.payment_status === "success") {
+          // If subscription is cancelled (either manually or auto-cancelled after 24h pending)
+          if (row.status === "cancelled") {
+            statusLabel = "Cancelled";
+            badgeClasses = "bg-red-100 text-red-700 border-red-300";
+          } else if (row.payment_status === "success") {
             badgeClasses = "bg-green-100 text-green-700 border-green-300";
           } else if (row.payment_status === "refunded") {
             badgeClasses = "bg-blue-100 text-blue-700 border-blue-300";
@@ -213,7 +216,7 @@ const Subscriptions = () => {
 
           return (
             <Badge variant="outline" className={badgeClasses}>
-              {status}
+              {statusLabel}
             </Badge>
           );
         },

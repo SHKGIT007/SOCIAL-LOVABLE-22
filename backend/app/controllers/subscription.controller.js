@@ -397,6 +397,19 @@ const getAllSubscriptions = asyncHandler(async (req, res) => {
     ];
   }
 
+  // ✅ Auto-cancel pending payments older than 24 hours
+  const twentyFourHoursAgo = moment().subtract(24, "hours").toDate();
+  await Subscription.update(
+    { status: "cancelled" },
+    {
+      where: {
+        payment_status: "pending",
+        created_at: { [Op.lt]: twentyFourHoursAgo },
+        status: { [Op.ne]: "cancelled" },
+      },
+    }
+  );
+
   const { count, rows: subscriptions } = await Subscription.findAndCountAll({
     where: whereClause,
     include: [
@@ -478,6 +491,20 @@ const getSubscriptionById = asyncHandler(async (req, res) => {
 
 const getUserSubscription = asyncHandler(async (req, res) => {
   const userId = req.user.id;
+
+  // ✅ Auto-cancel pending payments older than 24 hours
+  const twentyFourHoursAgo = moment().subtract(24, "hours").toDate();
+  await Subscription.update(
+    { status: "cancelled" },
+    {
+      where: {
+        user_id: userId,
+        payment_status: "pending",
+        created_at: { [Op.lt]: twentyFourHoursAgo },
+        status: { [Op.ne]: "cancelled" },
+      },
+    }
+  );
 
   const subscription = await Subscription.findOne({
     where: { user_id: userId, status: "active" },
