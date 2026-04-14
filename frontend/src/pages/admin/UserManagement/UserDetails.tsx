@@ -233,7 +233,7 @@ const UserDetails = () => {
                         </div>
                         <div className="text-right">
                           <p className="text-xs font-black text-indigo-500 uppercase tracking-widest mb-1">Monthly Cost</p>
-                          <p className="text-3xl font-black text-gray-900">₹{activeSubscription.plan_price || activeSubscription.amount_paid}</p>
+                          <p className="text-3xl font-black text-gray-900">₹{Math.floor(activeSubscription.plan_price || activeSubscription.amount_paid)}</p>
                         </div>
                       </div>
 
@@ -341,7 +341,7 @@ const UserDetails = () => {
                                             <p className="text-sm font-semibold text-gray-700">{formatDate(plan.start_date)}</p>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <p className="text-sm font-black text-indigo-600">₹{plan.amount_paid}</p>
+                                            <p className="text-sm font-black text-indigo-600">₹{Math.floor(plan.amount_paid)}</p>
                                         </td>
                                         <td className="px-6 py-4">
                                             <Badge className={`text-[10px] py-0 px-2 h-5 ${

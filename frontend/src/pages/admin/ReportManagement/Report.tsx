@@ -124,8 +124,8 @@ const Report = () => {
         Phone: u.user_phone || "N/A",
         "Plan Name": u.subscription?.plan || "N/A",
         "Plan Status": u.subscription?.status || "N/A",
-        "AI Used": u.subscription?.ai_posts_used ?? "N/A",
-        "AI Total": u.subscription?.plan_ai_posts ?? "N/A",
+        "AI Posts Used": u.subscription?.ai_posts_used ?? "N/A",
+        "AI Posts Total": u.subscription?.plan_ai_posts ?? "N/A",
       }));
 
       downloadExcel(excelData, "user-report", "Report");
@@ -190,7 +190,7 @@ const Report = () => {
         },
       },
       {
-        name: "AI Usage",
+        name: "AI Posts Usage",
         width: "140px",
         cell: (row) =>
           `${row.subscription?.ai_posts_used ?? "N/A"} / ${row.subscription?.plan_ai_posts ?? "N/A"

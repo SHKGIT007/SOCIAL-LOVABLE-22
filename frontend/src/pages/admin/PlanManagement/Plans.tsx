@@ -188,7 +188,7 @@ const Plans = () => {
       const excelData = res.data.plans.map((p, index) => ({
         "S.No": index + 1,
         Name: p.name || "N/A",
-        Price: p.price || "N/A",
+        Price: Math.floor(p.price) || "N/A",
         "AI Posts": p.ai_posts || "N/A",
         Accounts: p.linked_accounts || "N/A",
         Status: p.is_active ? "Active" : "Inactive",
@@ -226,7 +226,7 @@ const Plans = () => {
       },
       {
         name: "Price",
-        selector: (row) => row.price || "N/A",
+        selector: (row) => (row.price ? Math.floor(row.price) : "N/A"),
         sortable: true,
         width: "80px",
       },

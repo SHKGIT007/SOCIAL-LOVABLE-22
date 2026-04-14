@@ -93,7 +93,7 @@ const ClientPlans = () => {
       name: "Amount",
       selector: row => row.amount_paid,
       sortable: true,
-      cell: row => <span className="font-semibold text-slate-700">₹{row.amount_paid}</span>
+      cell: row => <span className="font-semibold text-slate-700">₹{Math.floor(row.amount_paid)}</span>
     },
     {
       name: "Date",
@@ -258,7 +258,7 @@ const ClientPlans = () => {
 
       const result = await Swal.fire({
         title: "Confirm Subscription",
-        html: `Are you sure you want to subscribe to <b>${plan.name}</b> for <b>₹${plan.price}</b>?`,
+        html: `Are you sure you want to subscribe to <b>${plan.name}</b> for <b>₹${Math.floor(plan.price)}</b>?`,
         icon: "question",
         showCancelButton: true,
         confirmButtonText: "Yes, Continue",
@@ -378,7 +378,7 @@ const ClientPlans = () => {
                   <div>
                     <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Current Plan</p>
                     <h3 className="text-xl font-bold text-slate-800">{currentSubscription.plan_name || currentSubscription.Plan?.name}</h3>
-                    <p className="text-sm font-semibold text-indigo-600">₹{currentSubscription.plan_price || currentSubscription.amount_paid} / term</p>
+                    <p className="text-sm font-semibold text-indigo-600">₹{Math.floor(currentSubscription.plan_price || currentSubscription.amount_paid)} / term</p>
                   </div>
                 </div>
 
@@ -467,7 +467,7 @@ const ClientPlans = () => {
                 <CardHeader>
                   <CardTitle>{plan.name}</CardTitle>
                   <CardDescription>
-                    <span className="text-3xl font-bold">₹{plan.price}</span>
+                    <span className="text-3xl font-bold">₹{Math.floor(plan.price)}</span>
                   </CardDescription>
                   <CardDescription>{plan.description}</CardDescription>
                 </CardHeader>

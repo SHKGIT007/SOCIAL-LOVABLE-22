@@ -13,7 +13,7 @@ const seedPlans = async () => {
         const plans = [
             {
                 name: 'Free Plan',
-                price: 0.00,
+                price: 0,
                 monthly_posts: 5,
                 ai_posts: 2,
                 linked_accounts: 1,
@@ -29,7 +29,7 @@ const seedPlans = async () => {
             },
             {
                 name: 'Pro Plan',
-                price: 19.99,
+                price: 20,
                 monthly_posts: 50,
                 ai_posts: 20,
                 linked_accounts: 3,
@@ -46,7 +46,7 @@ const seedPlans = async () => {
             },
             {
                 name: 'Business Plan',
-                price: 49.99,
+                price: 50,
                 monthly_posts: 200,
                 ai_posts: 100,
                 linked_accounts: 10,
@@ -65,7 +65,7 @@ const seedPlans = async () => {
             },
             {
                 name: 'Enterprise Plan',
-                price: 99.99,
+                price: 100,
                 monthly_posts: 500,
                 ai_posts: 300,
                 linked_accounts: 25,

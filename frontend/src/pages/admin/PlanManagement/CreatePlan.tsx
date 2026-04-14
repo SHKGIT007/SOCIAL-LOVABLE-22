@@ -25,9 +25,9 @@ const CreatePlanPage = () => {
   const validationSchema = Yup.object({
     name: Yup.string().required("Plan name required"),
     description: Yup.string().required("Description required"),
-    price: Yup.number().required("Price required"),
-    ai_posts: Yup.number().required("AI Posts required"),
-    linked_accounts: Yup.number().required("Linked accounts required"),
+    price: Yup.number().integer("Price must be an integer").required("Price required"),
+    ai_posts: Yup.number().integer("AI Posts must be an integer").required("AI Posts required"),
+    linked_accounts: Yup.number().integer("Linked accounts must be an integer").required("Linked accounts required"),
   });
 
   const fields = [

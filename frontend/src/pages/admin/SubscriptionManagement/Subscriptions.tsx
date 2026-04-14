@@ -134,7 +134,7 @@ const Subscriptions = () => {
         User: s.User?.user_name || "N/A",
         Email: s.User?.email || "N/A",
         Plan: s.plan_name || s.Plan?.name || "N/A",
-        Price: s.plan_price || s.Plan?.price || 0,
+        Price: Math.floor(Number(s.plan_price || s.Plan?.price || 0)),
         "AI Posts Used": `${s.ai_posts_used}/${s.ai_posts}`,
         "Linked Accounts": s.linked_accounts || 0,
         Status: s.payment_status,
@@ -182,7 +182,7 @@ const Subscriptions = () => {
       },
       {
         name: "Plan Price",
-        selector: (row) => row.plan_price || row.Plan?.price || "N/A",
+        selector: (row) => Math.floor(Number(row.plan_price || row.Plan?.price || 0)) || "N/A",
         sortable: true,
         width: "140px",
       },
