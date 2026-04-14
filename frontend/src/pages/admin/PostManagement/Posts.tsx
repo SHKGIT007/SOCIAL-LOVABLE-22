@@ -430,7 +430,7 @@ const AdminPosts = () => {
               <div className="relative w-full sm:w-72">
                 <input
                   type="text"
-                  placeholder="Search title..."
+                  placeholder="Search by title or content..."
                   className="border px-3 py-2 rounded-lg w-full shadow-sm focus:ring-indigo-300 focus:border-indigo-400 pr-9"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
