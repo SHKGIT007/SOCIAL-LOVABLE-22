@@ -212,7 +212,8 @@ const Users = () => {
 
       const excelData = data.data.users.map((u: UserData, index: number) => ({
         "S.No": index + 1,
-        Name: u.user_name || "N/A",
+        UserName: u.user_name || "N/A",
+        FullName: (u.user_fname || u.user_lname) ? `${u.user_fname || ""} ${u.user_lname || ""}`.trim() : "N/A",
         Email: u.email,
         Phone: u.user_phone || "N/A",
         Plan: u.subscription?.plan || "N/A",
