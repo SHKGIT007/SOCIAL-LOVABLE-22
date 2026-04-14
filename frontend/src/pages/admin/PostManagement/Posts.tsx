@@ -168,12 +168,13 @@ const AdminPosts = () => {
       const excelData = allPosts.map((p: Post, index: number) => ({
         "S.No": index + 1,
         Title: p.title || "Untitled",
-        Content: p.content || "",
-        Status: p.status,
-        User: p.User?.user_name || "N/A",
+        "Business/Creator": p.User?.Profile?.business_name || p.User?.user_name || "N/A",
         Email: p.User?.email || "N/A",
+        Content: p.content || "",
         Platforms: getPlatformsArray(p.platforms).join(", "),
+        Status: p.status,
         Type: p.is_ai_generated ? "AI" : "Manual",
+        "Scheduled At": formatDate(p.scheduled_at) || "N/A",
         Created: formatDate(p.created_at),
       }));
 
@@ -226,6 +227,11 @@ const AdminPosts = () => {
         width: "70px",
         cell: (row, index) =>
           page === 1 ? index + 1 : (page - 1) * perPage + (index + 1),
+      },
+      {
+        name:"Title",
+        width:"150px",
+        selector: (row) => row?.title || "N/A",
       },
       {
         name: "Business/Creator",

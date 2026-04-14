@@ -18,6 +18,8 @@ interface UserData {
   email: string;
   user_phone: string | null;
   user_name: string | null;
+  user_fname: string | null;
+  user_lname: string | null;
   created_at: string;
   role: string;
   subscription: {
@@ -244,8 +246,14 @@ const Users = () => {
           page === 1 ? index + 1 : (page - 1) * perPage + (index + 1),
       },
       {
-        name: "Name",
-        selector: (row) => row.user_name || "N/A",
+        name: "UserName",
+        selector: (row) => row?.user_name || "N/A",
+        sortable: true,
+        width: "120px",
+      },
+      {
+        name: "FullName",
+        selector: (row) => (row?.user_fname || row?.user_lname) ? `${row.user_fname || ""} ${row.user_lname || ""}`.trim() : "N/A",
         sortable: true,
         width: "120px",
       },
