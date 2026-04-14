@@ -205,19 +205,35 @@ const UserPostsReport = () => {
 
   const getPlatformsArray = (platforms: any): string[] => {
     if (!platforms) return [];
+
+    // already array
     if (Array.isArray(platforms)) return platforms;
+
+    // JSON string or other string format
     if (typeof platforms === "string") {
       try {
         const parsed = JSON.parse(platforms);
         if (Array.isArray(parsed)) return parsed;
-        return [parsed.toString()];
-      } catch {
+
+        // If parsed is not an array, maybe it was a single string that's actually comma-separated
         return platforms
           .split(",")
-          .map((p: string) => p.trim())
+          .map((p) => p.trim())
+          .filter(Boolean);
+      } catch {
+        // Not JSON, try as comma-separated string
+        return platforms
+          .split(",")
+          .map((p) => p.trim())
           .filter(Boolean);
       }
     }
+
+    // object case { facebook: true, instagram: true }
+    if (typeof platforms === "object") {
+      return Object.keys(platforms);
+    }
+
     return [];
   };
 

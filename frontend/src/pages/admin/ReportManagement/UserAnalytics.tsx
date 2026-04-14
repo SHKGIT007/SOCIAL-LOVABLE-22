@@ -110,6 +110,40 @@ const UserAnalytics = () => {
   const primaryGradient = "from-indigo-600 to-cyan-500";
   const primaryGradientClass = `bg-gradient-to-r ${primaryGradient}`;
 
+  const getPlatformsArray = (platforms: any): string[] => {
+    if (!platforms) return [];
+
+    // already array
+    if (Array.isArray(platforms)) return platforms;
+
+    // JSON string or other string format
+    if (typeof platforms === "string") {
+      try {
+        const parsed = JSON.parse(platforms);
+        if (Array.isArray(parsed)) return parsed;
+
+        // If parsed is not an array, maybe it was a single string that's actually comma-separated
+        return platforms
+          .split(",")
+          .map((p) => p.trim())
+          .filter(Boolean);
+      } catch {
+        // Not JSON, try as comma-separated string
+        return platforms
+          .split(",")
+          .map((p) => p.trim())
+          .filter(Boolean);
+      }
+    }
+
+    // object case { facebook: true, instagram: true }
+    if (typeof platforms === "object") {
+      return Object.keys(platforms);
+    }
+
+    return [];
+  };
+
   useEffect(() => {
     if (!isAuthenticated() || !isAdmin()) {
       navigate("/auth");
@@ -447,9 +481,9 @@ const UserAnalytics = () => {
                                         <Globe className="h-5 w-5 text-indigo-600 mb-2" />
                                         <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Platforms</p>
                                         <div className="flex flex-wrap gap-1 justify-center mt-2">
-                                            {postData.platforms ? JSON.parse(postData.platforms).map((p: string, i: number) => (
+                                            {getPlatformsArray(postData.platforms).map((p: string, i: number) => (
                                                 <Badge key={i} variant="secondary" className="capitalize text-[10px] bg-white text-indigo-700 border-indigo-100">{p}</Badge>
-                                            )) : "N/A"}
+                                            ))}
                                         </div>
                                     </div>
                                     <div className="p-4 rounded-2xl bg-emerald-50/50 border border-emerald-100 flex flex-col justify-center items-center text-center">
