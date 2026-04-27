@@ -23,6 +23,8 @@ const SocialAccounts = () => {
   const [igAppId, setIgAppId] = useState("");
   const [igAppSecret, setIgAppSecret] = useState("");
   const [showIgSecret, setShowIgSecret] = useState(false);
+  const [showFacebookGuide, setShowFacebookGuide] = useState(false);
+  const [showInstagramGuide, setShowInstagramGuide] = useState(false);
   const OAUTH_URLS = {
     Facebook: `${API_CONFIG.BASE_URL}/social-accounts/oauth/facebook`,
     Instagram: `${API_CONFIG.BASE_URL}/social-accounts/oauth/instagram`,
@@ -316,6 +318,60 @@ const SocialAccounts = () => {
     }
   };
 
+  // Function to get Facebook guide content
+  const getFacebookGuide = () => ({
+    title: 'How to Get Facebook App Credentials',
+    content: (
+      <ol className="list-decimal list-inside space-y-2 text-sm text-gray-700">
+        <li>
+          <strong>Create Facebook Developer Account:</strong> Go to <a href="https://developers.facebook.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">developers.facebook.com</a> and sign up
+        </li>
+        <li>
+          <strong>Create an App:</strong> Click <strong>My Apps</strong> → <strong>Create App</strong> → Select <strong>Consumer</strong> as app type
+        </li>
+        <li>
+          <strong>Add Facebook Login:</strong> In the app dashboard, add <strong>Facebook Login</strong> product
+        </li>
+        <li>
+          <strong>Get App Credentials:</strong> Go to <strong>Settings</strong> → <strong>Basic</strong> to find your App ID and App Secret
+        </li>
+        <li>
+          <strong>Configure OAuth Redirect:</strong> Go to <strong>Facebook Login</strong> → <strong>Settings</strong> and add redirect URI: <code className="bg-gray-100 px-1 rounded text-xs">https://socialvibe.tradestreet.in/backend/facebook/callback</code>
+        </li>
+        <li>
+          <strong>Set App Permissions:</strong> Go to <strong>App Review</strong> → <strong>Permissions and Features</strong> to request advanced permissions for your needed scopes
+        </li>
+      </ol>
+    )
+  });
+
+  // Function to get Instagram guide content
+  const getInstagramGuide = () => ({
+    title: 'How to Get Instagram App Credentials',
+    content: (
+      <ol className="list-decimal list-inside space-y-2 text-sm text-gray-700">
+        <li>
+          <strong>Use the same Facebook App:</strong> Instagram Business credentials come from the same Facebook App you created above
+        </li>
+        <li>
+          <strong>Add Instagram Basic Display:</strong> In your Facebook App, add <strong>Instagram Basic Display</strong> product
+        </li>
+        <li>
+          <strong>Add Instagram Graph API:</strong> Add <strong>Instagram Graph API</strong> product for advanced features
+        </li>
+        <li>
+          <strong>Configure OAuth Redirect:</strong> Go to <strong>Instagram Basic Display</strong> → <strong>Settings</strong> and add: <code className="bg-gray-100 px-1 rounded text-xs">https://socialvibe.tradestreet.in/backend/instagram/callback</code>
+        </li>
+        <li>
+          <strong>Connect Instagram Account:</strong> In <strong>App Roles</strong> → <strong>Instagram Testers</strong>, add your Instagram account as a tester
+        </li>
+        <li>
+          <strong>Note:</strong> Your Instagram account must be a Business or Creator account to use the API
+        </li>
+      </ol>
+    )
+  });
+
   const fbConnected = !!accounts.find((acc) => acc.platform === "Facebook" && Number(acc.is_active) === 1);
   const igConnected = !!accounts.find((acc) => acc.platform === "Instagram" && Number(acc.is_active) === 1);
 
@@ -371,10 +427,30 @@ const SocialAccounts = () => {
               <div className="relative rounded-2xl border border-indigo-100 bg-white p-6 shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_25px_rgba(99,102,241,0.12)] transition-all duration-300">
                 <div className="flex items-center justify-between mb-5">
                   <h3 className="text-lg font-semibold text-gray-900">Facebook</h3>
-                  <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600 shadow-sm">
-                    Not Connected
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setShowFacebookGuide(!showFacebookGuide)}
+                      className="text-xs text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
+                    >
+                      {showFacebookGuide ? '▼ Hide Guide' : '► How to Get Credentials'}
+                    </button>
+                    <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600 shadow-sm">
+                      Not Connected
+                    </span>
+                  </div>
                 </div>
+
+                {/* Facebook Guide */}
+                {showFacebookGuide && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
+                      📖 {getFacebookGuide().title}
+                    </h4>
+                    <div className="text-sm text-gray-700">
+                      {getFacebookGuide().content}
+                    </div>
+                  </div>
+                )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div className="space-y-2">
@@ -433,10 +509,30 @@ const SocialAccounts = () => {
               <div className="relative rounded-2xl border border-pink-100 bg-white p-6 shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_25px_rgba(244,114,182,0.15)] transition-all duration-300">
                 <div className="flex items-center justify-between mb-5">
                   <h3 className="text-lg font-semibold text-gray-900">Instagram</h3>
-                  <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600 shadow-sm">
-                    Not Connected
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setShowInstagramGuide(!showInstagramGuide)}
+                      className="text-xs text-pink-600 hover:text-pink-700 font-medium flex items-center gap-1"
+                    >
+                      {showInstagramGuide ? '▼ Hide Guide' : '► How to Get Credentials'}
+                    </button>
+                    <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600 shadow-sm">
+                      Not Connected
+                    </span>
+                  </div>
                 </div>
+
+                {/* Instagram Guide */}
+                {showInstagramGuide && (
+                  <div className="bg-pink-50 border border-pink-200 rounded-lg p-4 mb-4">
+                    <h4 className="font-semibold text-pink-900 mb-3 flex items-center gap-2">
+                      📖 {getInstagramGuide().title}
+                    </h4>
+                    <div className="text-sm text-gray-700">
+                      {getInstagramGuide().content}
+                    </div>
+                  </div>
+                )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div className="space-y-2">

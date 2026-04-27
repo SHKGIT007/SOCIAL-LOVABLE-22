@@ -1405,3 +1405,6 @@
 {"ai_prompt":"","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2026-04-13T09:36:36.268Z","userId":2}
 {"ai_prompt":"make an image of dhoni with all the trophies he is holding in his hand and table","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2026-04-13T09:36:49.307Z","userId":2}
 {"ai_prompt":"","level":"info","message":"AI post generated","service":"social-lovable-api","timestamp":"2026-04-13T09:36:58.719Z","userId":2}
+{"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-04-27T06:16:19.817Z","userId":1,"username":"admin"}
+{"email":"test@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-04-27T06:16:40.586Z","userId":2,"username":"test21"}
+{"email":"admin@gmail.com","level":"info","message":"User logged in successfully","service":"social-lovable-api","timestamp":"2026-04-27T06:16:57.507Z","userId":1,"username":"admin"}
