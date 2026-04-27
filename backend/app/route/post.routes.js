@@ -9,9 +9,29 @@ const {
     validateId, 
     validatePagination 
 } = require('../middleware/validation.middleware');
+const { getBlockedCategories, getAllowedTopics } = require('../services/contentModeration.service');
 
 // All routes require authentication
 router.use(authenticateToken);
+
+// ============================================
+// Content Policy Info (Public - no auth needed)
+// ============================================
+router.get('/content-policy', (req, res) => {
+    res.json({
+        status: true,
+        message: 'Content policy retrieved successfully',
+        data: {
+            blockedCategories: getBlockedCategories(),
+            allowedTopics: getAllowedTopics(),
+            guidelines: {
+                maxPromptLength: 2000,
+                minPromptLength: 3,
+                description: 'User prompts must not contain inappropriate, harmful, illegal, or offensive content.'
+            }
+        }
+    });
+});
 
 // Post CRUD operations
 

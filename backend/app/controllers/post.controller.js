@@ -9,6 +9,9 @@ const {
   Profile,
 } = require("../models");
 
+// Content Moderation Service
+const { checkContentModeration, moderateGeneratedContent } = require("../services/contentModeration.service");
+
 const { Op } = require("sequelize");
 const { asyncHandler } = require("../middleware/error.middleware");
 const logger = require("../config/logger");
@@ -588,7 +591,50 @@ const generateAIPost = asyncHandler(async (req, res) => {
   let { title, ai_prompt, image_prompt } = req.body;
   const userId = req.user.id;
 
-
+  // ============================================
+  // CONTENT MODERATION CHECK - Check prompts before processing
+  // ============================================
+  
+  // Combine both prompts for comprehensive checking
+  const combinedPrompt = [title, ai_prompt, image_prompt].filter(Boolean).join(' ');
+  
+  // Debug: Log the combined prompt
+  logger.info('Content moderation check', {
+    userId,
+    titleLength: title?.length || 0,
+    aiPromptLength: ai_prompt?.length || 0,
+    imagePromptLength: image_prompt?.length || 0,
+    combinedLength: combinedPrompt.length
+  });
+  
+  // Check content moderation
+  const moderationResult = checkContentModeration(combinedPrompt);
+  
+  // Debug: Log the moderation result
+  logger.info('Moderation result', {
+    isAllowed: moderationResult.isAllowed,
+    category: moderationResult.category,
+    message: moderationResult.message,
+    matchedPatterns: moderationResult.matchedPatterns
+  });
+  
+  if (!moderationResult.isAllowed) {
+    logger.warn('Content moderation blocked prompt', {
+      userId,
+      category: moderationResult.category,
+      message: moderationResult.message
+    });
+    
+    return res.status(400).json({
+      status: false,
+      message: moderationResult.message,
+      error: {
+        code: 'CONTENT_BLOCKED',
+        category: moderationResult.category,
+        details: 'Your prompt contains content that violates our content policy.'
+      }
+    });
+  }
 
   // ✅ Find active subscription
   const subscription = await Subscription.findOne({
@@ -645,6 +691,30 @@ const generateAIPost = asyncHandler(async (req, res) => {
         message: JSON.stringify(generatedContent.msg),
         error: generatedContent.msg,
       });
+    }
+    
+    // ============================================
+    // MODERATE AI-GENERATED CONTENT - Double check the output
+    // ============================================
+    if (generatedContent.content) {
+      const contentModerationResult = moderateGeneratedContent(generatedContent.content);
+      
+      if (!contentModerationResult.isAllowed) {
+        logger.error('AI-generated content blocked by moderation', {
+          userId,
+          category: contentModerationResult.category,
+          contentPreview: generatedContent.content.substring(0, 100)
+        });
+        
+        return res.status(400).json({
+          status: false,
+          message: "The generated content violates our content policy. Please try a different prompt.",
+          error: {
+            code: 'AI_CONTENT_BLOCKED',
+            category: contentModerationResult.category
+          }
+        });
+      }
     }
   }
 
