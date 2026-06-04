@@ -58,7 +58,7 @@ const createPost = asyncHandler(async (req, res) => {
     }
 
     // Use environment variables for upload directory and public URL
-    const UPLOAD_DIR = process.env.UPLOAD_DIR || "/var/www/socialvibe/uploads";
+    const UPLOAD_DIR = process.env.UPLOAD_DIR || path.join(__dirname, "../../../uploads");
     const PUBLIC_UPLOAD_URL =
       process.env.PUBLIC_UPLOAD_URL ||
       "https://socialvibe.tradestreet.in/uploads";
@@ -459,7 +459,7 @@ const updatePost = asyncHandler(async (req, res) => {
 
     const user = await User.findByPk(userId);
     const userFolder = user ? `user_${userId}_${user.user_name}` : `user_${userId}`;
-    const UPLOAD_DIR = process.env.UPLOAD_DIR || "/var/www/socialvibe/uploads";
+    const UPLOAD_DIR = process.env.UPLOAD_DIR || path.join(__dirname, "../../../uploads");
 
     if (req.files.image_file) {
       const img = req.files.image_file;

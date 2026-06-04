@@ -30,15 +30,15 @@ app.use(
 );
 
 // Rate limiting
-// const limiter = rateLimit({
-//   windowMs: 15 * 60 * 1000, // 15 minutes
-//   max: 100 // limit each IP to 100 requests per windowMs
-// });
-// app.use(limiter);
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100 // limit each IP to 100 requests per windowMs
+});
+app.use(limiter);
 
 // Allow frontend origin
 var corsOptions = {
-  origin: "*",
+  origin: process.env.FRONTEND_URL || "http://localhost:5173",
 };
 app.use(cors(corsOptions));
 
@@ -54,13 +54,7 @@ app.get("/", (req, res) => {
   res.send("Welcome to Social Lovable API");
 });
 
-// appid = 1579224306600577
-// secretkey = a61184184766a15c03154b899db189c7
-// callbackUrl = https://hometalent4u.in/backend/facebook/callback
-
-//  VERIFY_TOKEN = "nilesh";
-
-// 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
+// Third-party integration keys should be securely stored in .env file
 
 app.use("/api", routes);
 
@@ -115,7 +109,9 @@ sequelize
       console.log(`Server is running on port ${PORT}.`);
     });
   })
-  .catch((error) => {});
+  .catch((error) => {
+    console.error("Database sync failed:", error);
+  });
 
 //     response.data {
 //    access_token: 'IGAAVmGeDYcJ9BZAFFrZAVNwMkIweGlQUVhYa1ZAVZAnpSbi1vbVBPVVE2ZA1REckV0Q3duUi1BaFVHYkItX2xiWjRKMlo3Nk1aRm5zc1ZAhSDNOdC1idHp2TTZAkSURuOUh5amdJRVFQTmtDbVQ2ZAnppOVdySGpKeWVFU29ndjF4aDR4VjBLOXltQ2NxQ1NNNzR1UXhKNFJrSgZDZD',
