@@ -1,5 +1,5 @@
-
-const { User, SocialAccount } = require('../../app/models');
+﻿
+const { User, SocialAccount } = require('../../App/Models');
 
 const axios = require('axios');
 

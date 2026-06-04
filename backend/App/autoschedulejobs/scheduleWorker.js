@@ -1,0 +1,559 @@
+﻿// scheduleWorker.js
+const { parentPort, workerData } = require('worker_threads');
+const { Schedule, Post, SocialAccount, SystemSetting,Profile,sequelize } = require('../Models'); // adjust path
+const logger =  require('../Connection/logger');
+// const { facebookPost } = require('./redirectAuth/facebook/facebookPost');
+// const { instagramPost } = require('./redirectAuth/instagram/instagramPost');
+const { facebookPost } = require('../../redirectAuth/facebook/facebookPost');
+const { instagramPost } = require('../../redirectAuth/instagram/instagramPost');
+const { Op } = require('sequelize');
+const axios = require('axios');
+const cloudinary = require('cloudinary').v2;
+
+async function matchesSchedule(schedule, now) {
+  // schedule.platforms, schedule.days and schedule.times are JSON per your table
+  // parse them safely
+  let days = schedule.days;
+  let times = schedule.times;
+  if (typeof days === 'string') {
+    try { days = JSON.parse(days); } catch(e){ days = []; }
+  }
+  if (typeof times === 'string') {
+    try { times = JSON.parse(times); } catch(e){ times = {}; }
+  }
+  // convert `now` to schedule timezone if needed
+  // For simplicity assume timezone is Asia/Kolkata / server is same
+  const dayNames = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+  const todayName = dayNames[now.getDay()];
+
+  // handle custom dates
+  if (Array.isArray(days) && days.includes('single_date')) {
+    // for single_date, your times likely array under times.single_date
+    const singleDate = schedule.singleDate ? new Date(schedule.singleDate) : null;
+    if (singleDate) {
+      // if date matches today's date -> check times
+      if (singleDate.toDateString() === now.toDateString()) {
+        const slotTimes = times['single_date'] || [];
+        return slotTimes.some(t => isTimeMatch(t, now));
+      }
+    }
+  }
+
+  if (Array.isArray(days) && days.includes('custom_date')) {
+    const from = schedule.customDateFrom ? new Date(schedule.customDateFrom) : null;
+    const to = schedule.customDateTo ? new Date(schedule.customDateTo) : null;
+    if (from && to && now >= from && now <= to) {
+      const slotTimes = times['custom_date'] || [];
+      return slotTimes.some(t => isTimeMatch(t, now));
+    }
+  }
+
+  // daily
+  if (Array.isArray(days) && days.includes('daily')) {
+    const slotTimes = times['daily'] || [];
+    if (slotTimes.some(t => isTimeMatch(t, now))) return true;
+  }
+
+  // named weekday
+  if (Array.isArray(days) && days.includes(todayName)) {
+    const slotTimes = times[todayName] || [];
+    return slotTimes.some(t => isTimeMatch(t, now));
+  }
+
+  return false;
+}
+
+function isTimeMatch(timeStr, now) {
+  // timeStr like "19:38" â€” match hour and minute
+  const [h, m] = timeStr.split(':').map(Number);
+  return now.getHours() === h && now.getMinutes() === m;
+}
+
+async function processSchedule(scheduleId) {
+  const now = new Date();
+  // reload schedule fresh
+  const schedule = await Schedule.findByPk(scheduleId);
+  if (!schedule || schedule.status !== '1' || schedule.isPaused) return;
+
+  // Robustly parse JSON fields
+  let parsedSchedule = { ...schedule.dataValues };
+  if (typeof parsedSchedule.platforms === 'string') {
+    try { parsedSchedule.platforms = JSON.parse(parsedSchedule.platforms); } catch(e){ parsedSchedule.platforms = []; }
+  }
+  if (typeof parsedSchedule.days === 'string') {
+    try { parsedSchedule.days = JSON.parse(parsedSchedule.days); } catch(e){ parsedSchedule.days = []; }
+  }
+  if (typeof parsedSchedule.times === 'string') {
+    try { parsedSchedule.times = JSON.parse(parsedSchedule.times); } catch(e){ parsedSchedule.times = {}; }
+  }
+
+  // For each scheduled time/platform, create a dummy post if not already present
+  const userId = schedule.userId;
+  const platforms = parsedSchedule.platforms || [];
+  const timesObj = parsedSchedule.times || {};
+  const today = now;
+  const dayNames = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+  const todayName = dayNames[today.getDay()];
+
+  // Determine which day keys to check (daily, todayName, custom_date, single_date)
+  let dayKeys = [];
+  if (Array.isArray(parsedSchedule.days)) {
+    if (parsedSchedule.days.includes('daily')) dayKeys.push('daily');
+    if (parsedSchedule.days.includes(todayName)) dayKeys.push(todayName);
+    if (parsedSchedule.days.includes('custom_date')) dayKeys.push('custom_date');
+    if (parsedSchedule.days.includes('single_date')) dayKeys.push('single_date');
+  }
+   let generatedContent = '';
+   let imageUrl = null;
+
+   const profileData = await Profile.findOne({ where: { user_id: userId } });
+   let profileAiPrompt = '';
+   let profileImageAiPrompt = '';
+    if(profileData){
+        profileAiPrompt = `Business/Creator: ${profileData?.business_name}\nDescription: ${profileData?.description}\nPlatforms: ${profileData?.platforms}\nBrand Voice: ${profileData?.brand_voice}\nHashtags: ${profileData?.hashtags}`;
+
+        profileImageAiPrompt = profileData?.image_style || '';
+    }
+    
+
+  for (const dayKey of dayKeys) {
+    const timeSlots = Array.isArray(timesObj[dayKey]) ? timesObj[dayKey] : [];
+    for (const timeStr of timeSlots) {
+      
+     
+
+      
+
+      // Check if current time matches this time slot
+      const [h, m] = timeStr.split(':').map(Number);
+      let d = 2;
+      if (now.getHours() === h && now.getMinutes() === m && d===2) {
+
+         if(!['',null,undefined].includes(parsedSchedule.content_ai_prompt)){
+       generatedContent = await generateAIContent(parsedSchedule.content_ai_prompt);
+       }else{
+       
+        generatedContent = await generateAIContent(profileAiPrompt);
+       }
+
+
+
+       if (!['',null,undefined].includes(parsedSchedule.image_prompt)) {
+        const imageObj = await generateImagePollinations(parsedSchedule.image_prompt);
+        imageUrl = imageObj.url || '';
+      }else{
+        if(!['',null,undefined].includes(profileImageAiPrompt)){
+          const imageObj = await generateImagePollinations(profileImageAiPrompt);
+          imageUrl = imageObj.url || '';
+        }
+      }
+
+      
+      
+
+
+        for (const platform of platforms) {
+          // Create and immediately publish the post
+          const post = await Post.create({
+            title: `Auto Post for ${platform} at ${timeStr}`,
+           // content: `Scheduled post for ${platform} at ${timeStr}`,
+            content: generatedContent.content || `Scheduled post for ${platform} at ${timeStr}`,
+            platforms: [platform],
+            status: 'published',
+            user_id: userId,
+            is_ai_generated:1,
+            image_url: imageUrl || null,
+            scheduleId: schedule.id,
+            scheduled_at: new Date(today.getFullYear(), today.getMonth(), today.getDate(), h, m),
+            published_at: new Date()
+          });
+          // Run publish logic (simulate platform publish)
+          if (platform === 'facebook') {
+            const fbAccount = await SocialAccount.findOne({
+              where: { user_id: userId, platform: 'Facebook', is_active: 1 }
+            });
+            if (fbAccount && fbAccount.access_token) {
+              try {
+                await facebookPost(fbAccount.access_token, post.content, post.image_url);
+                logger.info('Published to Facebook', { postId: post.id });
+              } catch (err) {
+                logger.error('FB publish error', { postId: post.id, err: err.message });
+              }
+            }
+          }
+          if (platform === 'instagram') {
+            const igAccount = await SocialAccount.findOne({
+              where: { user_id: userId, platform: 'Instagram', is_active: 1 }
+            });
+            if (igAccount && igAccount.access_token) {
+              try {
+                await instagramPost(igAccount.access_token, post.content, post.image_url);
+                logger.info('Published to IG', { postId: post.id });
+              } catch (err) {
+                logger.error('IG publish error', { postId: post.id, err: err.message });
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  
+
+  const isDue = await matchesSchedule(parsedSchedule, now);
+  if (!isDue) return;
+
+  // fetch posts assigned to this schedule that are still scheduled
+  const posts = await Post.findAll({
+    where: {
+      scheduleId: schedule.id,
+      status: 'scheduled',
+      review_status: 'approved'
+    }
+  });
+
+  // optional write schedule_runs entry
+  const run = { scheduleId: schedule.id, startedAt: new Date(), status: 'success' };
+  let anyPublished = false;
+  try {
+    for (const post of posts) {
+      // atomic claim post to avoid duplicates
+      const [affectedRows] = await Post.update(
+        { status: 'publishing' },
+        {
+          where: {
+            id: post.id,
+            status: 'scheduled'
+          }
+        }
+      );
+      // proceed only if we successfully claimed
+      const fresh = await Post.findByPk(post.id);
+      if (!fresh || fresh.status !== 'publishing') continue;
+
+      let published = false;
+      // platforms for this post maybe array
+      let platforms = post.platforms;
+      if (typeof platforms === 'string') {
+        try { platforms = JSON.parse(platforms); } catch(e){ platforms = []; }
+      }
+      if (Array.isArray(platforms) && platforms.includes('facebook')) {
+        const fbAccount = await SocialAccount.findOne({
+          where: { user_id: post.user_id, platform: 'Facebook', is_active: 1 }
+        });
+        if (fbAccount && fbAccount.access_token) {
+          try {
+            await facebookPost(fbAccount.access_token, post.content, post.image_url);
+            published = true;
+            logger.info('Published to Facebook', { postId: post.id });
+          } catch (err) {
+            logger.error('FB publish error', { postId: post.id, err: err.message });
+          }
+        }
+      }
+
+      if (Array.isArray(platforms) && platforms.includes('instagram')) {
+        const igAccount = await SocialAccount.findOne({
+          where: { user_id: post.user_id, platform: 'Instagram', is_active: 1 }
+        });
+        if (igAccount && igAccount.access_token) {
+          try {
+            await instagramPost(igAccount.access_token, post.content, post.image_url);
+            published = true;
+            logger.info('Published to IG', { postId: post.id });
+          } catch (err) {
+            logger.error('IG publish error', { postId: post.id, err: err.message });
+          }
+        }
+      }
+
+      if (published) {
+        anyPublished = true;
+        await Post.update({ status: 'published', published_at: new Date() }, { where: { id: post.id } });
+      } else {
+        // something failed â€” set back to scheduled so it can retry next minute or record failure
+        await Post.update({ status: 'scheduled' }, { where: { id: post.id } });
+      }
+    }
+  } catch (err) {
+    run.status = 'failed';
+    run.meta = JSON.stringify({ error: err.message });
+    logger.error('Schedule worker error', { scheduleId: schedule.id, err: err.message });
+  } finally {
+    run.finishedAt = new Date();
+    // persist run to DB (if you created schedule_runs)
+    // await ScheduleRun.create(run);
+  }
+
+  return anyPublished;
+}
+
+
+// worker bootstrap
+(async () => {
+  try {
+    const scheduleId = workerData.scheduleId;
+    
+    await processSchedule(scheduleId);
+    parentPort.postMessage({ status: 'done', scheduleId });
+    process.exit(0);
+  } catch (err) {
+    parentPort.postMessage({ status: 'error', error: err.message });
+    process.exit(1);
+  }
+})();
+
+
+
+
+
+
+async function getGroqConfig() {
+    const setting = await SystemSetting.findOne({ where: { id: 1 } });
+    return {
+        api_key: setting?.api_key || '',
+        api_url: setting?.api_url || 'https://api.groq.com/openai/v1/chat/completions'
+    };
+}
+
+// Main function - AI se content generate karne ke liye
+async function generateAIContent1(prompt, options = {}) {
+    try {
+        const {
+            model = 'llama-3.3-70b-versatile',
+            temperature = 0.7,
+            maxTokens = 1024
+        } = options;
+
+
+        // Fetch Groq API key and URL from DB
+        const groqConfig = await getGroqConfig();
+        const groqApiKey = groqConfig.api_key;
+        const groqApiUrl = groqConfig.api_url;
+
+       
+       
+
+        const response = await axios.post(
+            groqApiUrl,
+            {
+                model: model,
+                messages: [
+                    {
+                        role: 'user',
+                        content: prompt
+                    }
+                ],
+                temperature: temperature,
+                max_tokens: maxTokens,
+                top_p: 1,
+                stream: false
+            },
+            {
+                headers: {
+                    'Authorization': `Bearer ${groqApiKey}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+
+        const content = response.data.choices[0].message.content;
+        const usage = response.data.usage;
+
+        
+        
+
+        return { status: true, content: content };
+
+    } catch (error) {
+        if (error.response) {
+            return { status: false, msg: error.response.data };
+        } else {
+            return { status: false, msg: error.message };
+        }
+        throw error;
+    }
+}
+async function generateAIContent(prompt, options = {}) {
+  const {
+    model = 'llama-3.3-70b-versatile',
+    temperature = 0.7,
+    maxTokens = 1024,
+    retries = 3, // max retry attempts
+    retryDelay = 90000 // default 90 sec if rate limit reached
+  } = options;
+
+  try {
+
+    // Get API config
+    const groqConfig = await getGroqConfig();
+    const groqApiKey = groqConfig.api_key;
+    const groqApiUrl = groqConfig.api_url;
+
+    // Make API request
+    const response = await axios.post(
+      groqApiUrl,
+      {
+        model,
+        messages: [{ role: 'user', content: prompt }],
+        temperature,
+        max_tokens: maxTokens,
+        top_p: 1,
+        stream: false
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${groqApiKey}`,
+          'Content-Type': 'application/json'
+        },
+        timeout: 60000 // 60 sec timeout
+      }
+    );
+
+    const content = response.data.choices[0].message.content;
+    const usage = response.data.usage;
+
+    
+    
+
+    return { status: true, content };
+
+  } catch (error) {
+    // If rate limit reached, wait and retry
+    if (error.response?.data?.error?.code === 'rate_limit_exceeded' && retries > 0) {
+      const waitTime =
+        (error.response.data.error.message.match(/in (\d+m?\d*\.?\d*)s/)?.[1] || 90) * 1000;
+      await new Promise(r => setTimeout(r, waitTime));
+      return generateAIContent(prompt, { ...options, retries: retries - 1 });
+    }
+
+    // Other API or network errors
+    if (error.response) {
+      return { status: false, msg: error.response.data };
+    } else {
+      return { status: false, msg: error.message };
+    }
+  }
+}
+
+async function uploadBufferToCloudinary(buffer, filename) {
+  const cloudinarySetting = await SystemSetting.findOne({ where: { id: 1 } });
+  if (!cloudinarySetting || !cloudinarySetting.cloudinary_cloud_name) return null;
+  
+  cloudinary.config({
+    cloud_name: cloudinarySetting.cloudinary_cloud_name,
+    api_key: cloudinarySetting.cloudinary_api_key,
+    api_secret: cloudinarySetting.cloudinary_api_secret,
+  });
+
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      { folder: "ai_generated_posts", resource_type: "image" },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result.secure_url);
+      }
+    );
+    const stream = require("stream");
+    const bufferStream = new stream.PassThrough();
+    bufferStream.end(buffer);
+    bufferStream.pipe(uploadStream);
+  });
+}
+
+// function for Image generate 
+async function generateImagePollinations(prompt, retries = 3) {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+        try {
+            
+            
+
+            // Replace spaces with underscores for better Pollinations API compatibility
+            const cleanPrompt = prompt.trim().replace(/\s+/g, '_');
+            const encodedPrompt = encodeURIComponent(cleanPrompt);
+
+            const urls = [
+                `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true`,
+                `https://image.pollinations.ai/prompt/${encodedPrompt}?model=flux&width=1024&height=1024&nologo=true`,
+                `https://image.pollinations.ai/prompt/${encodedPrompt}`
+            ];
+
+            const imageUrl = urls[attempt - 1] || urls[0];
+            
+
+            const response = await axios.get(imageUrl, {
+                responseType: 'arraybuffer',
+                timeout: 45000,
+                maxRedirects: 10,
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                }
+            });
+
+            if (!response.data || response.data.length < 1000) {
+                throw new Error('Invalid or empty image received');
+            }
+
+            const filename = `generated_${Date.now()}.png`;
+            // fs.writeFileSync(filename, response.data);
+
+            const sizeKB = (response.data.length / 1024).toFixed(2);
+            
+            let finalUrl = imageUrl;
+            try {
+                const cloudUrl = await uploadBufferToCloudinary(response.data, filename);
+                if (cloudUrl) finalUrl = cloudUrl;
+            } catch(e) {
+                logger.error("Cloudinary upload failed for AI image", { err: e.message });
+            }
+
+            return {
+                url: finalUrl,
+                filename,
+                size: response.data.length,
+                prompt: cleanPrompt
+            };
+
+        } catch (error) {
+
+            if (attempt === retries) {
+                return await generateImageFallback(prompt);
+            }
+
+            const waitTime = attempt * 2000;
+            
+            await new Promise(resolve => setTimeout(resolve, waitTime));
+        }
+    }
+}
+
+async function generateImageFallback(prompt) {
+    try {
+        
+
+        // Option 1: Picsum (random image based on seed)
+        const seed = prompt.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+        const imageUrl = `https://picsum.photos/seed/${seed}/1024/1024`;
+
+        const response = await axios.get(imageUrl, {
+            responseType: 'arraybuffer',
+            timeout: 30000
+        });
+
+        const filename = `fallback_${Date.now()}.jpg`;
+        // fs.writeFileSync(filename, response.data);
+
+        
+        
+
+        return {
+            url: imageUrl,
+            filename,
+            size: response.data.length,
+            isFallback: true
+        };
+    } catch (error) {
+        throw new Error('All image generation methods failed');
+    }
+}

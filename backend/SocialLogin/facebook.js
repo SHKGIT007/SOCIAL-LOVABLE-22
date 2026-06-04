@@ -1,8 +1,8 @@
-const axios = require("axios");
+﻿const axios = require("axios");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { User, SystemSetting } = require("../app/models");
-const logger = require("../app/config/logger");
+const { User, SystemSetting } = require("../App/Models");
+const logger = require("../App/Connection/logger");
 
 module.exports = function (app) {
   // Facebook Login/Signup Initiation Route
@@ -314,3 +314,4 @@ module.exports = function (app) {
     }
   );
 };
+

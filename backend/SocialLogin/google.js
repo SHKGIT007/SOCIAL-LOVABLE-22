@@ -1,7 +1,7 @@
-const axios = require("axios");
+﻿const axios = require("axios");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { User, SystemSetting } = require("../app/models");
+const { User, SystemSetting } = require("../App/Models");
 
 module.exports = function (app) {
   app.get(["/auth/google", "/backend/auth/google"], async (req, res) => {
@@ -222,3 +222,4 @@ module.exports = function (app) {
     }
   );
 };
+

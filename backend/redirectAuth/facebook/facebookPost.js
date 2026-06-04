@@ -1,4 +1,4 @@
-
+﻿
    const axios = require("axios");
 //    async function facebookPost(userAccessToken , content) {
 //     try {
@@ -7,7 +7,7 @@
 //     );
 
 //      const pageAccessToken = responsePageToken.data.data[0].access_token;
-//     //const message = "🚀 Hello from my Node.js App HAAAAAAA!";
+//     //const message = "ðŸš€ Hello from my Node.js App HAAAAAAA!";
         
 //         const responsePost = await axios.post(
 //           `https://graph.facebook.com/v20.0/me/feed`,
@@ -49,7 +49,7 @@ async function facebookPost(userAccessToken, content, imageUrl = "", videoUrl = 
 
     // Step 2: Decide endpoint based on video/image presence
     if (videoUrl && videoUrl.trim() !== "") {
-      // 🎥 If video is present → post video + caption
+      // ðŸŽ¥ If video is present â†’ post video + caption
       responsePost = await axios.post(
         `https://graph.facebook.com/${pageId}/videos`,
         {
@@ -61,7 +61,7 @@ async function facebookPost(userAccessToken, content, imageUrl = "", videoUrl = 
         }
       );
     } else if (imageUrl && imageUrl.trim() !== "") {
-      // 🖼️ If image is present → post image + caption
+      // ðŸ–¼ï¸ If image is present â†’ post image + caption
       responsePost = await axios.post(
         `https://graph.facebook.com/${pageId}/photos`,
         {
@@ -73,7 +73,7 @@ async function facebookPost(userAccessToken, content, imageUrl = "", videoUrl = 
         }
       );
     } else {
-      // 📝 If no image/video → post only text
+      // ðŸ“ If no image/video â†’ post only text
       responsePost = await axios.post(
         `https://graph.facebook.com/${pageId}/feed`,
         {

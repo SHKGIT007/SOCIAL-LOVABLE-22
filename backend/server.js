@@ -1,8 +1,8 @@
 const express = require("express");
 const path = require("path");
 require("dotenv").config({ path: path.join(__dirname, ".env") });
-const sequelize = require("./app/config/db.config");
-const routes = require("./app/route");
+const sequelize = require("./App/Connection/db.config");
+const routes = require("./App/Routes");
 const http = require("http");
 const socket = require("./socket");
 
@@ -59,8 +59,8 @@ app.get("/", (req, res) => {
 app.use("/api", routes);
 
 require("./redirectAuth")(app);
-require("./app/jobs/runScheduler");
-require("./app/autoschedulejobs/runScheduler");
+require("./App/jobs/runScheduler");
+require("./App/autoschedulejobs/runScheduler");
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -87,7 +87,7 @@ const {
   Plan,
   Subscription,
   SocialAccount,
-} = require("./app/models");
+} = require("./App/Models");
 
 sequelize
   .sync({ force: false })

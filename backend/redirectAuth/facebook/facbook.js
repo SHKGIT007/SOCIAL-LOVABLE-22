@@ -1,5 +1,5 @@
-
-const { User, SocialAccount } = require('../../app/models');
+﻿
+const { User, SocialAccount } = require('../../App/Models');
 
 
 module.exports = function (app) {
@@ -165,7 +165,7 @@ module.exports = function (app) {
 // router.get("/facebook/callback", async (req, res) => {
 //   const code = req.query.code;
 //   try {
-//     // 1️⃣ Exchange code for access_token
+//     // 1ï¸âƒ£ Exchange code for access_token
 //     const tokenRes = await axios.get(
 //       `https://graph.facebook.com/v20.0/oauth/access_token?client_id=${app_id}&redirect_uri=${encodeURIComponent(
 //         redirect_uri
@@ -174,12 +174,12 @@ module.exports = function (app) {
 
 //     const accessToken = tokenRes.data.access_token;
 
-//     // 2️⃣ Get the user's Facebook Pages
+//     // 2ï¸âƒ£ Get the user's Facebook Pages
 //     const pagesRes = await axios.get(
 //       `https://graph.facebook.com/me/accounts?access_token=${accessToken}`
 //     );
 
-//     // 3️⃣ Get Instagram Business Account ID from first page
+//     // 3ï¸âƒ£ Get Instagram Business Account ID from first page
 //     const pageId = pagesRes.data.data[0].id;
 //     const igRes = await axios.get(
 //       `https://graph.facebook.com/v20.0/${pageId}?fields=instagram_business_account&access_token=${accessToken}`

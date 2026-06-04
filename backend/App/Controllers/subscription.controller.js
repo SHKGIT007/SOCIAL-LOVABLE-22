@@ -1,0 +1,748 @@
+﻿const { Subscription, Plan, User, Notification, SystemSetting } = require("../Models");
+const { Op } = require("sequelize");
+const { asyncHandler } = require("../Middleware/error.middleware");
+const logger = require("../Connection/logger");
+const moment = require("moment-timezone");
+const razorpayService = require("../Utils/Services/razorpay.service");
+const notificationService = require("../Utils/Services/notification.service");
+const { createNotification } = require("./notification.controller");
+const socket = require("../../socket");
+
+const createSubscriptionRecord = async ({
+  userId,
+  plan,
+  paymentDetails = {},
+}) => {
+  const currentDate = moment().tz("Asia/Kolkata").startOf("day");
+
+  const existingSubscription = await Subscription.findOne({
+    where: { user_id: userId, status: "active" },
+    order: [["end_date", "DESC"]],
+  });
+
+  let startDate;
+
+  if (
+    existingSubscription &&
+    existingSubscription.end_date &&
+    currentDate.isBetween(
+      moment(existingSubscription.start_date).tz("Asia/Kolkata").startOf("day"),
+      moment(existingSubscription.end_date).tz("Asia/Kolkata").endOf("day"),
+      null,
+      "[]"
+    )
+  ) {
+    startDate = moment(existingSubscription.end_date)
+      .tz("Asia/Kolkata")
+      .add(1, "day")
+      .startOf("day");
+  } else {
+    startDate = currentDate.clone();
+  }
+
+  // No fixed end date (lifetime/managed manually)
+  let endDateMoment = null;
+
+  const subscription = await Subscription.create({
+    user_id: userId,
+    plan_id: plan.id,
+    start_date: startDate.format("YYYY-MM-DD HH:mm:ss"),
+    end_date: endDateMoment
+      ? endDateMoment.format("YYYY-MM-DD HH:mm:ss")
+      : null,
+    status: "active",
+    posts_used: 0,
+    ai_posts_used: 0,
+    auto_renew: false,
+    monthly_posts: plan.monthly_posts || 0,
+    ai_posts: plan.ai_posts || 0,
+    linked_accounts: plan.linked_accounts || 1,
+    plan_name: plan.name,
+    plan_price: plan.price,
+
+    payment_status: paymentDetails.payment_status || "success",
+    amount_paid:
+      paymentDetails.amount_paid !== undefined
+        ? paymentDetails.amount_paid
+        : plan.price,
+    payment_id: paymentDetails.payment_id || null,
+    order_id: paymentDetails.order_id || null,
+  });
+
+  logger.info("Subscription created", {
+    subscriptionId: subscription.id,
+    userId,
+    planId: plan.id,
+    hasEndDate: !!endDateMoment,
+    paymentStatus: subscription.payment_status,
+    amountPaid: subscription.amount_paid,
+  });
+
+  return subscription;
+};
+
+const createSubscription = asyncHandler(async (req, res) => {
+  const { plan_id } = req.body;
+  const userId = req.user.id;
+
+  const plan = await Plan.findByPk(plan_id);
+  if (!plan) {
+    return res.status(404).json({
+      status: false,
+      message: "Plan not found",
+    });
+  }
+
+  if (!plan.is_active) {
+    return res.status(400).json({
+      status: false,
+      message: "Plan is not active",
+    });
+  }
+
+  const subscription = await createSubscriptionRecord({
+    userId,
+    plan,
+    paymentDetails: {
+      payment_status: "success",
+      amount_paid: 0,
+      payment_id: null,
+      order_id: null,
+    },
+  });
+
+  // ðŸ”” Trigger Notification
+  await notificationService.planPurchase(userId, plan.name);
+
+  res.status(201).json({
+    status: true,
+    message: "Subscription created successfully",
+    data: { subscription },
+  });
+});
+
+const createRazorpayOrder = asyncHandler(async (req, res) => {
+  const { plan_id } = req.body;
+  const userId = req.user.id;
+
+  const settings = await SystemSetting.findOne({ where: { id: 1 } });
+  const keyId = settings?.razorpay_key_id || process.env.RAZORPAY_KEY_ID;
+  const keySecret = settings?.razorpay_key_secret || process.env.RAZORPAY_KEY_SECRET;
+
+  if (!keyId || !keySecret) {
+    return res.status(500).json({
+      status: false,
+      message: "Razorpay credentials are not configured",
+    });
+  }
+
+  const plan = await Plan.findByPk(plan_id);
+  if (!plan) {
+    return res.status(404).json({
+      status: false,
+      message: "Plan not found",
+    });
+  }
+
+  if (!plan.is_active) {
+    return res.status(400).json({
+      status: false,
+      message: "Plan is not active",
+    });
+  }
+
+  // Validate plan price
+  const planPrice = parseFloat(plan.price);
+  if (isNaN(planPrice) || planPrice <= 0) {
+    logger.error("Invalid plan price", {
+      plan_id,
+      price: plan.price,
+      parsedPrice: planPrice,
+    });
+    return res.status(400).json({
+      status: false,
+      message: "Plan price is invalid. Please contact support.",
+    });
+  }
+
+  const amountInPaise = Math.round(planPrice * 100);
+
+  if (!amountInPaise || amountInPaise <= 0) {
+    return res.status(400).json({
+      status: false,
+      message: "Plan price must be greater than zero",
+    });
+  }
+
+  const receipt = `sub_${userId}_${plan_id}_${Date.now()}`;
+
+  let order;
+  try {
+    logger.info("Creating Razorpay order", {
+      userId,
+      plan_id,
+      amount: amountInPaise,
+      currency: "INR",
+    });
+    order = await razorpayService.createOrder({
+      amount: amountInPaise,
+      currency: "INR",
+      receipt,
+      notes: {
+        plan_id: plan.id,
+        user_id: userId,
+      },
+    });
+    if (!order || !order.id) {
+      throw new Error("Invalid response from Razorpay - order ID missing");
+    }
+    logger.info("Razorpay order created successfully", { orderId: order.id });
+  } catch (error) {
+    logger.error("Razorpay order creation failed", {
+      error: error.message,
+      planId: plan_id,
+      userId,
+    });
+    return res.status(500).json({
+      status: false,
+      message: error.message || "Failed to create Razorp  ay order. Please verify your credentials.",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
+  }
+
+  const startDate = moment().tz("Asia/Kolkata").startOf("day");
+
+  // No fixed end date
+  let endDate = null;
+
+  const pendingSubscription = await Subscription.create({
+    user_id: userId,
+    plan_id: plan.id,
+    start_date: startDate.format("YYYY-MM-DD HH:mm:ss"),
+    end_date: endDate ? endDate.format("YYYY-MM-DD HH:mm:ss") : null,
+    status: "pending",
+    posts_used: 0,
+    ai_posts_used: 0,
+    auto_renew: false,
+    monthly_posts: plan.monthly_posts || 0,
+    ai_posts: plan.ai_posts || 0,
+    linked_accounts: plan.linked_accounts || 1,
+    plan_name: plan.name,
+    plan_price: plan.price,
+    payment_status: "pending",
+    amount_paid: plan.price,
+    payment_id: null,
+    order_id: order.id,
+  });
+
+  logger.info("Razorpay order created with pending subscription", {
+    orderId: order.id,
+    userId,
+    planId: plan.id,
+    subscriptionId: pendingSubscription.id,
+    hasEndDate: !!endDate,
+  });
+
+  res.status(201).json({
+    status: true,
+    data: {
+      order_id: order.id,
+      amount: order.amount,
+      currency: order.currency,
+      key: keyId,
+    },
+  });
+});
+
+const verifyRazorpayPayment = asyncHandler(async (req, res) => {
+  const {
+    plan_id,
+    razorpay_order_id,
+    razorpay_payment_id,
+    razorpay_signature,
+  } = req.body;
+  const userId = req.user.id;
+
+  const isValid = await razorpayService.verifySignature(
+    razorpay_order_id,
+    razorpay_payment_id,
+    razorpay_signature
+  );
+
+  if (!isValid) {
+    await Subscription.update(
+      {
+        payment_status: "failed",
+        status: "inactive",
+      },
+      {
+        where: {
+          user_id: userId,
+          order_id: razorpay_order_id,
+        },
+      }
+    );
+
+    return res.status(400).json({
+      status: false,
+      message: "Invalid Razorpay signature",
+    });
+  }
+
+  const plan = await Plan.findByPk(plan_id);
+  if (!plan) {
+    return res.status(404).json({
+      status: false,
+      message: "Plan not found",
+    });
+  }
+
+  if (!plan.is_active) {
+    return res.status(400).json({
+      status: false,
+      message: "Plan is not active",
+    });
+  }
+
+  const startDate = moment().tz("Asia/Kolkata").startOf("day");
+
+  // No fixed end date
+  let endDate = null;
+
+  const updateData = {
+    status: "active",
+    payment_status: "success",
+    payment_id: razorpay_payment_id,
+  };
+
+  // Only set end_date if it exists
+  if (endDate) {
+    updateData.end_date = endDate.format("YYYY-MM-DD HH:mm:ss");
+  }
+
+  const [updatedCount] = await Subscription.update(updateData, {
+    where: {
+      user_id: userId,
+      order_id: razorpay_order_id,
+      payment_status: "pending",
+    },
+  });
+
+  if (updatedCount === 0) {
+    const subscription = await createSubscriptionRecord({
+      userId,
+      plan,
+      paymentDetails: {
+        payment_status: "success",
+        amount_paid: plan.price,
+        payment_id: razorpay_payment_id,
+        order_id: razorpay_order_id,
+      },
+    });
+
+    return res.json({
+      status: true,
+      message: "Payment verified and subscription activated",
+      data: { subscription },
+    });
+  }
+
+  const subscription = await Subscription.findOne({
+    where: {
+      user_id: userId,
+      order_id: razorpay_order_id,
+    },
+    include: [
+      {
+        model: Plan,
+        as: "Plan",
+      },
+      {
+        model: User,
+        as: "User",
+        attributes: ["id", "user_fname", "user_lname", "email", "user_name"],
+      },
+    ],
+  });
+
+  // ðŸ”” Trigger Notification
+  await notificationService.planPurchase(userId, subscription.Plan.name);
+
+  logger.info("Razorpay payment verified and subscription activated", {
+    orderId: razorpay_order_id,
+    paymentId: razorpay_payment_id,
+    subscriptionId: subscription.id,
+  });
+
+  res.json({
+    status: true,
+    message: "Payment verified and subscription activated",
+    data: { subscription },
+  });
+});
+
+const getAllSubscriptions = asyncHandler(async (req, res) => {
+  const { page = 1, limit = 10, search, status, user_id } = req.query;
+  const offset = (page - 1) * limit;
+  const userType = req.user.user_type;
+  const userId = req.user.id;
+
+  const whereClause = {};
+
+  if (userType !== "admin") {
+    whereClause.user_id = userId;
+  } else if (user_id) {
+    whereClause.user_id = user_id;
+  }
+
+  if (status) {
+    whereClause.status = status;
+  }
+
+  if (search) {
+    whereClause[Op.or] = [
+      { "$User.user_name$": { [Op.like]: `%${search}%` } },
+      { "$User.email$": { [Op.like]: `%${search}%` } },
+      { "$Plan.name$": { [Op.like]: `%${search}%` } },
+    ];
+  }
+
+  // âœ… Auto-cancel pending payments older than 24 hours
+  const twentyFourHoursAgo = moment().subtract(24, "hours").toDate();
+  await Subscription.update(
+    { status: "cancelled" },
+    {
+      where: {
+        payment_status: "pending",
+        created_at: { [Op.lt]: twentyFourHoursAgo },
+        status: { [Op.ne]: "cancelled" },
+      },
+    }
+  );
+
+  const { count, rows: subscriptions } = await Subscription.findAndCountAll({
+    where: whereClause,
+    include: [
+      {
+        model: User,
+        as: "User",
+        attributes: ["id", "user_name", "email", "user_fname", "user_lname"],
+      },
+      {
+        model: Plan,
+        as: "Plan",
+        attributes: [
+          "id",
+          "name",
+          "price",
+          "monthly_posts",
+          "ai_posts",
+          "linked_accounts",
+        ],
+      },
+    ],
+    limit: parseInt(limit),
+    offset: parseInt(offset),
+    order: [["created_at", "DESC"]],
+  });
+
+  res.json({
+    status: true,
+    data: {
+      subscriptions,
+      pagination: {
+        total: count,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalPages: Math.ceil(count / limit),
+      },
+    },
+  });
+});
+
+const getSubscriptionById = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const userType = req.user.user_type;
+  const userId = req.user.id;
+
+  const subscription = await Subscription.findByPk(id, {
+    include: [
+      {
+        model: User,
+        as: "User",
+        attributes: ["id", "user_name", "email", "user_fname", "user_lname"],
+      },
+      {
+        model: Plan,
+        as: "Plan",
+      },
+    ],
+  });
+
+  if (!subscription) {
+    return res.status(404).json({
+      status: false,
+      message: "Subscription not found",
+    });
+  }
+
+  if (userType !== "admin" && subscription.user_id !== userId) {
+    return res.status(403).json({
+      status: false,
+      message: "Access denied",
+    });
+  }
+
+  res.json({
+    status: true,
+    data: { subscription },
+  });
+});
+
+const getUserSubscription = asyncHandler(async (req, res) => {
+  const userId = req.user.id;
+
+  // âœ… Auto-cancel pending payments older than 24 hours
+  const twentyFourHoursAgo = moment().subtract(24, "hours").toDate();
+  await Subscription.update(
+    { status: "cancelled" },
+    {
+      where: {
+        user_id: userId,
+        payment_status: "pending",
+        created_at: { [Op.lt]: twentyFourHoursAgo },
+        status: { [Op.ne]: "cancelled" },
+      },
+    }
+  );
+
+  const subscription = await Subscription.findOne({
+    where: { user_id: userId, status: "active" },
+    include: [
+      {
+        model: Plan,
+        as: "Plan",
+      },
+    ],
+    order: [["created_at", "DESC"]],
+  });
+
+  if (!subscription) {
+    return res.json({
+      status: true,
+      data: { subscription: null },
+    });
+  }
+
+  const currentDate = moment().tz("Asia/Kolkata");
+  let shouldExpire = false;
+  let expiryReason = null;
+
+  // âœ… Check 1: AI posts limit reached
+  if (subscription.ai_posts_used >= subscription.ai_posts) {
+    shouldExpire = true;
+    expiryReason = "AI posts limit reached";
+  }
+
+  // âœ… Check 2: Time limit reached (only if end_date exists)
+  if (subscription.end_date) {
+    const endDate = moment(subscription.end_date).tz("Asia/Kolkata");
+    if (currentDate.isAfter(endDate)) {
+      shouldExpire = true;
+      expiryReason = expiryReason
+        ? `${expiryReason} and time expired`
+        : "Time expired";
+    }
+  }
+
+  // âœ… Expire the subscription if any condition is met
+  if (shouldExpire) {
+    await Subscription.update(
+      { status: "expired" },
+      { where: { id: subscription.id } }
+    );
+    subscription.status = "expired";
+
+    logger.info("Subscription expired", {
+      subscriptionId: subscription.id,
+      userId,
+      reason: expiryReason,
+    });
+  }
+
+  res.json({
+    status: true,
+    data: { subscription },
+  });
+});
+
+const updateSubscription = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { status, end_date, auto_renew } = req.body;
+  const userType = req.user.user_type;
+  const userId = req.user.id;
+
+  const subscription = await Subscription.findByPk(id);
+  if (!subscription) {
+    return res.status(404).json({
+      status: false,
+      message: "Subscription not found",
+    });
+  }
+
+  if (userType !== "admin" && subscription.user_id !== userId) {
+    return res.status(403).json({
+      status: false,
+      message: "Access denied",
+    });
+  }
+
+  const updateData = {};
+  if (status) updateData.status = status;
+  if (end_date !== undefined) updateData.end_date = end_date;
+  if (auto_renew !== undefined) updateData.auto_renew = auto_renew;
+
+  await Subscription.update(updateData, { where: { id } });
+
+  const updatedSubscription = await Subscription.findByPk(id, {
+    include: [
+      {
+        model: User,
+        as: "User",
+        attributes: ["id", "user_name", "email", "user_fname", "user_lname"],
+      },
+      {
+        model: Plan,
+        as: "Plan",
+      },
+    ],
+  });
+
+  logger.info("Subscription updated", {
+    subscriptionId: id,
+    updatedBy: req.user.id,
+  });
+
+  res.json({
+    status: true,
+    message: "Subscription updated successfully",
+    data: { subscription: updatedSubscription },
+  });
+});
+
+const cancelSubscription = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+
+  const subscription = await Subscription.findByPk(id);
+  if (!subscription) {
+    return res.status(404).json({
+      status: false,
+      message: "Subscription not found",
+    });
+  }
+
+  if (subscription.user_id !== userId) {
+    return res.status(403).json({
+      status: false,
+      message: "Access denied",
+    });
+  }
+
+  await Subscription.update(
+    {
+      status: "cancelled",
+      auto_renew: false,
+    },
+    { where: { id } }
+  );
+
+  logger.info("Subscription cancelled", { subscriptionId: id, userId });
+
+  res.json({
+    status: true,
+    message: "Subscription cancelled successfully",
+  });
+});
+
+const renewSubscription = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+
+  const subscription = await Subscription.findByPk(id, {
+    include: [{ model: Plan, as: "Plan" }],
+  });
+
+  if (!subscription) {
+    return res.status(404).json({
+      status: false,
+      message: "Subscription not found",
+    });
+  }
+
+  if (subscription.user_id !== userId) {
+    return res.status(403).json({
+      status: false,
+      message: "Access denied",
+    });
+  }
+
+  if (subscription.status !== "active" && subscription.status !== "expired") {
+    return res.status(400).json({
+      status: false,
+      message: "Only active or expired subscriptions can be renewed",
+    });
+  }
+
+  const updateData = {
+    status: "active",
+    posts_used: 0,
+    ai_posts_used: 0,
+  };
+
+  // No fixed end date on renewal
+  updateData.end_date = null;
+
+  await Subscription.update(updateData, { where: { id } });
+
+  logger.info("Subscription renewed", { subscriptionId: id, userId });
+
+  res.json({
+    status: true,
+    message: "Subscription renewed successfully",
+  });
+});
+
+const getUserSubscriptionHistory = asyncHandler(async (req, res) => {
+  const userId = req.user.id;
+
+  const subscriptions = await Subscription.findAll({
+    where: { user_id: userId },
+    include: [
+      {
+        model: Plan,
+        as: "Plan",
+      },
+    ],
+    order: [["created_at", "DESC"]],
+  });
+
+  res.json({
+    status: true,
+    data: { subscriptions },
+  });
+});
+
+module.exports = {
+  createSubscription,
+  createRazorpayOrder,
+  verifyRazorpayPayment,
+  getAllSubscriptions,
+  getSubscriptionById,
+  getUserSubscription,
+  getUserSubscriptionHistory,
+  updateSubscription,
+  cancelSubscription,
+  renewSubscription,
+};
+
