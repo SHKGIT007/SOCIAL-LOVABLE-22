@@ -119,8 +119,8 @@ const createPost = asyncHandler(async (req, res) => {
       }
     }
 
-    // If image_url is provided and is not null, upload it to Cloudinary
-    if (image_url) {
+    // If image_url is provided and is not null, upload it to Cloudinary (unless already uploaded)
+    if (image_url && !image_url.includes("res.cloudinary.com") && !req.files?.image_file) {
       // Get user info for folder naming
       const user = await User.findByPk(userId);
       const userFolder = user
@@ -948,6 +948,31 @@ async function chatWithAI(messages) {
   }
 }
 
+async function uploadBufferToCloudinary(buffer, filename) {
+  const cloudinarySetting = await SystemSetting.findOne({ where: { id: 1 } });
+  if (!cloudinarySetting || !cloudinarySetting.cloudinary_cloud_name) return null;
+  
+  cloudinary.config({
+    cloud_name: cloudinarySetting.cloudinary_cloud_name,
+    api_key: cloudinarySetting.cloudinary_api_key,
+    api_secret: cloudinarySetting.cloudinary_api_secret,
+  });
+
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      { folder: "ai_generated_posts", resource_type: "image" },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result.secure_url);
+      }
+    );
+    const stream = require("stream");
+    const bufferStream = new stream.PassThrough();
+    bufferStream.end(buffer);
+    bufferStream.pipe(uploadStream);
+  });
+}
+
 // function for Image generate
 async function generateImagePollinations(prompt, retries = 3) {
   for (let attempt = 1; attempt <= retries; attempt++) {
@@ -984,8 +1009,16 @@ async function generateImagePollinations(prompt, retries = 3) {
 
       const sizeKB = (response.data.length / 1024).toFixed(2);
 
+      let finalUrl = imageUrl;
+      try {
+        const cloudUrl = await uploadBufferToCloudinary(response.data, filename);
+        if (cloudUrl) finalUrl = cloudUrl;
+      } catch(e) {
+        logger.error("Cloudinary upload failed for AI image", { err: e.message });
+      }
+
       return {
-        url: imageUrl,
+        url: finalUrl,
         filename,
         size: response.data.length,
         prompt: cleanPrompt,

@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { formatDate, formatDateTime } from "@/utils/dateFormatter";
 import { Zap } from "lucide-react";
 import Swal from "sweetalert2";
+import { getDisplayImageUrl } from "@/utils/imageHelper";
 
 const AdminViewPost = () => {
   const { id } = useParams();
@@ -152,7 +153,7 @@ const AdminViewPost = () => {
               <div className="absolute -bottom-10 left-6">
                 <div className="h-20 w-20 rounded-xl overflow-hidden ring-4 ring-white shadow-lg bg-white">
                   <img
-                    src={post.image_url.replace('https://pollinations.ai/p/', 'https://image.pollinations.ai/prompt/')}
+                    src={getDisplayImageUrl(post.image_url)}
                     alt="Post"
                     className="h-full w-full object-cover"
                   />
@@ -238,7 +239,7 @@ const AdminViewPost = () => {
                 {post.image_url && (
                   <div className="rounded-2xl overflow-hidden border shadow-sm bg-gray-50">
                     <img
-                      src={post.image_url.replace('https://pollinations.ai/p/', 'https://image.pollinations.ai/prompt/')}
+                      src={getDisplayImageUrl(post.image_url)}
                       alt="Post"
                       className="w-auto max-h-72 object-contain"
                     />

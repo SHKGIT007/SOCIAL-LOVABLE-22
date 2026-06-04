@@ -48,6 +48,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { getDisplayImageUrl } from "@/utils/imageHelper";
 
 const statuses = ["draft", "scheduled", "published"];
 
@@ -416,7 +417,7 @@ const EditPost = () => {
                 {imagePreview && (
                   <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm relative group">
                     <img
-                      src={imagePreview.replace('https://pollinations.ai/p/', 'https://image.pollinations.ai/prompt/')}
+                      src={getDisplayImageUrl(imagePreview)}
                       alt="Post Image"
                       className="w-auto max-h-72 object-contain "
                       onError={(e) => {

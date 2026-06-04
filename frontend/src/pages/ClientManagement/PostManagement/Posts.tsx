@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import Swal from "sweetalert2";
 import { apiService } from "@/services/api";
+import { getDisplayImageUrl } from "@/utils/imageHelper";
 import { isAuthenticated, logout } from "@/utils/auth";
 import {
   AlertDialog,
@@ -427,7 +428,7 @@ const Posts = () => {
                     <div className="relative w-full h-48 overflow-hidden bg-gradient-to-br from-indigo-100 via-cyan-50 to-violet-100">
                       {post.image_url ? (
                         <img
-                          src={post.image_url.replace('https://pollinations.ai/p/', 'https://image.pollinations.ai/prompt/')}
+                          src={getDisplayImageUrl(post.image_url)}
                           alt={post.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />

@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Edit, Calendar, Sparkles } from "lucide-react";
 import Swal from "sweetalert2";
 import { formatDate, formatDateTime } from "@/utils/dateFormatter";
+import { getDisplayImageUrl } from "@/utils/imageHelper";
 
 interface Post {
   id: string;
@@ -183,7 +184,7 @@ const ViewPost = () => {
               <div className="absolute -bottom-10 left-6">
                 <div className="h-20 w-20 rounded-xl overflow-hidden ring-4 ring-white shadow-lg bg-white">
                   <img
-                    src={post.image_url.replace('https://pollinations.ai/p/', 'https://image.pollinations.ai/prompt/')}
+                    src={getDisplayImageUrl(post.image_url)}
                     alt="Cover"
                     className="h-full w-full object-cover"
                     onError={(e) => {
@@ -252,7 +253,7 @@ const ViewPost = () => {
                 </h3>
                 <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm bg-gray-50 flex justify-start">
                   <img
-                    src={post.image_url.replace('https://pollinations.ai/p/', 'https://image.pollinations.ai/prompt/')}
+                    src={getDisplayImageUrl(post.image_url)}
                     alt="Post"
                     className="w-auto max-h-72 object-contain "
                     style={{ alignSelf: "flex-start" }}

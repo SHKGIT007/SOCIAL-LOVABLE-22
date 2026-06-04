@@ -23,6 +23,7 @@ import {
 } from "recharts";
 import Swal from "sweetalert2";
 import { apiService } from "@/services/api";
+import { getDisplayImageUrl } from "@/utils/imageHelper";
 import { formatDate, formatDateTime } from "@/utils/dateFormatter";
 import { isAdmin, isAuthenticated } from "@/utils/auth";
 import {
@@ -529,7 +530,7 @@ const UserAnalytics = () => {
                                 <div className="aspect-[4/5] md:aspect-square w-full rounded-[40px] overflow-hidden bg-gray-50 border-4 border-white shadow-2xl relative group">
                                     {postData.image_url ? (
                                         <img 
-                                            src={postData.image_url.replace('https://pollinations.ai/p/', 'https://image.pollinations.ai/prompt/')}
+                                            src={getDisplayImageUrl(postData.image_url)} 
                                             alt="insight preview" 
                                             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                                         />
