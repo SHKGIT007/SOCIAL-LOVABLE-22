@@ -183,7 +183,7 @@ const ViewPost = () => {
               <div className="absolute -bottom-10 left-6">
                 <div className="h-20 w-20 rounded-xl overflow-hidden ring-4 ring-white shadow-lg bg-white">
                   <img
-                    src={post.image_url}
+                    src={post.image_url.replace('https://pollinations.ai/p/', 'https://image.pollinations.ai/prompt/')}
                     alt="Cover"
                     className="h-full w-full object-cover"
                     onError={(e) => {
@@ -252,7 +252,7 @@ const ViewPost = () => {
                 </h3>
                 <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm bg-gray-50 flex justify-start">
                   <img
-                    src={post.image_url}
+                    src={post.image_url.replace('https://pollinations.ai/p/', 'https://image.pollinations.ai/prompt/')}
                     alt="Post"
                     className="w-auto max-h-72 object-contain "
                     style={{ alignSelf: "flex-start" }}

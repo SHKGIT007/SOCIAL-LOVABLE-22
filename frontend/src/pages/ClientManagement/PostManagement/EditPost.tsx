@@ -416,7 +416,7 @@ const EditPost = () => {
                 {imagePreview && (
                   <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm relative group">
                     <img
-                      src={imagePreview}
+                      src={imagePreview.replace('https://pollinations.ai/p/', 'https://image.pollinations.ai/prompt/')}
                       alt="Post Image"
                       className="w-auto max-h-72 object-contain "
                       onError={(e) => {

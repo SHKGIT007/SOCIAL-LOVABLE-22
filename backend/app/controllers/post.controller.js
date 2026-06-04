@@ -960,7 +960,7 @@ async function generateImagePollinations(prompt, retries = 3) {
       const urls = [
         `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true`,
         `https://image.pollinations.ai/prompt/${encodedPrompt}?model=flux&width=1024&height=1024&nologo=true`,
-        `https://pollinations.ai/p/${encodedPrompt}`,
+        `https://image.pollinations.ai/prompt/${encodedPrompt}`,
       ];
 
       const imageUrl = urls[attempt - 1] || urls[0];
