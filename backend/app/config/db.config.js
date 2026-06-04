@@ -23,9 +23,7 @@ const sequelize = new Sequelize(
         },
 
         timezone: '+05:30', // Tells Sequelize/MySQL to use IST instead of UTC
-        dialectOptions: {
-            useUTC: false, // Prevents automatic UTC conversion
-        },
+
     }
 );
 
