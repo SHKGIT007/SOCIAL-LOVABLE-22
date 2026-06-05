@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,7 +35,8 @@ const Auth = () => {
   const [userLname, setUserLname] = useState("");
   const [userPhone, setUserPhone] = useState("");
   const [showSignupPassword, setShowSignupPassword] = useState(false);
-  const [activeTab, setActiveTab] = useState("signin");
+  const location = useLocation();
+  const [activeTab, setActiveTab] = useState(location.state?.activeTab || "signin");
 
   const [otp, setOtp] = useState("");
   const [isOtpSent, setIsOtpSent] = useState(false);

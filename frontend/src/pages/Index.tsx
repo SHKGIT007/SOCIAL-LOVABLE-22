@@ -92,8 +92,8 @@ const Index = () => {
           </div>
           <div className="space-x-2">
             <Button variant="ghost" className="text-gray-700 hover:bg-indigo-50" onClick={() => navigate("/auth")}>Sign In</Button>
-            <Button className={`${primaryGradientClass} text-white font-semibold shadow-lg shadow-indigo-400/50 hover:shadow-indigo-400/70 transition-shadow`} onClick={() => navigate("/auth")}>
-                Get Started
+            <Button className={`${primaryGradientClass} text-white font-semibold shadow-lg shadow-indigo-400/50 hover:shadow-indigo-400/70 transition-shadow`} onClick={() => navigate("/auth", { state: { activeTab: "signup" } })}>
+                Sign Up
             </Button>
           </div>
         </div>
@@ -127,7 +127,7 @@ const Index = () => {
           <Button
             size="lg"
             className={`${primaryGradientClass} text-white font-extrabold px-6 sm:px-10 py-6 sm:py-5 text-lg sm:text-xl rounded-2xl shadow-2xl shadow-indigo-500/50 hover:scale-[1.03] transition-transform duration-300`}
-            onClick={() => navigate("/auth")}
+            onClick={() => navigate("/auth", { state: { activeTab: "signup" } })}
           >
             <Sparkles className="mr-2 h-5 w-5 sm:h-6 sm:w-6 animate-pulse" />
             Start Free Trial Now
@@ -206,7 +206,7 @@ const Index = () => {
                     <div className="p-4">
                         <Button
                             className={`w-full mt-4 transition-transform hover:scale-[1.02] ${plan.variant === "solid" ? primaryGradientClass : "bg-indigo-600 text-white hover:bg-indigo-700"}`}
-                            onClick={() => navigate("/auth")}
+                            onClick={() => navigate("/auth", { state: { activeTab: "signup" } })}
                         >
                             Choose Plan
                         </Button>
@@ -237,10 +237,10 @@ const Index = () => {
               <Button
                 size="lg"
                 className={`${primaryGradientClass} text-white font-extrabold px-8 sm:px-10 py-6 sm:py-5 text-lg sm:text-xl rounded-2xl shadow-2xl shadow-indigo-500/40 hover:scale-[1.05] transition-transform duration-300 w-full sm:w-auto`}
-                onClick={() => navigate("/auth")}
+                onClick={() => navigate("/auth", { state: { activeTab: "signup" } })}
               >
                 <Sparkles className="mr-2 h-6 w-6 animate-spin" />
-                Get Started Today
+                Sign Up Today
               </Button>
             </CardContent>
           </Card>
