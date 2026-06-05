@@ -513,14 +513,14 @@ const Posts = () => {
                       <div className="flex-1" />
 
                       {/* Action buttons */}
-                      <div className="flex items-center justify-center gap-2 flex-wrap pt-4 border-t border-slate-100">
-                        {/* Primary View/Read More button - styled like reference */}
+                      <div className="flex items-center justify-center gap-3 pt-4 border-t border-slate-100">
+                        {/* Primary View button */}
                         <button
                           onClick={() => navigate(`/posts/${post.id}`)}
-                          className="inline-flex items-center text-white bg-gradient-to-r from-indigo-600 to-cyan-500 hover:from-indigo-700 hover:to-cyan-600 focus:ring-4 focus:ring-indigo-200 shadow-sm font-medium rounded-lg text-sm px-4 py-2 transition-all duration-200 hover:shadow-md"
+                          title="View Details"
+                          className="p-2 rounded-lg hover:bg-indigo-100 transition"
                         >
-                          View Post
-                          <ArrowRight className="w-4 h-4 ml-1.5 -mr-0.5" />
+                          <Eye className="h-4 w-4 text-indigo-600" />
                         </button>
 
                         {!showViewOnly && (
@@ -529,35 +529,36 @@ const Posts = () => {
                               <>
                                 <button
                                   onClick={() => handleApprove(post.id)}
-                                  className="inline-flex items-center text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 font-medium rounded-lg text-sm px-3 py-2 transition-all duration-200"
+                                  title="Approve"
+                                  className="p-2 rounded-lg hover:bg-emerald-100 transition"
                                 >
-                                  <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
-                                  Approve
+                                  <CheckCircle2 className="h-4 w-4 text-emerald-600" />
                                 </button>
 
                                 <button
                                   onClick={() => handleReject(post.id)}
-                                  className="inline-flex items-center text-red-700 bg-red-50 border border-red-200 hover:bg-red-100 font-medium rounded-lg text-sm px-3 py-2 transition-all duration-200"
+                                  title="Reject"
+                                  className="p-2 rounded-lg hover:bg-rose-100 transition"
                                 >
-                                  Reject
+                                  <Trash2 className="h-4 w-4 text-rose-600" />
                                 </button>
                               </>
                             )}
 
                             <button
                               onClick={() => navigate(`/posts/edit/${post.id}`)}
-                              className="inline-flex items-center text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 font-medium rounded-lg text-sm px-3 py-2 transition-all duration-200"
+                              title="Edit"
+                              className="p-2 rounded-lg hover:bg-indigo-100 transition"
                             >
-                              <Edit className="h-3.5 w-3.5 mr-1" />
-                              Edit
+                              <Edit className="h-4 w-4 text-indigo-600" />
                             </button>
 
                             <button
                               onClick={() => setDeletePostId(post.id)}
-                              className="inline-flex items-center text-red-600 bg-white border border-red-200 hover:bg-red-50 hover:border-red-300 font-medium rounded-lg text-sm px-3 py-2 transition-all duration-200"
+                              title="Delete"
+                              className="p-2 rounded-lg hover:bg-rose-100 transition"
                             >
-                              <Trash2 className="h-3.5 w-3.5 mr-1" />
-                              Delete
+                              <Trash2 className="h-4 w-4 text-rose-600" />
                             </button>
                           </>
                         )}
