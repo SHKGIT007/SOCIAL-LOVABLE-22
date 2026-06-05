@@ -1,14 +1,15 @@
-﻿const express = require('express');
+const express = require('express');
 const router = express.Router();
 const planController = require('../controllers/plan.controller');
 const { authenticateToken, requireAdmin } = require('../Middleware/auth.middleware');
 const { validatePlanCreation, validateId, validatePagination } = require('../Middleware/validation.middleware');
 
-// All routes require authentication
-router.use(authenticateToken);
-
 // Public plan routes (for clients to view available plans)
 router.get('/active', planController.getActivePlans);
+
+// All routes below require authentication
+router.use(authenticateToken);
+
 router.get('/:id', validateId, planController.getPlanById);
 
 // Admin-only routes

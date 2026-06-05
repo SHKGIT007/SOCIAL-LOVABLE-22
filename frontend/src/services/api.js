@@ -400,8 +400,8 @@ class ApiService {
   }
 
   // Plan API methods
-  async getActivePlans() {
-    return this.request(API_CONFIG.ENDPOINTS.PLANS.GET_ACTIVE);
+  async getActivePlans(options = {}) {
+    return this.request(API_CONFIG.ENDPOINTS.PLANS.GET_ACTIVE, { skipAuthLogout: true, ...options });
   }
 
   async getAllPlans(queryParams = {}) {

@@ -3,7 +3,19 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sparkles, Calendar, TrendingUp, Users, Shield, Twitter, Linkedin, Instagram } from "lucide-react";
 import { motion } from "framer-motion";
-import { useState, useEffect } from "react"; // <-- Import ज़रूरी है
+import { useState, useEffect } from "react";
+import { apiService } from "@/services/api";
+
+interface Plan {
+  id: number;
+  name: string;
+  price: number;
+  monthly_posts: number;
+  ai_posts: number;
+  linked_accounts: number;
+  features?: any;
+  description: string;
+}
 
 // ---
 // Floating blob component 
@@ -43,8 +55,25 @@ const MouseSpotlight = ({ mousePos }) => {
 
 const Index = () => {
   const navigate = useNavigate();
-  // State to track mouse position
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [isLoadingPlans, setIsLoadingPlans] = useState(true);
+
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        const response = await apiService.getActivePlans({ includeAuth: false });
+        if (response.status) {
+          setPlans(response.data.plans || []);
+        }
+      } catch (error) {
+        console.error("Failed to fetch plans", error);
+      } finally {
+        setIsLoadingPlans(false);
+      }
+    };
+    fetchPlans();
+  }, []);
 
   // Effect to update mouse position on movement
   useEffect(() => {
@@ -173,31 +202,49 @@ const Index = () => {
           <p className="text-gray-600 text-lg">Choose the plan that fits your ambition and scale</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {[
-            { title: "Starter", description: "Perfect for getting started", price: "$0", features: ["10 posts per month", "5 AI-generated posts", "1 linked account", "Basic analytics"], variant: "outline" },
-            { title: "Pro", description: "For power creators & small teams", price: "$29.99", features: ["100 posts per month", "50 AI-generated posts", "5 linked accounts", "Priority support", "Advanced Analytics"], variant: "solid" },
-            { title: "Enterprise", description: "For large agencies and businesses", price: "$99.99", features: ["Unlimited posts", "Unlimited AI posts", "Unlimited accounts", "Premium support", "Dedicated Account Manager"], variant: "outline" },
-          ].map((plan, idx) => (
+          {isLoadingPlans ? (
+            <div className="col-span-1 md:col-span-3 flex justify-center py-10">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600" />
+            </div>
+          ) : plans.slice(0, 3).map((plan, idx) => {
+            const variant = idx === 1 ? "solid" : "outline";
+            const isPopular = idx === 1;
+            const featuresList = [
+              `${plan.monthly_posts === -1 ? 'Unlimited' : plan.monthly_posts} posts per month`,
+              `${plan.ai_posts === -1 ? 'Unlimited' : plan.ai_posts} AI-generated posts`,
+              `${plan.linked_accounts === -1 ? 'Unlimited' : plan.linked_accounts} linked account${plan.linked_accounts > 1 ? 's' : ''}`,
+            ];
+            
+            if (plan.features) {
+              try {
+                const parsedFeatures = typeof plan.features === 'string' ? JSON.parse(plan.features) : plan.features;
+                if (Array.isArray(parsedFeatures)) {
+                    featuresList.push(...parsedFeatures);
+                }
+              } catch(e) {}
+            }
+
+            return (
             <motion.div
-              key={idx}
+              key={plan.id || idx}
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: idx * 0.2, duration: 0.6 }}
             >
-              <Card className={`relative p-2 rounded-2xl transition-transform h-full ${plan.variant === "solid" ? "border-2 border-indigo-600 shadow-2xl shadow-indigo-500/30 bg-white" : "bg-white/80 backdrop-blur-sm border border-gray-200 hover:border-teal-500/50"}`}>
+              <Card className={`relative p-2 rounded-2xl transition-transform h-full ${variant === "solid" ? "border-2 border-indigo-600 shadow-2xl shadow-indigo-500/30 bg-white" : "bg-white/80 backdrop-blur-sm border border-gray-200 hover:border-teal-500/50"}`}>
                 <div className="p-4 rounded-xl h-full flex flex-col">
-                    {plan.title === "Pro" && (
+                    {isPopular && (
                         <div className="absolute top-0 right-0 transform translate-y-[-50%] translate-x-1 bg-indigo-600 text-white text-sm px-4 py-1 rounded-full font-bold shadow-xl">MOST POPULAR</div>
                     )}
                     <CardHeader className="text-center">
-                        <CardTitle className={`text-3xl font-extrabold ${plan.variant === "solid" ? "text-indigo-600" : "text-gray-900"}`}>{plan.title}</CardTitle>
+                        <CardTitle className={`text-3xl font-extrabold ${variant === "solid" ? "text-indigo-600" : "text-gray-900"}`}>{plan.name}</CardTitle>
                         <CardDescription className="text-gray-600">{plan.description}</CardDescription>
-                        <div className="text-5xl font-extrabold mt-6 text-gray-900">{plan.price}</div>
+                        <div className="text-5xl font-extrabold mt-6 text-gray-900">₹{Math.floor(plan.price)}</div>
                         <p className="text-base text-gray-500">per month</p>
                     </CardHeader>
                     <CardContent className="space-y-3 mt-4 flex-grow">
-                        {plan.features.map((feat, i) => (
+                        {featuresList.map((feat, i) => (
                             <p key={i} className="text-base flex items-center text-gray-700">
                                 <Sparkles className="h-4 w-4 mr-2 text-teal-500 flex-shrink-0" /> {feat}
                             </p>
@@ -205,7 +252,7 @@ const Index = () => {
                     </CardContent>
                     <div className="p-4">
                         <Button
-                            className={`w-full mt-4 transition-transform hover:scale-[1.02] ${plan.variant === "solid" ? primaryGradientClass : "bg-indigo-600 text-white hover:bg-indigo-700"}`}
+                            className={`w-full mt-4 transition-transform hover:scale-[1.02] ${variant === "solid" ? primaryGradientClass : "bg-indigo-600 text-white hover:bg-indigo-700"}`}
                             onClick={() => navigate("/auth", { state: { activeTab: "signup" } })}
                         >
                             Choose Plan
@@ -214,7 +261,7 @@ const Index = () => {
                 </div>
               </Card>
             </motion.div>
-          ))}
+          )})}
         </div>
       </section>
 
