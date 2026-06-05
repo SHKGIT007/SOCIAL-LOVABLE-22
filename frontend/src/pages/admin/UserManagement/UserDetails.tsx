@@ -101,73 +101,72 @@ const UserDetails = () => {
           <div className="flex items-center gap-4">
             <Button
               variant="outline"
-              size="sm"
+              size="icon"
               onClick={() => navigate("/admin/users")}
-              className="rounded-full h-10 w-10 p-0 flex items-center justify-center hover:bg-gray-100 transition-colors border-indigo-100"
+              className="h-9 w-9"
             >
-              <ArrowLeft className="h-5 w-5 text-indigo-600" />
+              <ArrowLeft className="h-4 w-4" />
             </Button>
             <div>
-              <h1 className="text-3xl font-black tracking-tight">
-                <span className={`text-transparent bg-clip-text ${primaryGradientClass}`}>
-                  User
-                </span>{" "}
-                Profile
-              </h1>
+              <h1 className="text-2xl font-bold tracking-tight text-gray-900">User Profile</h1>
+              <p className="text-sm text-gray-500">View and manage user details</p>
             </div>
           </div>
           
-          <div className="flex items-center gap-3">
+          <div className="flex items-center">
               <Button 
-                 variant="outline" 
                  onClick={() => navigate(`/admin/edituser/${user.id}`)}
-                 className="hidden sm:flex font-bold border-indigo-100 hover:bg-indigo-50"
+                 className="bg-indigo-600 hover:bg-indigo-700 text-white"
                >
-                 <Edit className="h-4 w-4 mr-2 text-indigo-600" /> Edit Profile
+                 <Edit className="h-4 w-4 mr-2" /> Edit Profile
               </Button>
-           
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column: User Profile Card */}
           <div className="lg:col-span-1 space-y-6">
-            <Card className="overflow-hidden border-none shadow-xl bg-white group">
-              <div className={`h-24 ${primaryGradientClass} opacity-80 group-hover:opacity-100 transition-opacity`} />
-              <CardContent className="px-6 pb-6 pt-0 relative">
-                <div className="flex flex-col items-center -mt-12 mb-6">
-                  <Avatar className="h-24 w-24 border-4 border-white shadow-lg ring-2 ring-indigo-50">
+            <Card className="shadow-sm border-gray-200">
+              <CardContent className="pt-6">
+                <div className="flex flex-col items-center mb-6">
+                  <Avatar className="h-20 w-20 mb-4">
                     <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.email}`} />
-                    <AvatarFallback className="bg-indigo-100 text-indigo-700 text-2xl font-bold">
+                    <AvatarFallback className="bg-indigo-100 text-indigo-700 text-xl font-semibold">
                         {initials}
                     </AvatarFallback>
                   </Avatar>
-                  <h2 className="text-2xl font-bold mt-4 text-gray-900">{user.user_fname} {user.user_lname}</h2>
-                  <p className="text-gray-500 font-medium">@{user.user_name}</p>
+                  <h2 className="text-xl font-semibold text-gray-900">{user.user_fname} {user.user_lname}</h2>
+                  <p className="text-gray-500 text-sm">@{user.user_name}</p>
                 </div>
 
-                <div className="space-y-4 pt-4">
-                  <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-indigo-50 transition-colors">
-                    <Mail className="h-5 w-5 text-indigo-500" />
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-indigo-50 rounded-md text-indigo-600">
+                      <Mail className="h-4 w-4" />
+                    </div>
                     <div className="overflow-hidden">
-                      <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Email Address</p>
-                      <p className="text-sm font-semibold text-gray-700 truncate">{user.email}</p>
+                      <p className="text-xs text-gray-500 font-medium">Email Address</p>
+                      <p className="text-sm font-medium text-gray-900 truncate">{user.email}</p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-indigo-50 transition-colors">
-                    <Phone className="h-5 w-5 text-indigo-500" />
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-indigo-50 rounded-md text-indigo-600">
+                      <Phone className="h-4 w-4" />
+                    </div>
                     <div>
-                      <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Phone Number</p>
-                      <p className="text-sm font-semibold text-gray-700">{user.user_phone || "Not Provided"}</p>
+                      <p className="text-xs text-gray-500 font-medium">Phone Number</p>
+                      <p className="text-sm font-medium text-gray-900">{user.user_phone || "Not Provided"}</p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-indigo-50 transition-colors">
-                    <Calendar className="h-5 w-5 text-indigo-500" />
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-indigo-50 rounded-md text-indigo-600">
+                      <Calendar className="h-4 w-4" />
+                    </div>
                     <div>
-                      <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Join Date</p>
-                      <p className="text-sm font-semibold text-gray-700">{formatDateTime(user.created_at)}</p>
+                      <p className="text-xs text-gray-500 font-medium">Join Date</p>
+                      <p className="text-sm font-medium text-gray-900">{formatDateTime(user.created_at)}</p>
                     </div>
                   </div>
                 </div>
@@ -175,23 +174,22 @@ const UserDetails = () => {
             </Card>
 
             {/* Quick Stats Summary */}
-            <Card className="border-none shadow-lg bg-indigo-900 text-white overflow-hidden">
-                <CardContent className="p-6 relative">
-                    <div className="absolute top-0 right-0 p-4 opacity-10">
-                        <Activity className="h-24 w-24" />
-                    </div>
-                    <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                        <Activity className="h-5 w-5" />
+            <Card className="shadow-sm border-gray-200">
+                <CardHeader className="pb-3">
+                    <CardTitle className="text-base font-semibold flex items-center gap-2">
+                        <Activity className="h-4 w-4 text-indigo-600" />
                         Usage Summary
-                    </h3>
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-white/10 p-4 rounded-xl backdrop-blur-sm">
-                            <p className="text-indigo-200 text-xs font-bold uppercase">Total Plans</p>
-                            <p className="text-2xl font-black">{planHistory.length}</p>
+                        <div className="p-3 bg-gray-50 rounded-lg border border-gray-100">
+                            <p className="text-gray-500 text-xs font-medium mb-1">Total Plans</p>
+                            <p className="text-xl font-semibold text-gray-900">{planHistory.length}</p>
                         </div>
-                        <div className="bg-white/10 p-4 rounded-xl backdrop-blur-sm">
-                            <p className="text-indigo-200 text-xs font-bold uppercase">Active</p>
-                            <p className="text-2xl font-black">{activeSubscription ? 1 : 0}</p>
+                        <div className="p-3 bg-gray-50 rounded-lg border border-gray-100">
+                            <p className="text-gray-500 text-xs font-medium mb-1">Active</p>
+                            <p className="text-xl font-semibold text-gray-900">{activeSubscription ? 1 : 0}</p>
                         </div>
                     </div>
                 </CardContent>
@@ -209,78 +207,75 @@ const UserDetails = () => {
                   exit={{ opacity: 0, x: -20 }}
                   key="active-sub"
                 >
-                  <Card className="border-none shadow-xl bg-white overflow-hidden relative group">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-600/5 rounded-bl-full -mr-16 -mt-16 transition-all group-hover:scale-110" />
-                    <CardHeader className="pb-4">
+                  <Card className="shadow-sm border-indigo-100 bg-white">
+                    <CardHeader className="pb-4 border-b border-gray-100 bg-gray-50/50">
                       <div className="flex justify-between items-center">
                         <div className="space-y-1">
-                          <CardTitle className="text-2xl font-black text-gray-900 flex items-center gap-2">
-                            <Crown className="h-6 w-6 text-yellow-500" />
-                            {activeSubscription.plan_name || activeSubscription.Plan?.name || "Subscription"}
+                          <CardTitle className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                            <Crown className="h-5 w-5 text-yellow-500" />
+                            Active Subscription
                           </CardTitle>
-                          <CardDescription>Managed enterprise-level features</CardDescription>
                         </div>
-                        <Badge className="bg-green-100 text-green-700 border-green-200 text-sm py-1.5 px-4 animate-pulse">
-                          ACTIVE NOW
+                        <Badge className="bg-green-100 text-green-700 border-green-200 hover:bg-green-100">
+                          Active
                         </Badge>
                       </div>
                     </CardHeader>
-                    <CardContent className="space-y-6">
-                      <div className="bg-indigo-50/50 p-6 rounded-2xl border border-indigo-100 flex items-center justify-between">
-                        <div>
-                          <p className="text-xs font-black text-indigo-500 uppercase tracking-widest mb-1">Current Plan</p>
-                          <p className="text-3xl font-black text-indigo-900">{activeSubscription.plan_name || activeSubscription.Plan?.name}</p>
+                    <CardContent className="pt-6 space-y-6">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-100">
+                        <div className="mb-4 sm:mb-0">
+                          <p className="text-sm font-medium text-gray-500 mb-1">Current Plan</p>
+                          <p className="text-xl font-bold text-gray-900">{activeSubscription.plan_name || activeSubscription.Plan?.name}</p>
                         </div>
-                        <div className="text-right">
-                          <p className="text-xs font-black text-indigo-500 uppercase tracking-widest mb-1">Monthly Cost</p>
-                          <p className="text-3xl font-black text-gray-900">₹{Math.floor(activeSubscription.plan_price || activeSubscription.amount_paid)}</p>
+                        <div className="sm:text-right">
+                          <p className="text-sm font-medium text-gray-500 mb-1">Monthly Cost</p>
+                          <p className="text-xl font-bold text-gray-900">₹{Math.floor(activeSubscription.plan_price || activeSubscription.amount_paid)}</p>
                         </div>
                       </div>
 
                       <div className="space-y-4">
-                        <div className="flex justify-between items-end">
+                        <div className="flex justify-between items-center">
                             <div>
-                                <h4 className="font-bold text-gray-700 flex items-center gap-2">
+                                <h4 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
                                     <Zap className="h-4 w-4 text-indigo-600" />
                                     AI Credits Usage
                                 </h4>
-                                <p className="text-sm text-gray-500">Monthly quota allocation</p>
                             </div>
-                            <div className="text-right">
-                                <span className="text-2xl font-black text-indigo-600">{activeSubscription.ai_posts_used}</span>
-                                <span className="text-gray-400 mx-1">/</span>
-                                <span className="text-lg font-bold text-gray-600">{activeSubscription.ai_posts}</span>
+                            <div className="text-sm">
+                                <span className="font-semibold text-gray-900">{activeSubscription.ai_posts_used}</span>
+                                <span className="text-gray-500 mx-1">/</span>
+                                <span className="text-gray-500">{activeSubscription.ai_posts}</span>
                             </div>
                         </div>
                         <div className="space-y-2">
                             <Progress 
                                 value={(activeSubscription.ai_posts_used / (activeSubscription.ai_posts || 1)) * 100} 
-                                className="h-3 bg-indigo-100 [&>div]:bg-indigo-600"
+                                className="h-2 bg-gray-100"
                             />
-                            <div className="flex justify-between text-xs font-bold text-gray-400 uppercase">
-                                <span>Used</span>
-                                <span>Remaining: {(activeSubscription.ai_posts || 0) - activeSubscription.ai_posts_used}</span>
+                            <div className="flex justify-between text-xs text-gray-500">
+                                <span>{(activeSubscription.ai_posts_used / (activeSubscription.ai_posts || 1) * 100).toFixed(0)}% Used</span>
+                                <span>{(activeSubscription.ai_posts || 0) - activeSubscription.ai_posts_used} Remaining</span>
                             </div>
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-                        <div className="flex items-center gap-4 p-4 rounded-xl border border-gray-100 bg-white">
-                            <div className="p-3 bg-yellow-100 rounded-lg text-yellow-600">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="flex items-center gap-3 p-3 rounded-lg border border-gray-100">
+                            <div className="text-gray-400">
                                 <Clock className="h-5 w-5" />
                             </div>
                             <div>
-                                <p className="text-xs text-gray-400 font-bold uppercase">Billing Cycle</p>
-                                <p className="text-sm font-black text-gray-800">Monthly (Manual)</p>
+                                <p className="text-xs text-gray-500 font-medium">Billing Cycle</p>
+                                <p className="text-sm font-semibold text-gray-900">Monthly</p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-4 p-4 rounded-xl border border-gray-100 bg-white">
-                            <div className="p-3 bg-blue-100 rounded-lg text-blue-600">
+                        <div className="flex items-center gap-3 p-3 rounded-lg border border-gray-100">
+                            <div className="text-gray-400">
                                 <Calendar className="h-5 w-5" />
                             </div>
                             <div>
-                                <p className="text-xs text-gray-400 font-bold uppercase">Valid Since</p>
-                                <p className="text-sm font-black text-gray-800">{formatDate(activeSubscription.start_date)}</p>
+                                <p className="text-xs text-gray-500 font-medium">Valid Since</p>
+                                <p className="text-sm font-semibold text-gray-900">{formatDate(activeSubscription.start_date)}</p>
                             </div>
                         </div>
                       </div>
@@ -293,13 +288,13 @@ const UserDetails = () => {
                   animate={{ opacity: 1, scale: 1 }}
                   key="no-sub"
                 >
-                  <Card className="border-2 border-dashed border-red-200 bg-red-50/30 p-12 text-center group">
-                    <div className="bg-red-100 h-20 w-20 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                      <XCircle className="h-10 w-10 text-red-600" />
+                  <Card className="shadow-sm border-gray-200 bg-gray-50 p-8 text-center">
+                    <div className="bg-gray-100 h-16 w-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <XCircle className="h-8 w-8 text-gray-400" />
                     </div>
-                    <h3 className="text-xl font-black text-red-900">No Active Subscription</h3>
-                    <p className="text-red-600/70 max-w-sm mx-auto mt-2">
-                      This user doesn't have an active plan. Manage plans or contact the user to upgrade.
+                    <h3 className="text-lg font-semibold text-gray-900">No Active Subscription</h3>
+                    <p className="text-gray-500 text-sm max-w-sm mx-auto mt-1">
+                      This user currently doesn't have an active plan.
                     </p>
                   </Card>
                 </motion.div>
@@ -307,16 +302,11 @@ const UserDetails = () => {
             </AnimatePresence>
 
             {/* Plan History Table */}
-            <Card className="border-none shadow-xl bg-white overflow-hidden">
-              <CardHeader className="bg-gray-50/50 border-b">
-                <div className="flex items-center gap-3">
-                    <div className="p-2 bg-indigo-100 rounded-lg text-indigo-600">
-                        <Clock className="h-5 w-5" />
-                    </div>
-                    <div>
-                        <CardTitle className="text-xl font-bold">Billing History</CardTitle>
-                        <CardDescription>Recent transactions and plan history</CardDescription>
-                    </div>
+            <Card className="shadow-sm border-gray-200">
+              <CardHeader className="pb-4 border-b border-gray-100 bg-gray-50/50">
+                <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-indigo-600" />
+                    <CardTitle className="text-base font-semibold text-gray-900">Billing History</CardTitle>
                 </div>
               </CardHeader>
               <CardContent className="p-0">
@@ -324,31 +314,31 @@ const UserDetails = () => {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-gray-50">
-                                <th className="px-6 py-4 text-xs font-black text-gray-400 uppercase tracking-wider">Plan Name</th>
-                                <th className="px-6 py-4 text-xs font-black text-gray-400 uppercase tracking-wider">Date</th>
-                                <th className="px-6 py-4 text-xs font-black text-gray-400 uppercase tracking-wider">Amount</th>
-                                <th className="px-6 py-4 text-xs font-black text-gray-400 uppercase tracking-wider">Status</th>
+                                <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-200">Plan Name</th>
+                                <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-200">Date</th>
+                                <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-200">Amount</th>
+                                <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-200">Status</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100">
+                        <tbody className="divide-y divide-gray-200 bg-white">
                             {planHistory.length > 0 ? (
                                 planHistory.slice(0, 5).map((plan, i) => (
-                                    <tr key={i} className="hover:bg-gray-50/50 transition-colors">
-                                        <td className="px-6 py-4">
-                                            <p className="font-bold text-gray-900">{plan.plan_name || plan.Plan?.name || "Standard Plan"}</p>
+                                    <tr key={i} className="hover:bg-gray-50 transition-colors">
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <p className="text-sm font-medium text-gray-900">{plan.plan_name || plan.Plan?.name || "Standard Plan"}</p>
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <p className="text-sm font-semibold text-gray-700">{formatDate(plan.start_date)}</p>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <p className="text-sm text-gray-500">{formatDate(plan.start_date)}</p>
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <p className="text-sm font-black text-indigo-600">₹{Math.floor(plan.amount_paid)}</p>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <p className="text-sm font-medium text-gray-900">₹{Math.floor(plan.amount_paid)}</p>
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <Badge className={`text-[10px] py-0 px-2 h-5 ${
-                                                plan.status === 'active' ? 'bg-green-100 text-green-700 border-green-200' : 
-                                                'bg-gray-100 text-gray-600 border-gray-200'
-                                            } border`}>
-                                                {plan.status.toUpperCase()}
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <Badge variant="outline" className={`text-[10px] font-medium py-0.5 px-2 ${
+                                                plan.status === 'active' ? 'bg-green-50 text-green-700 border-green-200' : 
+                                                'bg-gray-50 text-gray-600 border-gray-200'
+                                            }`}>
+                                                {plan.status}
                                             </Badge>
                                         </td>
                                     </tr>
