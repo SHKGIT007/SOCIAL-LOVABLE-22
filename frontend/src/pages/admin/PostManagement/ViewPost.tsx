@@ -144,87 +144,61 @@ const AdminViewPost = () => {
         </div>
 
         {/* Main Card */}
-        <Card className="overflow-hidden rounded-2xl border-indigo-100 shadow-xl">
-          {/* Gradient banner */}
-          <div className="relative">
-            <div className="h-24 bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-500" />
+        <Card className="shadow-sm border-gray-200">
+          <CardHeader className="border-b border-gray-100 bg-gray-50/50 pb-6">
+            <div className="flex flex-col md:flex-row gap-6">
+              <div className="space-y-4 flex-1">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                      <Zap className="h-5 w-5 text-indigo-500" />
+                      {post.title || "Untitled Post"}
+                    </h2>
+                    <div className="mt-1 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-sm text-gray-500">
+                      <span className="font-medium text-gray-900">
+                        {post.User?.Profile?.business_name || post.User?.user_name || "Unknown Creator"}
+                      </span>
+                      <span className="hidden sm:inline text-gray-300">•</span>
+                      <span>{post.User?.email}</span>
+                    </div>
+                  </div>
 
-            {post.image_url && (
-              <div className="absolute -bottom-10 left-6">
-                <div className="h-20 w-20 rounded-xl overflow-hidden ring-4 ring-white shadow-lg bg-white">
-                  <img
-                    src={getDisplayImageUrl(post.image_url)}
-                    alt="Post"
-                    className="h-full w-full object-cover"
-                  />
+                  <Badge variant="outline" className="bg-white">
+                    {post.status.charAt(0).toUpperCase() + post.status.slice(1)}
+                  </Badge>
                 </div>
-              </div>
-            )}
-          </div>
 
-          {/* Header */}
-          <CardHeader className={`pt-6 ${post.image_url ? "pl-28" : ""}`}>
-            <div className="space-y-4">
-              {/* Creator Info Above Title */}
-              <div className="flex flex-col gap-1">
-                <span className="text-xs font-bold uppercase tracking-wider text-indigo-600">
-                  Business / Creator Name
-                </span>
-                <span className="text-xl font-extrabold text-gray-900">
-                  {post.User?.Profile?.business_name || post.User?.user_name || "Unknown Creator"}
-                </span>
-                <span className="text-xs text-gray-500 font-medium italic">
-                  ({post.User?.email})
-                </span>
-              </div>
+                {/* Badges */}
+                <div className="flex flex-wrap gap-2">
+                  {platforms.map((p: string, i: number) => (
+                    <Badge key={i} variant="secondary" className="capitalize bg-indigo-50 text-indigo-700 hover:bg-indigo-50">
+                      {p}
+                    </Badge>
+                  ))}
 
-              <div className="h-px bg-gray-100" />
-
-              <CardTitle className="text-2xl tracking-tight text-gray-800 flex items-center gap-2">
-                <Zap className="h-5 w-5 text-indigo-500" />
-                {post.title || "Untitled Post"}
-              </CardTitle>
-
-              {/* Badges */}
-              <div className="flex flex-wrap gap-2 pt-2">
-                {platforms.map((p: string, i: number) => (
-                  <Badge key={i} variant="secondary" className="capitalize">
-                    {p}
-                  </Badge>
-                ))}
-
-                <Badge className="bg-gray-700 text-white">
-                  {post.status.charAt(0).toUpperCase() + post.status.slice(1)}
-                </Badge>
-
-                {post.is_ai_generated ? (
-                  <Badge
-                    variant="outline"
-                    className="border-indigo-200 text-indigo-700"
-                  >
-                    <Zap className="mr-1 h-3 w-3" />
-                    AI Generated
-                  </Badge>
-                ) : (
-                  <Badge
-                    variant="outline"
-                    className="border-gray-300 text-gray-700"
-                  >
-                    Manual
-                  </Badge>
-                )}
+                  {post.is_ai_generated ? (
+                    <Badge variant="outline" className="border-indigo-200 text-indigo-700 bg-white">
+                      <Zap className="mr-1 h-3 w-3" />
+                      AI Generated
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="border-gray-300 text-gray-700 bg-white">
+                      Manual
+                    </Badge>
+                  )}
+                </div>
               </div>
             </div>
           </CardHeader>
 
           {/* Content */}
-          <CardContent className="space-y-8">
+          <CardContent className="space-y-8 pt-6">
             {/* Content */}
-            <section className="space-y-2">
-              <h3 className="text-sm font-semibold text-gray-900">Content</h3>
-              <div className="rounded-xl border bg-white p-4 shadow-sm">
-                <p className="whitespace-pre-wrap text-gray-700 leading-relaxed">
-                  {post.content || "No content available"}
+            <section className="space-y-3">
+              <h3 className="text-sm font-semibold text-gray-900">Post Content</h3>
+              <div className="rounded-lg border border-gray-200 bg-gray-50 p-5 shadow-sm">
+                <p className="whitespace-pre-wrap text-gray-800 leading-relaxed text-sm">
+                  {post.content || <span className="text-gray-400 italic">No content available</span>}
                 </p>
               </div>
             </section>
@@ -235,53 +209,52 @@ const AdminViewPost = () => {
                 <h3 className="text-sm font-semibold text-gray-900">
                   Media Preview
                 </h3>
-
-                {post.image_url && (
-                  <div className="rounded-2xl overflow-hidden border shadow-sm bg-gray-50">
+                <div className="rounded-lg overflow-hidden border border-gray-200 shadow-sm bg-gray-100/50 p-4 flex justify-center">
+                  {post.image_url && (
                     <img
                       src={getDisplayImageUrl(post.image_url)}
-                      alt="Post"
-                      className="w-auto max-h-72 object-contain"
+                      alt="Post Media"
+                      className="max-h-[400px] w-auto object-contain rounded-md shadow-sm border border-gray-200 bg-white"
                     />
-                  </div>
-                )}
+                  )}
 
-                {post.video_url && (
-                  <video
-                    controls
-                    src={post.video_url}
-                    className="w-full max-h-72 rounded-xl border shadow-sm"
-                  />
-                )}
+                  {post.video_url && !post.image_url && (
+                    <video
+                      controls
+                      src={post.video_url}
+                      className="max-h-[400px] w-full max-w-2xl rounded-md shadow-sm border border-gray-200 bg-black"
+                    />
+                  )}
+                </div>
               </section>
             )}
 
             {/* Dates */}
-            <section className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
-              <div className="rounded-xl border p-4 bg-white shadow-sm">
-                <h4 className="font-semibold text-gray-900 mb-1">Created At</h4>
-                <p className="text-sm text-gray-600">
+            <section className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-gray-100">
+              <div className="rounded-lg border border-gray-200 p-4 bg-white shadow-sm flex flex-col justify-center">
+                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Created At</h4>
+                <p className="text-sm font-medium text-gray-900">
                   {formatDateTime(post.created_at)}
                 </p>
               </div>
 
               {post.scheduled_at && (
-                <div className="rounded-xl border p-4 bg-white shadow-sm">
-                  <h4 className="font-semibold text-gray-900 mb-1">
+                <div className="rounded-lg border border-gray-200 p-4 bg-white shadow-sm flex flex-col justify-center">
+                  <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
                     Scheduled At
                   </h4>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm font-medium text-gray-900">
                     {formatDateTime(post.scheduled_at)}
                   </p>
                 </div>
               )}
 
               {post.published_at && (
-                <div className="rounded-xl border p-4 bg-white shadow-sm">
-                  <h4 className="font-semibold text-gray-900 mb-1">
+                <div className="rounded-lg border border-gray-200 p-4 bg-white shadow-sm flex flex-col justify-center">
+                  <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
                     Published At
                   </h4>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm font-medium text-gray-900">
                     {formatDateTime(post.published_at)}
                   </p>
                 </div>
