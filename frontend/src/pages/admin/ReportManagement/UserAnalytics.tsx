@@ -253,21 +253,19 @@ const UserAnalytics = () => {
         animate={{ opacity: 1 }} 
         className="space-y-6 max-w-7xl mx-auto pb-10"
       >
-        {/* Modern Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/40 backdrop-blur-xl p-6 rounded-3xl border border-white shadow-xl sticky top-0 z-30">
+        {/* Modern Header - Simplified */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-xl border border-gray-200 shadow-sm sticky top-0 z-30">
           <div className="flex items-center gap-5">
-            <Avatar className="h-16 w-16 border-2 border-white shadow-md ring-4 ring-indigo-50">
+            <Avatar className="h-16 w-16 border border-gray-200">
                <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${userData.email}`} />
-               <AvatarFallback className="bg-indigo-600 text-white font-bold">{userData.user_fname?.[0]}{userData.user_lname?.[0]}</AvatarFallback>
+               <AvatarFallback className="bg-indigo-600 text-white">{userData.user_fname?.[0]}{userData.user_lname?.[0]}</AvatarFallback>
             </Avatar>
             <div>
-              <h1 className="text-3xl font-black tracking-tighter text-gray-900">
-                {userData.user_fname} <span className={`text-transparent bg-clip-text ${primaryGradientClass}`}>{userData.user_lname}</span>
+              <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+                {userData.user_fname} {userData.user_lname}
               </h1>
               <div className="flex items-center gap-3 mt-1">
                 <p className="text-gray-500 font-medium text-sm">@{userData.user_name}</p>
-               
-                
               </div>
             </div>
           </div>
@@ -277,11 +275,10 @@ const UserAnalytics = () => {
               variant="outline" 
               size="sm" 
               onClick={() => navigate(-1)} 
-              className="rounded-xl font-bold bg-white/50 border-gray-100 hover:bg-gray-100 transition-all font-bold"
+              className="bg-white border-gray-200 hover:bg-gray-50 transition-colors"
             >
-              <ArrowLeft className="h-4 w-4 mr-2 text-indigo-600" /> Back
+              <ArrowLeft className="h-4 w-4 mr-2" /> Back
             </Button>
-          
           </div>
         </div>
 
@@ -293,14 +290,14 @@ const UserAnalytics = () => {
                 { icon: User, label: "Type", value: userData.user_type, color: "bg-purple-50 text-purple-600" },
                 { icon: Calendar, label: "Joined", value: formatDate(userData.created_at), color: "bg-amber-50 text-amber-600" },
             ].map((item, i) => (
-                <Card key={i} className="border-none shadow-sm bg-white/60 hover:shadow-md transition-all">
+                <Card key={i} className="border border-gray-200 shadow-sm bg-white hover:shadow-md transition-all">
                     <CardContent className="p-4 flex items-center gap-4">
-                        <div className={`p-3 rounded-2xl ${item.color}`}>
+                        <div className={`p-3 rounded-lg ${item.color}`}>
                             <item.icon className="h-5 w-5" />
                         </div>
                         <div className="overflow-hidden">
-                            <p className="text-[10px] uppercase font-black tracking-widest text-gray-400">{item.label}</p>
-                            <p className="text-sm font-bold text-gray-800 truncate">{item.value}</p>
+                            <p className="text-xs uppercase font-semibold text-gray-500 tracking-wider">{item.label}</p>
+                            <p className="text-sm font-medium text-gray-900 truncate">{item.value}</p>
                         </div>
                     </CardContent>
                 </Card>
@@ -310,16 +307,15 @@ const UserAnalytics = () => {
         {/* Data & Analytics Section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Post Stats & Distribution */}
-            <Card className="lg:col-span-2 border-none shadow-xl bg-white overflow-hidden">
-                <CardHeader className="flex flex-row items-center justify-between border-b bg-gray-50/30">
+            <Card className="lg:col-span-2 border border-gray-200 shadow-sm bg-white overflow-hidden">
+                <CardHeader className="flex flex-row items-center justify-between border-b border-gray-100 bg-gray-50/50">
                     <div>
-                        <CardTitle className="text-lg font-black flex items-center gap-2 uppercase tracking-tight">
-                            <Activity className="h-5 w-5 text-indigo-600" />
+                        <CardTitle className="text-lg font-bold flex items-center gap-2 text-gray-900">
+                            <Activity className="h-5 w-5 text-indigo-500" />
                             Post Performance
                         </CardTitle>
                         <CardDescription>Visual breakdown of user activities</CardDescription>
                     </div>
-                    <Badge className="bg-indigo-600 text-white border-none px-3 py-1">REAL-TIME</Badge>
                 </CardHeader>
                 <CardContent className="p-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
@@ -341,7 +337,7 @@ const UserAnalytics = () => {
                                             ))}
                                         </Pie>
                                         <RechartsTooltip 
-                                            contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                                            contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                                         />
                                         <Legend verticalAlign="bottom" height={36}/>
                                     </PieChart>
@@ -356,17 +352,16 @@ const UserAnalytics = () => {
 
                         <div className="grid grid-cols-2 gap-3">
                             {statCards.map((stat, i) => (
-                                <motion.div 
+                                <div 
                                     key={i}
-                                    whileHover={{ scale: 1.02 }}
-                                    className={`p-4 rounded-2xl border bg-${stat.color}-50/30 border-${stat.color}-100`}
+                                    className={`p-4 rounded-xl border border-gray-200 bg-gray-50/50`}
                                 >
                                     <div className="flex items-center gap-2 mb-1">
                                         <stat.icon className={`h-4 w-4 text-${stat.color}-600`} />
-                                        <p className="text-[10px] font-black uppercase text-gray-400 tracking-wider">{stat.label}</p>
+                                        <p className="text-xs font-semibold uppercase text-gray-500 tracking-wider">{stat.label}</p>
                                     </div>
-                                    <p className="text-2xl font-black text-gray-900">{stat.value}</p>
-                                </motion.div>
+                                    <p className="text-xl font-bold text-gray-900">{stat.value}</p>
+                                </div>
                             ))}
                         </div>
                     </div>
@@ -374,10 +369,10 @@ const UserAnalytics = () => {
             </Card>
 
             {/* Subscription Usage Card */}
-            <Card className="border-none shadow-xl bg-white overflow-hidden flex flex-col">
-                <CardHeader className="border-b bg-indigo-900 text-white">
-                    <CardTitle className="text-lg font-black flex items-center gap-2 uppercase">
-                        <Zap className="h-5 w-5 text-yellow-400" />
+            <Card className="border border-gray-200 shadow-sm bg-white overflow-hidden flex flex-col">
+                <CardHeader className="border-b border-gray-100 bg-gray-50/50">
+                    <CardTitle className="text-lg font-bold flex items-center gap-2 text-gray-900">
+                        <Zap className="h-5 w-5 text-yellow-500" />
                         Usage Quota
                     </CardTitle>
                 </CardHeader>
@@ -385,41 +380,48 @@ const UserAnalytics = () => {
                     {activeSubscription ? (
                         <>
                             <div className="text-center">
-                                <div className="inline-block p-4 rounded-full bg-indigo-50 mb-4 border-2 border-indigo-100 ring-8 ring-indigo-50/50">
-                                    <Zap className="h-8 w-8 text-indigo-600" />
+                                <div className="inline-block p-4 rounded-full bg-indigo-50 mb-4 border border-indigo-100">
+                                    <Zap className="h-6 w-6 text-indigo-600" />
                                 </div>
-                                <h3 className="text-4xl font-black text-gray-900 leading-none">{aiPostsUsed}</h3>
-                                <p className="text-gray-400 font-bold uppercase text-[10px] mt-2 italic tracking-widest underline decoration-indigo-200">Total Credits Used</p>
+                                <h3 className="text-3xl font-bold text-gray-900 leading-none">{aiPostsUsed}</h3>
+                                <p className="text-gray-500 font-semibold uppercase text-xs mt-2 tracking-wider">Total Credits Used</p>
                             </div>
 
                             <div className="space-y-4">
-                                <div className="flex justify-between items-center text-xs font-black uppercase text-gray-400 tracking-tighter">
+                                <div className="flex justify-between items-center text-xs font-semibold uppercase text-gray-500 tracking-wider">
                                     <span>Plan Progress</span>
-                                    <span className="text-indigo-600 font-black">{Math.round(usagePercentage)}%</span>
+                                    <span className="text-indigo-600 font-bold">{Math.round(usagePercentage)}%</span>
                                 </div>
                                 <div className="relative pt-1">
-                                    <Progress value={usagePercentage} className="h-4 bg-indigo-50 [&>div]:bg-gradient-to-r [&>div]:from-indigo-600 [&>div]:to-cyan-400 rounded-full" />
+                                    <Progress value={usagePercentage} className="h-2 bg-indigo-50" />
                                 </div>
-                                <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100 text-center">
-                                    <p className="text-2xl font-black text-gray-800">{totalAiPosts - aiPostsUsed}</p>
-                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Remaining Posts</p>
+                                <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 text-center flex justify-around">
+                                    <div>
+                                      <p className="text-xl font-bold text-gray-900">{totalAiPosts - aiPostsUsed}</p>
+                                      <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Remaining</p>
+                                    </div>
+                                    <div className="w-px bg-gray-200 mx-2"></div>
+                                    <div>
+                                      <p className="text-xl font-bold text-gray-900">{totalAiPosts}</p>
+                                      <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Total Limit</p>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div className="pt-4 border-t border-dashed">
-                                <p className="text-indigo-700 bg-indigo-50 p-3 rounded-xl text-xs font-bold text-center border border-indigo-100">
-                                    Current Plan: <span className="underline decoration-indigo-300 font-black">{activeSubscription.plan_name || activeSubscription.Plan?.name}</span>
+                            <div className="pt-4 border-t border-gray-100">
+                                <p className="text-gray-700 bg-gray-50 p-3 rounded-lg text-sm font-medium text-center border border-gray-200">
+                                    Current Plan: <span className="font-bold text-indigo-600">{activeSubscription.plan_name || activeSubscription.Plan?.name}</span>
                                 </p>
                             </div>
                         </>
                     ) : (
                         <div className="text-center space-y-4">
-                            <div className="inline-block p-6 rounded-3xl bg-gray-50 border-2 border-dashed border-gray-200 opacity-50">
-                                <Activity className="h-10 w-10 text-gray-300" />
+                            <div className="inline-block p-6 rounded-full bg-gray-50 border border-gray-200">
+                                <Activity className="h-8 w-8 text-gray-400" />
                             </div>
                             <div>
-                                <h3 className="text-xl font-bold text-gray-400">No active plan</h3>
-                                <p className="text-xs text-gray-400 max-w-[200px] mx-auto">This user currently has no active subscription credits.</p>
+                                <h3 className="text-lg font-semibold text-gray-700">No active plan</h3>
+                                <p className="text-sm text-gray-500 max-w-[200px] mx-auto">This user currently has no active subscription credits.</p>
                             </div>
                         </div>
                     )}
@@ -435,87 +437,70 @@ const UserAnalytics = () => {
                     animate={{ opacity: 1, y: 0 }}
                     className="pt-6"
                 >
-                    <Card className="border-none shadow-2xl bg-white overflow-hidden rounded-3xl">
-                        <div className={`h-2 ${primaryGradientClass}`} />
-                        <CardHeader className="bg-gray-50/50 p-8 flex flex-row items-start justify-between">
-                            <div className="space-y-2">
-                                <div className="flex items-center gap-3">
-                                    <Badge className="bg-indigo-100 text-indigo-700 hover:bg-indigo-100 border-none px-3 font-black">TARGETED POST</Badge>
-                                
-                                </div>
-                                <CardTitle className="text-3xl font-black tracking-tight text-gray-900 group">
+                    <Card className="border border-gray-200 shadow-sm bg-white overflow-hidden rounded-xl">
+                        <CardHeader className="bg-gray-50/50 p-6 flex flex-row items-center justify-between border-b border-gray-100">
+                            <div className="space-y-1">
+                                <Badge variant="outline" className="text-indigo-600 border-indigo-200 mb-2">TARGETED POST</Badge>
+                                <CardTitle className="text-xl font-bold text-gray-900">
                                     {postData.title || "Untitled Insight"}
-                                    <ArrowLeft className="inline-block ml-2 h-6 w-6 text-gray-200 group-hover:text-indigo-600 transition-colors rotate-180" />
                                 </CardTitle>
-                                <div className="flex items-center gap-4 text-sm font-medium text-gray-500">
-                                    <div className="flex items-center gap-1">
-                                        <User className="h-4 w-4" /> {postData.User?.user_fname} {postData.User?.user_lname}
-                                    </div>
-                                    <Separator orientation="vertical" className="h-4" />
-                                    <div className="flex items-center gap-1">
-                                        <Mail className="h-4 w-4" /> {postData.User?.email}
-                                    </div>
-                                </div>
                             </div>
-                            <Badge className={`px-4 py-2 text-sm font-black border-none shadow-sm ${
-                                postData.status === 'published' ? 'bg-emerald-500 text-white' : 
-                                postData.status === 'failed' ? 'bg-rose-500 text-white' : 
-                                'bg-indigo-500 text-white'
+                            <Badge className={`px-4 py-1.5 text-xs font-semibold shadow-sm ${
+                                postData.status === 'published' ? 'bg-emerald-500 text-white hover:bg-emerald-600' : 
+                                postData.status === 'failed' ? 'bg-rose-500 text-white hover:bg-rose-600' : 
+                                'bg-indigo-500 text-white hover:bg-indigo-600'
                             }`}>
                                 {postData.status.toUpperCase()}
                             </Badge>
                         </CardHeader>
                         
-                        <CardContent className="p-8 grid grid-cols-1 lg:grid-cols-2 gap-10">
+                        <CardContent className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
                             <div className="space-y-6">
-                                <div className="space-y-3">
-                                    <label className="text-[10px] font-black uppercase text-indigo-500 tracking-widest flex items-center gap-2">
-                                        <FileText className="h-3 w-3" /> Post Content
+                                <div className="space-y-2">
+                                    <label className="text-xs font-semibold uppercase text-gray-500 flex items-center gap-2">
+                                        <FileText className="h-4 w-4 text-indigo-500" /> Post Content
                                     </label>
-                                    <div className="bg-gray-50 border border-indigo-50 p-6 rounded-3xl text-gray-700 leading-relaxed font-medium text-sm shadow-inner min-h-[150px]">
+                                    <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg text-gray-800 text-sm leading-relaxed min-h-[120px]">
                                         {postData.content}
                                     </div>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">
-                                    <div className="p-4 rounded-2xl bg-indigo-50/50 border border-indigo-100 flex flex-col justify-center items-center text-center">
-                                        <Globe className="h-5 w-5 text-indigo-600 mb-2" />
-                                        <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Platforms</p>
+                                    <div className="p-4 rounded-lg bg-gray-50 border border-gray-200 flex flex-col justify-center items-center text-center">
+                                        <Globe className="h-5 w-5 text-indigo-500 mb-2" />
+                                        <p className="text-[10px] font-semibold uppercase text-gray-500 tracking-wider">Platforms</p>
                                         <div className="flex flex-wrap gap-1 justify-center mt-2">
                                             {getPlatformsArray(postData.platforms).map((p: string, i: number) => (
-                                                <Badge key={i} variant="secondary" className="capitalize text-[10px] bg-white text-indigo-700 border-indigo-100">{p}</Badge>
+                                                <Badge key={i} variant="outline" className="capitalize text-[10px] bg-white">{p}</Badge>
                                             ))}
                                         </div>
                                     </div>
-                                    <div className="p-4 rounded-2xl bg-emerald-50/50 border border-emerald-100 flex flex-col justify-center items-center text-center">
-                                        <Zap className={`h-5 w-5 ${postData.is_ai_generated ? 'text-emerald-600' : 'text-gray-300'} mb-2`} />
-                                        {/* <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest">AI Engine</p> */}
-                                        <p className="text-sm font-black text-emerald-800 mt-1">{postData.is_ai_generated ? 'AI Generated' : 'MANUAL'}</p>
+                                    <div className="p-4 rounded-lg bg-gray-50 border border-gray-200 flex flex-col justify-center items-center text-center">
+                                        <Zap className={`h-5 w-5 ${postData.is_ai_generated ? 'text-indigo-500' : 'text-gray-400'} mb-2`} />
+                                        <p className="text-sm font-bold text-gray-900 mt-1">{postData.is_ai_generated ? 'AI Generated' : 'Manual'}</p>
                                     </div>
                                 </div>
 
-                                <div className="p-6 rounded-3xl bg-gray-900 text-white relative overflow-hidden group">
-                                    <Clock className="absolute top-0 right-0 h-24 w-24 text-white/5 -mr-8 -mt-8 rotate-12 transition-transform group-hover:rotate-0" />
-                                    <div className="space-y-3 relative">
-                                        <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-indigo-400">
-                                            <span>Timeline</span>
-                                            <span>UTC +5:30</span>
+                                <div className="p-4 rounded-lg border border-gray-200 bg-white">
+                                    <div className="space-y-3">
+                                        <div className="flex justify-between items-center text-xs font-semibold uppercase text-gray-500">
+                                            <span className="flex items-center gap-2"><Clock className="h-4 w-4" /> Timeline</span>
                                         </div>
-                                        <div className="space-y-2">
+                                        <div className="space-y-2 pt-2 border-t border-gray-100">
                                             <div className="flex justify-between items-center text-sm">
-                                                <span className="text-gray-400">Created:</span>
-                                                <span className="font-bold">{formatDateTime(postData.created_at)}</span>
+                                                <span className="text-gray-500">Created:</span>
+                                                <span className="font-medium text-gray-900">{formatDateTime(postData.created_at)}</span>
                                             </div>
                                             {postData.scheduled_at && (
                                                 <div className="flex justify-between items-center text-sm">
-                                                    <span className="text-gray-400">Scheduled:</span>
-                                                    <span className="font-bold text-cyan-400">{formatDateTime(postData.scheduled_at)}</span>
+                                                    <span className="text-gray-500">Scheduled:</span>
+                                                    <span className="font-medium text-gray-900">{formatDateTime(postData.scheduled_at)}</span>
                                                 </div>
                                             )}
                                             {postData.published_at && (
                                                 <div className="flex justify-between items-center text-sm">
-                                                    <span className="text-gray-400">Published:</span>
-                                                    <span className="font-bold text-emerald-400">{formatDateTime(postData.published_at)}</span>
+                                                    <span className="text-gray-500">Published:</span>
+                                                    <span className="font-medium text-gray-900">{formatDateTime(postData.published_at)}</span>
                                                 </div>
                                             )}
                                         </div>
@@ -523,30 +508,27 @@ const UserAnalytics = () => {
                                 </div>
                             </div>
 
-                            <div className="space-y-6">
-                                <label className="text-[10px] font-black uppercase text-indigo-500 tracking-widest flex items-center gap-2">
-                                    <Activity className="h-3 w-3" /> Media Visuals
+                            <div className="space-y-4">
+                                <label className="text-xs font-semibold uppercase text-gray-500 flex items-center gap-2">
+                                    <Activity className="h-4 w-4 text-indigo-500" /> Media Visuals
                                 </label>
-                                <div className="aspect-[4/5] md:aspect-square w-full rounded-[40px] overflow-hidden bg-gray-50 border-4 border-white shadow-2xl relative group">
+                                <div className="aspect-[4/5] md:aspect-square w-full rounded-xl overflow-hidden bg-gray-50 border border-gray-200 shadow-sm flex items-center justify-center">
                                     {postData.image_url ? (
                                         <img 
                                             src={getDisplayImageUrl(postData.image_url)} 
                                             alt="insight preview" 
-                                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                            className="w-full h-full object-contain bg-white"
                                         />
                                     ) : postData.video_url ? (
-                                        <video controls className="w-full h-full object-cover">
+                                        <video controls className="w-full h-full bg-black">
                                             <source src={postData.video_url} />
                                         </video>
                                     ) : (
-                                        <div className="w-full h-full flex flex-col items-center justify-center text-gray-300">
-                                            <Activity className="h-20 w-20 mb-4 opacity-10" />
-                                            <p className="text-xs font-black uppercase tracking-tighter opacity-20">No Media Provided</p>
+                                        <div className="w-full h-full flex flex-col items-center justify-center text-gray-400">
+                                            <Activity className="h-10 w-10 mb-2 opacity-30" />
+                                            <p className="text-sm font-medium">No Media Provided</p>
                                         </div>
                                     )}
-                                    <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-black/60 to-transparent translate-y-full group-hover:translate-y-0 transition-transform">
-                                        <p className="text-white text-xs font-bold truncate">{postData.title}</p>
-                                    </div>
                                 </div>
                             </div>
                         </CardContent>
