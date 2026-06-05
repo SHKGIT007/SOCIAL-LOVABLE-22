@@ -3,7 +3,7 @@ import { Dialog } from "@headlessui/react";
 import { apiService } from "@/services/api";
 import Swal from "sweetalert2";
 import DashboardLayout from "../../../components/Layout/DashboardLayout";
-import { Bell, BellOff, Edit2, Trash2, Eye, Sparkles, Loader2, Image as ImageIcon } from "lucide-react";
+import { Bell, BellOff, Edit2, Trash2, Eye, Sparkles, Loader2, Image as ImageIcon, Calendar } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 // Helper to get day label
 const getDayLabel = (day) => {
@@ -502,117 +502,151 @@ export default function UserSchedules() {
                 return (
                   <div
                     key={sch.id}
-                    className="flex flex-col justify-between p-5 rounded-2xl border shadow-md"
+                    className="group relative bg-white rounded-xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:shadow-indigo-100/50 hover:border-indigo-200/60 transition-all duration-300 overflow-hidden flex flex-col"
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-4">
-                        <span className="grid place-items-center h-10 w-10 rounded-full border bg-indigo-100">
-                          {isActive ? (
-                            <Bell className="h-5 w-5 text-indigo-600" />
-                          ) : (
-                            <BellOff className="h-5 w-5 text-gray-400" />
-                          )}
-                        </span>
-                        <div>
-                          <div className="text-sm text-gray-700 font-semibold">
-                            Platforms:{" "}
-                            <span className="font-normal">
-                              {Array.isArray(sch.platforms)
-                                ? sch.platforms.join(", ")
-                                : sch.platforms}
-                            </span>
+                    {/* Image Section */}
+                    <div className="relative w-full h-48 overflow-hidden bg-gradient-to-br from-indigo-100 via-cyan-50 to-violet-100">
+                      {sch.image_url ? (
+                        <img
+                          src={sch.image_url}
+                          alt="Schedule Image"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <div className="text-center">
+                            <ImageIcon className="h-10 w-10 text-indigo-300 mx-auto mb-2" />
+                            <span className="text-xs text-indigo-400 font-medium">No Image</span>
                           </div>
-                          {sch.recurrence && (
-                            <div className="text-xs text-indigo-600 mt-0.5">
-                              Recurs: {sch.recurrence}
-                            </div>
-                          )}
                         </div>
-                      </div>
+                      )}
+                      
+                      
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                      {/* Toggle Switch */}
-                      {/* <ToggleSwitch
-            checked={isActive}
-            onChange={async () => {
-              try {
-                await apiService.toggleScheduleStatus(sch.id, isActive ? '0' : '1');
-                fetchSchedules();
-              } catch {
-                Swal.fire('Error', 'Failed to update status', 'error');
-              }
-            }}
-          /> */}
 
-                      <ToggleSwitch
-                        checked={isActive}
-                        onChange={async () => {
-                          const result = await Swal.fire({
-                            title: isActive ? "Deactivate?" : "Activate?",
-                            text: `Are you sure you want to ${
-                              isActive ? "deactivate" : "activate"
-                            } this schedule?`,
-                            icon: "warning",
-                            showCancelButton: true,
-                            confirmButtonText: "Yes",
-                            cancelButtonText: "No",
-                          });
-
-                          if (!result.isConfirmed) return;
-
-                          try {
-                            await apiService.toggleScheduleStatus(
-                              sch.id,
-                              isActive ? "0" : "1"
-                            );
-                            Swal.fire(
-                              isActive ? "Deactivated!" : "Activated!",
-                              `Schedule has been ${
-                                isActive ? "deactivated" : "activated"
-                              }.`,
-                              "success"
-                            );
-                            fetchSchedules();
-                          } catch {
-                            Swal.fire(
-                              "Error",
-                              "Failed to update status",
-                              "error"
-                            );
-                          }
-                        }}
-                      />
+                    
                     </div>
 
-                    <div className="flex items-center justify-end gap-3 mt-4 pt-3 border-t border-slate-200">
-                      <button
-                        type="button"
-                        title="View Details"
-                        className="p-2 rounded-lg hover:bg-indigo-100 transition"
-                        onClick={() => {
-                          setViewSchedule(sch);
-                          setViewModalOpen(true);
-                        }}
-                      >
-                        <Eye className="h-4 w-4 text-indigo-600" />
-                      </button>
+                    {/* Content Section */}
+                    <div className="p-5 text-center flex flex-col flex-1">
+                      {/* Platforms */}
+                      <div className="flex flex-wrap gap-1.5 justify-center mb-3">
+                        {(Array.isArray(sch.platforms)
+                          ? sch.platforms
+                          : String(sch.platforms || "")
+                              .split(",")
+                              .map((p) => p.trim())
+                        )
+                          .filter(Boolean)
+                          .map((platform) => (
+                            <span
+                              key={platform}
+                              className="inline-flex items-center bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-medium px-2 py-0.5 rounded-md capitalize"
+                            >
+                              {platform}
+                            </span>
+                          ))}
+                      </div>
 
-                      <button
-                        type="button"
-                        title="Edit"
-                        className="p-2 rounded-lg hover:bg-indigo-100 transition"
-                        onClick={() => handleEdit(sch)}
-                      >
-                        <Edit2 className="h-4 w-4 text-indigo-600" />
-                      </button>
+                      {/* Content Preview */}
+                    
 
-                      <button
-                        type="button"
-                        title="Delete"
-                        className="p-2 rounded-lg hover:bg-rose-100 transition"
-                        onClick={() => handleDelete(sch.id)}
-                      >
-                        <Trash2 className="h-4 w-4 text-rose-600" />
-                      </button>
+                      {/* Schedule info */}
+                      <div className="inline-flex flex-col items-center gap-1 text-xs text-slate-500 bg-slate-50 rounded-lg px-3 py-2 mx-auto mb-4 border border-slate-100 w-full max-w-[200px]">
+                        <div className="flex items-center gap-1.5 text-indigo-600 font-semibold">
+                          <Calendar className="h-3.5 w-3.5" />
+                          <span>{sch.recurrence ? `Recurs: ${sch.recurrence}` : 'Schedule Time'}</span>
+                        </div>
+                        {sch.days && sch.days.length > 0 && (
+                          <div className="text-[10px] text-slate-400 mt-0.5 line-clamp-1" title={sch.days.map(getDayLabel).join(", ")}>
+                            {sch.days.map(getDayLabel).join(", ")}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex-1" />
+
+                      {/* Action buttons */}
+                      <div className="flex items-center justify-center gap-2 pt-4 border-t border-slate-100 flex-wrap">
+                        {/* Status Toggle */}
+                        <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-full border border-slate-100 shadow-sm mr-auto sm:mr-0">
+                          <ToggleSwitch
+                            checked={isActive}
+                            onChange={async () => {
+                              const result = await Swal.fire({
+                                title: isActive ? "Deactivate?" : "Activate?",
+                                text: `Are you sure you want to ${
+                                  isActive ? "deactivate" : "activate"
+                                } this schedule?`,
+                                icon: "warning",
+                                showCancelButton: true,
+                                confirmButtonText: "Yes",
+                                cancelButtonText: "No",
+                              });
+
+                              if (!result.isConfirmed) return;
+
+                              try {
+                                await apiService.toggleScheduleStatus(
+                                  sch.id,
+                                  isActive ? "0" : "1"
+                                );
+                                Swal.fire(
+                                  isActive ? "Deactivated!" : "Activated!",
+                                  `Schedule has been ${
+                                    isActive ? "deactivated" : "activated"
+                                  }.`,
+                                  "success"
+                                );
+                                fetchSchedules();
+                              } catch {
+                                Swal.fire(
+                                  "Error",
+                                  "Failed to update status",
+                                  "error"
+                                );
+                              }
+                            }}
+                          />
+                          <span className={`text-xs font-semibold pr-1 ${isActive ? 'text-emerald-600' : 'text-slate-500'}`}>
+                            {isActive ? "Active" : "Paused"}
+                          </span>
+                        </div>
+
+                        {/* Icons */}
+                        <div className="flex items-center gap-1.5 ml-auto sm:ml-0">
+                          <button
+                            type="button"
+                            title="View Details"
+                            className="p-2 rounded-lg hover:bg-indigo-100 transition"
+                            onClick={() => {
+                              setViewSchedule(sch);
+                              setViewModalOpen(true);
+                            }}
+                          >
+                            <Eye className="h-4 w-4 text-indigo-600" />
+                          </button>
+
+                          <button
+                            type="button"
+                            title="Edit"
+                            className="p-2 rounded-lg hover:bg-indigo-100 transition"
+                            onClick={() => handleEdit(sch)}
+                          >
+                            <Edit2 className="h-4 w-4 text-indigo-600" />
+                          </button>
+
+                          <button
+                            type="button"
+                            title="Delete"
+                            className="p-2 rounded-lg hover:bg-rose-100 transition"
+                            onClick={() => handleDelete(sch.id)}
+                          >
+                            <Trash2 className="h-4 w-4 text-rose-600" />
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 );
