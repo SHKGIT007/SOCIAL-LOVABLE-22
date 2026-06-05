@@ -1,4 +1,4 @@
-﻿const { Schedule } = require('../Models');
+const { Schedule } = require('../Models');
 
 // Toggle only the status of a schedule
 exports.toggleScheduleStatus = async (req, res) => {
@@ -25,7 +25,9 @@ exports.createSchedule = async (req, res) => {
       customDateTo,
       singleDate,
       content_ai_prompt,
-      image_prompt
+      image_prompt,
+      generated_content,
+      image_url
     } = req.body;
 
     recurrence = recurrence == '' ? null : recurrence;
@@ -76,6 +78,8 @@ exports.createSchedule = async (req, res) => {
       singleDate,
       content_ai_prompt,
       image_prompt,
+      generated_content,
+      image_url,
       userId: req.user.id, // assuming user is set in auth middleware
     });
     res.status(201).json({ success: true, data: schedule });
@@ -127,6 +131,8 @@ exports.getSchedules = async (req, res) => {
         times: parseSafely(s.times),
         content_ai_prompt: s.content_ai_prompt,
         image_prompt: s.image_prompt,
+        generated_content: s.generated_content,
+        image_url: s.image_url,
       };
     });
 
@@ -156,7 +162,9 @@ exports.updateSchedule = async (req, res) => {
       customDateTo,
       singleDate,
       content_ai_prompt,
-      image_prompt
+      image_prompt,
+      generated_content,
+      image_url
     } = req.body;
 
 
@@ -211,7 +219,9 @@ exports.updateSchedule = async (req, res) => {
         customDateTo,
         singleDate,
         content_ai_prompt: content_ai_prompt || null,
-        image_prompt: image_prompt || null
+        image_prompt: image_prompt || null,
+        generated_content: generated_content || null,
+        image_url: image_url || null
       }
     );
     res.json({ success: true, data: schedule });

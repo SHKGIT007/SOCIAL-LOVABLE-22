@@ -1,4 +1,4 @@
-﻿// scheduleWorker.js
+// scheduleWorker.js
 const { parentPort, workerData } = require('worker_threads');
 const { Schedule, Post, SocialAccount, SystemSetting,Profile,sequelize } = require('../Models'); // adjust path
 const logger =  require('../Connection/logger');
@@ -129,24 +129,25 @@ async function processSchedule(scheduleId) {
       let d = 2;
       if (now.getHours() === h && now.getMinutes() === m && d===2) {
 
-         if(!['',null,undefined].includes(parsedSchedule.content_ai_prompt)){
-       generatedContent = await generateAIContent(parsedSchedule.content_ai_prompt);
+         if(!['',null,undefined].includes(parsedSchedule.generated_content)){
+           generatedContent = { status: true, content: parsedSchedule.generated_content };
+         } else if(!['',null,undefined].includes(parsedSchedule.content_ai_prompt)){
+           generatedContent = await generateAIContent(parsedSchedule.content_ai_prompt);
+         }else{
+           generatedContent = await generateAIContent(profileAiPrompt);
+         }
+
+       if (!['',null,undefined].includes(parsedSchedule.image_url)) {
+           imageUrl = parsedSchedule.image_url;
+       } else if (!['',null,undefined].includes(parsedSchedule.image_prompt)) {
+         const imageObj = await generateImagePollinations(parsedSchedule.image_prompt);
+         imageUrl = imageObj.url || '';
        }else{
-       
-        generatedContent = await generateAIContent(profileAiPrompt);
+         if(!['',null,undefined].includes(profileImageAiPrompt)){
+           const imageObj = await generateImagePollinations(profileImageAiPrompt);
+           imageUrl = imageObj.url || '';
+         }
        }
-
-
-
-       if (!['',null,undefined].includes(parsedSchedule.image_prompt)) {
-        const imageObj = await generateImagePollinations(parsedSchedule.image_prompt);
-        imageUrl = imageObj.url || '';
-      }else{
-        if(!['',null,undefined].includes(profileImageAiPrompt)){
-          const imageObj = await generateImagePollinations(profileImageAiPrompt);
-          imageUrl = imageObj.url || '';
-        }
-      }
 
       
       

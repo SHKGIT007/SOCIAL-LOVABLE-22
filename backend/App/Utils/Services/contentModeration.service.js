@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Content Moderation Service
  * Checks user prompts for inappropriate content before AI generation
  */
@@ -111,9 +111,10 @@ const SAFE_TOPICS = [
 /**
  * Check if content contains inappropriate material
  * @param {string} prompt - The user's prompt to check
+ * @param {boolean} isGeneratedContent - Whether this is checking generated content (to bypass length limits)
  * @returns {object} - { isAllowed: boolean, category: string, message: string, matchedPatterns: array }
  */
-const checkContentModeration = (prompt) => {
+const checkContentModeration = (prompt, isGeneratedContent = false) => {
   if (!prompt || typeof prompt !== 'string') {
     return {
       isAllowed: false,
@@ -146,12 +147,22 @@ const checkContentModeration = (prompt) => {
     };
   }
 
-  // Check maximum length (prevent abuse)
-  if (trimmedPrompt.length > 2000) {
+  // Check maximum length (prevent abuse) - skip for generated content
+  if (!isGeneratedContent && trimmedPrompt.length > 2000) {
     return {
       isAllowed: false,
       category: 'TOO_LONG',
       message: 'Prompt is too long. Please limit your prompt to 2000 characters or less.',
+      matchedPatterns: []
+    };
+  }
+
+  // Check absolute maximum length for generated content
+  if (isGeneratedContent && trimmedPrompt.length > 10000) {
+    return {
+      isAllowed: false,
+      category: 'TOO_LONG',
+      message: 'Generated content is abnormally long.',
       matchedPatterns: []
     };
   }
@@ -240,7 +251,7 @@ const moderateGeneratedContent = (content) => {
     return { isAllowed: true, category: null, message: 'No content to moderate' };
   }
 
-  const result = checkContentModeration(content);
+  const result = checkContentModeration(content, true);
   
   if (!result.isAllowed) {
     logger.error('AI-generated content failed moderation', {

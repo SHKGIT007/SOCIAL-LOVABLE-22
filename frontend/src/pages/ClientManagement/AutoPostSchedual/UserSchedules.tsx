@@ -3,7 +3,7 @@ import { Dialog } from "@headlessui/react";
 import { apiService } from "@/services/api";
 import Swal from "sweetalert2";
 import DashboardLayout from "../../../components/Layout/DashboardLayout";
-import { Bell, BellOff, Edit2, Trash2, Eye } from "lucide-react";
+import { Bell, BellOff, Edit2, Trash2, Eye, Sparkles, Loader2, Image as ImageIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 // Helper to get day label
 const getDayLabel = (day) => {
@@ -63,6 +63,8 @@ const defaultSchedule = {
   singleDate: null,
   content_ai_prompt: "",
   image_prompt: "",
+  generated_content: "",
+  image_url: "",
 };
 const emptyRow = () => ({ ...defaultSchedule });
 
@@ -73,6 +75,7 @@ export default function UserSchedules() {
   const [modalOpen, setModalOpen] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [viewSchedule, setViewSchedule] = useState(null);
+  const [isGenerating, setIsGenerating] = useState(false);
   const navigate = useNavigate();
   const fetchSchedules = async () => {
     try {
@@ -150,9 +153,58 @@ export default function UserSchedules() {
         updated[idx].content_ai_prompt = value;
       } else if (name === "image_prompt") {
         updated[idx].image_prompt = value;
+      } else if (name === "generated_content") {
+        updated[idx].generated_content = value;
       }
       return updated;
     });
+  };
+
+  const handleGenerateAI = async (idx) => {
+    const row = rows[idx];
+    if (!row.content_ai_prompt && !row.image_prompt) {
+      Swal.fire({
+        icon: "warning",
+        title: "Prompt Required",
+        text: "Please provide either a content prompt or an image prompt for generation.",
+      });
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const payload = {
+        title: "Auto Generated Schedule", // dummy title needed by generate API
+        ai_prompt: row.content_ai_prompt || "",
+        image_prompt: row.image_prompt || "",
+      };
+
+      const res = await apiService.generateAIPost(payload);
+
+      if (res.status) {
+        setRows((prev) => {
+          const updated = [...prev];
+          updated[idx].generated_content = res.data.content || "";
+          updated[idx].image_url = res.data.imageUrl || "";
+          return updated;
+        });
+
+        Swal.fire({
+          icon: "success",
+          title: "Success!",
+          text: "AI content generated successfully!",
+          timer: 2000,
+        });
+      } else {
+        throw new Error(res.message || "Failed to generate post");
+      }
+    } catch (err) {
+      const errorMessage =
+        err?.response?.data?.message || err?.response?.data?.error || err?.message || "Generation failed";
+      Swal.fire("Generation Failed", errorMessage, "error");
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const isScheduleChanged = (oldData, newData) => {
@@ -356,6 +408,8 @@ export default function UserSchedules() {
         singleDate: schedule.singleDate || "",
         content_ai_prompt: schedule.content_ai_prompt || "",
         image_prompt: schedule.image_prompt || "",
+        generated_content: schedule.generated_content || "",
+        image_url: schedule.image_url || "",
       },
     ]);
     setEditingId(schedule.id);
@@ -589,7 +643,18 @@ export default function UserSchedules() {
                   <div className="bg-white px-6 py-5">
                     {viewSchedule && (
                       <div className="space-y-4">
-                        {/* platforms pills */}
+                        {viewSchedule.image_url && (
+                          <div className="mt-4 rounded-lg overflow-hidden max-w-sm border">
+                            <img src={viewSchedule.image_url} alt="Scheduled post image" className="w-full" />
+                          </div>
+                        )}
+                        {viewSchedule.generated_content && (
+                          <div className="mt-4 p-4 bg-gray-50 border rounded-lg whitespace-pre-wrap text-sm text-gray-700">
+                            {viewSchedule.generated_content}
+                          </div>
+                        )}
+                        <hr className="border-slate-100" />
+                          {/* platforms pills */}
                         <div>
                           <div className="text-sm font-semibold text-gray-700 mb-1">
                             Platforms
@@ -800,6 +865,65 @@ export default function UserSchedules() {
                         placeholder="Enter image prompt for AI image generation..."
                       />
                     </div>
+
+                    {/* Generate Button */}
+                    <div className="mb-4">
+                      <button
+                        type="button"
+                        onClick={() => handleGenerateAI(idx)}
+                        disabled={isGenerating}
+                        className="w-full h-12 bg-gradient-to-r from-indigo-600 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 text-white font-semibold shadow-md rounded-lg flex items-center justify-center transition-all"
+                      >
+                        {isGenerating ? (
+                          <>
+                            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                            Generating Content...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="mr-2 h-5 w-5" />
+                            Generate AI Post Preview
+                          </>
+                        )}
+                      </button>
+                    </div>
+
+                    {/* Preview Section */}
+                    {(row.generated_content || row.image_url) && (
+                      <div className="mb-6 p-4 border border-green-200 bg-green-50 rounded-lg">
+                        <div className="flex items-center justify-between mb-4">
+                          <span className="font-semibold text-green-800">
+                            Generated Preview
+                          </span>
+                          <span className="text-xs text-green-600 font-medium bg-green-100 px-2 py-1 rounded-full">
+                            This will be posted automatically
+                          </span>
+                        </div>
+                        {row.image_url && (
+                          <div className="rounded-lg overflow-hidden border border-green-200 mb-4 max-w-sm mx-auto">
+                            <img
+                              src={row.image_url}
+                              alt="Generated Preview"
+                              className="w-full"
+                            />
+                          </div>
+                        )}
+                        {row.generated_content && (
+                          <div>
+                            <label className="text-sm font-medium text-gray-700 block mb-2">
+                              Content (You can edit this before saving)
+                            </label>
+                            <textarea
+                              name="generated_content"
+                              value={row.generated_content}
+                              onChange={(e) => handleRowChange(idx, e)}
+                              className="w-full p-2 rounded border border-indigo-200 text-sm"
+                              rows={5}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     {/* Frequency / Days */}
                     <div className="mb-4">

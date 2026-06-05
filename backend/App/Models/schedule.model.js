@@ -1,4 +1,4 @@
-﻿const { DataTypes } = require('sequelize');
+const { DataTypes } = require('sequelize');
 
 const sequelize = require('../Connection/db.config');
 
@@ -68,6 +68,14 @@ const Schedule = sequelize.define('Schedule', {
   },
   image_prompt: {
     type: DataTypes.TEXT,
+    allowNull: true,
+  },
+  generated_content: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
+  image_url: {
+    type: DataTypes.STRING(500),
     allowNull: true,
   },
 }, {
