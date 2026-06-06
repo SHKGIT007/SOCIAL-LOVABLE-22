@@ -1,5 +1,5 @@
 ﻿const router = require("express").Router();
-const controller = require("../controllers/notification.controller");
+const controller = require('../Controllers/notification.controller');
 const { authenticateToken } = require("../Middleware/auth.middleware");
 
 // Get all notifications for current user/admin

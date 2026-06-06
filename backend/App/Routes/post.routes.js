@@ -1,6 +1,6 @@
 ﻿const express = require('express');
 const router = express.Router();
-const postController = require('../controllers/post.controller');
+const postController = require('../Controllers/post.controller');
 const { authenticateToken, requireAdmin } = require('../Middleware/auth.middleware');
 const { 
     validatePostCreation, 

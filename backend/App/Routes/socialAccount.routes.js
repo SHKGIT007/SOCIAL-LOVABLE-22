@@ -1,6 +1,6 @@
 ﻿const express = require('express');
 const router = express.Router();
-const socialAccountController = require('../controllers/socialAccount.controller');
+const socialAccountController = require('../Controllers/socialAccount.controller');
 const { authenticateToken, requireAdmin } = require('../Middleware/auth.middleware');
 const { validateSocialAccountCreation, validateId, validatePagination } = require('../Middleware/validation.middleware');
 

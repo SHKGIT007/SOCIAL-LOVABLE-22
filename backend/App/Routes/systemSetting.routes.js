@@ -9,7 +9,7 @@ const {
   getFacebookCredentials,
   getRazorpayCredentials,
   getSMTPCredentials
-} = require('../controllers/systemSetting.controller');
+} = require('../Controllers/systemSetting.controller');
 
 router.get('/', getSystemSettings);
 router.get('/ai-provider', getAIProviderCredentials);

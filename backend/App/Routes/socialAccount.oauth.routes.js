@@ -2,7 +2,7 @@
 const router = express.Router();
 // const passport = require('passport');
 const { authenticateToken } = require('../Middleware/auth.middleware');
-const socialAccountController = require('../controllers/socialAccount.controller');
+const socialAccountController = require('../Controllers/socialAccount.controller');
 
 // Facebook OAuth2
 router.get('/facebook', socialAccountController.facebookOAuthInit);

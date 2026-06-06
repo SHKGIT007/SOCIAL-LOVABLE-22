@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const planController = require('../controllers/plan.controller');
+const planController = require('../Controllers/plan.controller');
 const { authenticateToken, requireAdmin } = require('../Middleware/auth.middleware');
 const { validatePlanCreation, validateId, validatePagination } = require('../Middleware/validation.middleware');
 

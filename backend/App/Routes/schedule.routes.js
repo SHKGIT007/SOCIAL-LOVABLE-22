@@ -1,7 +1,7 @@
 ﻿// Toggle status only
 const express = require('express');
 const router = express.Router();
-const scheduleController = require('../controllers/schedule.controller');
+const scheduleController = require('../Controllers/schedule.controller');
 const { authenticateToken } = require('../Middleware/auth.middleware');
 
 // All routes require authentication
