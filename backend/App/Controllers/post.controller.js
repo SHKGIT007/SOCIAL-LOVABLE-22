@@ -1,4 +1,4 @@
-﻿const {
+const {
   Post,
   User,
   Plan,
@@ -1024,7 +1024,7 @@ async function generateImagePollinations(prompt, retries = 3) {
         prompt: cleanPrompt,
       };
     } catch (error) {
-
+      console.log(`Pollinations Error on attempt ${attempt}:`, error.message, error.response?.data?.toString());
       if (attempt === retries) {
         return await generateImageFallback(prompt);
       }
@@ -1058,6 +1058,7 @@ async function generateImageFallback(prompt) {
       isFallback: true,
     };
   } catch (error) {
+    console.log("Fallback Error:", error.message, error.response?.data?.toString());
     throw new Error("All image generation methods failed");
   }
 }

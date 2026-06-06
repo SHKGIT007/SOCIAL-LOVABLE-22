@@ -387,10 +387,18 @@ class ApiService {
   }
 
   async generateAIPost(aiData) {
-    return this.request(API_CONFIG.ENDPOINTS.POSTS.GENERATE_AI, {
-      method: "POST",
-      body: aiData,
-    });
+    console.log("Frontend Request -> generateAIPost:", aiData);
+    try {
+      const response = await this.request(API_CONFIG.ENDPOINTS.POSTS.GENERATE_AI, {
+        method: "POST",
+        body: aiData,
+      });
+      console.log("Frontend Response <- generateAIPost:", response);
+      return response;
+    } catch (error) {
+      console.log("Frontend Error <- generateAIPost:", error);
+      throw error;
+    }
   }
 
   async publishPost(id) {
